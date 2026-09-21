@@ -1,0 +1,424 @@
+:root.dark {
+  // 红色
+  #{getCssVarName(red, 0)}: 108, 9, 10;
+  #{getCssVarName(red, 1)}: 144, 17, 16;
+  #{getCssVarName(red, 2)}: 181, 31, 25;
+  #{getCssVarName(red, 3)}: 215, 51, 35;
+  #{getCssVarName(red, 4)}: 251, 73, 49;
+  #{getCssVarName(red, 5)}: 252, 114, 90;
+  #{getCssVarName(red, 6)}: 253, 153, 131;
+  #{getCssVarName(red, 7)}: 254, 190, 172;
+  #{getCssVarName(red, 8)}: 254, 224, 213;
+  #{getCssVarName(red, 9)}: 255, 243, 239;
+
+  // 粉色
+  #{getCssVarName(pink, 0)}: 92, 7, 47;
+  #{getCssVarName(pink, 1)}: 128, 15, 66;
+  #{getCssVarName(pink, 2)}: 164, 23, 81;
+  #{getCssVarName(pink, 3)}: 199, 34, 97;
+  #{getCssVarName(pink, 4)}: 235, 47, 112;
+  #{getCssVarName(pink, 5)}: 239, 86, 134;
+  #{getCssVarName(pink, 6)}: 243, 126, 159;
+  #{getCssVarName(pink, 7)}: 247, 168, 188;
+  #{getCssVarName(pink, 8)}: 251, 211, 220;
+  #{getCssVarName(pink, 9)}: 253, 239, 241;
+
+  // 紫色
+  #{getCssVarName(purple, 0)}: 74, 16, 97;
+  #{getCssVarName(purple, 1)}: 94, 23, 118;
+  #{getCssVarName(purple, 2)}: 115, 31, 138;
+  #{getCssVarName(purple, 3)}: 137, 40, 159;
+  #{getCssVarName(purple, 4)}: 160, 51, 179;
+  #{getCssVarName(purple, 5)}: 181, 83, 194;
+  #{getCssVarName(purple, 6)}: 202, 120, 209;
+  #{getCssVarName(purple, 7)}: 221, 160, 225;
+  #{getCssVarName(purple, 8)}: 239, 206, 240;
+  #{getCssVarName(purple, 9)}: 247, 235, 247;
+
+  // 紫罗兰色
+  #{getCssVarName(violet, 0)}: 64, 27, 119;
+  #{getCssVarName(violet, 1)}: 76, 36, 140;
+  #{getCssVarName(violet, 2)}: 88, 46, 160;
+  #{getCssVarName(violet, 3)}: 100, 57, 180;
+  #{getCssVarName(violet, 4)}: 113, 70, 201;
+  #{getCssVarName(violet, 5)}: 136, 101, 212;
+  #{getCssVarName(violet, 6)}: 162, 136, 223;
+  #{getCssVarName(violet, 7)}: 190, 173, 233;
+  #{getCssVarName(violet, 8)}: 221, 212, 243;
+  #{getCssVarName(violet, 9)}: 240, 238, 250;
+
+  // 靛蓝
+  #{getCssVarName(indigo, 0)}: 23, 30, 101;
+  #{getCssVarName(indigo, 1)}: 32, 41, 122;
+  #{getCssVarName(indigo, 2)}: 41, 54, 142;
+  #{getCssVarName(indigo, 3)}: 52, 68, 163;
+  #{getCssVarName(indigo, 4)}: 64, 83, 183;
+  #{getCssVarName(indigo, 5)}: 95, 113, 197;
+  #{getCssVarName(indigo, 6)}: 129, 145, 212;
+  #{getCssVarName(indigo, 7)}: 167, 180, 226;
+  #{getCssVarName(indigo, 8)}: 209, 216, 241;
+  #{getCssVarName(indigo, 9)}: 237, 239, 248;
+
+  // 蓝色
+  #{getCssVarName(blue, 0)}: 6, 49, 112;
+  #{getCssVarName(blue, 1)}: 8, 70, 148;
+  #{getCssVarName(blue, 2)}: 19, 92, 184;
+  #{getCssVarName(blue, 3)}: 28, 117, 219;
+  #{getCssVarName(blue, 4)}: 41, 143, 255;
+  #{getCssVarName(blue, 5)}: 84, 169, 255;
+  #{getCssVarName(blue, 6)}: 127, 193, 255;
+  #{getCssVarName(blue, 7)}: 169, 215, 255;
+  #{getCssVarName(blue, 8)}: 211, 237, 255;
+  #{getCssVarName(blue, 9)}: 239, 248, 255;
+
+  // 浅蓝色
+  #{getCssVarName(light, blue, 0)}: 1, 55, 97;
+  #{getCssVarName(light, blue, 1)}: 0, 77, 133;
+  #{getCssVarName(light, blue, 2)}: 2, 102, 169;
+  #{getCssVarName(light, blue, 3)}: 7, 129, 204;
+  #{getCssVarName(light, blue, 4)}: 19, 159, 239;
+  #{getCssVarName(light, blue, 5)}: 64, 180, 243;
+  #{getCssVarName(light, blue, 6)}: 111, 200, 245;
+  #{getCssVarName(light, blue, 7)}: 157, 220, 249;
+  #{getCssVarName(light, blue, 8)}: 206, 238, 252;
+  #{getCssVarName(light, blue, 9)}: 235, 248, 254;
+
+  // 青色
+  #{getCssVarName(cyan, 0)}: 5, 52, 61;
+  #{getCssVarName(cyan, 1)}: 6, 79, 92;
+  #{getCssVarName(cyan, 2)}: 8, 108, 123;
+  #{getCssVarName(cyan, 3)}: 13, 137, 153;
+  #{getCssVarName(cyan, 4)}: 20, 168, 183;
+  #{getCssVarName(cyan, 5)}: 56, 187, 198;
+  #{getCssVarName(cyan, 6)}: 98, 205, 212;
+  #{getCssVarName(cyan, 7)}: 145, 223, 227;
+  #{getCssVarName(cyan, 8)}: 198, 239, 241;
+  #{getCssVarName(cyan, 9)}: 231, 247, 248;
+
+  // 蓝绿色
+  #{getCssVarName(teal, 0)}: 2, 60, 57;
+  #{getCssVarName(teal, 1)}: 5, 90, 85;
+  #{getCssVarName(teal, 2)}: 8, 119, 111;
+  #{getCssVarName(teal, 3)}: 12, 149, 136;
+  #{getCssVarName(teal, 4)}: 13, 179, 161;
+  #{getCssVarName(teal, 5)}: 51, 194, 176;
+  #{getCssVarName(teal, 6)}: 95, 209, 193;
+  #{getCssVarName(teal, 7)}: 142, 225, 211;
+  #{getCssVarName(teal, 8)}: 196, 240, 232;
+  #{getCssVarName(teal, 9)}: 230, 247, 244;
+
+  // 绿色
+  #{getCssVarName(green, 0)}: 18, 60, 25;
+  #{getCssVarName(green, 1)}: 27, 90, 37;
+  #{getCssVarName(green, 2)}: 39, 119, 49;
+  #{getCssVarName(green, 3)}: 51, 149, 61;
+  #{getCssVarName(green, 4)}: 62, 179, 72;
+  #{getCssVarName(green, 5)}: 92, 194, 100;
+  #{getCssVarName(green, 6)}: 127, 209, 132;
+  #{getCssVarName(green, 7)}: 165, 225, 168;
+  #{getCssVarName(green, 8)}: 208, 240, 208;
+  #{getCssVarName(green, 9)}: 236, 246, 236;
+
+  // 浅绿色
+  #{getCssVarName(light, green, 0)}: 38, 61, 19;
+  #{getCssVarName(light, green, 1)}: 58, 92, 28;
+  #{getCssVarName(light, green, 2)}: 81, 123, 41;
+  #{getCssVarName(light, green, 3)}: 103, 153, 51;
+  #{getCssVarName(light, green, 4)}: 127, 184, 64;
+  #{getCssVarName(light, green, 5)}: 151, 198, 95;
+  #{getCssVarName(light, green, 6)}: 176, 212, 129;
+  #{getCssVarName(light, green, 7)}: 201, 228, 167;
+  #{getCssVarName(light, green, 8)}: 227, 241, 209;
+  #{getCssVarName(light, green, 9)}: 243, 248, 237;
+
+  // 清柠色
+  #{getCssVarName(lime, 0)}: 48, 70, 2;
+  #{getCssVarName(lime, 1)}: 75, 105, 6;
+  #{getCssVarName(lime, 2)}: 103, 141, 9;
+  #{getCssVarName(lime, 3)}: 132, 176, 9;
+  #{getCssVarName(lime, 4)}: 162, 211, 16;
+  #{getCssVarName(lime, 5)}: 174, 220, 58;
+  #{getCssVarName(lime, 6)}: 189, 229, 102;
+  #{getCssVarName(lime, 7)}: 207, 237, 150;
+  #{getCssVarName(lime, 8)}: 229, 246, 201;
+  #{getCssVarName(lime, 9)}: 242, 252, 233;
+
+  // 黄色
+  #{getCssVarName(yellow, 0)}: 84, 73, 2;
+  #{getCssVarName(yellow, 1)}: 126, 108, 6;
+  #{getCssVarName(yellow, 2)}: 168, 142, 12;
+  #{getCssVarName(yellow, 3)}: 211, 175, 15;
+  #{getCssVarName(yellow, 4)}: 252, 206, 22;
+  #{getCssVarName(yellow, 5)}: 253, 222, 68;
+  #{getCssVarName(yellow, 6)}: 253, 235, 113;
+  #{getCssVarName(yellow, 7)}: 255, 245, 160;
+  #{getCssVarName(yellow, 8)}: 254, 251, 207;
+  #{getCssVarName(yellow, 9)}: 255, 254, 236;
+
+  // 琥珀色
+  #{getCssVarName(amber, 0)}: 81, 46, 10;
+  #{getCssVarName(amber, 1)}: 121, 76, 15;
+  #{getCssVarName(amber, 2)}: 161, 107, 22;
+  #{getCssVarName(amber, 3)}: 201, 143, 31;
+  #{getCssVarName(amber, 4)}: 242, 183, 38;
+  #{getCssVarName(amber, 5)}: 245, 201, 79;
+  #{getCssVarName(amber, 6)}: 248, 219, 122;
+  #{getCssVarName(amber, 7)}: 249, 234, 166;
+  #{getCssVarName(amber, 8)}: 252, 246, 210;
+  #{getCssVarName(amber, 9)}: 255, 251, 237;
+
+  // 橙色
+  #{getCssVarName(orange, 0)}: 230, 81, 0;
+  #{getCssVarName(orange, 1)}: 239, 108, 0;
+  #{getCssVarName(orange, 2)}: 245, 124, 2;
+  #{getCssVarName(orange, 3)}: 250, 141, 0;
+  #{getCssVarName(orange, 4)}: 255, 152, 0;
+  #{getCssVarName(orange, 5)}: 255, 167, 38;
+  #{getCssVarName(orange, 6)}: 255, 183, 77;
+  #{getCssVarName(orange, 7)}: 255, 204, 128;
+  #{getCssVarName(orange, 8)}: 255, 223, 177;
+  #{getCssVarName(orange, 9)}: 255, 243, 224;
+
+  // 灰色
+  #{getCssVarName(grey, 0)}: 29, 31, 35;
+  #{getCssVarName(grey, 1)}: 46, 50, 55;
+  #{getCssVarName(grey, 2)}: 65, 70, 76;
+  #{getCssVarName(grey, 3)}: 85, 91, 97;
+  #{getCssVarName(grey, 4)}: 107, 112, 116;
+  #{getCssVarName(grey, 5)}: 136, 141, 145;
+  #{getCssVarName(grey, 6)}: 167, 171, 175;
+  #{getCssVarName(grey, 7)}: 198, 202, 205;
+  #{getCssVarName(grey, 8)}: 230, 232, 234;
+  #{getCssVarName(grey, 9)}: 249, 249, 249;
+
+
+  // 蓝青色
+  #{getCssVarName(blue, cyan, 0)}: 16, 41, 68;
+  #{getCssVarName(blue, cyan, 1)}: 26, 52, 79;
+  #{getCssVarName(blue, cyan, 2)}: 36, 65, 96;
+  #{getCssVarName(blue, cyan, 3)}: 48, 81, 115;
+  #{getCssVarName(blue, cyan, 4)}: 70, 107, 144;
+  #{getCssVarName(blue, cyan, 5)}: 85, 125, 165;
+  #{getCssVarName(blue, cyan, 6)}: 105, 148, 190;
+  #{getCssVarName(blue, cyan, 7)}: 131, 171, 212;
+  #{getCssVarName(blue, cyan, 8)}: 164, 201, 238;
+  #{getCssVarName(blue, cyan, 9)}: 217, 236, 255;
+
+  // 深紫色
+  #{getCssVarName(dark, purple, 0)}: 0, 0, 0;
+  #{getCssVarName(dark, purple, 1)}: 4, 3, 6;
+  #{getCssVarName(dark, purple, 2)}: 17, 16, 26;
+  #{getCssVarName(dark, purple, 3)}: 31, 31, 47;
+  #{getCssVarName(dark, purple, 4)}: 43, 43, 64;
+  #{getCssVarName(dark, purple, 5)}: 79, 79, 105;
+  #{getCssVarName(dark, purple, 6)}: 115, 116, 142;
+  #{getCssVarName(dark, purple, 7)}: 157, 158, 180;
+  #{getCssVarName(dark, purple, 8)}: 204, 205, 217;
+  #{getCssVarName(dark, purple, 9)}: 255, 255, 255;
+
+  // 黑、白色
+  #{getCssVarName(white)}: 255, 255, 255;
+  #{getCssVarName(black)}: 0, 0, 0;
+
+  // 功能色
+  #{getCssVarName(color, white)}: rgba(var(#{getCssVarName(white)}),1); // 浅色模式下深色背景内容Inverse
+  #{getCssVarName(color, black)}: rgba(var(#{getCssVarName(black)}),1); // 深色模式下浅色背景内容Inverse
+
+  // 主要颜色
+  #{getCssVarName(color, primary)}: rgba(var(#{getCssVarName(blue, 4)}),1); // 主要颜色。仅在需要非常强调的情况下使用。
+  #{getCssVarName(color, primary, text)}: rgba(var(#{getCssVarName(white)}), 1); // 主要颜色文字色，和背景色形成对比
+  #{getCssVarName(color, primary, hover)}: rgba(var(#{getCssVarName(blue, 6)}),1); // 主要颜色悬浮态
+  #{getCssVarName(color, primary, hover, text)}: rgba(var(#{getCssVarName(white)}), 1); // 主要颜色文字色，和背景色形成对比
+  #{getCssVarName(color, primary, active)}: rgba(var(#{getCssVarName(blue, 3)}),1); // 主要颜色激活态
+  #{getCssVarName(color, primary, active, text)}: rgba(var(#{getCssVarName(white)}), 1); // 主要颜色文字色，和背景色形成对比
+  #{getCssVarName(color, primary, disabled)}: rgba(var(#{getCssVarName(blue, 2)}),1); // 主要颜色禁用态
+  #{getCssVarName(color, primary, disabled, text)}: rgba(var(#{getCssVarName(white)}), 1); // 主要颜色文字色，和背景色形成对比
+  #{getCssVarName(color, primary, light, default)}: rgba(var(#{getCssVarName(blue, 5)}),.2); // 浅版主要颜色（多用于背景）。仅在需要非常强调的情况下使用。
+  #{getCssVarName(color, primary, light, hover)}: rgba(var(#{getCssVarName(blue, 5)}),.3); // 浅版主要颜色悬浮态
+  #{getCssVarName(color, primary, light, active)}: rgba(var(#{getCssVarName(blue, 5 )}),.4); // 浅版主要颜色激活态
+
+  // todo 次要颜色 未确定颜色，需后续调整
+  #{getCssVarName(color, secondary)}: rgba(var(#{getCssVarName(light, blue, 5)}),1); // 次要颜色。强调作用次于主要颜色，但仍然具有强调作用。
+  #{getCssVarName(color, secondary, text)}: rgba(var(#{getCssVarName(white)}), 1); // 次要颜色文字色，和背景色形成对比
+  #{getCssVarName(color, secondary, hover)}: rgba(var(#{getCssVarName(light, blue, 6)}),1); // 次要颜色悬浮态
+  #{getCssVarName(color, secondary, hover, text)}: rgba(var(#{getCssVarName(white)}), 1); // 次要颜色文字色，和背景色形成对比
+  #{getCssVarName(color, secondary, active)}: rgba(var(#{getCssVarName(light, blue, 7)}),1); // 次要颜色激活态
+  #{getCssVarName(color, secondary, active, text)}: rgba(var(#{getCssVarName(white)}), 1); // 次要颜色文字色，和背景色形成对比
+  #{getCssVarName(color, secondary, disabled)}: rgba(var(#{getCssVarName(light, blue, 2)}),1); // 次要颜色禁用态
+  #{getCssVarName(color, secondary, disabled, text)}: rgba(var(#{getCssVarName(white)}), 1); // 次要颜色文字色，和背景色形成对比
+  #{getCssVarName(color, secondary, light, default)}: rgba(var(#{getCssVarName(light, blue, 0)}),1); // 浅版次要颜色（多用于背景）。强调作用次于主要颜色，但仍然具有强调作用。
+  #{getCssVarName(color, secondary, light, hover)}: rgba(var(#{getCssVarName(light, blue, 1)}),1); // 浅版次要颜色悬浮态
+  #{getCssVarName(color, secondary, light, active)}: rgba(var(#{getCssVarName(light, blue, 2)}),1); // 浅版次要颜色激活态
+
+  // 第三颜色
+  #{getCssVarName(color, tertiary)}: rgba(var(#{getCssVarName(dark, purple, 4)}),1); // 第三颜色，可以在页面上多次使用
+  #{getCssVarName(color, tertiary, text)}: rgba(var(#{getCssVarName(white)}), 1); // 第三颜色文字色，和背景色形成对比
+  #{getCssVarName(color, tertiary, hover)}: rgba(var(#{getCssVarName(dark, purple, 6)}),1); // 第三颜色悬浮态
+  #{getCssVarName(color, tertiary, hover, text)}: rgba(var(#{getCssVarName(white)}), 1); // 第三颜色文字色，和背景色形成对比
+  #{getCssVarName(color, tertiary, active)}: rgba(var(#{getCssVarName(dark, purple, 5)}),1); // 第三颜色激活态
+  #{getCssVarName(color, tertiary, active, text)}: rgba(var(#{getCssVarName(white)}), 1); // 第三颜色文字色，和背景色形成对比
+  #{getCssVarName(color, tertiary, light, default)}: rgba(var(#{getCssVarName(dark, purple, 5)}),.2); // 浅版第三颜色（多用于背景），可以在页面上多次使用
+  #{getCssVarName(color, tertiary, light, hover)}: rgba(var(#{getCssVarName(dark, purple, 5)}),.3); // 浅版第三颜色悬浮态
+  #{getCssVarName(color, tertiary, light, active)}: rgba(var(#{getCssVarName(dark, purple, 5)}),.4); // 浅版第三颜色激活态
+
+  // 信息色
+  #{getCssVarName(color, info)}: rgba(var(#{getCssVarName(blue, 4)}),1); // 信息色, 通常用于表达客观、中立信息
+  #{getCssVarName(color, info, text)}: rgba(var(#{getCssVarName(white)}), 1); // 信息颜色文字色，和背景色形成对比
+  #{getCssVarName(color, info, hover)}: rgba(var(#{getCssVarName(blue, 6)}),1); // 信息色悬浮态
+  #{getCssVarName(color, info, hover, text)}: rgba(var(#{getCssVarName(white)}), 1); // 信息颜色文字色，和背景色形成对比
+  #{getCssVarName(color, info, active)}: rgba(var(#{getCssVarName(blue, 3)}),1); // 信息色激活态
+  #{getCssVarName(color, info, active, text)}: rgba(var(#{getCssVarName(white)}), 1); // 信息颜色文字色，和背景色形成对比
+  #{getCssVarName(color, info, disabled)}: rgba(var(#{getCssVarName(blue, 2)}),1); // 信息色禁用态
+  #{getCssVarName(color, info, disabled, text)}: rgba(var(#{getCssVarName(white)}), 1); // 信息颜色文字色，和背景色形成对比
+  #{getCssVarName(color, info, light, default)}: rgba(var(#{getCssVarName(blue, 5)}),.2); // 浅版信息色（多用于背景），通常用于表达客观、中立信息
+  #{getCssVarName(color, info, light, hover)}: rgba(var(#{getCssVarName(blue, 5)}),.3); // 浅版信息色悬浮态
+  #{getCssVarName(color, info, light, active)}: rgba(var(#{getCssVarName(blue, 5)}),.4); // 浅版信息色激活态
+
+  // 成功色
+  #{getCssVarName(color, success)}: rgba(var(#{getCssVarName(green, 5)}),1); // 成功色，表示安全、成功、开启的状态
+  #{getCssVarName(color, success, text)}: rgba(var(#{getCssVarName(white)}), 1); // 成功颜色文字色，和背景色形成对比
+  #{getCssVarName(color, success, hover)}: rgba(var(#{getCssVarName(green, 6)}),1); // 成功色悬浮态
+  #{getCssVarName(color, success, hover, text)}: rgba(var(#{getCssVarName(white)}), 1); // 成功颜色文字色，和背景色形成对比
+  #{getCssVarName(color, success, active)}: rgba(var(#{getCssVarName(green, 4)}),1); // 成功色激活态
+  #{getCssVarName(color, success, active, text)}: rgba(var(#{getCssVarName(white)}), 1); // 成功颜色文字色，和背景色形成对比
+  #{getCssVarName(color, success, disabled)}: rgba(var(#{getCssVarName(green, 2)}),1); // 成功色禁用态
+  #{getCssVarName(color, success, disabled, text)}: rgba(var(#{getCssVarName(white)}), 1); // 成功颜色文字色，和背景色形成对比
+  #{getCssVarName(color, success, light, default)}: rgba(var(#{getCssVarName(green, 5)}),.2); // 浅版成功色（多用于背景），表示安全、成功、开启的状态
+  #{getCssVarName(color, success, light, hover)}: rgba(var(#{getCssVarName(green, 5)}),.3); // 浅版成功色悬浮态
+  #{getCssVarName(color, success, light, active)}: rgba(var(#{getCssVarName(green, 5)}),.4); // 浅版成功色激活态
+
+  // 警示色
+  #{getCssVarName(color, warning)}: rgba(var(#{getCssVarName(orange, 5)}),1); // 警示色，表示警告、不安全的状态
+  #{getCssVarName(color, warning, text)}: rgba(var(#{getCssVarName(white)}), 1); // 警告颜色文字色，和背景色形成对比
+  #{getCssVarName(color, warning, hover)}: rgba(var(#{getCssVarName(orange, 6)}),1); // 警示色悬浮态
+  #{getCssVarName(color, warning, hover, text)}: rgba(var(#{getCssVarName(white)}), 1); // 警告颜色文字色，和背景色形成对比
+  #{getCssVarName(color, warning, active)}: rgba(var(#{getCssVarName(orange, 4)}),1); // 警示色激活态
+  #{getCssVarName(color, warning, active, text)}: rgba(var(#{getCssVarName(white)}), 1); // 警告颜色文字色，和背景色形成对比
+  #{getCssVarName(color, warning, light, default)}: rgba(var(#{getCssVarName(orange, 5)}),.2); // 浅版警示色（多用于背景），表示警告、不安全的状态
+  #{getCssVarName(color, warning, light, hover)}: rgba(var(#{getCssVarName(orange, 5)}),.3); // 浅版警示色悬浮态
+  #{getCssVarName(color, warning, light, active)}: rgba(var(#{getCssVarName(orange, 5)}),.4); // 浅版警示色激活态
+
+  // 危险色
+  #{getCssVarName(color, danger)}: rgba(var(#{getCssVarName(red, 5)}),1); // 危险色，表示危险的操作、或需要特别注意的危险信息
+  #{getCssVarName(color, danger, text)}: rgba(var(#{getCssVarName(white)}), 1); // 危险颜色文字色，和背景色形成对比
+  #{getCssVarName(color, danger, hover)}: rgba(var(#{getCssVarName(red, 6)}),1); // 危险色悬浮态
+  #{getCssVarName(color, danger, hover, text)}: rgba(var(#{getCssVarName(white)}), 1); // 危险颜色文字色，和背景色形成对比
+  #{getCssVarName(color, danger, active)}: rgba(var(#{getCssVarName(red, 4)}),1); // 危险色激活态
+  #{getCssVarName(color, danger, active, text)}: rgba(var(#{getCssVarName(white)}), 1); // 危险颜色文字色，和背景色形成对比
+  #{getCssVarName(color, danger, light, default)}: rgba(var(#{getCssVarName(red, 5)}),.2); // 浅版危险色（多用于背景），表示危险的操作、或需要特别注意的危险信息
+  #{getCssVarName(color, danger, light, hover)}: rgba(var(#{getCssVarName(red, 5)}),.3); // 浅版危险色悬浮态
+  #{getCssVarName(color, danger, light, active)}: rgba(var(#{getCssVarName(red, 5)}),.4); // 浅版危险色激活态
+
+  // 文本/图标颜色
+  #{getCssVarName(color, text, 0)}: rgba(var(#{getCssVarName(dark, purple, 9)}),1); // 文本/图标颜色 - 最主要
+  #{getCssVarName(color, text, 1)}: rgba(var(#{getCssVarName(dark, purple, 8)}),1); // 文本/图标颜色 - 稍次要
+  #{getCssVarName(color, text, 2)}: rgba(var(#{getCssVarName(grey, 9)}),.6); // 文本/图标颜色 - 次要
+  #{getCssVarName(color, text, 3)}: rgba(var(#{getCssVarName(grey, 9)}),.35); // 文本/图标颜色 - 最次要
+  #{getCssVarName(color, text, 5)}: rgba(255, 255, 255, 0.8); // 文本色(特殊) - 应用搜索框使用
+  #{getCssVarName(color, text, menu)}: rgba(var(#{getCssVarName(white)}), 1); // 文本 - 特殊-菜单颜色
+
+  // 图标颜色
+  #{getCssVarName(color, icon, 0)}: rgba(204,204,204,.6); // 图标颜色 - 最主要
+  #{getCssVarName(color, icon, 1)}: #37373d; // 图标颜色 - 稍次要
+    
+  // 链接颜色
+  #{getCssVarName(color, link)}: rgba(var(#{getCssVarName(blue, 4)}),1); // 链接颜色
+  #{getCssVarName(color, link, hover)}: rgba(var(#{getCssVarName(blue, 6)}),1); // 链接颜色 - 悬浮态
+  #{getCssVarName(color, link, active)}: rgba(var(#{getCssVarName(blue, 3)}),1); // 链接颜色 - 激活态
+  #{getCssVarName(color, link, visited)}: rgba(var(#{getCssVarName(blue, 2)}),1); // 链接颜色 - 已访问
+
+  // 背景色
+  #{getCssVarName(color, bg, 0)}: rgb(18 18 18 / 100%); // 背景色 - 最下层（底部页面）
+  #{getCssVarName(color, bg, 1)}: rgb(28 28 28 / 100%); // 背景色 - 次下层（页面中需要提升的内容）
+  #{getCssVarName(color, bg, 2)}: rgb(53 54 60 / 100%); // 背景色 - 中间层（模态等容器）
+  #{getCssVarName(color, bg, 3)}: rgb(67 68 74 / 100%); // 背景色 - 次上层（通知，Toast等）
+  #{getCssVarName(color, bg, 4)}: rgb(79 81 89 / 100%); // 背景色 - 最上层（特殊）
+  #{getCssVarName(color, bg, 5)}: rgba(204, 204, 204, .6); // 背景色(特殊) - 应用搜索框使用
+  #{getCssVarName(color, bg, overlay)}: rgba(22 22 26 / 60%);  // 蒙层背景色
+
+  // 填充色
+  #{getCssVarName(color, fill, 0)}: rgba(var(#{getCssVarName(dark, purple, 4)}),1); // 填充色 - 默认态
+  #{getCssVarName(color, fill, 1)}: rgba(var(#{getCssVarName(white)}),.16); // 填充色 - 悬浮态
+  #{getCssVarName(color, fill, 2)}: rgba(var(#{getCssVarName(white)}),.20); // 填充色 - 激活态
+  #{getCssVarName(color, scroll, menu)}: rgba(var(#{getCssVarName(white)}), .20); // 填充色 - 特殊-菜单滚动条颜色
+
+
+  // 边框
+  #{getCssVarName(color, border)}: rgba(var(#{getCssVarName(white)}),0.08); // 默认描边颜色
+
+  // 禁用态
+  #{getCssVarName(color, disabled, text)}: rgba(var(#{getCssVarName(grey, 9)}), .35); // 禁用态 - 文字
+  #{getCssVarName(color, disabled, border)}: rgba(var(#{getCssVarName(grey, 1)}),1); // 禁用态 - 描边
+  #{getCssVarName(color, disabled, bg)}: rgba(var(#{getCssVarName(grey, 1)}),1); // 禁用态 - 背景
+  #{getCssVarName(color, disabled, fill)}: rgba(var(#{getCssVarName(grey, 8)}),.04); // 禁用态 - 填充
+
+  // 阴影
+  #{getCssVarName(color, shadow)}: rgba(var(#{getCssVarName(black)}),0.04); // 用于模拟描边的阴影颜色
+  #{getCssVarName(shadow, elevated)}:
+    0 0 1px rgba(0 0 0 / 30%),
+    0 4px 14px rgba(0 0 0 / 10%); // 用于toast, modal, popover等需要提升层级的界面元素
+
+  // 字号
+  #{getCssVarName('font-size', 'small')}: 12px;
+  #{getCssVarName('font-size', 'regular')}: 14px;
+  #{getCssVarName('font-size', 'header-6')}: 16px;
+  #{getCssVarName('font-size', 'header-5')}: 18px;
+  #{getCssVarName('font-size', 'header-4')}: 20px;
+  #{getCssVarName('font-size', 'header-3')}: 24px;
+  #{getCssVarName('font-size', 'header-2')}: 28px;
+  #{getCssVarName('font-size', 'header-1')}: 32px;
+
+  // 字重
+  #{getCssVarName('font-weight', 'light')}: 200;
+  #{getCssVarName('font-weight', 'regular')}: 400;
+  #{getCssVarName('font-weight', 'bold')}: 800;
+
+  // 圆角
+  #{getCssVarName(border, radius, extra, small)}: 2px; // 超小圆角，用于 checkbox 内圆角
+  #{getCssVarName(border, radius, small)}: 4px; // 小圆角, 用于 button、tag、tabs 等大多数组件, 比较常用
+  #{getCssVarName(border, radius, medium)}: 8px; // 中圆角, 用于 dropdown、scrollist、transfer 等菜单类组件
+  #{getCssVarName(border, radius, large)}: 12px; // 大圆角, 用于 modal
+  #{getCssVarName(border, radius, circle)}: 50%; // 全圆角, 用于 avatar, badge 等组件
+  #{getCssVarName(border, radius, full)}: 9999px; // 用于创建全尺寸圆角，如胶囊标签等
+
+  // 高度
+  #{getCssVarName('height-control', 'small')}: 24px;
+  #{getCssVarName('height-control', 'default')}: 32px;
+  #{getCssVarName('height-control', 'large')}: 40px;
+
+  // 描边尺寸
+  #{getCssVarName('border-thickness')}: 0;
+  #{getCssVarName('border-thickness', 'control')}: 1px;
+  #{getCssVarName('border-thickness', 'control-focus')}: 1px;
+
+  // 图标尺寸
+  #{getCssVarName('width-icon', 'extra-small')}: 8px;
+  #{getCssVarName('width-icon', 'small')}: 12px;
+  #{getCssVarName('width-icon', 'medium')}: 16px;
+  #{getCssVarName('width-icon', 'large')}: 20px;
+  #{getCssVarName('width-icon', 'extra-large')}: 24px;
+
+  // 间距
+  #{getCssVarName('spacing', 'none')}: 0;
+  #{getCssVarName('spacing', 'super-tight')}: 2px;
+  #{getCssVarName('spacing', 'extra-tight')}: 4px;
+  #{getCssVarName('spacing', 'tight')}: 8px;
+  #{getCssVarName('spacing', 'base-tight')}: 12px;
+  #{getCssVarName('spacing', 'base')}: 16px;
+  #{getCssVarName('spacing', 'base-loose')}: 20px;
+  #{getCssVarName('spacing', 'loose')}: 24px;
+  #{getCssVarName('spacing', 'extra-loose')}: 32px;
+  #{getCssVarName('spacing', 'super-loose')}: 40px;
+}
+
+:root.dark {
+  @include b(panel-app-header) {
+    #{getCssVarName(color, primary)}: rgb(28, 28, 28);
+    #{getCssVarName(color, text, menu)}: rgba(204, 204, 204, .6);
+    #{getCssVarName(color, primary, text)}: rgba(204, 204, 204, .6);
+    #{getCssVarName(color, primary, hover)}: #2a2d2e; 
+    #{getCssVarName(color, primary, hover, text)}: #fff;
+    #{getCssVarName(color, primary, active)}: #37373d;
+    #{getCssVarName(color, primary, active, text)}: #fff;
+  }
+}

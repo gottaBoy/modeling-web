@@ -1,0 +1,71 @@
+$tree-grid-ex-field-column: (
+  cell-padding: getCssVar(spacing, tight),
+  color: getCssVar(color, text, 2),
+  clickable-text-color: getCssVar(color, primary),
+  clickable-hover-text-color: getCssVar(color, primary-hover),
+);
+
+@include b(tree-grid-ex-field-column) {
+  @include set-component-css-var(tree-grid-ex-field-column, $tree-grid-ex-field-column);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: getCssVar('grid-column', 'justify-content');
+  width: 100%;
+  height: 100%;
+  padding: getCssVar(tree-grid-ex-field-column, cell-padding);
+
+  @include e(text) {
+    font-size: getCssVar(font-size, regular);
+    font-weight: getCssVar(font-weight, regular);
+    color: getCssVar(tree-grid-ex-field-column, color);
+  }
+
+  @include m(clickable) {
+    @include e(text) {
+      color: getCssVar(tree-grid-ex-field-column, clickable-text-color);
+
+      &:hover {
+        color: getCssVar(tree-grid-ex-field-column, clickable-hover-text-color);
+      }
+    }
+
+    cursor: pointer;
+  }
+
+  @include m(ellipsis) {
+    // 内部所有的span都呈现成省略号
+    span {
+      @include utils-ellipsis;
+    }
+
+  }
+
+  @include m(wrap) {
+    @include overflow-wrap;
+  }
+
+  // 有行为组时
+  @include when(has-action){
+    justify-content: space-between;
+  }
+}
+
+@include b(tree-grid-ex-field-column-text-container) {
+  display: inline-flex;
+  flex-grow: 1;
+  align-items: center;
+  justify-content: getCssVar('grid-column', 'justify-content');
+  height: 100%;
+}
+
+@include b(tree-grid-ex-field-column-toolbar-container) {
+  // 关键操作不隐藏
+  .#{bem(action-toolbar,item)}:not(.#{bem(action-toolbar,item,level-250)}) {
+    opacity: 0;
+  }
+
+  .#{bem(action-toolbar,separator)} {
+    opacity: 0;
+  }
+}

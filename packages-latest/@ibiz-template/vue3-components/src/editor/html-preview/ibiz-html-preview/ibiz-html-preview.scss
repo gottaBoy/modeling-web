@@ -1,0 +1,189 @@
+// 预览富文本样式
+$html-preview: (
+  height: 600px,                                    // 默认高度
+  border-color: getCssVar('color', 'border'),       // 边框颜色
+);
+
+// 预览富文本工具栏样式
+$html-preview-toolbar: (
+    height: 48px,                                     // 工具栏高度
+    padding: 0 getCssVar(spacing, base),              // 工具栏内间距
+    gap: getCssVar(spacing, extra, tight),            // 工具栏项间隔
+);
+
+// 预览富文本工具栏项样式
+$html-preview-toolbar-item: (
+    width: 40px,                                      // 工具栏项宽度
+    height: 40px,                                     // 工具栏项高度
+    hover-bg-color: getCssVar('color', 'primary', light, default),      // 鼠标悬停背景色
+    hover-color: getCssVar('color', 'primary'),       // 鼠标悬停颜色
+);
+
+// 预览富文本编辑框样式
+$html-preview-editor: (
+    padding: getCssVar(spacing, base, tight),           // 预览富文本编辑框内边距
+    copy-size: getCssVar(font-size, header, 5),         // 复制按钮大小
+);
+
+// 预览富文本预览区域样式
+$html-preview-preview: (
+    padding: getCssVar(spacing, base, tight),           // 预览富文本预览区域内边距
+);
+
+// 预览富文本弹窗样式
+$html-preview-popup: (
+    height: 40px,                                         // 预览富文本弹窗高度
+    button-width: 40px,                                   // 预览富文本弹窗按钮宽度
+    padding: getCssVar(spacing, extra, tight),            // 预览富文本弹窗内边距   
+    bg-color: getCssVar(color, bg, 1),                    // 预览富文本弹窗背景色
+    hover-bg-color: getCssVar('color', 'primary', light, default),      // 预览富文本弹窗鼠标悬停背景色
+    hover-color: getCssVar('color', 'primary'),           // 预览富文本弹窗鼠标悬停文本颜色
+    border-radius: getCssVar(radius, small),              // 预览富文本弹窗圆角
+    box-shadow: getCssVar(shadow, elevated),              // 预览富文本弹窗阴影
+);
+
+@include b(html-preview) {
+    @include set-component-css-var('html-preview', $html-preview);
+    @include set-component-css-var('html-preview-toolbar', $html-preview-toolbar);
+    @include set-component-css-var('html-preview-toolbar-item', $html-preview-toolbar-item);
+    @include set-component-css-var('html-preview-editor', $html-preview-editor);
+    @include set-component-css-var('html-preview-preview', $html-preview-preview);
+    @include set-component-css-var('html-preview-popup', $html-preview-popup);
+
+    position: relative;
+    height: getCssVar('html-preview', 'height');
+    border: 1px solid getCssVar('html-preview', 'border-color');
+
+    @include e('toolbar') {
+        position: relative;
+        display: flex;
+        gap: getCssVar('html-preview-toolbar', 'gap');
+        align-items: center;
+        height: getCssVar('html-preview-toolbar', 'height');
+        padding: getCssVar('html-preview-toolbar', 'padding');
+        border-bottom: 1px solid getCssVar('html-preview', 'border-color');
+    }
+    @include e('toolbar-item') {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: getCssVar('html-preview-toolbar-item', 'width');
+        height: getCssVar('html-preview-toolbar-item', 'height');
+        cursor: pointer;
+
+        &:hover {
+            color: getCssVar('html-preview-toolbar-item', 'hover-color');
+            background-color: getCssVar('html-preview-toolbar-item', 'hover-bg-color');
+        }
+    }
+
+    @include e(full-screen-button) {
+        position: absolute;
+        right: 0;
+        margin: getCssVar('html-preview-toolbar', 'padding');
+    }
+
+    @include e('content') {
+        display: flex;
+        width: 100%;
+        height: calc(100% - getCssVar('html-preview-toolbar', 'height'));
+
+    }
+
+    @include e('editor') {
+        position: relative;
+        width: 100%;
+        height: 100%;
+
+        pre {
+            width: 100%;
+            height: 100%;
+            padding: getCssVar('html-preview-editor', 'padding');
+            margin: 0;
+            overflow: auto;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            outline: none;
+
+            &:empty::before {
+                position: absolute;
+                top: getCssVar('html-preview-editor', 'padding');
+                left: getCssVar('html-preview-editor', 'padding');
+                color: var(--el-text-color-placeholder);
+                pointer-events: none;
+                content: attr(placeholder);
+            }
+        }
+    }
+
+    @include e(copy) {
+        position: absolute;
+        top: getCssVar('html-preview-editor', 'padding');
+        right: getCssVar('html-preview-editor', 'padding');
+        font-size: getCssVar('html-preview-editor', 'copy-size');
+    }
+
+    @include e('preview') {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        padding: getCssVar('html-preview-preview', 'padding');
+    }
+
+    .#{bem(split-trigger-con)} {
+        display: none;
+    }
+    .#{bem(split-pane--right)} {
+        display: none;
+    }
+
+    @include e(hover-toolbar) {
+        position: absolute;
+        height: getCssVar(html-preview-popup, height);
+        padding: getCssVar(html-preview-popup, padding);
+        background-color: getCssVar(html-preview-popup, bg-color);
+        border-radius: getCssVar(html-preview-popup, border-radius);
+        box-shadow: getCssVar(html-preview-popup, box-shadow);
+
+        .el-button.is-link {
+            width: getCssVar(html-preview-popup, button-width);
+            height: 100%;
+
+            &:hover {
+                color: getCssVar(html-preview-popup, hover-color);
+                background-color: getCssVar(html-preview-popup, hover-bg-color);
+            }
+        }
+    }
+
+    @include when(preview) {
+        @include e('preview') {
+            display: flex;
+        }
+        .#{bem(split-trigger-con)} {
+            display: block;
+        }
+        .#{bem(split-pane--right)} {
+            display: block;
+        }
+    }
+
+    @include when(readonly) {
+        border: none;
+        @include e('toolbar') {
+            display: none;
+            border: none;
+        }
+        @include e('content') {
+            height: auto;
+            max-height: getCssVar('html-preview', 'height');
+        }
+        @include e('editor') {
+            pointer-events: none;
+        }
+        @include e('copy') {
+            display: none;
+        }
+    }
+}

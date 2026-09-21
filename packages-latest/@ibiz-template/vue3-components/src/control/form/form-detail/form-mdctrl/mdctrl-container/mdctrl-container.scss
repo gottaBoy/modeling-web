@@ -1,0 +1,119 @@
+// 表单多数据项样式
+$mdctrl-item: (
+  drag-chosen-color: rgba(#{getCssVar(grey, 1)}, 1),  // 拖拽选中行背景色
+);
+
+// 表单多数据操作按钮样式
+$mdctrl-button: (
+  width: 60px,                          // 操作按钮宽度
+  gap: getCssVar('spacing', 'tight'),   // 操作按钮间距
+);
+
+
+@include b(mdctrl-container) {
+}
+
+@include b(mdctrl-container-item) {
+  @include set-component-css-var(mdctrl-item, $mdctrl-item);
+  @include set-component-css-var(mdctrl-button, $mdctrl-button);
+
+  @include flex(row);
+
+  @include e(form) {
+    flex-grow: 1;
+  }
+
+  @include e('left') {
+    flex-shrink: 0;
+  }
+
+  @include e('right') {
+    flex-shrink: 0;
+    width: getCssVar(mdctrl-button, width);
+    margin-left: getCssVar(mdctrl-button, gap);
+  }
+
+  @include e('icon-drag') {
+    display: flex;
+    align-items: center;
+    min-height: getCssVar('height-control', 'default');
+    max-height: getCssVar('height-control', 'default');
+    margin-top: getCssVar('spacing', 'tight');
+    cursor: move;
+
+    >svg {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: getCssVar('spacing', 'base');
+      height: getCssVar('spacing', 'base');
+      fill: getCssVar(color, text, 3); 
+    }
+  }
+
+  @include when('drag-chosen') {
+    background-color: getCssVar(mdctrl-item, drag-chosen-color);
+  }
+
+}
+
+@include b(mdctrl-container-item-actions) {
+  flex-shrink: 0;
+  width: 80px;
+  text-align: center;
+
+  .el-button + .el-button {
+    margin-left: getCssVar(spacing, none);
+  }
+
+  @include e(btn) {
+    margin-top: getCssVar(spacing, tight);
+  }
+}
+
+@include b(mdctrl-container-no-data) {
+  width: 100%;
+  @include flex(row, flex-end);
+}
+
+// style2样式
+@include b('mdctrl-container-style2-item-actions') {
+  flex: 1;
+  width: 100%;
+
+  .el-button + .el-button {
+    margin-left: getCssVar(spacing, none);
+  }
+
+  @include e(btn) {
+    margin-top: getCssVar(spacing, tight);
+  }
+
+  @include e('create') {
+    width: 100%;
+    color: getCssVar(color, primary);
+    background-color: transparent;
+    border: 1px dashed getCssVar(color, border);
+    border-width: 1px !important;
+
+    ion-icon {
+      margin-right: getCssVar(spacing, extra-tight);
+    }
+
+    &:focus {
+      color: getCssVar(color, primary, hover);
+      background-color: transparent;
+      border: 1px dashed getCssVar(color, primary, hover);
+    }
+
+    &:hover {
+      color: getCssVar(color, primary, hover);
+      background-color: transparent;
+      border: 1px dashed getCssVar(color, primary, hover);
+    }
+  }
+
+  @include e('remove') {
+    font-size: getCssVar(font-size, heder-6);
+  }
+}

@@ -1,0 +1,51 @@
+// 搜索表单操作按钮组样式
+$control-searchform-button: (
+  height: 40px,                                                                   // 操作按钮高度
+  gap: getCssVar(spacing, tight),                                                 // 启用高级搜索时按钮与按钮的间隔
+  margin: getCssVar(spacing, extra-tight) getCssVar(spacing, extra-tight) 0 getCssVar(spacing, tight),  // 操作按钮外边距
+);
+
+// 搜索表单操作按钮组下拉历史项样式
+$control-searchform-button-filter: (
+  font-size: getCssVar('font-size', 'header-5'),                                  // 下拉历史项字体大小
+  gap: getCssVar('spacing', 'extra-tight'),                                       // 下拉历史项标题与图标间隔
+);
+
+@include b(searchform-buttons) {
+  @include set-component-css-var('control-searchform-button', $control-searchform-button);
+
+  display: flex;
+  gap: getCssVar(control-searchform-button, gap);
+  align-items: center;
+  height: getCssVar(control-searchform-button, height);
+  margin: getCssVar(control-searchform-button, margin);
+
+  .el-button+.el-button {
+    margin-left: 0;
+  }
+}
+
+@include b(searchform-buttons-filter-item){
+  @include set-component-css-var('control-searchform-button-filter', $control-searchform-button-filter);
+
+  position: relative;
+
+  @include e(text){
+    padding-right: getCssVar(control-searchform-button-filter, gap);
+  }
+
+  @include e(remove){
+    position: absolute;
+    top: 50%;
+    right: 0;
+    display: none;
+    font-size: getCssVar(control-searchform-button-filter, font-size);
+    transform: translateY(-50%);
+  }
+
+  &:hover{
+    @include e(remove){
+      display: block;
+    }
+  }
+}

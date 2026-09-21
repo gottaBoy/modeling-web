@@ -1,0 +1,125 @@
+// 用户信息样式
+$user-info: (
+  'padding': 0 getCssVar(spacing, loose),       // 左右内边距
+  'color': getCssVar('color', 'text', 0),       // 文本色
+  'font-size': getCssVar(font-size, header-5),  // 字体大小
+  'height': 44px,                                // 容器高度
+  collapse-padding: 0 getCssVar(spacing, base, tight),     // 折叠时内边距
+);
+
+// 用户信息头像样式
+$user-info-avatar: (
+  max-width: 32px,                       // 顶部、折叠时头像最大宽度
+  max-height: 32px,                      //  顶部、折叠时头像最大高度
+  gap: getCssVar(spacing, base),         // 头像与名称间距
+);
+
+// 用户信息姓名样式
+$user-info-name: (
+  max-width: 130px,                                  // 姓名最大宽度
+  font-size: getCssVar(user-info, font-size),         // 姓名字体大小（继承自用户信息容器）
+  person-font-size: getCssVar(font-size, small),      // 职位/身份字体大小
+  person-gap: getCssVar(spacing, extra-tight),         // 姓名与职位间距
+  arrow-gap: getCssVar(spacing, base-tight),           // 下拉箭头与姓名间距
+);
+
+@include b(user-info) {
+  @include set-component-css-var('user-info', $user-info);
+  @include set-component-css-var('user-info-avatar', $user-info-avatar);
+  @include set-component-css-var('user-info-name', $user-info-name);
+
+  @include flex(row, flex-start, center);
+
+  width: 100%;
+  height: 100%;
+
+  .el-dropdown {
+    width: 100%;
+    height: getCssVar(user-info, height);
+    padding: getCssVar(user-info, padding);
+    cursor: pointer;
+  }
+
+  @include e(icon) {
+    margin-right: getCssVar(spacing, extra, tight);
+  }
+
+  @include when(left){
+    @include e(down){
+      display: none;
+    }
+  }
+  @include when(top){
+    @include e(down){
+      margin-left: getCssVar(user-info-name, arrow-gap);
+      font-size: getCssVar(user-info, font-size);
+    }
+    @include b(user-info-avatar){
+      max-width: getCssVar(user-info-avatar, max-width);
+      max-height: getCssVar(user-info-avatar, max-height);
+      margin-right: getCssVar(user-info-avatar, gap);
+    }
+  }
+
+  @include when(collapse){
+    .el-dropdown{
+      padding: getCssVar(user-info, collapse-padding);
+    }
+    @include b(user-info-avatar) {
+      max-width: getCssVar(user-info-avatar, max-width);
+      max-height: getCssVar(user-info-avatar, max-height);
+      margin: 0;
+    }
+  }
+
+  @include when(readonly) {
+    .el-dropdown {
+      cursor: default;
+    }
+  }
+}
+
+@include b(user-info-avatar) {
+  width: getCssVar(user-info, height);
+  height: getCssVar(user-info, height);
+  margin-right: 10px;
+}
+
+@include b(user-info-info) {
+  width: 100%;
+  @include flex(row, space-between, center);
+
+  color: getCssVar(user-info, color);
+  @include when('collapse') {
+    justify-content: center;
+  }
+}
+
+@include b(user-info-name) {
+  @include e(user-name){
+    @include utils-ellipsis;
+
+    max-width: getCssVar(user-info-name, max-width);
+    font-size: getCssVar(user-info-name, font-size);
+    line-height: 1.3;
+  }
+  @include e(person-name){
+    @include utils-ellipsis;
+
+    max-width: getCssVar(user-info-name, max-width);
+    margin-top: getCssVar(user-info-name, person-gap);
+    font-size: getCssVar(user-info-name, person-font-size);
+    line-height: 1.2;
+  }
+  @include when('collapse') {
+    display: none;
+  }
+}
+
+@include b(user-info-label) {
+  @include flex(row, flex-start, center);
+
+  font-size: getCssVar(user-info, font-size);
+  color: getCssVar(user-info, color);
+  outline: none;
+}

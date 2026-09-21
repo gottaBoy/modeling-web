@@ -1,0 +1,38 @@
+// 地图根元素
+$control-map: (
+  bg-color: transparent,                                        // 地图背景色
+  padding: getCssVar('spacing', 'none'),                        // 地图内边距
+  icon-color: getCssVar('color', 'text', '2'),                  // 地图图标色
+  hover-color: getCssVar('color', 'primary', 'hover'),          // 地图悬浮色
+);
+
+// 地图返回上级
+$control-map-goback: (
+  gap: 6px,                                               // 返回上级内容间隔
+  text-color: getCssVar('color','link'),                  // 返回上级字体色
+  font-size: getCssVar('font-size', 'header-4'),          // 返回上级字体大小
+);
+
+@include b('control-map') {
+  @include set-component-css-var('control-map', $control-map);
+  @include set-component-css-var('control-map-goback', $control-map-goback);
+
+  position: relative;
+  width: 100%;
+  height: 100%;
+  @include e('map') {
+    width: 100%;
+    height: 100%;
+  }
+  @include e('nav-icon') {
+    position: absolute;
+    top: 18px;
+    right: 10px;
+    color: getCssVar('control-map', 'icon-color');
+    cursor: pointer;
+
+    &:hover {
+      color: getCssVar('control-map', 'hover-color');
+    }
+  }
+}

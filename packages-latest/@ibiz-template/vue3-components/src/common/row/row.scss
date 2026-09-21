@@ -1,0 +1,12 @@
+@include b(row) {
+
+  @include m(flex) {
+
+    @include flex(column);
+  }
+
+  @include m(grid){
+    // 栅格的子默认高度不拉伸，不随兄弟元素撑开
+    align-items: flex-start;
+  }
+}

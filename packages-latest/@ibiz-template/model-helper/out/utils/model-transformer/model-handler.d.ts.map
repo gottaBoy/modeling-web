@@ -1,0 +1,1 @@
+{"version":3,"file":"model-handler.d.ts","sourceRoot":"","sources":["../../../src/utils/model-transformer/model-handler.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,aAAa,EAAE,MAAM,iBAAiB,CAAC;AAEhD;;;;;;GAMG;AACH,8BAAsB,YAAa,YAAW,aAAa;IACzD;;;;;OAKG;IACI,QAAQ,EAAE,MAAM,CAAK;IAE5B;;;;OAIG;gBACS,QAAQ,GAAE,MAAU;IAIhC;;;;;;OAMG;IACH,QAAQ,CAAC,OAAO,CAAC,KAAK,EAAE,MAAM,GAAG,MAAM;CACxC"}

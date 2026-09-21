@@ -1,0 +1,106 @@
+@use 'sass:meta';
+@use 'sass:string';
+@use 'sass:list';
+@use "sass:math";
+
+@use '../settings/config.scss' as *;
+
+// BEM support Func
+@function selectorToString($selector) {
+  $selector: meta.inspect($selector);
+  $selector: string.slice($selector, 2, -2);
+  @return $selector;
+}
+
+@function containsModifier($selector) {
+  $selector: selectorToString($selector);
+
+  @if string.index($selector, $modifier-separator) {
+    @return true;
+  } @else {
+    @return false;
+  }
+}
+
+@function containWhenFlag($selector) {
+  $selector: selectorToString($selector);
+
+  @if string.index($selector, '.' + $state-prefix) {
+    @return true;
+  } @else {
+    @return false;
+  }
+}
+
+@function containPseudoClass($selector) {
+  $selector: selectorToString($selector);
+
+  @if string.index($selector, ':') {
+    @return true;
+  } @else {
+    @return false;
+  }
+}
+
+@function hitAllSpecialNestRule($selector) {
+  @return containsModifier($selector) or containWhenFlag($selector) or containPseudoClass($selector);
+}
+
+// join var name
+// joinVarName(('button', 'text-color')) => '--ibiz-button-text-color'
+@function joinVarName($list) {
+  $name: '--' + $namespace;
+  @each $item in $list {
+    @if $item != '' {
+      $name: $name + '-' + $item;
+    }
+  }
+  @return $name;
+}
+
+// getCssVarName('button', 'text-color') => '--ibiz-button-text-color'
+@function getCssVarName($args...) {
+  @return joinVarName($args);
+}
+
+// getCssVar('button', 'text-color') => var(--ibiz-button-text-color)
+@function getCssVar($args...) {
+  @return var(#{joinVarName($args)});
+}
+
+// getCssVarWithDefault(('button', 'text-color'), red) => var(--ibiz-button-text-color, red)
+@function getCssVarWithDefault($args, $default) {
+  @return var(#{joinVarName($args)}, #{$default});
+}
+
+/* bem('block', 'element', 'modifier') => 'ibiz-block__element--modifier' */
+@function bem($block, $element: '', $modifier: '') {
+  $name: $namespace + $common-separator + $block;
+
+  @if $element != '' {
+    $name: $name + $element-separator + $element;
+  }
+
+  @if $modifier != '' {
+    $name: $name + $modifier-separator + $modifier;
+  }
+
+  @return $name;
+}
+
+// 输出rem值，默认根字体大小为16px做转换。rem(10px 10rem 0 auto) => 0.625rem 10rem 0 auto
+@function rem($values) {
+  $root: 16px;
+  $unit: rem;
+  $list: ();
+  @each $v in $values {
+      $res: 0;
+      @if  $v == 0 or $v == auto or unit($v) == rem or unit($v) == em or unit($v) == vw or unit($v) == vh{
+          $res: $v;
+      } @else{
+          $res: math.div($v, $root) + $unit;
+     }
+     $list: list.append($list , $res);
+ }
+ @return $list;
+}

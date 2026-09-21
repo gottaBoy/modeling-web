@@ -1,0 +1,8 @@
+@include b(exp-bar-caption){
+  font-size: getCssVar(font-size, header-5);
+  font-weight: getCssVar(font-weight, regular);
+  
+  @include e(icon){
+    margin-right: getCssVar(spacing, tight);
+  }
+}

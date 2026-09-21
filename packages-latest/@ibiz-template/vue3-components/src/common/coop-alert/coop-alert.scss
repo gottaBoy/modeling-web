@@ -1,0 +1,104 @@
+$coop-alert: (
+  color--info:getCssVar(color,info),
+  background-color--info: getCssVar(color,info,light, default),
+  color--success: getCssVar(color,success),
+  background-color--success: getCssVar(color, success, light, default),
+  color--warning: getCssVar(color,warning),
+  background-color--warning: getCssVar(color, warning, light, default),
+  color--error: getCssVar(color,danger),
+  background-color--error: getCssVar(color, danger, light, default),
+  close-btn-color: getCssVar(color,text,1),
+);
+
+@include b(coop-alert) {
+  @include set-component-css-var('coop-alert', $coop-alert);
+
+  &.el-alert {
+    .el-alert__icon {
+      margin-right: getCssVar('spacing', 'tight');
+    }
+
+    .el-alert__close-btn {
+      top: 50%;
+      right: getCssVar('spacing', 'base-loose');
+      font-size: getCssVar('font-size', 'header-6');
+      color: getCssVar('coop-alert', 'close-btn-color');
+      transform: translateY(-50%);
+    }
+
+    .el-alert__content {
+      padding: getCssVar('spacing', 'none') getCssVar('spacing', 'extra-loose') getCssVar('spacing', 'none') getCssVar('spacing', 'none');
+    }
+
+    .el-alert__title {
+      line-height: getCssVar('spacing', 'loose');
+    }
+  }
+
+  &.el-alert--info {
+    color: getCssVar('coop-alert', 'color--info');
+    background-color: getCssVar('coop-alert', 'background-color--info');
+  }
+
+  &.el-alert--success {
+    color: getCssVar('coop-alert', 'color--success');
+    background-color: getCssVar('coop-alert', 'background-color--success');
+  }
+
+  &.el-alert--warning {
+    color: getCssVar('coop-alert', 'color--warning');
+    background-color: getCssVar('coop-alert', 'background-color--warning');
+  }
+
+  &.el-alert--error {
+    color: getCssVar('coop-alert', 'color--error');
+    background-color: getCssVar('coop-alert', 'background-color--error');
+  }
+}
+
+// message-util的样式
+.#{bem(message,'','alert')} {
+  @include set-component-css-var('coop-alert', $coop-alert);
+
+  &.el-message {
+    --el-message-padding : #{getCssVar('spacing', 'tight')} #{getCssVar('spacing', 'base')};
+
+    .el-message__icon,
+    .el-message__content {
+      color: inherit;
+    }
+
+    .el-message__content {
+      padding-right: getCssVar('spacing', 'extra-loose');
+    }
+
+    .el-message__closeBtn {
+      right: getCssVar('spacing', 'base-loose');
+      color: getCssVar('coop-alert', 'close-btn-color');
+    }
+  }
+
+  .el-message__content {
+    line-height: getCssVar('spacing', 'loose');
+  }
+
+  &.el-message--info {
+    color: getCssVar('coop-alert', 'color--info');
+    background-color: getCssVar('coop-alert', 'background-color--info');
+  }
+
+  &.el-message--success {
+    color: getCssVar('coop-alert', 'color--success');
+    background-color: getCssVar('coop-alert', 'background-color--success');
+  }
+
+  &.el-message--warning {
+    color: getCssVar('coop-alert', 'color--warning');
+    background-color: getCssVar('coop-alert', 'background-color--warning');
+  }
+
+  &.el-message--error {
+    color: getCssVar('coop-alert', 'color--error');
+    background-color: getCssVar('coop-alert', 'background-color--error');
+  }
+}

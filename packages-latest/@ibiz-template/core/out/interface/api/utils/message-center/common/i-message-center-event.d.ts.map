@@ -1,0 +1,1 @@
+{"version":3,"file":"i-message-center-event.d.ts","sourceRoot":"","sources":["../../../../../../src/interface/api/utils/message-center/common/i-message-center-event.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,cAAc,EAAE,MAAM,oBAAoB,CAAC;AAEpD;;;;GAIG;AACH,MAAM,WAAW,mBAAmB;IAClC;;;;OAIG;IACH,GAAG,EAAE,CAAC,GAAG,EAAE,cAAc,KAAK,IAAI,CAAC;CACpC"}

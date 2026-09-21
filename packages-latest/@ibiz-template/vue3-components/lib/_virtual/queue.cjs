@@ -1,0 +1,9 @@
+'use strict';
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+var queue = require('../node_modules/.pnpm/core-js@3.49.0/node_modules/core-js/internals/queue.cjs');
+
+
+
+exports.default = queue.queue;

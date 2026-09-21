@@ -1,0 +1,1 @@
+{"version":3,"file":"i-message-error.d.ts","sourceRoot":"","sources":["../../../../../../src/interface/api/utils/message-center/error/i-message-error.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,QAAQ,EAAE,MAAM,uBAAuB,CAAC;AACjD,OAAO,EAAE,YAAY,EAAE,MAAM,SAAS,CAAC;AAEvC;;;;;GAKG;AACH,MAAM,WAAW,aAAc,SAAQ,YAAY;IACjD;;;;OAIG;IACH,IAAI,CAAC,IAAI,EAAE,QAAQ,GAAG,MAAM,GAAG,IAAI,CAAC;CACrC"}

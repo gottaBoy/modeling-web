@@ -1,0 +1,1 @@
+@charset "UTF-8";body,html{padding:0;margin:0;overflow:hidden}*{box-sizing:border-box}.ibiz-app{width:100vw;height:100vh}::-webkit-scrollbar{width:4px;height:6px}::-webkit-scrollbar-thumb{background:var(--ibiz-color-fill-2)}div::-webkit-scrollbar{width:4px;height:6px}div::-webkit-scrollbar-thumb{background:var(--ibiz-color-fill-2)}

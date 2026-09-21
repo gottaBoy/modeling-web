@@ -1,0 +1,173 @@
+'use strict';
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+"use strict";
+var DEWFDynaStartView = {
+  "layoutMode": "FLEX",
+  "layout": {
+    "layout": "FLEX"
+  },
+  "rootPanelItems": [
+    {
+      "rawItem": {
+        "rawItemParams": [
+          {
+            "key": "POSITION",
+            "value": "TOP"
+          }
+        ],
+        "predefinedType": "VIEWMSG_POS",
+        "id": "viewmsg_pos_top"
+      },
+      "caption": "\u89C6\u56FE\u6D88\u606F\u5360\u4F4D",
+      "itemStyle": "DEFAULT",
+      "itemType": "RAWITEM",
+      "layoutPos": {
+        "shrink": 0,
+        "layout": "FLEX"
+      },
+      "showCaption": true,
+      "id": "viewmsg_pos_top"
+    },
+    {
+      "rawItem": {
+        "rawItemParams": [
+          {
+            "key": "POSITION",
+            "value": "BODY"
+          }
+        ],
+        "predefinedType": "VIEWMSG_POS",
+        "id": "viewmsg_pos_body"
+      },
+      "caption": "\u89C6\u56FE\u6D88\u606F\u5360\u4F4D",
+      "itemStyle": "DEFAULT",
+      "itemType": "RAWITEM",
+      "layoutPos": {
+        "shrink": 0,
+        "layout": "FLEX"
+      },
+      "showCaption": true,
+      "id": "viewmsg_pos_body"
+    },
+    {
+      "actionGroupExtractMode": "ITEM",
+      "panelItems": [
+        {
+          "caption": "\u8868\u5355",
+          "itemStyle": "DEFAULT",
+          "itemType": "CTRLPOS",
+          "layoutPos": {
+            "grow": 1,
+            "shrink": 1,
+            "layout": "FLEX"
+          },
+          "showCaption": true,
+          "id": "form"
+        }
+      ],
+      "predefinedType": "VIEWCONTENT",
+      "layout": {
+        "layout": "FLEX"
+      },
+      "dataRegionType": "INHERIT",
+      "caption": "\u5BB9\u5668",
+      "itemStyle": "DEFAULT",
+      "itemType": "CONTAINER",
+      "layoutPos": {
+        "grow": 1,
+        "shrink": 1,
+        "layout": "FLEX"
+      },
+      "id": "view_content"
+    },
+    {
+      "actionGroupExtractMode": "ITEM",
+      "panelItems": [
+        {
+          "actionType": "UIACTION",
+          "buttonStyle": "INFO",
+          "buttonType": "PANELBUTTON",
+          "uiactionId": "view_cancelaction",
+          "renderMode": "BUTTON",
+          "tooltip": "\u53D6\u6D88",
+          "caption": "\u53D6\u6D88",
+          "itemStyle": "INFO",
+          "itemType": "BUTTON",
+          "layoutPos": {
+            "shrink": 1,
+            "layout": "FLEX"
+          },
+          "showCaption": true,
+          "id": "button_cancelaction"
+        },
+        {
+          "actionType": "UIACTION",
+          "buttonStyle": "PRIMARY",
+          "buttonType": "PANELBUTTON",
+          "uiactionId": "view_okaction",
+          "renderMode": "BUTTON",
+          "tooltip": "\u786E\u5B9A",
+          "caption": "\u786E\u5B9A",
+          "itemStyle": "PRIMARY",
+          "itemType": "BUTTON",
+          "layoutPos": {
+            "shrink": 1,
+            "layout": "FLEX",
+            "spacingRight": "OUTERMEDIUM"
+          },
+          "showCaption": true,
+          "id": "button_okaction"
+        }
+      ],
+      "layout": {
+        "dir": "row-reverse",
+        "layout": "FLEX",
+        "valign": "center"
+      },
+      "dataRegionType": "INHERIT",
+      "caption": "\u5BB9\u5668",
+      "itemStyle": "DEFAULT",
+      "itemType": "CONTAINER",
+      "layoutPos": {
+        "shrink": 0,
+        "layout": "FLEX"
+      },
+      "id": "view_footer"
+    },
+    {
+      "rawItem": {
+        "rawItemParams": [
+          {
+            "key": "POSITION",
+            "value": "BOTTOM"
+          }
+        ],
+        "predefinedType": "VIEWMSG_POS",
+        "id": "viewmsg_pos_bottom"
+      },
+      "caption": "\u89C6\u56FE\u6D88\u606F\u5360\u4F4D",
+      "itemStyle": "DEFAULT",
+      "itemType": "RAWITEM",
+      "layoutPos": {
+        "shrink": 0,
+        "layout": "FLEX"
+      },
+      "showCaption": true,
+      "id": "viewmsg_pos_bottom"
+    }
+  ],
+  "layoutPanel": true,
+  "codeName": "WFDynaStartViewLayout",
+  "controlType": "VIEWLAYOUTPANEL",
+  "logicName": "\u5B9E\u4F53\u5DE5\u4F5C\u6D41\u52A8\u6001\u542F\u52A8\u89C6\u56FE\u5E03\u5C40\u9762\u677F(\u9884\u7F6E\u6A21\u578B)",
+  "appDataEntityId": "frontmodel.viewlayoutmodelrepository",
+  "controlParam": {},
+  "modelId": "B672A361-6F91-43E3-A8FD-937050B9C568",
+  "modelType": "PSSYSVIEWLAYOUTPANEL",
+  "name": "layoutpanel",
+  "id": "wfdynastartviewlayout"
+};
+
+exports.default = DEWFDynaStartView;

@@ -1,0 +1,146 @@
+// 数据选择（下拉视图）根元素
+$picker-select-view: (
+  font-size: getCssVar(form-item, font-size),                               // 字体大小
+  text-color: getCssVar(form-item, text-color),                             // 字体颜色
+  line-height: getCssVar(form-item, line-height),                           // 行高
+  readonly-color: getCssVar(form-item, readonly-color),                     // 只读字体色
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+// 数据选择（下拉视图）项元素
+$picker-select-view-item: (
+  margin: 2px 6px 2px 0,                                                    // 项外边距
+  padding: 0 getCssVar('spacing', 'tight'),                                 // 项内边距
+  font-size: getCssVar(font-size, small),                                   // 项字体大小
+  bg-color:  getCssVar(color, fill-0),                                      // 项背景色
+  border-color: transparent,                                                // 项边框色
+  border-radius: getCssVar(border-radius, small)                            // 项倒角
+);
+
+
+// 数据选择（下拉视图）popper元素
+$picker-select-view-popper: (
+  bg-color:  getCssVar(color, bg, 3),                                       // 背景色
+);
+
+@include b(picker-select-view) {
+  @include set-component-css-var('picker-select-view', $picker-select-view);
+  @include set-component-css-var('picker-select-view-item', $picker-select-view-item);
+
+  width: 100%;
+
+  .el-dropdown {
+    width: 100%;
+  }
+
+  .el-select {
+    width: 100%;
+  }
+
+  @include e('icon') {
+    cursor: pointer;
+  }
+
+  @include e('arrow'){
+    display: flex;
+    transition: transform 0.3s;
+    transform: rotateZ(0);
+    transform-origin: center center;
+
+    >svg{
+     width: 14px;
+     height: 14px;
+    }
+
+    &.overturn{
+      transform: rotateZ(-180deg);
+    }
+  }
+
+  @include m(readonly) {
+    font-size: getCssVar(picker-select-view, font-size);
+    line-height: getCssVar(picker-select-view, line-height);
+    color: getCssVar(picker-select-view, 'readonly-color');
+  }
+}
+
+@include b(picker-select-view-popper){
+  @include set-component-css-var('picker-select-view', $picker-select-view);
+  @include set-component-css-var('picker-select-view-popper', $picker-select-view-popper);
+
+  &.el-popper.el-dropdown__popper {
+    overflow: auto;
+
+    .el-scrollbar .el-dropdown__list{
+      background: getCssVar(picker-select-view-popper, bg-color);
+  
+      .el-dropdown-menu{
+        background: getCssVar(picker-select-view-popper, bg-color);
+      }
+    }
+  }
+}
+
+// 表单下的编辑器默认显示，悬浮上去显示编辑器
+@include b(picker-select-view-form-default-content){
+  display: none;
+}
+
+@include b(form-item){
+
+  @include b(picker-select-view) {
+    @include when(show-default){
+      // 悬浮显示编辑器
+      &:hover{
+        @include b(picker-select-view-form-default-content){
+          display: none;
+        }     
+        @include b(picker-select-view-select){
+          display: block; 
+        }       
+      }    
+      
+      // 不悬浮时显示信息态
+      @include b(picker-select-view-form-default-content){      
+        display: flex;
+        align-items: center;
+        width: 100%;     
+        height: getCssVar(picker-select-view, line-height);
+        padding: getCssVar(picker-select-view, hover-edit-padding);        
+        font-family: Arial, sans-serif;      
+        font-size: getCssVar(picker-select-view, font-size);
+        line-height: getCssVar(picker-select-view, line-height);
+        color: getCssVar(picker-select-view, text-color);
+        @include b(picker-select-view-content-item){
+          height: calc(getCssVar(picker-select-view, line-height) - getCssVar('spacing', 'tight'));
+          padding: getCssVar(picker-select-view-item, padding);
+          margin: getCssVar(picker-select-view-item, margin);
+          font-size: getCssVar(picker-select-view-item, font-size);
+          line-height: calc(getCssVar(picker-select-view, line-height) - getCssVar('spacing', 'tight'));
+          color: getCssVar(picker-select-view, text-color);
+          background-color: getCssVar(picker-select-view-item, bg-color);
+          border: 1px solid getCssVar(picker-select-view-item, border-color);
+          border-radius: getCssVar(picker-select-view-item, border-radius);
+        }
+      }
+      @include b(picker-select-view-select){
+        display: none;  
+      }
+      
+      // 输入态
+      @include when(editable){
+        @include b(picker-select-view-form-default-content){
+          display: none;
+        }     
+        @include b(picker-select-view-select){
+          display: block;    
+        }  
+      }
+    }
+
+  }
+}
+
+@include b(picker-select-view-select-popover){
+  display: none;
+}

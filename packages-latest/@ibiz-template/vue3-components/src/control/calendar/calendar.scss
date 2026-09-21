@@ -1,0 +1,339 @@
+// 日历根元素
+$control-calendar: (
+  bg-color: transparent,                                                            // 日历背景色
+  padding: getCssVar('spacing', 'none'),                                            // 日历内边距
+  border-color: getCssVar('color', 'border'),                                       // 日历边框色
+  icon-color: getCssVar('color', 'text', '2'),                                      // 日历图标色
+  hover-color: getCssVar('color', 'primary', 'hover'),                              // 日历悬浮色
+  active-border-color: getCssVar('color', 'primary', 'active'),                     // 日历激活边框色
+);
+
+// 日历时间轴样式
+$control-calendar-timeline: (
+  padding: getCssVar('spacing', 'none'),                                            // 时间轴内边距
+);
+
+// 日历月样式
+$control-calendar-month: (
+  gap: getCssVar('spacing', 'tight'),                                                // 月日历内容间隔
+  hover-bg-color: rgba(getCssVar('blue', 'cyan', '1'), 0.25),                        // 月日历悬浮背景色
+  active-bg-color: rgba(getCssVar('blue', 'cyan', '1'), 0.25),                       // 月日历激活背景色
+);
+
+// 月日历更多按钮
+$control-calendar-month-more: (
+  font-size: getCssVar('font-size', 'small'),                                       // 更多字体大小
+  hover-bg-color: getCssVar('color', 'fill', '0'),                                  // 更多悬浮背景色
+  border-radius: getCssVar('spacing', 'extra', 'tight'),                            // 更多倒角
+);
+
+// 月日历图例
+$control-calendar-month-legend: (
+  gap: getCssVar('spacing', 'tight'),                                               // 图例内容间隔
+);
+
+// 月日历图例项
+$control-calendar-month-legend-item: (
+  width: 1.5em,                                                                     // 图例项色块宽
+  height: 0.9em,                                                                    // 图例项色块高
+  line-height: 1em,                                                                 // 图例项行高
+  max-width: 100px,                                                                 // 图例项标题最大宽
+  gap: getCssVar('spacing', 'extra-tight'),                                         // 图例项间隔
+  border-radius: getCssVar('border', 'radius', 'extra', 'small'),                   // 图例项色块倒角
+);
+
+// 日历项
+$control-calendar-item: (
+  color: none,                                                                      // 日历项颜色
+  padding: getCssVar('spacing', 'tight'),                                           // 日历项内边距
+  text-color: getCssVar('color', 'text', '0'),                                      // 日历项字体色
+  font-size: getCssVar('font-size', 'small'),                                       // 日历项字体大小
+  margin: getCssVar('spacing', 'extra', 'tight'),                                   // 日历项外边距
+  border-radius: getCssVar('border-radius', 'small'),                               // 日历项倒角
+  hover-bg-color: getCssVar('color', 'fill', '0'),                                  // 日历项悬浮背景色
+  active-bg-color: getCssVar('color', 'fill', '0'),                                 // 日历项激活背景色
+);
+
+@include b('control-calendar') {
+  @include set-component-css-var('control-calendar', $control-calendar);
+  @include set-component-css-var('control-calendar-timeline', $control-calendar-timeline);
+  @include set-component-css-var('control-calendar-month', $control-calendar-month);
+  @include set-component-css-var('control-calendar-month-more', $control-calendar-month-more);
+  @include set-component-css-var('control-calendar-month-legend', $control-calendar-month-legend);
+  @include set-component-css-var('control-calendar-item', $control-calendar-item);
+  @include set-component-css-var('control-calendar-month-legend-item', $control-calendar-month-legend-item);
+
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: getCssVar('control-calendar', 'padding');
+  background-color: getCssVar('control-calendar', 'bg-color');
+
+  @include e('header') {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  @include e('nav-icon') {
+    position: absolute;
+    top: 18px;
+    right: 0;
+    color: getCssVar('control-calendar', 'icon-color');
+    cursor: pointer;
+
+    &:hover {
+      color: getCssVar('control-calendar', 'hover-color');
+    }
+  }
+
+  @include e('calendar-item') {
+    display: flex;
+    align-items: center;
+    padding: getCssVar('control-calendar-item', 'padding');
+  }
+
+  // 未找到绑定UI
+  @include e('icon') {
+    width: getCssVar('width-icon', 'small');
+    height: getCssVar('width-icon', 'small');
+    margin-right: getCssVar('spacing', 'base-tight');
+    border-radius: getCssVar('border', 'radius', 'circle');
+  }
+}
+
+.#{bem('control-calendar', 'user')} {
+  .#{bem('control-calendar', 'nav-icon')} {
+    top: 9px;
+  }
+}
+.#{bem('control-calendar', 'day')},
+.#{bem('control-calendar', 'week')} {
+  .#{bem('control-calendar', 'nav-icon')} {
+    top: 28px;
+    right: 10px;
+  }
+}
+
+@include b('control-calendar-content') {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+
+  @include e('month') {
+    .el-calendar {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+  
+    .el-calendar__header {
+      flex-wrap: nowrap;
+    }
+  
+    .el-calendar-table,
+    .el-calendar-table .el-calendar-day {
+      width: 100%;
+      height: 100%;
+      min-height: 90px;
+      cursor: pointer;
+    }
+  
+    .el-calendar-table {
+      flex: 1;
+      width: fit-content;
+    }
+  
+    .el-calendar-table .el-calendar-day:hover {
+      cursor: pointer;
+      background-color: getCssVar('control-calendar-month', 'hover-bg-color');
+    }
+  
+    .el-calendar-table td.is-selected {
+      background-color: getCssVar('control-calendar-month', 'active-bg-color');
+    }
+  
+    .el-calendar__body {
+      display: flex;
+      flex: 1;
+      padding: 0;
+      overflow: auto;
+    }
+  }
+
+  @include when('show-date-range') {
+    .el-calendar-day {
+      padding: getCssVar('control-calendar-month', 'gap') 0;
+    }
+    .#{bem('control-calendar-item')} {
+      width: calc(100% + 1px);
+      min-height: 34px;
+      border-radius: 0;
+
+      &.is-begin-time {
+        width: 100%;
+        margin-left: getCssVar('spacing', 'super', 'tight');
+        border-radius: getCssVar('spacing', 'extra', 'tight') 0 0
+          getCssVar('spacing', 'extra', 'tight');
+
+        &.is-end-time {
+          width: calc(100% - getCssVar('spacing', 'super', 'tight') * 2);
+          border-radius: getCssVar('spacing', 'extra', 'tight');
+        }
+      }
+
+      &.is-end-time {
+        width: calc(100% - getCssVar('spacing', 'super', 'tight'));
+        border-radius: 0 getCssVar('spacing', 'extra', 'tight')
+          getCssVar('spacing', 'extra', 'tight') 0;
+      }
+
+      &.is-active {
+        border-right: none;
+        border-left: none;
+
+        &.is-begin-time {
+          border-left: solid 0.5px
+            var(
+              #{getCssVarName('control-calendar-item', 'active-border-color')},
+              #{getCssVar('control-calendar', 'active-border-color')}
+            );
+        }
+
+        &.is-end-time {
+          border-right: solid 0.5px
+            var(
+              #{getCssVarName('control-calendar-item', 'active-border-color')},
+              #{getCssVar('control-calendar', 'active-border-color')}
+            );
+        }
+      }
+
+      &.is-hidden {
+        position: relative;
+        z-index: -1;
+        opacity: 0;
+      }
+
+      &.is-no-end-time,
+      &.is-no-begin-time {
+        width: calc(100% - getCssVar('spacing', 'super', 'tight') * 2);
+        margin-left: getCssVar('spacing', 'super', 'tight');
+        border-radius: getCssVar('spacing', 'extra', 'tight');
+      }
+    }
+  }
+}
+
+@include b('control-calendar-more') {
+  width: 100%;
+  font-size: getCssVar('control-calendar-month-more', 'font-size');
+  border-radius: getCssVar('control-calendar-month-more', 'border-radius');
+
+  &:hover {
+    background-color: getCssVar('control-calendar-month-more', 'hover-bg-color');
+  }
+}
+
+@include b('control-calendar-item') {
+  @include set-component-css-var('control-calendar-item', $control-calendar-item);
+
+  #{getCssVarName('color', 'text', '2')}: getCssVar('control-calendar-item', 'color');
+  #{getCssVarName('editor', 'default', 'text', 'color')}: getCssVar('control-calendar-item', 'color');
+  height: 100%;
+  padding: getCssVar('control-calendar-item', 'padding');
+  margin-bottom: getCssVar('control-calendar-item', 'margin');
+  overflow: hidden;
+  font-size: getCssVar('control-calendar-item', 'font-size');
+  color: getCssVar('control-calendar-item', 'text-color');
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  border: solid 0.5px transparent;
+  border-radius: getCssVar('control-calendar-item', 'border-radius');
+
+  &:hover {
+    background-color: getCssVar('control-calendar-item', 'hover-bg-color');
+  }
+
+  @include when(active) {
+    background-color: getCssVar('control-calendar-item', 'active-bg-color');
+    border: solid 0.5px
+      var(
+        #{getCssVarName('control-calendar-item', 'active-border-color')},
+        #{getCssVar('control-calendar', 'active-border-color')}
+      );
+  }
+}
+
+@include b('control-calendar-date-text') {
+  padding-bottom: getCssVar('control-calendar-month', 'gap');
+  margin: 0;
+  text-align: center;
+}
+
+@include b('control-calendar-day') {
+  height: fit-content;
+}
+
+@include b('control-calendar-content-title') {
+  line-height: getCssVar('editor', 'default', 'line-height');
+  white-space: nowrap;
+}
+
+@include b('control-calendar-content-header') {
+  display: flex;
+  align-items: center;
+
+  & > * + * {
+    margin-left: getCssVar('control-calendar-month', 'gap');
+  }
+
+  .el-button-group {
+    display: flex;
+  }
+}
+
+@include b('control-calendar-legend') {
+  display: flex;
+  gap: getCssVar('control-calendar-month-legend', 'gap');
+  justify-content: center;
+  width: 100%;
+
+  @include e('item') {
+    display: flex;
+    gap: getCssVar('control-calendar-month-legend-item', 'gap');
+    align-items: center;
+    line-height: getCssVar('control-calendar-month-legend-item', 'line-height');
+    cursor: pointer;
+
+    @include m('tip') {
+      display: inline-block;
+      width: getCssVar('control-calendar-month-legend-item', 'width');
+      height: getCssVar('control-calendar-month-legend-item', 'height');
+      border-radius: getCssVar('control-calendar-month-legend-item', 'border-radius');
+    }
+
+    @include m('text') {
+      display: inline-block;
+      width: auto;
+      max-width: getCssVar('control-calendar-month-legend-item', 'max-width');
+      overflow: hidden;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}
+
+@include b('control-calendar-timeline-content') {
+  // 适配父容器有高度时未出滚动条
+  height: 100%;
+  overflow: auto;
+
+  .el-timeline {
+    padding-left: getCssVar('control-calendar-timeline', 'padding');
+  }
+}

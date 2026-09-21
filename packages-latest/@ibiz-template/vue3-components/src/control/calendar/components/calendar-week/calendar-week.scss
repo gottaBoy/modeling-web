@@ -1,0 +1,359 @@
+// 周日历头
+$control-calendar-week-header: (
+  height: 150px,                                                      // 头部高度
+);
+
+// 周日历头部项
+$control-calendar-week-header-item: (
+  min-height: 22px,                                                   // 项最小高
+  bg-color: getCssVar('color', 'primary'),                            // 项背景色
+);
+
+// 周日历主体区项
+$control-calendar-week-body-item: (
+  gap: 2px,                                                           // 项间隔
+  padding: getCssVar('spacing', 'tight'),                             // 项内边距
+  active-border-color: getCssVar('color', 'primary'),                 // 项激活边框色
+);
+
+// 周日历今天
+$control-calendar-week-tody: (
+  text-color: getCssVar('color', 'primary', 'text'),                  // 今天文本色
+  bg-color: getCssVar('color', 'primary'),                            // 今天背景色
+);
+
+// 周日历滚动条
+$control-calendar-week-scroll: (
+  width: 4px,                                                         // 滚动条宽
+  border-radius: getCssVar('border-radius', 'extra','small'),         // 滚动条块倒角
+  bg-color: getCssVar('color', 'fill', '2'),                          // 滚动条块背景色
+);
+
+@include b('calendar-week') {
+  @include set-component-css-var('control-calendar-week-header', $control-calendar-week-header);
+  @include set-component-css-var('control-calendar-week-tody', $control-calendar-week-tody);
+  @include set-component-css-var('control-calendar-week-header-item', $control-calendar-week-header-item);
+  @include set-component-css-var('control-calendar-week-body-item', $control-calendar-week-body-item);
+  @include set-component-css-var('control-calendar-week-scroll', $control-calendar-week-scroll);
+
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  @include e('header') {
+    position: relative;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: getCssVar('control-calendar-week-header', 'height');
+    min-height: getCssVar('control-calendar-week-header', 'height');
+    @include m('date-cell-first') {
+      width: 90px;
+      max-width: 90px;
+      height: 100%;
+      border-right: 1px solid getCssVar('control-calendar-week', 'border-color');
+      border-bottom: 1px solid
+        getCssVar('control-calendar-week', 'border-color');
+    }
+    @include m('event-cell-first') {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 90px;
+      max-width: 90px;
+      height: 100%;
+      padding-left: 40px;
+      border-right: 1px solid getCssVar('control-calendar-week', 'border-color');
+    }
+    @include m('dates') {
+      display: flex;
+      justify-content: space-between;
+      width: calc(100% - 7px);
+      height: 96px;
+    }
+    @include m('date-cell') {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      align-items: center;
+      border-right: 1px solid getCssVar('control-calendar-week', 'border-color');
+      border-bottom: 1px solid
+        getCssVar('control-calendar-week', 'border-color');
+    }
+    @include m('date-week') {
+      width: 100%;
+      height: 26px;
+      margin-top: 6px;
+      text-align: center;
+    }
+    @include m('date-day') {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 50px;
+      height: 50px;
+      margin-top: 6px;
+      font-weight: 600;
+      border: none;
+      border-radius: 50%;
+
+      &.is-today {
+        color: getCssVar('control-calendar-week-tody', 'text-color');
+        background-color: getCssVar('control-calendar-week-tody', 'bg-color');
+      }
+    }
+    @include m('events') {
+      position: relative;
+      display: flex;
+      flex: 1;
+      width: 100%;
+      height: 30px;
+      overflow: hidden;
+    }
+    @include m('event-container') {
+      width: calc(100% - 97px);
+      height: 100%;
+      overflow: hidden auto;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+    @include m('container-scroll') {
+      display: flex;
+      height: auto;
+    }
+    @include m('event-cell') {
+      position: relative;
+      top: 0;
+      left: 0;
+      flex: 1;
+      width: 100%;
+      height: auto;
+
+      &::after {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: block;
+        width: 1px;
+        height: getCssVar('calendar-week-header-event-scroll', 'real-height');
+        content: '';
+        border-right: 1px solid getCssVar('control-calendar-week', 'border-color');
+      }
+    }
+    @include m('event-box') {
+      position: absolute;
+      display: flex;
+      min-width: 32px;
+      &:has(.#{bem('calendar-week__header--check')}) {
+        min-width: 50px;
+      }
+    }
+    @include m('event-content') {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      min-height: getCssVar('control-calendar-week-header-item', 'min-height');
+      cursor: pointer;
+      background-color: getCssVar('control-calendar-week-header-item', 'bg-color');
+      border: none;
+      outline: none;
+
+      &.is-selected-event {
+        padding-right: 20px;
+      }
+    }
+    @include m('event-summary') {
+      width: 100%;
+      overflow: hidden;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    @include m('resizable-handle') {
+      position: absolute;
+      bottom: -6px;
+      display: flex;
+      align-items: center;
+      width: calc(100% - 7px);
+      height: 10px;
+      cursor: row-resize;
+    }
+    @include m('resize-line') {
+      width: 100%;
+      height: 1px;
+      background-color: getCssVar('control-calendar-week', 'border-color');
+    }
+    @include m('check') {
+      position: absolute;
+      top: 50%;
+      right: 6px;
+      color: getCssVar('control-calendar-week', 'active-color');
+      transform: translate(0, -50%);
+    }
+  }
+
+  @include e('scroll-area') {
+    flex: 1;
+    overflow: hidden scroll;
+  }
+  @include e('time-pane') {
+    position: relative;
+    display: flex;
+    flex: 1 1 0%;
+    width: calc(100% - 3px);
+    height: auto;
+    @include m('time-labels') {
+      position: sticky;
+      left: 0;
+      width: 90px;
+      min-width: 90px;
+      padding: 27px 0 27px 40px;
+      border-right: 1px solid getCssVar('control-calendar-week', 'border-color');
+    }
+    @include m('time-label') {
+      height: 22px;
+      margin-top: 38px;
+      line-height: 22px;
+      text-align: left;
+
+      &:nth-child(1) {
+        height: 22px;
+        margin-top: 22px;
+      }
+    }
+    @include m('time-columns') {
+      position: relative;
+      flex: 1;
+      padding-bottom: 60px;
+      border-right: 1px solid getCssVar('control-calendar-week', 'border-color');
+    }
+    @include m('time-column') {
+      height: 60px;
+      border-top: 1px solid getCssVar('control-calendar-week', 'border-color');
+
+      &:nth-child(1) {
+        border-top: none;
+      }
+    }
+    @include m('time-column-last') {
+      border-bottom: 1px solid getCssVar('control-calendar-week', 'border-color');
+    }
+    @include m('event-timed-container') {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    @include m('container-scroll') {
+      position: relative;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      overflow: hidden;
+    }
+    @include m('event-box') {
+      position: absolute;
+      width: auto;
+      height: auto;
+      padding: 0 getCssVar('control-calendar-week-body-item', 'gap');
+    }
+    @include m('event-content') {
+      position: relative;
+      z-index: 3;
+      width: 100%;
+      height: 100%;
+      padding: getCssVar('control-calendar-week-body-item', 'padding');
+      overflow: hidden;
+      line-height: 100%;
+      text-align: left;
+      cursor: pointer;
+      border: none;
+      outline: none;
+
+      &.is-selected-event {
+        border: 1px solid getCssVar('control-calendar-week-body-item', 'active-border-color');
+      }
+    }
+    @include m('event-summary') {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      & > span {
+        margin-right: 4px;
+      }
+    }
+  }
+
+  // 面板项popper
+  @include e('event-popover') {
+    width: auto;
+    height: auto;
+    padding: 0;
+
+    &.#{bem('popover')} {
+      position: absolute;
+      z-index: 110;
+      padding: getCssVar('spacing', 'tight');
+      background: getCssVar('color', 'bg', '1');
+      border: none;
+      box-shadow: getCssVar('shadow', 'elevated');
+    }
+
+    // 当配置了 showdetail 参数，只有配置了布局面板时才会显示气泡
+    &:has(.#{bem('control-calendar-item-default')}) {
+      display: none !important;
+    }
+
+    @include m('body') {
+      width: auto;
+      height: auto;
+      overflow: hidden;
+    }
+    @include m('scroll') {
+      width: auto;
+      min-width: 200px;
+      height: auto;
+      max-height: 80%;
+      overflow: auto;
+      pointer-events: none;
+
+      .#{bem('control-calendar-item')} {
+        &:last-child {
+          margin-bottom: 0;
+        }
+        @include when('active') {
+          background-color: transparent;
+          border-color: transparent;
+        }
+      }
+    }
+  }
+}
+
+@include b('calendar-week-scroll-bar') {
+  position: absolute;
+  top: getCssVar('calendar-week-header-event-scroll-bar', 'thumb-top');
+  right: 0;
+  z-index: 10;
+  width: getCssVar('control-calendar-week-scroll', 'width');
+  height: 100%;
+  border-radius: getCssVar('control-calendar-week-scroll', 'border-radius');
+  @include e('thumb') {
+    width: getCssVar('control-calendar-week-scroll', 'width');
+    height: getCssVar('calendar-week-header-event-scroll-bar', 'thumb-height');
+    cursor: pointer;
+    background-color:getCssVar('control-calendar-week-scroll', 'bg-color');
+    border-radius: getCssVar('control-calendar-week-scroll', 'border-radius');
+  }
+}

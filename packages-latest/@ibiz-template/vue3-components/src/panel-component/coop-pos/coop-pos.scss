@@ -1,0 +1,41 @@
+// 消息协同占位样式
+$coop-pos: (
+  width: 24px,                                      // 占位图标宽度
+  height: 24px,                                     // 占位图标高度
+  color: getCssVar('color', 'white'),               // 占位图标文本色
+  margin: getCssVar('spacing-super', 'tight'),       // 占位图标外边距
+  font-size: getCssVar('font-size', 'small'),        // 占位图标字体大小
+  border-radius: getCssVar('border-radius', 'circle'), // 占位图标圆角（圆形）
+);
+
+@include b(coop-pos) {
+  @include set-component-css-var('coop-pos', $coop-pos);
+
+  width: 100%;
+
+  @include e(on-line-editing) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+
+    @include m(person) {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: getCssVar(coop-pos, width);
+      height: getCssVar(coop-pos, height);
+      margin: getCssVar(coop-pos, margin);
+      font-size: getCssVar(coop-pos, font-size);
+      color: getCssVar(coop-pos, color);
+      cursor: pointer;
+      border-radius: getCssVar(coop-pos, border-radius);
+    }
+  }
+
+  @include e(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+}

@@ -1,0 +1,89 @@
+// 时间选择器根元素
+$date-picker: (
+  font-size: getCssVar(form-item, font-size),                               // 字体大小
+  text-color: getCssVar(form-item, text-color),                             // 字体颜色
+  border-color: getCssVar('form-item', 'border-color'),                     // 边框色
+  placeholder-color: getCssVar(form-item, placeholder-color),               // 占位文本色
+  disabled-color: getCssVar('form-item', 'disabled-color'),                 // 禁用色
+  disabled-border-color: getCssVar('form-item', 'disabled-border-color'),   // 禁用边框色
+  readonly-color: getCssVar(form-item, readonly-color),                     // 只读字体色
+  line-height: getCssVar(form-item, line-height),                           // 行高
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+@include b('date-picker') {
+  @include set-component-css-var(date-picker, $date-picker);
+
+  .el-date-editor {
+    width: 100%;
+  }
+
+  input {
+    font-size: getCssVar('date-picker', 'font-size');
+    color: getCssVar('date-picker', 'text-color');
+    border-color: getCssVar('date-picker', 'border-color');
+  }
+
+  input::placeholder {
+    color: getCssVar('date-picker', 'placeholder-color');
+  }
+
+  input[disabled] {
+    color: getCssVar('date-picker', 'disabled-color');
+    border-color: getCssVar('date-picker', 'disabled-border-color');
+  }
+
+  @include m(readonly) {
+    font-size: getCssVar(date-picker, font-size);
+    line-height: getCssVar(date-picker, line-height);
+    color: getCssVar(date-picker, readonly-color);
+  }
+}
+
+// 表单下的时间选择器默认显示，悬浮上去显示编辑器
+@include b(date-picker-form-default-content){
+  display: none;
+}
+
+@include b(form-item){
+
+  @include b(date-picker) {
+    @include when(show-default){
+      // 悬浮显示编辑器
+      &:hover{
+        @include b(date-picker-form-default-content){
+          display: none;
+        }     
+        @include b(date-picker-input){
+          display: block;    
+        }       
+      }    
+      
+      // 不悬浮时显示信息态
+      @include b(date-picker-form-default-content){      
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: getCssVar(date-picker, hover-edit-padding);        
+        font-family: Arial, sans-serif;      
+        font-size: getCssVar(date-picker, font-size);
+        line-height: getCssVar(date-picker, line-height);
+        color: getCssVar(date-picker, text-color);      
+      }
+      @include b(date-picker-input){
+        display: none;  
+      }
+      
+      // 输入态
+      @include when(editable){
+        @include b(date-picker-form-default-content){
+          display: none;
+        }     
+        @include b(date-picker-input){
+          display: block;    
+        }  
+      }
+    }
+
+  }
+}

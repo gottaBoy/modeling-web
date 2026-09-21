@@ -1,0 +1,6 @@
+@include b('preset-rawitem') {
+  @include flex(row, flex-start, center);
+
+  width: 100%;
+  height: 100%;
+}

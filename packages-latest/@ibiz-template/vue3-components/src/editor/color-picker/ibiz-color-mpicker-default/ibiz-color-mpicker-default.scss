@@ -1,0 +1,55 @@
+// 默认颜色选择器（多选）项元素
+$color-mpicker-default-item: (
+  height: getCssVar('height-control', 'large'),                                       // 高度
+  padding: getCssVar('spacing', 'none') getCssVar('spacing', 'base-loose'),           // 内边距
+  select-bg-color: getCssVar(color, primary, light, default),                         // 选中背景色
+);
+
+@include b('color-mpicker-default-picker'){
+  width: 100%;
+}
+@include b(color-mpicker-default-template-color-picker) {
+  width: 100%;
+  margin-top: getCssVar(spacing, base-tight);
+
+  .el-select__prefix {
+    display: flex;
+  }
+  @include e(icon) {
+    display: block;
+    width: 14px;
+    height: 14px;
+    margin-right: getCssVar('spacing', 'tight');
+    border-radius: getCssVar(border, radius, extra, small);
+
+    &:last-of-type {
+      margin-right: getCssVar('spacing', 'none');
+    }
+  }
+}
+@include b(color-mpicker-default-template-color-picker-option) {
+  display: flex;
+  align-items: center;
+}
+
+.el-popper.is-light {
+  @include b(color-mpicker-default-popper) {
+    .el-select-dropdown__list {
+      margin: getCssVar('spacing', 'base-tight') getCssVar('spacing', 'none') !important;
+    }
+
+    .el-select-dropdown__item {
+      height: getCssVar(color-mpicker-default-item, height);
+      padding: getCssVar(color-mpicker-default-item, padding);
+      line-height: getCssVar(color-mpicker-default-item, height);
+
+      &.selected {
+        background-color: getCssVar(color-mpicker-default-item, select-bg-color);
+      }
+    }
+  }
+}
+
+@include b('color-mpicker-default-popper'){
+  @include set-component-css-var('color-mpicker-default-item', $color-mpicker-default-item);
+}

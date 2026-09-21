@@ -1,0 +1,146 @@
+/* action-toolbar 界面行为组工具栏 start */
+$action-toolbar: (
+  item-margin: getCssVar(spacing,none) getCssVar(spacing,extra-tight) getCssVar(spacing,none) getCssVar(spacing,none),
+  item-padding: getCssVar('spacing', 'extra-tight') getCssVar('spacing', 'none'),
+  separator-height: getCssVar('spacing', 'base-loose'),
+  separator-width: getCssVar('spacing', 'super-tight'),
+  separator-color: getCssVar(color, border),
+  popover-padding: getCssVar(spacing,tight) getCssVar(spacing,none),
+  popover-button-padding: getCssVar(spacing,tight) getCssVar(spacing,base-loose),
+  popover-button-color: getCssVar(color, text, 2),
+  popover-button-hover-bg: getCssVar(color, bg, 0),
+);
+
+/* action-toolbar 界面行为组工具栏 end */
+
+@include b(action-toolbar) {
+  @include set-component-css-var(action-toolbar, $action-toolbar);
+
+  display: flex;
+  flex-wrap: wrap;
+
+  @include e(item) {
+    padding: getCssVar(action-toolbar, item-padding);
+    margin: getCssVar(action-toolbar, item-margin);
+
+    @include m(icon) {
+      @include when('has-icon') {
+        position: relative;
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        width: getCssVar('width-icon', 'medium');
+        height: getCssVar('width-icon', 'medium');
+        margin-right: getCssVar('spacing','extra-tight');
+        margin-left: getCssVar('spacing','extra-tight');
+        font-size: getCssVar('width-icon', 'medium');
+
+        // 适配浏览器缩放为80%时图标未垂直居中对齐
+        .#{bem('icon')} {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+        }
+
+        // 固定svg图标大小
+        svg {
+          max-width: 100%;
+          max-height: 100%;
+        }
+      }
+    }
+    @include m('label') {
+      @include when('has-caption') {
+        margin-right: getCssVar('spacing','extra-tight');
+      }
+    }
+
+
+    &+& {
+      margin: getCssVar(action-toolbar, item-margin);
+    }
+  }
+
+  @include e(group-item) {
+    > span {
+      width: 100%;
+    }
+    @include m(content) {
+      display: flex;
+      gap: getCssVar(spacing, extra, tight);
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+    @include m(caption) {
+      display: flex;
+      align-items: center;
+      padding: getCssVar(action-toolbar, item-padding);
+      margin: getCssVar(action-toolbar, item-margin);
+    }
+  }
+
+  @include e('separator'){
+    height: auto;
+  }
+
+  @include e(popover) {
+    @include set-component-css-var(action-toolbar, $action-toolbar);
+
+    // 这个是为了解决el-popover的宽度问题 必须要加 !important
+    width: auto !important;
+    min-width: 150px;
+
+    --el-popover-padding:#{getCssVar(action-toolbar, popover-padding)};
+
+    .el-button {
+      --el-button-size: getCssVar('height-control', 'large');
+
+      display: block;
+      width: 100%;
+      padding: getCssVar(action-toolbar, popover-button-padding);
+      margin: getCssVar('spacing', 'none');
+      font-size: getCssVar('font-size', 'regular');;
+      color: getCssVar(action-toolbar, popover-button-color);
+      text-align: left;
+      border-radius: 0;
+
+      &:hover {
+        background-color: getCssVar(action-toolbar, popover-button-hover-bg);
+      }
+
+      .#{bem('action-toolbar__item--icon')} {
+        @include when(has-icon) {
+          margin: 0 getCssVar('spacing', 'tight') 0 0;
+        }
+      }
+    }
+
+    .ibiz-action-toolbar__separator{
+      margin: getCssVar('spacing', 'none');
+    }
+  }
+
+  @include m(dropdown) {
+    @include e(caption) {
+      cursor: pointer;
+    }
+
+    @include e(caption-icon) {
+      vertical-align: bottom;
+    }
+  }
+
+  @include m(buttons) {
+    @include when(nowrap) {
+      flex-wrap: nowrap;
+      .#{bem(action-toolbar, item)},
+      .#{bem(action-toolbar, item)} > span {
+        overflow: hidden;
+      }
+      .#{bem(action-toolbar, item, label)} {
+        @include utils-ellipsis;
+      }
+    }
+  }
+}

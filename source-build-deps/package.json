@@ -1,0 +1,14 @@
+{
+  "name": "aibiz-source-build-deps",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "verify": "node verify.mjs"
+  },
+  "dependencies": {
+    "@interactjs/types": "file:archives/interactjs-types-1.10.26.tgz",
+    "interactjs": "file:archives/interactjs-1.10.26.tgz",
+    "js-md5": "file:archives/js-md5-0.8.3.tgz"
+  }
+}

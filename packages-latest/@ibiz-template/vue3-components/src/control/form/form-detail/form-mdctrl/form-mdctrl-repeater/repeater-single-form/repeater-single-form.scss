@@ -1,0 +1,18 @@
+$repeater-form: (
+  'header-height': 32px,
+);
+
+
+@include b(repeater-single-form){
+  @include set-component-css-var('repeater-form', $repeater-form);
+
+  width: 100%;
+  @include e(content){
+    width: 100%;
+  }
+
+}
+
+@include b(repeater-single-form-header){
+  height: getCssVar(repeater-form, header-height);
+}

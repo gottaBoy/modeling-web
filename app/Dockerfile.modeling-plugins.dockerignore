@@ -1,0 +1,9 @@
+**
+!dist-modeling-plugins/
+!dist-modeling-plugins/modeling-plugins.html
+!dist-modeling-plugins/server.mjs
+!dist-modeling-plugins/plugin-manifest.json
+!dist-modeling-plugins/assets/
+!dist-modeling-plugins/assets/**
+dist-modeling-plugins/assets/*.map
+!Dockerfile.modeling-plugins

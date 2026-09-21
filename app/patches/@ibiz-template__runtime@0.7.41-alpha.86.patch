@@ -1,0 +1,47 @@
+diff --git a/out/controller/control/grid/grid/auto-grid.util.js b/out/controller/control/grid/grid/auto-grid.util.js
+index 8b24270ea931000a3a782bc4cf3f52178b5e5d75..82d5e43596e369a6b4391b9cd07af8f951538e6d 100644
+--- a/out/controller/control/grid/grid/auto-grid.util.js
++++ b/out/controller/control/grid/grid/auto-grid.util.js
+@@ -140,9 +140,11 @@ async function calcColumnModelBySchema(json, c) {
+                         type = 'number';
+                         break;
+                     default:
+-                        ibiz.log.error(ibiz.i18n.t('runtime.controller.control.grid.unsupported', {
+-                            type: properties[key].type,
+-                        }));
++                        if (!['array', 'object'].includes(properties[key].type)) {
++                            ibiz.log.error(ibiz.i18n.t('runtime.controller.control.grid.unsupported', {
++                                type: properties[key].type,
++                            }));
++                        }
+                 }
+                 if (type) {
+                     columns.push({
+diff --git a/out/controller/control/grid/grid/entity-schema.js b/out/controller/control/grid/grid/entity-schema.js
+index fd7971247e7b32a4915fb27d637a6c42a8c17625..817f5c3ee1b3759b51b39e8dc6b5f25c5d50ad4b 100644
+--- a/out/controller/control/grid/grid/entity-schema.js
++++ b/out/controller/control/grid/grid/entity-schema.js
+@@ -49,6 +49,9 @@ export async function calcColumnModelBySchema(json, c) {
+                     type = 'number';
+                     break;
+                 default:
++                    if (['array', 'object'].includes(properties[key].type)) {
++                        return;
++                    }
+                     ibiz.log.error(ibiz.i18n.t('runtime.controller.control.grid.unsupported', {
+                         type: properties[key].type,
+                     }));
+diff --git a/out/controller/control/search-bar/entity-schema.js b/out/controller/control/search-bar/entity-schema.js
+index 7cc213a3d63a21f10813c0e9da69f85756b3a4fe..fb8c493f93788c36644aa67e063680a4c80cc7bc 100644
+--- a/out/controller/control/search-bar/entity-schema.js
++++ b/out/controller/control/search-bar/entity-schema.js
+@@ -135,6 +135,9 @@ export async function calcFilterModelBySchema(json, appDataEntityId, modelAppId)
+                     type = 'number';
+                     break;
+                 default:
++                    if (['array', 'object'].includes(properties[key].type)) {
++                        return;
++                    }
+                     ibiz.log.error(ibiz.i18n.t('runtime.controller.control.grid.unsupported', {
+                         type: properties[key].type,
+                     }));

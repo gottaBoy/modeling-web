@@ -1,0 +1,8 @@
+@include b(teleport-placeholder) {
+  width: auto;
+  height: auto;
+
+  &> div:not(:last-child) {
+    display: none;
+  }
+}

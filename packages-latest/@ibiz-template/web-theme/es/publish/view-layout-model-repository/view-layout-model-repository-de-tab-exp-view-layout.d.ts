@@ -1,0 +1,217 @@
+declare const _default: {
+    layoutMode: string;
+    layout: {
+        layout: string;
+    };
+    rootPanelItems: ({
+        rawItem: {
+            rawItemParams: {
+                key: string;
+                value: string;
+            }[];
+            predefinedType: string;
+            id: string;
+        };
+        caption: string;
+        itemStyle: string;
+        itemType: string;
+        layoutPos: {
+            shrink: number;
+            layout: string;
+            grow?: undefined;
+        };
+        showCaption: boolean;
+        id: string;
+        actionGroupExtractMode?: undefined;
+        panelItems?: undefined;
+        predefinedType?: undefined;
+        layout?: undefined;
+        dataRegionType?: undefined;
+    } | {
+        actionGroupExtractMode: string;
+        panelItems: ({
+            actionGroupExtractMode: string;
+            panelItems: {
+                caption: string;
+                itemStyle: string;
+                itemType: string;
+                layoutPos: {
+                    shrink: number;
+                    layout: string;
+                };
+                showCaption: boolean;
+                id: string;
+            }[];
+            layout: {
+                layout: string;
+            };
+            dataRegionType: string;
+            caption: string;
+            itemStyle: string;
+            itemType: string;
+            layoutPos: {
+                shrink: number;
+                layout: string;
+                grow?: undefined;
+            };
+            id: string;
+        } | {
+            actionGroupExtractMode: string;
+            panelItems: {
+                caption: string;
+                itemStyle: string;
+                itemType: string;
+                layoutPos: {
+                    shrink: number;
+                    layout: string;
+                };
+                showCaption: boolean;
+                id: string;
+            }[];
+            layout: {
+                layout: string;
+            };
+            dataRegionType: string;
+            caption: string;
+            itemStyle: string;
+            itemType: string;
+            layoutPos: {
+                grow: number;
+                shrink: number;
+                layout: string;
+            };
+            id: string;
+        })[];
+        predefinedType: string;
+        layout: {
+            dir: string;
+            layout: string;
+            valign: string;
+        };
+        dataRegionType: string;
+        caption: string;
+        itemStyle: string;
+        itemType: string;
+        layoutPos: {
+            shrink: number;
+            layout: string;
+            grow?: undefined;
+        };
+        id: string;
+        rawItem?: undefined;
+        showCaption?: undefined;
+    } | {
+        actionGroupExtractMode: string;
+        panelItems: ({
+            actionGroupExtractMode: string;
+            layout: {
+                layout: string;
+            };
+            dataRegionType: string;
+            caption: string;
+            itemStyle: string;
+            itemType: string;
+            layoutPos: {
+                shrink: number;
+                layout: string;
+                grow?: undefined;
+            };
+            id: string;
+            panelItems?: undefined;
+        } | {
+            actionGroupExtractMode: string;
+            panelItems: ({
+                actionGroupExtractMode: string;
+                panelItems: {
+                    rawItem: {
+                        predefinedType: string;
+                        id: string;
+                    };
+                    caption: string;
+                    itemStyle: string;
+                    itemType: string;
+                    layoutPos: {
+                        grow: number;
+                        shrink: number;
+                        layout: string;
+                    };
+                    showCaption: boolean;
+                    id: string;
+                }[];
+                predefinedType: string;
+                layout: {
+                    layout: string;
+                };
+                dataRegionType: string;
+                caption: string;
+                itemStyle: string;
+                itemType: string;
+                layoutPos: {
+                    grow: number;
+                    shrink: number;
+                    layout: string;
+                };
+                id: string;
+            } | {
+                actionGroupExtractMode: string;
+                layout: {
+                    layout: string;
+                };
+                dataRegionType: string;
+                caption: string;
+                itemStyle: string;
+                itemType: string;
+                layoutPos: {
+                    shrink: number;
+                    layout: string;
+                    grow?: undefined;
+                };
+                id: string;
+                panelItems?: undefined;
+                predefinedType?: undefined;
+            })[];
+            layout: {
+                layout: string;
+            };
+            dataRegionType: string;
+            caption: string;
+            itemStyle: string;
+            itemType: string;
+            layoutPos: {
+                grow: number;
+                shrink: number;
+                layout: string;
+            };
+            id: string;
+        })[];
+        layout: {
+            dir: string;
+            layout: string;
+            valign?: undefined;
+        };
+        dataRegionType: string;
+        caption: string;
+        itemStyle: string;
+        itemType: string;
+        layoutPos: {
+            grow: number;
+            shrink: number;
+            layout: string;
+        };
+        id: string;
+        rawItem?: undefined;
+        showCaption?: undefined;
+        predefinedType?: undefined;
+    })[];
+    layoutPanel: boolean;
+    codeName: string;
+    controlType: string;
+    logicName: string;
+    appDataEntityId: string;
+    controlParam: {};
+    modelId: string;
+    modelType: string;
+    name: string;
+    id: string;
+};
+export default _default;

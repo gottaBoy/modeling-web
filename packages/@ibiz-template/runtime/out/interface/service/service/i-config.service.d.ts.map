@@ -1,0 +1,1 @@
+{"version":3,"file":"i-config.service.d.ts","sourceRoot":"","sources":["../../../../src/interface/service/service/i-config.service.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,cAAc;IAC7B;;;;;;;OAOG;IACH,IAAI,CAAC,IAAI,EAAE,KAAK,GAAG,OAAO,CAAC,OAAO,CAAC,CAAC;IAEpC;;;;;;OAMG;IACH,KAAK,IAAI,OAAO,CAAC,OAAO,CAAC,CAAC;IAE1B;;;;;;OAMG;IACH,IAAI,IAAI,OAAO,CAAC,KAAK,CAAC,CAAC;CACxB"}

@@ -1,0 +1,126 @@
+$anchor-bar: (
+  item-height: 32px,
+  selected-icon-width: 4px,
+  hover-color: getCssVar(color, primary, hover),
+  select-color: getCssVar(color, primary, active),
+  select-bar-color: getCssVar(color, primary),
+);
+
+@include b('anchor-bar-list') {
+  @include set-component-css-var(anchor-bar, $anchor-bar);
+
+  position: relative;
+
+  @include e('item') {
+    height: getCssVar(anchor-bar, item-height);
+    padding-left: getCssVar(spacing, base);
+    overflow: hidden;
+    font-size: getCssVar(font-size, header-6);
+    line-height: getCssVar(anchor-bar, item-height);
+    color: getCssVar(color, text, 3);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+
+    @include m('title') {
+      display: block;
+      width: 100%;
+      overflow: hidden;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    @include when('selected') {
+      position: relative;
+      font-size: getCssVar(font-size, header-5);
+      font-weight: getCssVar(font-weight, bold);
+      color: getCssVar(anchor-bar, select-color);
+
+      &::after {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: getCssVar(anchor-bar, selected-icon-width);
+        height: 100%;
+        content: '';
+        background-color: getCssVar(anchor-bar, select-bar-color);
+        border-radius: calc(getCssVar(anchor-bar, selected-icon-width) / 2);
+      }
+    }
+
+    &:hover {
+      color: getCssVar(anchor-bar, hover-color);
+    }
+  }
+
+  &::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: getCssVar(anchor-bar, selected-icon-width);
+    height: 100%;
+    content: '';
+    background-color: getCssVar(color, fill, 0);
+  }
+
+  @include when('usermode') {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+
+    @include e('item') {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-size: getCssVar(font-size, header-6);
+      color: getCssVar(color, text, 3);
+      cursor: pointer;
+      @include m('title') {
+        display: block;
+        width: 100%;
+        overflow: hidden;
+        text-align: center;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      @include when('selected') {
+        position: relative;
+        font-size: getCssVar(font-size, header-5);
+        font-weight: getCssVar(font-weight, bold);
+        color: getCssVar(color, primary, active);
+
+        &::after {
+          position: absolute;
+          top: unset;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: getCssVar(anchor-bar, selected-icon-width);
+          content: '';
+          background-color: getCssVar(color, primary);
+          border-radius: calc(getCssVar(anchor-bar, selected-icon-width) / 2);
+        }
+      }
+
+      &:hover {
+        color: getCssVar(color, primary, hover);
+      }
+    }
+
+    &::before {
+      position: absolute;
+      top: unset;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: getCssVar(anchor-bar, selected-icon-width);
+      content: '';
+      background-color: getCssVar(color, fill, 0);
+    }
+  }
+}

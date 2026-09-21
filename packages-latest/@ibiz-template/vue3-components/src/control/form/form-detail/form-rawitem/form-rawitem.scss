@@ -1,0 +1,38 @@
+// 表单直接内容样式
+$form-rawitem: (
+  'line-height': getCssVar(height-control, default),  // 直接内容行高
+  'padding': getCssVar(spacing, tight) getCssVar(spacing, extra-tight) getCssVar(spacing, tight) getCssVar(spacing, extra-tight), // 直接内容项内边距
+  'font-size': getCssVar(font-size, regular),         // 直接内容项字体大小
+);
+
+@include b(form-raw-item) {
+  @include set-component-css-var('form-rawitem', $form-rawitem);
+
+  width: 100%;
+  height: 100%;
+  @include when('form-text') {
+    padding: getCssVar('form-rawitem', 'padding');
+    font-size: getCssVar('form-rawitem', 'font-size');
+    line-height: getCssVar('form-rawitem', 'line-height');
+  }
+}
+
+// 左右padding 为11px固定不变
+@include b(form-raw-item) {
+  @include when(show-default){
+    padding: getCssVar(spacing,none) 11px;
+  }
+}
+
+@include b(form-raw-item-preview-content) {
+  display: flex;
+  align-items: center;
+
+  @include e(image) {
+    display: flex;
+  }
+
+  @include e(video) {
+    display: flex;
+  }
+}

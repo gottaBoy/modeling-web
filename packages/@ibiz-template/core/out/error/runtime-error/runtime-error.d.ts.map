@@ -1,0 +1,1 @@
+{"version":3,"file":"runtime-error.d.ts","sourceRoot":"","sources":["../../../src/error/runtime-error/runtime-error.ts"],"names":[],"mappings":"AAAA;;;;;;;;GAQG;AACH,qBAAa,YAAa,SAAQ,KAAK;IAGlB,OAAO,EAAE,MAAM;IAFlC,IAAI,EAAE,MAAM,CAAmB;gBAEZ,OAAO,EAAE,MAAM;CAGnC"}

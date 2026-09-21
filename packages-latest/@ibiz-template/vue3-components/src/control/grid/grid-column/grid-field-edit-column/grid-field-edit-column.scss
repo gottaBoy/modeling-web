@@ -1,0 +1,14 @@
+@include b(grid-field-edit-column) {
+  @include m(ellipsis){
+    // 内部所有的span都呈现成省略号
+    @include e(editor) {
+      @include utils-ellipsis;
+    }
+  }
+
+  @include m(wrap){
+    @include e(editor) {
+      @include overflow-wrap;
+    }
+  }
+}

@@ -1,0 +1,1 @@
+export { m as default } from '../node_modules/.pnpm/core-js@3.49.0/node_modules/core-js/internals/math-trunc.mjs';

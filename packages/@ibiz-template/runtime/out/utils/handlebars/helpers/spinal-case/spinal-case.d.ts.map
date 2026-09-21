@@ -1,0 +1,1 @@
+{"version":3,"file":"spinal-case.d.ts","sourceRoot":"","sources":["../../../../../src/utils/handlebars/helpers/spinal-case/spinal-case.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,UAAU,EAAE,MAAM,gBAAgB,CAAC;AAE5C;;;;;;;;;GASG;AACH,qBAAa,gBAAiB,SAAQ,UAAU;gBAClC,GAAG,EAAE,KAAK;IAItB,SAAS,CAAC,KAAK,EAAE,MAAM,GAAG,MAAM;CAMjC"}

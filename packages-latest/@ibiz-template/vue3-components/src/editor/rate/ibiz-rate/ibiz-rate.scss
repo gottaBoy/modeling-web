@@ -1,0 +1,16 @@
+// 评分器根元素
+$rate: (
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+@include b(rate) {
+  @include set-component-css-var('rate', $rate);
+}
+@include b(form-item){
+
+  @include b(rate) {
+    @include when(show-default){
+      padding: getCssVar(rate, hover-edit-padding);
+    }
+  }
+}

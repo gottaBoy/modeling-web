@@ -1,0 +1,162 @@
+// 搜索栏部件样式
+$control-searchbar: (
+  font-size: getCssVar(font-size, regular),  // 搜索栏基础字体大小
+);
+
+// 搜索栏分组项样式
+$control-searchbar-group-item: (
+  font-size: getCssVar(control-searchbar, font-size),  // 分组项字体大小
+  padding: getCssVar(spacing, tight),                  // 分组项内边距
+  gap: getCssVar(spacing, tight),                      // 分组项内元素间距
+  icon-gap: getCssVar(spacing, extra-tight),           // 分组项图标与文本间距
+  active-color: getCssVar(color, primary),             // 分组项激活文本色
+);
+
+// 搜索栏项计数器样式
+$control-searchbar-counter: (
+  gap: getCssVar(spacing, tight),  // 计数器徽标与文本间隔
+);
+
+// 搜索栏更多按钮样式
+$control-searchbar-more: (
+  font-size: getCssVar(control-searchbar, font-size),  // 更多按钮字体大小
+  padding: getCssVar(spacing, tight),                  // 更多按钮内边距
+  gap: getCssVar(spacing, extra-tight),                // 更多按钮内元素间距
+  active-color: getCssVar(color, primary),             // 更多按钮激活文本色
+);
+
+// 搜索栏更多按钮弹出层样式
+$control-searchbar-more-dropdown: (
+  width: 180px,                                          // 下拉选项宽度
+  icon-gap: getCssVar(spacing, tight),                   // 下拉选项图标与文本间隔
+);
+
+// 更多按钮分组管理面板样式
+$control-searchbar-more-manage: (
+  border-color: getCssVar(color, border),                                         // 边框颜色
+  bg-color:getCssVar(color, tertiary, light, hover),                              // 表格行背景色
+  hover-bg-color: getCssVar(color, primary, light, default),                      // 表格行悬浮背景色
+  cell-padding: getCssVar(spacing, base-tight) getCssVar(spacing, base),          // 表格单元格内边距
+  gap: getCssVar(spacing, base),                                                  // 分头部与内容区间隔
+  icon-gap: getCssVar(spacing, extra-tight),                                      // 图标与文本的间隔
+  button-gap: getCssVar(spacing, loose),                                          // 按钮与按钮直接的间隔
+);
+
+// 搜索栏保存按钮样式
+$control-searchbar-save: (
+  gap: getCssVar(spacing, base-tight),  // 保存按钮与左侧分组间隔
+);
+
+// 搜索栏输入框样式
+$control-searchbar-search: (
+  font-size: getCssVar(control-searchbar, font-size),  // 快速搜索框字体大小
+  width: 220px,                                        // 快速搜索框宽度
+  gap: getCssVar(spacing, base-tight),                 // 快速搜索框与左侧项间隔
+  bg-color: getCssVar(color, bg, 1),                   // 快速搜索框背景色
+  border-radius: getCssVar(border, radius, small),     // 快速搜索框圆角
+);
+
+// 搜索栏过滤按钮样式
+$control-searchbar-filter: (
+  margin: 0 getCssVar(spacing, extra-tight) 0 getCssVar(spacing, base-tight),  // 过滤按钮外边距
+);
+
+@include b(control-searchbar) {
+  @include set-component-css-var('control-searchbar', $control-searchbar);
+  @include set-component-css-var('control-searchbar-group-item', $control-searchbar-group-item);
+  @include set-component-css-var('control-searchbar-counter', $control-searchbar-counter);
+  @include set-component-css-var('control-searchbar-more', $control-searchbar-more);
+  @include set-component-css-var('control-searchbar-save', $control-searchbar-save);
+  @include set-component-css-var('control-searchbar-search', $control-searchbar-search);
+  @include set-component-css-var('control-searchbar-filter', $control-searchbar-filter);
+
+  @include flex(row, flex-start, center);
+
+  height: 100%;
+
+  @include e(counter) {
+    margin-left: getCssVar('control-searchbar-counter', 'gap');
+  }
+
+  @include b(control-searchbar-quick-search) {
+    width: getCssVar('control-searchbar-search', 'width');
+    margin-left: getCssVar('control-searchbar-search', 'gap');
+    font-size: getCssVar(control-searchbar-search, font-size);
+    background: getCssVar('control-searchbar-search', 'bg-color');
+    border-radius: getCssVar('control-searchbar-search', 'border-radius');
+
+    // 前缀不要padding
+    &.el-input-group__append, .el-input-group__prepend {
+      padding: getCssVar('spacing','none');
+    }
+    
+    @include when(advanced-quick-search) {
+      .el-input-group__prepend+.el-input__wrapper {
+        border-radius: 0 getCssVar('control-searchbar-search', 'border-radius') getCssVar('control-searchbar-search', 'border-radius') 0;
+      }
+    }
+  }
+
+  @include b(control-searchbar-quick-group) {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+
+    @include b(control-searchbar-quick-group-item){
+      position: relative;
+      display: flex;
+      align-items: center;
+      height: auto;
+      padding: getCssVar('control-searchbar', group-item, 'padding');
+      font-size: getCssVar('control-searchbar', group-item, font-size);
+      cursor: pointer;
+
+      @include e('icon') {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: getCssVar('control-searchbar', group-item, icon-gap);
+      }
+
+      @include when(selected){
+        &::after{
+          position: absolute;
+          bottom: 2px;
+          left: getCssVar('control-searchbar', group-item, 'padding');
+          width: calc(100% - 2 * getCssVar('control-searchbar', group-item, 'padding'));
+          height: 2px;
+          content: "";
+          background-color: getCssVar('control-searchbar', group-item, active-color);
+        }
+      }
+
+      &:hover{
+        color: getCssVar('control-searchbar', group-item, active-color);
+      }
+    }
+  }
+
+  .el-input__icon {
+    cursor: pointer;
+  }
+}
+
+@include b(control-searchbar-filter){
+  margin: getCssVar('control-searchbar-filter', 'margin');
+}
+
+@include b(control-searchbar-save){
+  margin-left: getCssVar(control-searchbar-save, gap);
+}
+
+// 更多下拉框
+@include b(search-groups-dropdown){
+  @include set-component-css-var('control-searchbar-more-dropdown', $control-searchbar-more-dropdown);
+}
+
+// 管理分组
+@include b(search-groups-manage-dialog){
+  @include set-component-css-var('control-searchbar-more-manage', $control-searchbar-more-manage);
+}

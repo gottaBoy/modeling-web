@@ -1,0 +1,48 @@
+// 表单按钮样式
+$form-button: (
+  icon-margin: getCssVar(spacing, extra-tight),    // 表单按钮图标外边距
+  icon-max-width: getCssVar(width-icon, medium),   // 表单按钮图标最大宽度
+  icon-max-height: getCssVar(width-icon, medium),  // 表单按钮图标最大高度
+  margin: getCssVar(spacing, tight),              // 表单按钮外边距
+);
+
+@include b(form-button) {
+  @include set-component-css-var(form-button, $form-button);
+
+  width: calc(100% - getCssVar(form-button, margin) * 2);
+  height: 100%;
+  margin: getCssVar(form-button, margin);
+  overflow: hidden;
+
+  .el-button{
+    width: 100%;
+    height: 100%;
+
+    @include b(form-button-content){
+      @include flex(row, flex-start, center);
+
+      img, i{
+        display: inline-block;
+        max-width: getCssVar(form-button, icon-max-width);
+        max-height: getCssVar(form-button, icon-max-height);
+      }
+
+      // 同时存在图标和文本时，给文本加左margin
+      .#{bem(icon)} + .#{bem(form-button-content, '', caption)}{
+        margin-left: getCssVar(form-button, icon-margin);
+      }
+    }    
+  }
+
+  @include when(loading){
+    .el-button{
+      .#{bem(icon)}{
+        display: none;
+      }
+    }
+  }  
+
+  @include when(readonly) {
+    display: none;
+  }
+}

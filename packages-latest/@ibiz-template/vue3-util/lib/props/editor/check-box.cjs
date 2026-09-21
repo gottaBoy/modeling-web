@@ -1,0 +1,20 @@
+'use strict';
+
+var common = require('./common.cjs');
+
+"use strict";
+function getCheckboxProps() {
+  return {
+    ...common.getEditorProps(),
+    /**
+     * @description 编辑器值
+     */
+    value: [String, Number]
+  };
+}
+function getGridCheckboxProps() {
+  return { ...getCheckboxProps(), ...common.getGridEditorCommonProps() };
+}
+
+exports.getCheckboxProps = getCheckboxProps;
+exports.getGridCheckboxProps = getGridCheckboxProps;

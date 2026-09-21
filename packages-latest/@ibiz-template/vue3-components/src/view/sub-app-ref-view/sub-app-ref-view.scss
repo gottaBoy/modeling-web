@@ -1,0 +1,27 @@
+@include b(sub-app-ref-view){
+  width: auto;
+  height: 100%;
+  color: getCssVar(color, text, 0);
+  background-color: getCssVar(color, bg, 1);
+  @include flex(column, center, center);
+
+  @include b(sub-app-ref-view-result){
+    padding: 0;
+    margin-bottom: getCssVar(spacing, base-loose);
+  }
+
+  @include b(sub-app-ref-view-caption){
+    margin-bottom: getCssVar(spacing, extra-loose);
+    font-size: getCssVar(font-size, header-2);
+    font-weight: getCssVar(font-weight, bold);
+    color: getCssVar(color, text, 0);    
+  }
+  @include b(sub-app-ref-view-sub-caption){
+    margin-bottom: getCssVar(spacing, super-loose);
+    font-size: getCssVar(font-size, header-5);
+    color: getCssVar(color, text, 2);     
+  }
+  @include b(sub-app-ref-view-btn){
+    padding: getCssVar(spacing,base-tight) getCssVar(spacing, super-loose);
+  }
+}

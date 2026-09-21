@@ -1,0 +1,1 @@
+{"version":3,"file":"i-api-panel.state.d.ts","sourceRoot":"","sources":["../../../../../src/interface/api/state/control/i-api-panel.state.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,QAAQ,EAAE,MAAM,qBAAqB,CAAC;AAC/C,OAAO,EAAE,gBAAgB,EAAE,MAAM,uBAAuB,CAAC;AACzD;;;;;;GAMG;AACH,MAAM,WAAW,cAAe,SAAQ,gBAAgB;IACtD;;;;;OAKG;IACH,IAAI,EAAE,QAAQ,CAAC;CAChB"}

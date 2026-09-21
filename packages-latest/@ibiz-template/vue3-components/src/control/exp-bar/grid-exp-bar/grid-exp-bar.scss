@@ -1,0 +1,16 @@
+// 表格导航栏根元素
+$control-gridexpbar: (
+  min-width: 300px,                                                                 // 导航栏最小宽
+  bg-color: transparent,                                                            // 导航栏背景色
+  padding: getCssVar('spacing', 'none'),                                            // 导航栏内边距
+);
+
+@include b('control-gridexpbar') {
+  @include set-component-css-var('control-gridexpbar', $control-gridexpbar);
+
+  min-width: getCssVar('control-gridexpbar', 'min-width');
+  height: 100%;
+  padding: getCssVar('control-gridexpbar', 'padding');
+  overflow-y: auto;
+  background-color: getCssVar('control-gridexpbar', 'bg-color');
+}

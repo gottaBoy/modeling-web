@@ -1,0 +1,141 @@
+// 数据选择（下拉）根元素
+$picker-dropdown: (
+  font-size: getCssVar(form-item, font-size),                               // 字体大小
+  text-color: getCssVar(form-item, text-color),                             // 字体颜色
+  placeholder-color: getCssVar(form-item, placeholder-color),               // 占位文本色
+  disabled-color: getCssVar('form-item', 'disabled-color'),                 // 禁用色
+  disabled-border-color: getCssVar('form-item', 'disabled-border-color'),   // 禁用边框色
+  border-color: getCssVar('form-item', 'border-color'),                     // 边框色
+  line-height: getCssVar(form-item, line-height),                           // 行高
+  empty-bg-color: getCssVar(color, bg, 3),                                  // 空值背景色
+  transfer-zindex: 1000,                                                    // popper层级
+  readonly-color: getCssVar(form-item, readonly-color),                     // 只读字体色
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+// 数据选择（下拉）行为项
+$picker-dropdown-action: (
+  text-color: getCssVar(color, link),                                       // 字体颜色
+);
+
+@include b('picker-dropdown') {
+  @include set-component-css-var('picker-dropdown', $picker-dropdown);
+  @include set-component-css-var('picker-dropdown-action', $picker-dropdown-action);
+
+  .el-select {
+    width: 100%;
+  }
+
+  .el-input .el-input__inner {
+    font-size: getCssVar('picker-dropdown', 'font-size');
+    color: getCssVar('picker-dropdown', 'text-color');
+    border-color: getCssVar('picker-dropdown', 'border-color');
+  }
+
+  .el-input .el-input__inner::placeholder {
+    color: getCssVar('picker-dropdown', 'placeholder-color');
+  }
+
+  .el-input.is-disabled .el-input__inner {
+    color: getCssVar('picker-dropdown', 'disabled-color');
+    border-color: getCssVar('picker-dropdown', 'disabled-border-color');
+  }
+
+  @include m(readonly) {
+    font-size: getCssVar(picker-dropdown, font-size);
+    line-height: getCssVar(picker-dropdown, line-height);
+    color: getCssVar(picker-dropdown, readonly-color);
+  }
+
+  @include e(action-item) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: getCssVar(picker-dropdown-action, text-color);
+    @include m(icon) {
+      margin-right: getCssVar(spacing, extra-tight);
+    }
+  }
+
+  @include e(empty) {
+    padding: 0;
+    #{getCssVarName(no-data, min-height)}: 100px;
+
+    --el-empty-image-width: 100px;
+  }
+
+  @include e(transfer) {
+    @include set-component-css-var('picker-dropdown', $picker-dropdown);
+    @include set-component-css-var('picker-dropdown-action', $picker-dropdown-action);
+
+    z-index: getCssVar(picker-dropdown, transfer-zindex)!important;
+    @include when(empty) {
+      .el-select-dropdown__item {
+        height: auto;
+        padding: 0;
+      }
+      .#{bem(no-data)} {
+        background-color: getCssVar(picker-dropdown, empty-bg-color);
+      }
+    }
+  }
+
+  @include e(hidden-input){
+    position: absolute;
+    z-index: -9999; 
+    width: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+    border: none;
+    opacity: 0;
+  }
+}
+
+// 表单下的编辑器默认显示，悬浮上去显示编辑器
+@include b(picker-dropdown-form-default-content){
+  display: none;
+}
+
+@include b(form-item){
+
+  @include b(picker-dropdown) {
+    @include when(show-default){
+      // 悬浮显示编辑器
+      &:hover{
+        @include b(picker-dropdown-form-default-content){
+          display: none;
+        }     
+        @include b(picker-dropdown-select){
+          display: block;    
+        }       
+      }    
+      
+      // 不悬浮时显示信息态
+      @include b(picker-dropdown-form-default-content){      
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: getCssVar(picker-dropdown, hover-edit-padding);        
+        font-family: Arial, sans-serif;      
+        font-size: getCssVar(picker-dropdown, font-size);
+        line-height: getCssVar(picker-dropdown, line-height);
+        color: getCssVar(picker-dropdown, text-color);            
+      }
+      @include b(picker-dropdown-select){
+        display: none;  
+      }
+      
+      // 输入态
+      @include when(editable){
+        @include b(picker-dropdown-form-default-content){
+          display: none;
+        }     
+        @include b(picker-dropdown-select){
+          display: block;    
+        }  
+      }
+    }
+
+  }
+}

@@ -1,0 +1,111 @@
+@include b(dashboard-design){
+  width: 100%;
+  height: 100%;
+  @include b(dashboard-design-header){
+    height: 48px;
+    padding: getCssVar(spacing, tight);
+    @include flex(row,space-between, center);
+
+    @include b(dashboard-design-header-utils){
+      @include flex(row,flex-start, center);
+
+      @include e(col-num){
+        margin-right: getCssVar(spacing, tight);
+      }
+      @include e(row-h){
+        margin-right: getCssVar(spacing, tight);
+      }
+    }
+  }
+
+  @include b(dashboard-design-content){
+    width: 100%;
+    height: calc(100% - 48px);
+    @include flex(row,flex-start, flex-start);
+
+    @include b(dashboard-design-tree){
+      min-width: 300px;
+      height: 100%;
+      overflow-y: scroll;
+      @include b(dashboard-design-tree-filter){
+        width: 100%;
+        height: 32px;
+        padding: getCssVar(spacing, none) getCssVar(spacing, tight);
+      }
+      
+      @include b(dashboard-design-tree-content){
+        height: calc(100% - 32px);
+        overflow: auto;
+        
+        >.el-menu{
+          height: 100%;
+          border: none;
+
+          .el-menu-item{
+            @include flex(flex, space-between, center);
+
+            >span{
+              max-width: 200px;
+              @include utils-ellipsis;
+            }
+
+            ion-icon{
+              font-size: calc(getCssVar('width-icon','medium') - 2px);
+              cursor: pointer;
+
+              &:hover{
+                color:getCssVar(color, primary);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // 该盒子负责滚动
+    @include b(dashboard-design-scroll-box){
+      flex-grow: 1;
+      height: 100%;
+      overflow-y: scroll;
+      background: getCssVar(color, fill,1);
+    }
+
+    @include b(dashboard-design-panel){
+      position: relative;
+
+      // 栅格遮罩
+      @include b(dashboard-design-grid-layout-mask){
+        position: absolute;
+        inset: 0;
+        height: 100%; 
+        min-height: 1248px;       
+        background: linear-gradient(to bottom, getCssVar(color,primary) 10px, transparent 10px), linear-gradient(to right, getCssVar(color,primary) 10px, transparent 10px);
+      }
+      @include b(dashboard-design-grid-layout){
+        @include b(dashboard-design-grid-layout-item){
+          width: 100%;
+          height: 100%;
+
+          .el-card__body{
+            @include flex(column);
+            height: 100%;
+            position: relative;
+            background-color: getCssVar(color, bg, 1),
+          }
+          @include b(dashboard-design-grid-layout-item-icon){
+            cursor: pointer;
+            position: absolute;
+            right: getCssVar(spacing, tight);
+            top: getCssVar(spacing, tight);
+          }
+          @include b(dashboard-design-grid-layout-item-content){
+            @include flex(row,center, center);
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+          }
+        }
+      }
+    }
+  }
+}

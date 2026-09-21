@@ -1,0 +1,43 @@
+// 列表框根元素
+$list-box: (
+  text-color: getCssVar(form-item, text-color),                             // 字体颜色
+  font-size: getCssVar(form-item, font-size),                               // 字体大小
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+@include b(list-box) {
+  height: 100%;
+  overflow: auto;
+  @include set-component-css-var(list-box, $list-box);
+  @include b(list-box-radio) {
+    @include flex(column, flex-start, flex-start);
+
+    .el-radio {
+      .el-radio__label {
+        font-size: getCssVar('list-box', 'font-size');
+        color: getCssVar('list-box', 'text-color');
+      }
+    }
+  }
+
+  @include b(list-box-checkbox) {
+    @include flex(column, flex-start, flex-start);
+
+    .el-checkbox {
+      .el-checkbox__label {
+        font-size: getCssVar('list-box', 'font-size');
+        color: getCssVar('list-box', 'text-color');
+      }
+    }
+  }
+}
+
+
+@include b(form-item){
+
+  @include b(list-box) {
+    @include when(show-default){
+      padding: getCssVar(list-box, hover-edit-padding);
+    }
+  }
+}

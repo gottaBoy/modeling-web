@@ -1,0 +1,29 @@
+// 直接内容接根元素
+$raw: (
+  text-color: getCssVar(form-item, text-color),                             // 字体颜色
+  line-height: getCssVar(form-item, line-height),                           // 行高
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+@include b(raw){
+  @include set-component-css-var('raw', $raw);
+
+  line-height: getCssVar(raw, line-height);
+  color:getCssVar(raw, text-color);
+
+  @include when(overflow){
+    .#{bem(rawitem)} {
+      overflow-y: auto;
+    }
+  }
+}
+
+
+@include b(form-item){
+
+  @include b(raw) {
+    @include when(show-default){
+      padding: getCssVar(raw, hover-edit-padding);
+    }
+  }
+}

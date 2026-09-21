@@ -1,0 +1,79 @@
+// 导航面板根元素
+$control-tabexppanel: (
+  bg-color: transparent,                                                            // 导航面板背景色
+  padding: getCssVar('spacing', 'none'),                                            // 导航面板内边距
+);
+
+// 导航面板内容
+$control-tabexppanel-content: (
+  gap: getCssVar('spacing', 'base'),                                                // 内容项间距
+);
+
+// 导航面板项
+$control-tabexppanel-item: (
+  font-size: getCssVar('font-size', 'regular'),                                     // 项字体大小
+  text-color: getCssVar('color', 'text', '2'),                                      // 项字体色
+  hover-color: getCssVar('color', 'text', '0'),                                     // 项悬浮色
+  active-color: getCssVar('color', 'primary'),                                      // 项激活色
+  padding: getCssVar('spacing', 'base'),                                            // 项内边距
+  gap: getCssVar('spacing', 'extra' ,'tight')                                                // 项内容间隔
+);
+
+@include b('control-tabexppanel') {
+  @include set-component-css-var('control-tabexppanel', $control-tabexppanel);
+  @include set-component-css-var('control-tabexppanel-item', $control-tabexppanel-item);
+  @include set-component-css-var('control-tabexppanel-content', $control-tabexppanel-content);
+
+  padding: getCssVar('control-tabexppanel', 'padding');
+  background-color: getCssVar('control-tabexppanel', 'bg-color');
+
+  // 标签栏
+  .el-tabs {
+    .el-tabs__header {
+      margin: getCssVar('spacing','none');
+
+      .el-tabs__nav-wrap {
+        margin: getCssVar('spacing','none');
+
+        .el-tabs__nav {
+          .el-tabs__active-bar {
+            background-color: getCssVar('control-tabexppanel-item', 'active-color');
+          }
+
+          .el-tabs__item {
+            font-size: getCssVar('control-tabexppanel-item', 'font-size');
+            color: getCssVar('control-tabexppanel-item', color);
+
+            &:hover {
+              color: getCssVar('control-tabexppanel-item', 'hover-color');
+            }
+
+            &.is-active {
+              color: getCssVar('control-tabexppanel-item', 'active-color');
+            }
+
+            &.is-top {
+              &:last-child {
+                padding-right: getCssVar('spacing','none');
+              }
+            }
+          }
+        }
+      }
+    }
+
+    &.el-tabs--top, &.el-tabs--bottom {
+      padding-left: getCssVar('control-tabexppanel-content', 'gap');
+    }
+  }
+
+  .el-tabs__item {
+    padding: getCssVar('control-tabexppanel-item', 'padding');
+  }
+
+  @include e('item') {
+    display: flex;
+    gap: getCssVar('control-tabexppanel-item', 'gap');
+    align-items: center;
+  }
+}

@@ -1,0 +1,218 @@
+// 数据选择根元素
+$picker: (
+  font-size: getCssVar(form-item, font-size),                               // 字体大小
+  text-color: getCssVar(form-item, text-color),                             // 字体颜色
+  placeholder-color: getCssVar(form-item, placeholder-color),               // 占位文本色
+  border-color: getCssVar('form-item', 'border-color'),                     // 边框色
+  line-height: getCssVar(form-item, line-height),                           // 行高
+  empty-bg-color: getCssVar(color, bg, 3),                                  // 空值背景色
+  disabled-color: getCssVar('form-item', 'disabled-color'),                 // 禁用色
+  disabled-border-color: getCssVar('form-item', 'disabled-border-color'),   // 禁用边框色
+  hover-bg-color: getCssVar('form-item', 'hover-bg-color'),                 // 悬浮背景色
+  readonly-color: getCssVar(form-item, readonly-color),                     // 只读字体色
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+// 数据选择行为项元素
+$picker-action: (
+  text-color: getCssVar(color, link),                                       // 字体颜色      
+);
+
+// 数据选择加载更多元素
+$picker-loadmore: (
+  text-color: getCssVar(color, link),                                       // 字体颜色
+);
+
+@include b('picker') {
+  @include set-component-css-var('picker', $picker);
+  @include set-component-css-var('picker-action', $picker-action);
+  @include set-component-css-var('picker-loadmore', $picker-loadmore);
+
+  .el-input .el-input__inner {
+    font-size: getCssVar('picker', 'font-size');
+    color: getCssVar('picker', 'text-color');
+    border-color: getCssVar('picker', 'border-color');
+  }
+
+  .el-input .el-input__inner::placeholder {
+    color: getCssVar('picker', 'placeholder-color');
+  }
+
+  .el-input.is-disabled .el-input__inner {
+    color: getCssVar('picker', 'disabled-color');
+    border-color: getCssVar('picker', 'disabled-border-color');
+  }
+
+  ion-icon {
+    font-size: getCssVar(picker, font-size);
+    cursor: pointer;
+  }
+
+  @include b(picker-input) {
+    width: 100%;
+
+    .el-input__wrapper{
+      width: 100%;
+    }
+  }
+
+  @include e('buns-position') {
+    position: relative;
+    display: inline-block;
+  }
+
+  @include e('btns') {
+    position: absolute;
+    right: 0;
+    @include flex;
+
+    height: getCssVar(picker, line-height);
+
+    span {
+      @include flex($direction: column, $horizontal: center);
+    }
+  }
+
+  @include e('autocomplete') {
+    @include flex;
+
+    .el-autocomplete {
+      width: 100%;
+    }
+  }
+
+  @include e('transfer-item') {
+    padding: getCssVar('spacing', 'extra-tight');
+    cursor: pointer;
+
+    &:hover {
+      background-color: getCssVar('picker', 'hover-bg-color');
+    }
+  }
+
+  @include m(disabled) {
+    ion-icon {
+      pointer-events: none;
+    }
+  }
+
+  @include m(readonly) {
+    font-size: getCssVar(picker, font-size);
+    line-height: getCssVar(picker line-height);
+    color: getCssVar('picker', 'readonly-color');
+  }
+}
+
+@include b('picker') {
+  @include e('transfer-item') {
+    @include when(ellipsis) {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  // 界面行为项
+  @include e(action-item) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: getCssVar(picker-action, text-color);
+    @include m(icon) {
+      margin-right: getCssVar(spacing, extra-tight);
+    }
+    @include when(disabled) {
+      color: getCssVar(picker, disabled-color);
+      cursor: not-allowed;
+    }
+  }
+
+  @include e(empty) {
+    padding: 0;
+    #{getCssVarName(no-data, min-height)}: 100px;
+
+    --el-empty-image-width: 100px;
+  }
+
+  @include e(transfer) {
+    @include set-component-css-var('picker', $picker);
+    @include set-component-css-var('picker-action', $picker-action);
+    @include set-component-css-var('picker-loadmore', $picker-loadmore);
+    @include when(empty) {
+      .el-autocomplete-suggestion li {
+        padding: 0;
+      }
+      .#{bem(no-data)} {
+        background-color: getCssVar(picker, empty-bg-color);
+      }
+    }
+    li:has(.#{bem(picker__loadmore)}) {
+      padding: 0;
+    }
+  }
+
+  @include e(loadmore) { 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: getCssVar(picker-loadmore, text-color);
+  }
+
+  @include e(suffix) {
+    cursor: pointer;
+    visibility: inherit;
+    transition: var(--el-transition-duration);
+    transform: rotate(0);
+    @include when(reverse) {
+      transform: rotate(-180deg);
+    }
+  }
+}
+
+// 表单下的编辑器默认显示，悬浮上去显示编辑器
+@include b(picker-form-default-content){
+  display: none;
+}
+
+@include b(form-item){
+
+  @include b(picker) {
+    @include when(show-default){
+      // 悬浮显示编辑器
+      &:hover{
+        @include b(picker-form-default-content){
+          display: none;
+        }     
+        @include b(picker-input){
+          display: block;    
+        }       
+      }    
+      
+      // 不悬浮时显示信息态
+      @include b(picker-form-default-content){      
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: getCssVar(picker, hover-edit-padding);        
+        font-family: Arial, sans-serif;      
+        font-size: getCssVar(picker, font-size);
+        line-height: getCssVar(picker, line-height);
+        color: getCssVar(picker, text-color);            
+      }
+      @include b(picker-input){
+        display: none;  
+      }
+      
+      // 输入态
+      @include when(editable){
+        @include b(picker-form-default-content){
+          display: none;
+        }     
+        @include b(picker-input){
+          display: block;    
+        }  
+      }
+    }
+
+  }
+}

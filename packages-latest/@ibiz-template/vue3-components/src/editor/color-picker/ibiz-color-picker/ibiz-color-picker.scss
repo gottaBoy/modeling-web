@@ -1,0 +1,55 @@
+// 颜色选择器根元素
+$color-picker: (
+  text-color: getCssVar(form-item, text-color),                             // 字体颜色
+  font-size: getCssVar(form-item, font-size),                               // 字体大小
+  border-color: getCssVar(editor, default, border-color),                   // 边框色
+  hover-border-color: getCssVar(editor, hover, border-color),               // 悬浮边框色
+  border-radius: getCssVar(border, radius, small),                          // 倒角
+  line-height: getCssVar(form-item, line-height),                           // 行高
+  readonly-color: getCssVar(form-item, readonly-color),                     // 只读字体色
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+@include b(color-picker) {
+  @include set-component-css-var('color-picker', $color-picker);
+
+  color: getCssVar(color-picker, text-color);
+
+  // 颜色选择框样式
+  .el-color-picker__trigger {
+    border: none;
+  }
+
+  @include b(color-picker-content){
+    display: inline-block;
+    padding: getCssVar('spacing', 'extra-tight') getCssVar(spacing, tight);
+    font-size: getCssVar(color-picker, font-size);
+    border: 1px solid getCssVar(color-picker, border-color);
+    border-radius: getCssVar(color-picker, border-radius);    
+
+    &:hover{
+      border: 1px solid getCssVar(color-picker, hover-border-color);
+    }
+  }
+
+  @include b(color-picker-text){
+    margin-left: getCssVar(spacing, super-tight);
+  }
+
+  // 只读模式显示
+  @include m(readonly) {
+    font-size: getCssVar(color-picker, font-size);
+    line-height: getCssVar(color-picker, line-height);
+    color: getCssVar(color-picker, readonly-color);
+
+    @include overflow-wrap;
+  }
+}
+
+@include b(form-item){
+
+  @include b(color-picker) {
+    @include when(show-default){
+      padding: getCssVar(color-picker, hover-edit-padding);
+    }
+  }
+}

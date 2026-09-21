@@ -1,0 +1,134 @@
+// 门户部件样式
+$portlet: (
+  'bg-color': transparent,                                    // 门户部件背景色
+  'padding': getCssVar(spacing, tight),                       // 门户部件内边距
+  hight-light-color: getCssVar(color, warning, light, active), // 门户部件高亮色(过滤器显示生效部件)
+);
+
+// 门户部件头部样式
+$portlet-header: (
+  'height': 50px,                                                          // 头部高度
+  'padding': calc(getCssVar(spacing, base-tight) + 2px) getCssVar(spacing, base), // 头部内边距
+  'margin': getCssVar(spacing, none),                                      // 头部外边距
+  'bg-color': getCssVar(color, bg, 1),                                     // 头部背景色
+);
+
+// 门户部件标题区域样式
+$portlet-caption: (
+  'max-width': 300px,                                          // 标题最大宽度
+  'font-weight': getCssVar('font-weight', 'regular'),          // 标题字体粗细
+  'font-size': getCssVar('font-size', 'header-5'),             // 标题字体大小
+  'color': getCssVar('text-color', 'primary'),                 // 标题文本色
+  link-color: getCssVar(color, link),                          // 标题链接色（存在链接时生效）
+  icon-width: 4px,                                             // 标题左侧装饰图标宽度
+  icon-height: getCssVar('width-icon','large'),                // 标题左侧装饰图标高度
+  icon-color: getCssVar('color', 'primary'),                   // 标题左侧装饰图标色
+  icon-border-radius: getCssVar(border, radius, extra, small), // 标题左侧装饰图标圆角
+);
+
+// 门户部件内容区域样式
+$portlet-content: (
+  'bg-color': getCssVar(color, bg, 1),    // 内容区域背景色
+  'padding': getCssVar(spacing, none),    // 内容区域内边距
+  'margin':  getCssVar(spacing, none),    // 内容区域外边距
+);
+
+@include b(portlet-layout) {
+  @include set-component-css-var('portlet', $portlet);
+  @include set-component-css-var('portlet-header', $portlet-header);
+  @include set-component-css-var('portlet-caption', $portlet-caption);
+  @include set-component-css-var('portlet-content', $portlet-content);
+
+  width: 100%;
+  height: 100%;
+  padding: getCssVar('portlet', 'padding');
+  background-color: getCssVar('portlet','bg-color');
+
+  // 标题样式
+  @include e(caption){
+    max-width: getCssVar('portlet-caption','max-width');
+    height: 100%;
+    padding: getCssVar(spacing, none) getCssVar(spacing, none) getCssVar(spacing, none) getCssVar(spacing, base);
+    @include e(caption-text){
+      font-size: getCssVar('portlet-caption','font-size');
+      font-weight: getCssVar('portlet-caption','font-weight');
+      line-height: getCssVar('portlet-caption','font-size');
+      color: getCssVar('portlet-caption','color');
+    }
+
+    &::before {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: getCssVar('portlet-caption','icon-width');
+      height: getCssVar('portlet-caption','icon-height');
+      content: '';
+      background-color: getCssVar('portlet-caption','icon-color');
+      border-radius: getCssVar('portlet-caption','icon-border-radius');
+      transform: translateY(-50%);
+    }
+
+    @include when(link) {
+      cursor: pointer;
+
+      &:hover {
+        color: getCssVar('portlet-caption','link-color');
+      }
+    }
+  }
+
+  // 无头部时的样式
+  @include when(no-header) {
+    >.#{bem(portlet-layout-content)}{
+      height: 100%;
+    }
+  }
+
+  // 高亮
+  @include when(hight-light) {
+    box-shadow: 0 0 0 calc(getCssVar('portlet', 'padding') - 2px) getCssVar(color, bg, 1) inset, inset 0 0 0 getCssVar('portlet', 'padding') getCssVar('portlet', 'hight-light-color');
+  }
+}
+
+// 头部样式
+@include b(portlet-layout-header) {
+  @include flex(row, space-between);
+
+  @include e(left){
+    position: relative;
+  }
+
+  @include when(custom) {
+    position: relative;
+
+    @include e(left){
+      z-index: 1;
+    }
+  
+    @include e(right){
+      z-index: 1;
+    }
+  
+    @include e(bg) {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  height: getCssVar('portlet-header','height');
+  padding: getCssVar('portlet-header','padding');
+  margin: getCssVar('portlet-header','margin');
+  background-color: getCssVar('portlet-header','bg-color');
+}
+
+// 内容区样式
+@include b(portlet-layout-content) {
+  height: calc(100% - getCssVar('portlet-header','height'));
+  padding: getCssVar('portlet-content','padding');
+  margin: getCssVar('portlet-content','margin');
+  overflow-y: scroll;
+  background-color: getCssVar('portlet-content','bg-color');
+}

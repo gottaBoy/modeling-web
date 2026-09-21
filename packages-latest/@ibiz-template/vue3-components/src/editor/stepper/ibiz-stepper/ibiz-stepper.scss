@@ -1,0 +1,25 @@
+// 步进器根元素
+$stepper: (
+  font-size: getCssVar(form-item, font-size),                               // 字体大小
+  readonly-color: getCssVar(form-item, readonly-color),                     // 只读字体色
+  line-height: getCssVar(form-item, line-height),                           // 行高
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+@include b(stepper) {
+  @include set-component-css-var(stepper, $stepper);
+  @include m(readonly) {
+    font-size: getCssVar(stepper, font-size);
+    line-height: getCssVar(stepper, line-height);
+    color: getCssVar(stepper, readonly-color);
+  }
+}
+
+@include b(form-item){
+
+  @include b(stepper) {
+    @include when(show-default){
+      padding: getCssVar(stepper, hover-edit-padding);
+    }
+  }
+}

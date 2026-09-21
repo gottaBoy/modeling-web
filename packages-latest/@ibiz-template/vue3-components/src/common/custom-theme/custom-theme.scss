@@ -1,0 +1,100 @@
+@include b(custom-theme) {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: getCssVar('spacing', 'loose');
+
+    @include b(custom-theme-header) {
+        .el-button {
+            padding: getCssVar('spacing', 'tight');
+        }
+    }
+
+    @include b(custom-theme-content) {
+        flex-grow: 1;
+        padding: getCssVar('spacing', 'tight') getCssVar('spacing', 'base');
+        overflow: hidden;
+
+        @include b(custom-theme-content-container) {
+            width: 100%;
+            height: 100%;
+
+            @include b(custom-theme-edit-container) {
+                width: 100%;
+                height: 100%;
+
+                @include when(hidden) {
+                    display: none;
+                }
+            }
+
+            @include b(custom-theme-default-container) {
+                width: 100%;
+                height: 100%;
+
+                @include when(hidden) {
+                    display: none;
+                }
+
+                .el-tabs {
+                    height: 100%;
+                }
+
+                .el-tabs__content {
+                    height: calc(100% - 55px);
+                    overflow: auto;
+                }
+
+            }
+        }
+
+    }
+
+    @include b(custom-theme-footer) {
+        flex: none;
+        height: 64px;
+        padding: getCssVar('spacing', 'base');
+        @include flex(row, flex-start, center);
+
+        .el-button+.el-dropdown{
+            margin-left: 12px;
+        }
+    }
+
+}
+
+@include b(custom-theme-item) {
+    padding: getCssVar('spacing', 'base');
+    border-bottom: 1px solid getCssVar(color, border);
+
+    @include e(caption) {
+        font-size: getCssVar('font-size', 'header-5');
+        font-weight: getCssVar('font-weight', 'bold');
+        line-height: getCssVar('spacing', 'super', 'loose');
+    }
+
+    @include e(container) {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    @include e(content) {
+        padding: getCssVar('spacing', 'base') 0;
+
+        .el-button {
+            min-width: getCssVar(height, control-default);
+        }
+    }
+
+    @include b(custom-theme-content-setting) {
+        font-size: var(--el-font-size-base);
+        cursor: pointer;
+    }
+}
+
+@include b(custom-theme-var) {
+    gap: getCssVar('spacing', 'base');
+    padding: getCssVar('spacing', 'extra-tight') 0;
+    @include flex(row, space-between, center);
+}

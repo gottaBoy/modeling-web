@@ -1,0 +1,118 @@
+/* context-menu 界面行为组工具栏 start */
+$context-menu: (item-margin: 0 0 0 4px,
+separator-height: 20px,
+separator-width: 2px,
+separator-color: getCssVar(color, border),
+popover-padding: getCssVar(spacing, tight) getCssVar(spacing, none),
+popover-button-padding: getCssVar(spacing, tight) getCssVar(spacing, base-loose),
+popover-button-color: getCssVar(color, text, 2),
+popover-button-hover-bg: getCssVar(color, bg, 0),
+transfer-zindex: 1000,
+);
+
+/* context-menu 界面行为组工具栏 end */
+
+@include b(context-menu) {
+  @include set-component-css-var(context-menu, $context-menu);
+
+  @include e(item) {
+    padding: getCssVar(spacing, extra-tight) 0;
+
+    &+& {
+      margin: getCssVar(context-menu, item-margin);
+    }
+
+    .#{bem('context-menu','action-content-icon')} {
+        margin-right: getCssVar(spacing, extra-tight);
+    }
+  }
+
+  @include e('action-content'){
+    display: flex;
+  }
+
+
+  @include e('action-content-icon') {
+    @include flex(row, center, center);
+
+    padding: 0 getCssVar('spacing','super-tight');
+    font-size: getCssVar('width-icon',medium);
+  }
+
+  @include e('action-content-caption'){
+    @include flex(row, center, center);
+  }
+
+  // 界面行为组样式
+  @include e(group-item) {
+    @include m(content) {
+      display: flex;
+    }
+  }
+
+  @include e(popover) {
+    @include set-component-css-var(context-menu, $context-menu);
+
+    // 这个是为了解决el-popover的宽度问题 必须要加 !important 
+    width: auto !important;
+    min-width: 150px;
+
+    --el-popover-padding:#{getCssVar(context-menu, popover-padding)};
+
+    .el-button {
+      --el-button-size: 40px;
+
+      display: block;
+      width: 100%;
+      padding: getCssVar(context-menu, popover-button-padding);
+      margin: getCssVar(spacing, none);
+      font-size: getCssVar(font-size, regular);
+      color: getCssVar(context-menu, popover-button-color);
+      text-align: left;
+      border-radius: 0;
+
+      &:hover {
+        background-color: getCssVar(context-menu, popover-button-hover-bg);
+      }
+
+      .#{bem('context-menu','action-content-icon')} {
+        margin-right: getCssVar('spacing','extra-tight');
+      }
+
+      .#{bem('context-menu','action-content-group-caption')} {
+        margin-right: getCssVar('spacing', 'base-loose');
+      }
+
+      .#{bem(context-menu, group-item, icon)},
+      .#{bem('context-menu','action-content-group-icon')} {
+        position: absolute;
+        right: getCssVar('spacing', 'base-loose');
+        font-size: getCssVar('font-size', 'header-6');
+      }
+    }
+
+    @include e(separator) {
+      margin: getCssVar(spacing, none);
+
+      &.el-divider--horizontal {
+        width: calc(100% - 2 * getCssVar('spacing', 'base-loose'));
+        margin: getCssVar('spacing', 'extra-tight') getCssVar('spacing', 'base-loose');
+      }
+    }
+  }
+  @include e(transfer){
+    @include set-component-css-var(context-menu, $context-menu);
+
+    z-index: getCssVar(context-menu, transfer-zindex)!important;
+  }
+
+  @include m(dropdown) {
+    @include e(caption) {
+      cursor: pointer;
+    }
+
+    @include e(caption-icon) {
+      vertical-align: bottom;
+    }
+  }
+}

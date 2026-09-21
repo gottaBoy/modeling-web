@@ -1,0 +1,16 @@
+// 图表导航栏根元素
+$control-chartexpbar: (
+  min-width: 300px,                                                                 // 导航栏最小宽
+  bg-color: transparent,                                                            // 导航栏背景色
+  padding: getCssVar('spacing', 'none'),                                            // 导航栏内边距
+);
+
+@include b('control-chartexpbar') {
+  @include set-component-css-var('control-chartexpbar', $control-chartexpbar);
+
+  min-width: getCssVar('control-chartexpbar', 'min-width');
+  height: 100%;
+  padding: getCssVar('control-chartexpbar', 'padding');
+  overflow-y: auto;
+  background-color: getCssVar('control-chartexpbar', 'bg-color');
+}

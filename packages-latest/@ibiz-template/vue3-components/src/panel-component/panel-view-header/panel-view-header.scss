@@ -1,0 +1,27 @@
+// 视图头部样式
+$panel-view-header: (
+  height: 64px,                                    // 头部高度
+  border-color: getCssVar(color, border),           // 底部边框颜色
+  padding: 0 getCssVar('spacing', 'base'),          // 内边距
+);
+
+@include b(panel-view-header) {
+  @include set-component-css-var('panel-view-header', $panel-view-header);
+
+  width: auto;
+  height: getCssVar(panel-view-header, height);
+  border-bottom: 1px solid getCssVar(panel-view-header, border-color);
+
+  .#{bem(row)} {
+    height: 100%;
+  }
+
+  .#{bem(panel-container, '', view_header_right)} {
+    padding: getCssVar(panel-view-header, padding);
+  }
+
+  // 视图头存在边框，分页栏边框隐藏
+  .el-tabs__nav-wrap::after {
+    display: none;
+  }
+}

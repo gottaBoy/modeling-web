@@ -1,0 +1,423 @@
+@include b(style-debug-dock) {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 9998;
+  display: flex;
+  width: 600px;
+  height: 100vh;
+  overflow: hidden;
+  font-size: 13px;
+  background: getCssVar(color, bg, 1);
+  transition: all 0.3s ease;
+
+  @include when(hidden) {
+    display: none !important;
+  }
+
+  @include e(dock-accent) {
+    flex-shrink: 0;
+    width: 1px;
+    height: 100%;
+    background: getCssVar(color, bg, 2);
+  }
+
+  @include e(panel-content) {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  @include e(header) {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: getCssVar(color, bg, 2);
+    border-bottom: 1px solid getCssVar(color, border);
+  }
+
+  @include e(left-area) {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  @include e(right-area) {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+  }
+
+  @include e(close-button) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    color: getCssVar(color, text, 2);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+
+    &:hover {
+      color: getCssVar(color, text, 1);
+      background: getCssVar(color, bg, 3);
+    }
+
+    ion-icon {
+      font-size: 18px;
+    }
+  }
+
+  @include e(selector-container) {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+  }
+
+  @include e(picker-button) {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    color: getCssVar(color, text, 2);
+    cursor: pointer;
+    background: getCssVar(color, bg, 1);
+    border: 1px solid getCssVar(color, border);
+    border-radius: 4px;
+    transition: all 0.2s;
+
+    &:hover {
+      color: getCssVar(color, primary);
+      border-color: getCssVar(color, primary);
+    }
+
+    @include when(active) {
+      color: #fff;
+      background: getCssVar(color, primary);
+      border-color: getCssVar(color, primary);
+    }
+
+    ion-icon {
+      font-size: 16px;
+    }
+  }
+
+  @include e(selector-input) {
+    flex: 1;
+
+    input {
+      width: 100%;
+      height: 32px;
+      padding: 0 12px;
+      font-size: 13px;
+      color: getCssVar(color, text, 1);
+      background: getCssVar(color, bg, 1);
+      border: 1px solid getCssVar(color, border);
+      border-radius: 6px;
+      outline: none;
+      transition: all 0.2s;
+
+      &::placeholder {
+        color: getCssVar(color, text, 3);
+      }
+
+      &:focus {
+        border-color: getCssVar(color, primary);
+      }
+    }
+  }
+
+  @include e(breadcrumb-section) {
+    flex-shrink: 0;
+  }
+
+  @include e(dom-breadcrumbs) {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    align-items: center;
+    padding: 10px 16px;
+    overflow-x: auto;
+    background: getCssVar(color, bg, 1);
+    border-bottom: 1px solid getCssVar(color, border);
+  }
+
+  @include e(crumb) {
+    display: flex;
+    flex-shrink: 0;
+    gap: 6px;
+    align-items: center;
+
+    ion-icon {
+      font-size: 14px;
+      color: getCssVar(color, text, 3);
+    }
+  }
+
+  @include e(crumb-item) {
+    height: 28px;
+    padding: 4px 8px;
+    color: getCssVar(color, text, 2);
+    cursor: pointer;
+    border-radius: 6px;
+
+    &:hover {
+      background: getCssVar(color, bg, 2);
+    }
+
+    @include when(active) {
+      color: getCssVar(color, primary);
+      background: getCssVar(color, bg, 2);
+    }
+  }
+
+  @include e(children-list) {
+    background: getCssVar(color, bg, 1);
+    border-bottom: 1px solid getCssVar(color, border);
+  }
+
+  @include e(list-header) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+  }
+
+  @include e(list-title) {
+    font-size: 11px;
+    font-weight: 600;
+    color: getCssVar(color, text, 2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  @include e(list-count) {
+    padding: 2px 8px;
+    font-family: 'Geist Mono', 'Courier New', monospace;
+    font-size: 11px;
+    color: getCssVar(color, text, 2);
+    background: getCssVar(color, bg, 2);
+    border-radius: 10px;
+  }
+
+  @include e(list-items) {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+  }
+
+  @include e(list-item) {
+    display: flex;
+    align-items: center;
+    height: 36px;
+    padding: 0 12px;
+    color: getCssVar(color, text, 1);
+    cursor: pointer;
+    background: getCssVar(color, bg, 2);
+    border-radius: 6px;
+    transition: all 0.2s;
+
+    &:hover {
+      color: getCssVar(color, primary);
+    }
+
+    @include when(selected) {
+      color: getCssVar(color, primary);
+    }
+  }
+
+  @include e(empty-placeholder) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    padding: 0 16px;
+    font-size: 13px;
+    color: getCssVar(color, text, 3);
+  }
+
+  @include e(style-editor) {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  @include e(editor-header) {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: getCssVar(color, bg, 2);
+    border-bottom: 1px solid getCssVar(color, border);
+  }
+
+  @include e(editor-title) {
+    font-size: 13px;
+    font-weight: 600;
+    color: getCssVar(color, text, 1);
+  }
+
+  @include e(editor-body) {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  @include e(css-editor) {
+    position: relative;
+    flex-grow: 1;
+    overflow: hidden;
+    background: getCssVar(color, bg, 1);
+    border: 1px solid getCssVar(color, border);
+    border-radius: 8px;
+  }
+
+  @include e(monaco-container) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+  }
+
+  @include e(code-exporter) {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    height: 400px;
+    background: getCssVar(color, bg, 2);
+    border-top: 1px solid getCssVar(color, border);
+  }
+
+  @include e(exporter-header) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid getCssVar(color, border);
+  }
+
+  @include e(exporter-title) {
+    font-size: 13px;
+    font-weight: 600;
+    color: getCssVar(color, text, 1);
+  }
+
+  @include e(header-right) {
+    display: flex;
+    gap: 8px;
+  }
+
+  @include e(copy-button) {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    padding: 4px 10px;
+    cursor: pointer;
+    background: getCssVar(color, bg, 1);
+    border: 1px solid getCssVar(color, border);
+    border-radius: 4px;
+    transition: all 0.2s;
+
+    ion-icon {
+      font-size: 12px;
+      color: getCssVar(color, text, 1);
+    }
+
+    span {
+      font-size: 12px;
+      color: getCssVar(color, text, 1);
+    }
+
+    &:hover {
+      color: #fff;
+      background: getCssVar(color, primary);
+
+      ion-icon {
+        color: #fff;
+      }
+
+      span {
+        color: #fff;
+      }
+    }
+  }
+
+  @include e(code-block) {
+    flex-grow: 1;
+    padding: 12px;
+    overflow: auto;
+    background: getCssVar(color, bg, 1);
+    border: 1px solid getCssVar(color, border);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 5%);
+
+    &::-webkit-scrollbar {
+      width: 14px;
+      height: 14px;
+    }
+
+    pre {
+      margin: 0;
+      font-family: 'Geist Mono', 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      color: getCssVar(color, text, 1);
+      word-break: break-all;
+      white-space: pre-wrap;
+    }
+  }
+}
+
+// ==========================================================================
+// 检查器引擎 overlay 悬浮层样式
+// 不直接修改目标元素，改用绝对定位悬浮层覆盖目标实现高亮
+// 类名由 InspectorEngine 直接附加到 body 下的 overlay div 上
+// ==========================================================================
+@include b(style-debug-dock-overlay) {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99999;
+  box-sizing: border-box;
+  display: none;
+  pointer-events: none;
+
+  @include m(hover) {
+    background: rgb(getCssVar(color, primary, hover) 0.3);
+    border: 2px dashed getCssVar(color, primary, hover);
+  }
+
+  @include m(selected) {
+    background: rgb(getCssVar(color, primary, active) 0.3);
+    border: 2px solid getCssVar(color, primary, active);
+    animation: style-debug-dock-pulse 0.8s ease-in-out 1;
+  }
+}
+
+@keyframes style-debug-dock-pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.015);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}

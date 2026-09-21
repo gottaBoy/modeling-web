@@ -1,0 +1,321 @@
+/* stylelint-disable no-descending-specificity */
+// 甘特图部件样式
+$control-gantt: (
+  color-white: getCssVar(color, white),                           // 白色，拖拽任务块时任务块顶部时间字体颜色
+  color-black: getCssVar(color, black),                           // 黑色，甘特图任务块连线按钮边框颜色
+  color-primary: getCssVar(color, primary),                       // 主题色,甘特图任务块背景色
+  color-warning: getCssVar(color, warning),                       // 警告色
+  color-linking: getCssVar(color, primary),                       // 任务连线颜色
+  text-color: getCssVar(color, text, 3),                           // 基础文本色
+  text-color-dark: getCssVar(color, text, 0),                      // 暗色主题下文本颜色
+  bg-color: getCssVar(color, bg, 1),                               // 基础背景色
+  bg-color-hover: getCssVar(color, disabled, border),              // 悬浮背景色
+  bg-color-active: getCssVar(color, disabled, border),             // 激活背景色
+  shadow: getCssVar(color, shadow),                               // 基础阴影色
+  border-color: getCssVar(color, tertiary, light, active),          // 基础边框色
+  border-color-hover: getCssVar(colo, tertiary, light, active),    // 悬浮边框色
+  border-dashed-color: getCssVar(color, disabled, border),         // 虚线边框色（拖拽时的辅助线）
+);
+
+// 甘特图任务条样式
+$control-gantt-slider: (
+  overflow-gap: getCssVar(spacing, base),                              // 滑块溢出时文字与边界间隔
+  padding: getCssVar(spacing,none) getCssVar(spacing,base, tight),      // 滑块内边距
+  bg-color: getCssVar('color', 'primary'),                             // 滑块背景色
+  border-radius: getCssVar(border, radius, small),                     // 滑块圆角
+  icon-gap: getCssVar('spacing',extra, tight),                        // 滑块图标与文本间隔
+  box-shadow: getCssVar('shadow', 'elevated'),                         // 滑块阴影
+);
+
+// 甘特图任务条标题样式
+$control-gantt-slider-caption: (
+  color: getCssVar(color, 'primary', 'text'),       // 标题文本色
+  left: getCssVar(spacing, tight),                  // 标题左侧粘性定位
+  margin: getCssVar(spacing, tight),                // 任务弹框中标题外边距
+  font-size: getCssVar(font-size, header-6),        // 标题字体大小
+  font-weight: getCssVar(font-weight, regular),     // 标题字体粗细
+);
+
+// 甘特图表格内容单元格样式
+$control-gantt-grid-body-cell: (
+  check-mark: transparent,                            // 选中标记颜色
+);
+
+// 甘特图工具栏按钮项样式
+$control-gantt-toolbar-item: (
+  color-hover: getCssVar(color, primary, light, default),  // 按钮悬浮文本色
+  shadow: getCssVar(color, shadow),                       // 按钮阴影
+  border-color: getCssVar(color, border),                 // 按钮边框色
+  gap: getCssVar(spacing, tight),                         // 按钮与按钮间隔 
+);
+
+// 甘特图分割线样式
+$control-gantt-split: (
+  color: getCssVar(color, border),  // 分割线颜色
+);
+
+// 甘特图设置按钮样式
+$control-gantt-setting: (
+  color: getCssVar('color','primary'),  // 设置按钮图标色
+);
+
+// 甘特图空数据容器样式
+$control-gantt-empty: (
+  height: calc(100% - 86px),  // 空数据区域高度（减去头部高度）
+);
+
+@include b(control-gantt) {
+  @include set-component-css-var(control-gantt, $control-gantt);
+  @include set-component-css-var(control-gantt-slider, $control-gantt-slider);
+  @include set-component-css-var(control-gantt-slider-caption, $control-gantt-slider-caption);
+  @include set-component-css-var(control-gantt-grid-body-cell, $control-gantt-grid-body-cell);
+  @include set-component-css-var(control-gantt-toolbar-item, $control-gantt-toolbar-item);
+  @include set-component-css-var(control-gantt-split, $control-gantt-split);
+  @include set-component-css-var(control-gantt-setting, $control-gantt-setting);
+  @include set-component-css-var(control-gantt-empty, $control-gantt-empty);
+
+  width: 100%;
+  height: 100%;
+
+  .xg-root {
+    // 背景
+    --gantt-bg: #{getCssVar(control-gantt, bg-color)};
+    --gantt-bg-hover: #{getCssVar(control-gantt, bg-color-hover)};
+    --gantt-bg-active: #{getCssVar(control-gantt, bg-color-active)};
+    --gantt-bg-checkmark: #{getCssVar(control-gantt, grid-body-cell, check-mark)};
+    --gantt-bg-toolbar-item-hover: #{getCssVar(control-gantt, toolbar-item, color-hover)};
+
+    // 阴影
+    --gantt-shadow: #{getCssVar(control-gantt, shadow)};
+    --gantt-shadow-toolbar-item: #{getCssVar(control-gantt, toolbar-item, shadow)};
+
+    // 边框
+    --gantt-border: #{getCssVar(control-gantt, border-color)};
+    --gantt-border-hover: #{getCssVar(control-gantt, border-color-hover)};
+    --gantt-border-dashed: #{getCssVar(control-gantt, border-dashed-color)};
+    --gantt-border-toolbar-item: #{getCssVar(control-gantt, toolbar-item, border-color)};
+    --gantt-border-separate-line: #{getCssVar(control-gantt, split, color)};
+
+    // 文本
+    --gantt-text-0: #{getCssVar(control-gantt, text-color-dark)};
+    --gantt-text-3: #{getCssVar(control-gantt, text-color)};
+
+    // 主要颜色
+    --gantt-white: #{getCssVar(control-gantt, color-white)};
+    --gantt-black: #{getCssVar(control-gantt, color-black)};
+    --gantt-color-primary: #{getCssVar(control-gantt, color-primary)};
+
+    // 警示色
+    --gantt-warning: #{getCssVar(control-gantt, color-warning)};
+
+    // 链接线颜色
+
+    --gantt-color-linking: #{getCssVar(control-gantt, color-linking)};
+    --gantt-link-path-hover: #{getCssVar(control-gantt, color-linking)};
+
+    .xg-table-body .xg-table-row {
+      cursor: pointer;
+
+      .xg-table-cell:not(:first-child) {
+        > div {
+          padding: getCssVar(spacing,none);
+        }
+      }
+    }
+
+    .xg-table-cell > div {
+      width: 100%;
+
+      .cell {
+        height: 100%;
+      }
+    }
+
+    // 适配滑块粘性布局
+    .xg-row.xg-gantt-row {
+      overflow: visible;
+
+      .xg-slider{
+        &.xg-slider-drag.xg-slider-level0 {
+          overflow: visible;
+        }
+
+        .xg-slider-block {
+          overflow: visible;
+        }
+
+        // 任务滑块宽度为0时不显示
+        &.is-no-width {
+          display: none;
+        }
+      }
+    }
+    .#{bem('control-gantt__slider--caption')} {
+      position: sticky;
+      left: getCssVar(control-gantt, slider-caption, left);
+    }
+
+    // 滑块超出结束时间的总范围时
+    .is-exceeds-range {
+      .#{bem('control-gantt__slider')} {
+        &::after {
+          position: absolute;
+          right: 0;
+          z-index: 99;
+          display: block;
+          width: getCssVar(control-gantt, slider, overflow-gap);
+          height: 100%;
+          content: '';
+          background-color: getCssVar(control-gantt, slider, bg-color);
+        }
+      }
+    }
+
+    // 甘特图工具栏
+    .xg-view-toolbar>div {
+      margin-right: 0;
+
+      &+div {
+        margin-left: getCssVar(control-gantt-toolbar-item, gap);
+      }
+    }
+  }
+  @include m(empty) {
+    .xg-table-body {
+      height: getCssVar(control-gantt, empty, height) !important;
+    }
+  }
+  @include e(slider) {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: getCssVar(control-gantt, slider, padding);
+    cursor: pointer;
+    background-color: getCssVar(control-gantt, slider, bg-color);
+    border-radius: getCssVar(control-gantt, slider, border-radius);
+    @include m(container-title) {
+      .icon {
+        margin-right: getCssVar(control-gantt, slider, icon-gap);
+      }
+
+      .number {
+        display: flex;
+        align-items: center;
+      }
+
+      .caption {
+        margin: getCssVar(control-gantt, slider-caption, margin);
+        font-size: getCssVar(control-gantt, slider-caption, font-size);
+        font-weight: getCssVar(control-gantt, slider-caption, font-weight);
+      }
+    }
+    @include m(container-content) {
+      display: flex;
+      justify-content: space-between;
+
+      .caption {
+        margin: getCssVar('spacing','extra-tight');
+        color: getCssVar(color, disabled, text);
+      }
+
+      .detail {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        align-items: center;
+      }
+    }
+
+    @include m(caption) {
+      overflow: hidden;
+      color: getCssVar(control-gantt, slider-caption, color);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  @include e('setting') {
+    display: flex;
+    align-items: center;
+    @include m('icon') {
+      cursor: pointer;
+      fill: getCssVar(control-gantt, setting, color);
+    }
+  }
+
+  @include e('slider-popover') {
+    z-index: 300 !important;
+    width: auto;
+    min-width: 300px;
+    padding: getCssVar(spacing, base-tight);
+    border: none;
+    box-shadow: getCssVar('shadow', 'elevated');
+  }
+
+  @include e('link-path-popover') {
+    z-index: 300 !important;
+    width: auto;
+    min-width: 300px;
+    padding: getCssVar(spacing, base-tight);
+    border: none;
+    box-shadow: getCssVar('shadow', 'elevated');
+  }
+
+  .#{bem('tree-grid-ex-field-column','','ellipsis')} {
+    .#{bem('tree-grid-ex-field-column-text-container')} {
+      min-width: 0;
+    }
+  }
+  .#{bem('tree-grid-ex-field-column-toolbar-container')} {
+    flex-shrink: 0;
+  }
+  .#{bem('tree-grid-ex-edit-column', 'editor')} {
+    min-height: etCssVar(editor, default, line-height);
+  }
+
+  .#{bem(tree-grid-ex-field-column)} {
+    // 存在行为组时，单元格内容垂直居中显示
+    @include when(has-action) {
+      .#{bem(tree-grid-ex-field-column-text-container)} {
+        overflow: hidden;
+      }
+      .#{bem(tree-grid-ex-field-column, text)} {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .#{bem(tree-grid-ex-field-column-toolbar-container)} {
+        flex-shrink: 1;
+        overflow: hidden;
+      }
+    }
+  }
+
+  // 显示列界面行为项
+  .xg-root .xg-table-body .xg-table-row {
+    .#{bem(action-toolbar,item)} {
+      &.is-expand {
+        display: inline-flex;
+        opacity: 1;
+      }
+    }
+
+    &:hover {
+      .#{bem(action-toolbar,item)} {
+        display: inline-flex;
+        opacity: 1;
+      }
+    
+      .#{bem(action-toolbar,separator)} {
+        display: inline-flex;
+        opacity: 1;
+      }
+    }
+  }
+
+}
+
+.xg-view-toolbar-switch-action {
+  // 文本
+  --gantt-text-switch-item: #{getCssVar(control-gantt, text-color)};
+  --gantt-bg-hover-switch-item: #{getCssVar(control-gantt, text-color-dark)};
+}

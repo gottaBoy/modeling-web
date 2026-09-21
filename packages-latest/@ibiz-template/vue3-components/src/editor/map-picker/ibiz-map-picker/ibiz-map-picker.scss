@@ -1,0 +1,295 @@
+// 地图选择器根元素
+$map-picker: (
+  font-size: getCssVar(form-item, font-size),                               // 字体大小
+  font-weight: getCssVar(form-item, regular),                               // 字体粗细
+  line-height: getCssVar(form-item, line-height),                           // 行高
+  readonly-color: getCssVar(form-item, readonly-color),                     // 只读字体色
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+// 地图选择器建议元素
+$map-picker-sugg: (
+  bg-color: getCssVar(color, bg, 1),                                        // 背景色
+  hover-bg-color: getCssVar(color, fill, 0),                                // 悬浮背景色
+  border-color: getCssVar(color, border),                                   // 边框色
+);
+
+// 地图选择器搜索结果元素
+$map-picker-search-result: (
+  bg-color: getCssVar(color, white),                                      // 背景色
+);
+
+// 地图选择器标记元素
+$map-picker-marker: (
+  bg-color: #3d93fd,                                                      // 背景色
+  border-radius: getCssVar(border-radius, small),                           // 倒角
+  font-size: getCssVar(font-size, small),                                   // 字体大小
+  text-color: getCssVar(color, white),                                    // 字体颜色
+);
+
+// 地图选择器预定义标记元素
+$map-picker-preset-marker: (
+  index-color: getCssVar(color, white),                                   // 索引字体色
+  top: getCssVar(editor, default, line-height),                             // 上边距
+  bg-color: getCssVar(color, bg, 0),                                        // 背景色
+  box-shadow: getCssVar(shadow, elevated),                                  // 阴影色
+  hover-bg-color: getCssVar(editor, hover, bg, color),                      // 悬浮背景色
+  border-color: getCssVar(color, border),                                   // 边框色
+  font-size: getCssVar(font-size, small),                                   // 字体大小
+  text-color:  getCssVar(color, text, 3),                                   // 文本色
+  line-height: getCssVar(editor, default, line-height),                     // 行高
+);
+
+@include b(map-picker) {
+  @include set-component-css-var('map-picker', $map-picker);
+
+  font-size: getCssVar(map-picker, font-size);
+  font-weight: getCssVar(map-picker, regular);
+  
+  @include m(readonly) {
+    height: auto;
+    overflow: auto;
+    line-height: getCssVar(map-picker, line-height);
+    color: getCssVar(map-picker, readonly-color);
+    word-break: break-word;
+    white-space: pre-wrap;
+  }
+}
+
+@include b(map-picker-input) {
+  .el-input__suffix {
+    display: none;
+  }
+
+  .el-input__wrapper:hover {
+    .el-input__suffix {
+      display: inline-flex;
+    }
+  }
+}
+
+@include b(map-picker-dialog) {
+  display: flex;
+  flex-direction: column;
+  height: 80%;
+  @include set-component-css-var('map-picker', $map-picker);
+  @include set-component-css-var('map-picker-sugg', $map-picker-sugg);
+  @include set-component-css-var('map-picker-marker', $map-picker-marker);
+  @include set-component-css-var('map-picker-preset-marker', $map-picker-preset-marker);
+  @include set-component-css-var('map-picker-search-result', $map-picker-search-result);
+
+  --el-dialog-padding-primary: var(#{getCssVarName('spacing', 'base')});
+
+  .el-dialog__headerbtn {
+    top: calc(var(--el-dialog-padding-primary) - 2px);
+    right: calc(var(--el-dialog-padding-primary) / 2)
+  }
+
+  .el-dialog__header, .el-dialog__footer {
+    flex: 0 0 auto;
+    padding: var(--el-dialog-padding-primary);
+  }
+
+  .el-dialog__body {
+    flex: 1 1 0;
+    padding: var(--el-dialog-padding-primary);
+    border-top: 1px solid getCssVar(map-picker-sugg, bg-color);
+    border-bottom: 1px solid getCssVar(map-picker-sugg, border-color);
+  }
+
+  .amap-ui-poi-picker-sugg-container {
+    background-color: getCssVar(map-picker-sugg, bg-color);
+    border-color: getCssVar(map-picker-sugg, border-color);
+
+    .sugg-item {
+      border-color: getCssVar(map-picker-sugg, border-color);
+
+      &:hover {
+        background-color: getCssVar(map-picker-sugg, hover-bg-color);
+      }
+    }
+  }
+}
+
+
+@include b(map-picker-dialog-content) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+@include b(map-picker-dialog-search-input) {
+  z-index: 999;
+  flex: 0 0 auto;
+  margin-bottom: getCssVar('spacing', 'tight');
+
+  .el-input__suffix {
+    display: none;
+  }
+
+  .el-input__wrapper:hover {
+    .el-input__suffix {
+      display: inline-flex;
+    }
+  }
+}
+
+@include b(map-picker-dialog-map-content) {
+  position: relative;
+  flex: 1 1 0;
+}
+
+@include b(map-picker-dialog-map-container) {
+  height: 100%;
+}
+
+@include b(map-picker-dialog-search-result-container) {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: block !important;
+  width: 280px;
+  max-height: 90%;
+  overflow-y: auto;
+  background-color: getCssVar(map-picker-search-result, bg-color);
+
+  .amap_lib_placeSearch_page {
+    display: flex;
+    overflow-x: auto;
+  }
+}
+
+@include b(map-picker-dialog-map-marker-text) {
+  position: absolute;
+  top: -24px;
+  padding: getCssVar(spacing, extra, tight) getCssVar(spacing, tight);
+  font-size: getCssVar(map-picker-marker, font-size);
+  color: getCssVar(map-picker-marker, text-color);
+  white-space: nowrap;
+  background-color: getCssVar(map-picker-marker, bg-color);
+  border-radius: getCssVar(map-picker-marker, border-radius);
+  transform: translateX(calc(-50% - (25px / 2)));
+}
+
+@include b(form-item) {
+  @include b(map-picker) {
+    @include when(show-default) {
+      &:hover {
+        @include b(map-picker-form-default-content) {
+          display: none;
+        }
+
+        @include b(map-picker-input) {
+          display: inline-flex;
+        }
+      }
+
+      @include b(map-picker-input) {
+        display: none;
+        font-family: Arial, sans-serif;
+      }
+
+      @include b(map-picker-form-default-content) {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: getCssVar(map-picker, hover-edit-padding);
+        font-family: Arial, sans-serif;
+        font-size: getCssVar(map-picker, font-size);
+        line-height: getCssVar(map-picker, line-height);
+        color: getCssVar(map-picker, text-color);
+        word-wrap: break-word;
+        white-space: pre-wrap;
+      }
+    }
+  }
+}
+
+// 预设标记点样式
+@include b(map-picker-dialog-map-marker-index) {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  color: getCssVar(map-picker-preset-marker, index-color);
+  transform: translate(-50%);
+}
+
+// 预设点弹框样式
+@include b(map-picker-dialog-search-input) {
+  .#{bem(map-picker, preset-markers)} {
+    position: absolute;
+    top: getCssVar(map-picker-preset-marker, top);
+    left: 0;
+    display: grid;
+    grid-template-rows: 0fr;
+    width: 350px;
+    background-color: getCssVar(map-picker-preset-marker, bg-color);
+    box-shadow: getCssVar(map-picker-preset-marker, box-shadow);
+    transition: grid-template-rows 0.5s ease;
+
+    &.is-active {
+      grid-template-rows: 1fr;
+      padding: getCssVar(spacing, tight) getCssVar(spacing, base, tight);
+    }
+  }
+  .#{bem(map-picker, preset-markers-inner)} {
+    max-height: 300px;
+    overflow: hidden auto;
+  }
+  .#{bem(map-picker, preset-marker)} {
+    display: flex;
+    align-items: center;
+    padding: getCssVar(spacing, tight) getCssVar(spacing, base, loose);
+    cursor: pointer;
+
+    &:hover {
+      background-color: getCssVar(map-picker-preset-marker, hover-bg-color);
+    }
+
+    img {
+      width: 46px;
+      height: 46px;
+      margin-left: getCssVar(spacing, tight);
+    }
+
+    &+.#{bem(map-picker, preset-marker)} {
+      border-top: 1px solid getCssVar(map-picker-preset-marker, border-color);
+    }
+  }
+
+  .#{bem(map-picker, preset-marker-content)} {
+    width: calc(100% - 71px - getCssVar(spacing, base));
+    line-height: 1.5em;
+    .#{bem(map-picker, preset-marker-title)} {
+      overflow: hidden;
+      font-weight: bold;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .#{bem(map-picker, preset-marker-address)} {
+      overflow: hidden;
+      font-size: getCssVar(map-picker-preset-marker, font-size);
+      color: getCssVar(map-picker-preset-marker, text-color);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  .#{bem(map-picker, preset-marker-index)} {
+    position: relative;
+    flex: none;
+    width: 25px;
+    height: getCssVar(map-picker-preset-marker, line-height);
+    margin-right: getCssVar(spacing, tight);
+    line-height: getCssVar(map-picker-preset-marker, line-height);
+    background-repeat: no-repeat;
+    background-size: contain;
+
+    span {
+      position: absolute;
+      top: -5px;
+      left: 8px;
+      font-size: getCssVar(map-picker-preset-marker, font-size);
+      color: getCssVar(map-picker-preset-marker, index-color);
+    }
+  }
+}

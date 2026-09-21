@@ -1,0 +1,158 @@
+// 时间范围选择（扩展）根元素
+$date-range-select: (
+  line-height: 32px,                                        // 行高
+  font-size: getCssVar(font-size, small),                   // 字体大小
+  icon-color: getCssVar(color, tertiary-light-active),      // 图标颜色
+  border-radius: getCssVar(border-radius, small),           // 倒角
+  border-color: getCssVar('color', border),                 // 边框色
+  hover-border-color: getCssVar('color', primary),          // 悬浮边框色
+);
+
+// 时间范围选择（扩展）标签元素
+$date-range-select-label: (
+  font-size: getCssVar(font-size, regular),                  // 字体大小
+  icon-color: getCssVar('color', 'danger'),                  // 图标颜色
+);
+
+// 时间范围选择（扩展）项元素
+$date-range-select-item: (
+  icon-size: getCssVar(font-size, header, 5),                 // 图标大小
+  hover-bg-color: getCssVar(color, fill, 1),                  // 悬浮背景色
+);
+
+@include b('date-range-select') {
+  width: 100%;
+  @include set-component-css-var(date-range-select, $date-range-select);
+  @include set-component-css-var(date-range-select-item, $date-range-select-item);
+  @include set-component-css-var(date-range-select-label, $date-range-select-label);
+  @include e('date-unit') {
+    width: 100%;
+
+    @include m('label') {
+      font-size: getCssVar(date-range-select-label, font-size);
+
+      &::after {
+        position: relative;
+        top: 0;
+        left: getCssVar(spacing, extra-tight);
+        color: getCssVar(date-range-select-label, icon-color);
+        content: '*';
+      }
+    }
+    @include m('editor-select') {
+      width: 100%;
+      margin-top: 12px;
+    }
+  }
+  @include e('date-range') {
+    width: 100%;
+    margin-top: 12px;
+    @include m('label') {
+      font-size: getCssVar(date-range-select-label, font-size);
+
+      &::after {
+        position: relative;
+        top: 0;
+        left: getCssVar(spacing, extra-tight);
+        color: getCssVar(date-range-select-label, icon-color);
+        content: '*';
+      }
+    }
+    @include m('editor') {
+      display: inline-flex;
+      flex-grow: 1;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 1px 11px;
+      margin-top: getCssVar(spacing, base-tight);
+      font-size: getCssVar(date-range-select, font-size);
+      line-height: getCssVar(date-range-select, line-height);
+      cursor: pointer;
+      background-image: none;
+      border-radius: getCssVar(date-range-select, border-radius);
+      box-shadow: 0 0 0 1px getCssVar(date-range-select, border-color) inset;
+      transition: all 0.2s;
+      transform: translate3d(0, 0, 0);
+
+      i {
+        color: getCssVar(date-range-select, icon-color);
+      }
+
+      &:hover {
+        box-shadow: 0 0 0 1px getCssVar(date-range-select, hover-border-color) inset;
+      }
+    }
+  }
+  @include e('date-type') {
+    padding: getCssVar(spacing, base-tight) 0;
+    @include m('item') {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 32px;
+      padding: 0 getCssVar(spacing, base-tight);
+      cursor: pointer;
+
+      &:hover {
+        background-color: getCssVar(date-range-select-item, hover-bg-color);
+      }
+    }
+    @include m('item-caption') {
+      flex: 1;
+    }
+    @include m('item-icon') {
+      margin-top: 2px;
+
+      i {
+        margin-left: getCssVar(spacing, base-tight);
+        font-size: getCssVar(date-range-select-item, icon-size);
+      }
+    }
+    @include m('editor') {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      width: 100%;
+      height: 100%;
+      visibility: hidden;
+    }
+    @include m('quarter') {
+      z-index: -10;
+      visibility: visible;
+      opacity: 0;
+
+      .el-tooltip__trigger {
+        width: 100%;
+        height: 100%;
+      }
+    }
+    @include m('year') {
+      z-index: -10;
+      visibility: visible;
+      opacity: 0;
+
+      .el-tooltip__trigger {
+        width: 100%;
+        height: 100%;
+      }
+    }
+    @include m('week') {
+      z-index: -10;
+      visibility: visible;
+      opacity: 0;
+
+      .el-tooltip__trigger {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+  @include e('select-value') {
+    height: 32px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

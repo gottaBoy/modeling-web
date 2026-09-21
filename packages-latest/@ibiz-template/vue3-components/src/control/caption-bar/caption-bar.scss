@@ -1,0 +1,95 @@
+$control-captionbar: (
+  color: getCssVar('color', 'text', 0),
+  font-size: getCssVar('font-size', 'header-5'),
+  font-size2: getCssVar('font-size', 'header-5'),
+  font-weight: getCssVar('font-weight', 'regular'),
+  font-weight2: getCssVar('font-weight', 'regular'),
+  padding: 0 getCssVar('spacing', 'base'),
+  margin: getCssVar('spacing', 'none'),
+);
+
+@include b(control-captionbar) {
+  @include set-component-css-var(control-captionbar, $control-captionbar);
+
+  position: relative;
+  height: 100%;
+  padding: getCssVar('control-captionbar', 'padding');
+
+  @include b(control-captionbar-caption) {
+    @include utils-ellipsis;
+
+    position: relative;
+    height: 100%;
+    padding-left: getCssVar('spacing', 'base');
+    font-size: getCssVar('control-captionbar', 'font-size');
+    font-weight: getCssVar('control-captionbar', 'font-weight');
+    color: getCssVar('control-captionbar', 'color');
+
+    @include flex(row, flex-start, center);
+
+    &::before {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 4px;
+      height: getCssVar('width-icon', 'large');
+      content: '';
+      background-color: getCssVar('color', 'primary');
+      border-radius: 2px;
+      transform: translateY(-50%);
+    }
+
+    &.is-show-icon {
+      padding-left: 0;
+
+      &::before {
+        display: none;
+      }
+    }
+
+    @include e(icon) {
+      margin-right: getCssVar(spacing, tight);
+    }
+
+    @include e(content) {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    @include e(total) {
+      font-size: getCssVar('font-size', 'regular');
+      color: getCssVar('color', 'text', 3);
+      transform: translate(0, 2px);
+    }
+  }
+}
+
+// 第二层视图下caption单独样式
+@mixin view-deep-caption-style {
+  .#{bem(view)} {
+    .#{bem(view)} {
+      .#{bem(control-captionbar-caption)} {
+        #{getCssVarName('control-captionbar', 'font-size')}: getCssVar('control-captionbar', 'font-size2');
+        #{getCssVarName('control-captionbar', 'font-weight')}: getCssVar('control-captionbar', 'font-weight2');
+        padding-left: 0;
+
+        &::before {
+          content: none;
+        }
+      }
+    }
+  }
+}
+
+@include b(view) {
+  &:not(.#{bem(view-appindexview)}) {
+    @include view-deep-caption-style;
+  }
+}
+
+.#{bem(modal)},
+.#{bem(popover)},
+.#{bem(drawer)} {
+  @include view-deep-caption-style;
+}

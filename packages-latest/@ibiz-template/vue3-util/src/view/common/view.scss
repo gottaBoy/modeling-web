@@ -1,0 +1,39 @@
+// 视图样式
+$view: (
+  bg-color: getCssVar(color, bg, 1),                  // 视图背景色  
+  border-radius: getCssVar(border-radius, medium),    // 视图圆角
+);
+
+// 视图默认撑满父容器
+@include b(view) {
+  @include set-component-css-var(view, $view);
+
+  width: 100%;
+  height: 100%;
+
+  .#{bem(view)} {
+    background-color: getCssVar(view, bg-color);
+    border-radius: getCssVar(view, border-radius);
+  }
+
+  // 看板视图样式
+  @include b(view-appportalview){
+    background-color: transparent;
+  }
+
+  &.has-top-message,&.has-bottom-message{
+    @include flex(column);
+
+    // 视图消息不压缩
+    > .#{bem(view-message)}{
+      flex-grow: 0;
+      flex-shrink: 0;
+    }
+
+    // 视图面板自适应
+    > .#{bem(control-viewlayoutpanel)}{
+      flex-grow: 1;
+      flex-shrink: 1;
+    }
+  }
+}

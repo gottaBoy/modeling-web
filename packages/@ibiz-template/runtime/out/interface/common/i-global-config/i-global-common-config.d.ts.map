@@ -1,0 +1,1 @@
+{"version":3,"file":"i-global-common-config.d.ts","sourceRoot":"","sources":["../../../../src/interface/common/i-global-config/i-global-common-config.ts"],"names":[],"mappings":"AAAA;;;;;;;GAOG;AACH,MAAM,WAAW,mBAAmB;IAClC;;;;;;OAMG;IACH,SAAS,EAAE,MAAM,CAAC;IAElB;;;;;;OAMG;IACH,WAAW,CAAC,EAAE,MAAM,CAAC;IAErB;;;;;;OAMG;IACH,YAAY,CAAC,EAAE,MAAM,CAAC;CACvB"}

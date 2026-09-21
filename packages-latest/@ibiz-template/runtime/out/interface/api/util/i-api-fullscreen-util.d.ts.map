@@ -1,0 +1,1 @@
+{"version":3,"file":"i-api-fullscreen-util.d.ts","sourceRoot":"","sources":["../../../../src/interface/api/util/i-api-fullscreen-util.ts"],"names":[],"mappings":"AAAA;;;;GAIG;AACH,MAAM,WAAW,kBAAkB;IACjC;;;;;OAKG;IACH,qBAAqB,CAAC,GAAG,EAAE,cAAc,EAAE,IAAI,CAAC,EAAE;QAAE,KAAK,CAAC,EAAE,MAAM,CAAA;KAAE,GAAG,IAAI,CAAC;IAE5E;;;OAGG;IACH,sBAAsB,IAAI,IAAI,CAAC;CAChC"}

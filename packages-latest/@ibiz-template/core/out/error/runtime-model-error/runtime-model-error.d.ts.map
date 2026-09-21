@@ -1,0 +1,1 @@
+{"version":3,"file":"runtime-model-error.d.ts","sourceRoot":"","sources":["../../../src/error/runtime-model-error/runtime-model-error.ts"],"names":[],"mappings":"AAAA;;;;;GAKG;AACH,qBAAa,iBAAkB,SAAQ,KAAK;IAUjC,KAAK,EAAE,KAAK;IATrB,IAAI,EAAE,MAAM,CAAuD;IAEnE;;;;;OAKG;gBAEM,KAAK,EAAE,KAAK,EACnB,GAAG,CAAC,EAAE,MAAM;CASf"}

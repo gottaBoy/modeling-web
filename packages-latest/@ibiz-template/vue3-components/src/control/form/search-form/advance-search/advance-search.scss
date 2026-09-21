@@ -1,0 +1,49 @@
+// 高级搜索样式
+$advance-search: (
+  padding: getCssVar('spacing', 'base'),                    // 高级搜索内边距
+  gap: getCssVar('spacing', 'base'),                        // 高级搜索头部、内容区、底部区间隔            
+);
+
+// 高级搜索头部样式
+$advance-search-header: (
+  height: getCssVar('height-control', 'large'),             // 高级搜索头部高度
+  font-size: getCssVar('font-size', 'header', 4),           // 高级搜索头部字体大小
+);
+
+// 高级搜索内容样式
+$advance-search-content: (
+  height: calc(100% - #{getCssVar('height-control', 'large')} * 2),         // 高级搜索内容高度
+);
+
+@include b(advance-search) {
+  @include set-component-css-var('advance-search', $advance-search);
+  @include set-component-css-var('advance-search-header', $advance-search-header);
+  @include set-component-css-var('advance-search-content', $advance-search-content);
+
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: getCssVar(advance-search, padding);
+  overflow: auto;
+  @include e('header') {
+    display: flex;
+    align-items: center;
+    height: getCssVar(advance-search-header, 'height');
+    padding-bottom: getCssVar(advance-search, 'gap');
+    overflow: hidden;
+    font-size: getCssVar(advance-search-header, 'font-size');
+    white-space: nowrap;
+    cursor: move;
+  }
+  @include e('search-form') {
+    width: 100%;
+    height: getCssVar(advance-search-content, 'height');
+    overflow: auto;
+  }
+  @include e('footer') {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: getCssVar(advance-search, 'gap');
+  }
+}

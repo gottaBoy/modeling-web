@@ -1,0 +1,27 @@
+$view-model-viewer: (
+  width: 600px,
+);
+
+@include b(view-model-viewer) {
+  @include set-component-css-var(view-model-viewer, $view-model-viewer);
+
+  position: relative;
+
+  @include b(view-model-viewer-drag) {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    padding: getCssVar(spacing, extra-tight) 0;
+    color: getCssVar(color, primary , text);
+    pointer-events: none;
+    background: getCssVar(color, primary);
+    border-radius: getCssVar(border, radius, extra, small);
+    transform: translateY(-50%);
+  }
+
+  @include b(view-model-viewer-editor) {
+    width: getCssVar(view-model-viewer, width);
+    height: 100vh;
+    padding: 0 0 0 16px;
+  }
+}

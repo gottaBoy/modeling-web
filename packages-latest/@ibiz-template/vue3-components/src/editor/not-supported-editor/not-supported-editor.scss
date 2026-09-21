@@ -1,0 +1,23 @@
+// 未支持编辑器根元素
+$not-supported-editor: (
+  height: var(--el-component-size),                               // 高度
+  text-color: getCssVar('color', 'danger'),                       // 文本颜色
+  disabled-color: var(--el-disabled-text-color),                  // 禁用文本色
+  disabled-bg-color: var(--el-disabled-bg-color),                 // 禁用背景色
+  border-radius: var(--el-border-radius-base),                    // 倒角
+  disabled-border-color: var(--el-disabled-border-color),         // 禁用边框色
+);
+
+@include b(not-supported-editor) {
+  @include set-component-css-var(not-supported-editor, $not-supported-editor);
+
+  color: getCssVar(not-supported-editor, text-color);
+}
+
+@include b(not-supported-editor-preview-content) {
+  height: getCssVar(not-supported-editor, height);
+  color: getCssVar(not-supported-editor, disabled-color);
+  background-color: getCssVar(not-supported-editor, disabled-bg-color);
+  border-radius: getCssVar(not-supported-editor, border-radius);
+  box-shadow: 0 0 0 1px getCssVar(not-supported-editor, disabled-border-color) inset;
+}

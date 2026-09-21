@@ -1,0 +1,245 @@
+// 树部件样式
+$control-treeview: (
+  font-size: getCssVar(font-size, regular),                       // 树部件字体大小
+  font-weight: getCssVar(font-weight, regular),                   // 树部件字体粗细
+  text-color: getCssVar(color, text, 0),                         // 树部件文本色
+  padding: getCssVar(spacing, tight) 0,                          // 树部件内边距
+  bg-color: transparent,                                         // 树部件背景色
+);
+
+// 树节点样式
+$control-treeview-item: (
+  font-size: getCssVar(control-treeview, font-size),             // 节点字体大小
+  hover-color: getCssVar(color, text, 0),                        // 节点悬浮文本色
+  hover-bg-color: getCssVar(color, fill, 0),                     // 节点悬浮背景色
+  select-color: getCssVar(color, text, 0),                       // 节点选中文本色
+  select-bg-color: getCssVar(color, primary, light, default),    // 节点选中背景色
+  disabled-color: getCssVar(color, disabled, text),              // 节点禁用态文本色
+  font-weight: getCssVar(control-treeview, font-weight),         // 节点字体粗细
+  icon-height: getCssVar(width-icon, medium),                    // 节点图标高度
+  icon-width: getCssVar(width-icon, medium),                     // 节点图标宽度
+  icon-gap: getCssVar(spacing, tight),                            // 节点图标与右侧文本间隔
+  height: 26px,                                                  // 节点行高度
+  new-node-padding: 0 getCssVar(spacing, base) 0 calc(1em + getCssVar(spacing, base, tight)), // 新建节点输入框内边距
+);
+
+// 树节点右键菜单样式
+$control-treeview-item-menu: (
+  width: 30px,                                                    // 右键菜单触发按钮宽度
+  padding: getCssVar(spacing, tight) getCssVar(spacing, none),    // 右键菜单容器内边距
+  item-padding: getCssVar(spacing, tight) getCssVar(spacing, base-loose), // 右键菜单项内边距
+  item-height: 40px,                                             // 右键菜单下拉项高度
+  border-radius: getCssVar(spacing, none),                       // 右键菜单弹框圆角
+  bg-color: getCssVar(color, bg, 3),                             // 右键菜单弹框背景色
+  hover-color: getCssVar(color, fill, 0),                        // 右键菜单项悬浮背景色
+  text-color: getCssVar(color, text, 2),                         // 右键菜单项文本色
+);
+
+// 树部件搜索框样式
+$control-treeview-search: (
+  margin: 0 getCssVar(spacing, base) getCssVar(spacing, tight),  // 搜索框外边距
+  width: calc(100% - getCssVar(spacing, base) * 2)
+);
+
+// 树部件内容区域样式
+$control-treeview-content: (
+  padding: 0 getCssVar(spacing, base),       // 内容区域内边距
+  bg-color: transparent,         // 内容区域背景色
+);
+
+// 树部件加载更多按钮样式
+$control-treeview-more: (
+  color: getCssVar(color, primary),  // 加载更多按钮文本色
+);
+
+@include b(control-treeview) {
+  @include set-component-css-var(control-treeview, $control-treeview);
+  @include set-component-css-var(control-treeview-item, $control-treeview-item);
+  @include set-component-css-var(control-treeview-item-menu, $control-treeview-item-menu);
+  @include set-component-css-var(control-treeview-search, $control-treeview-search);
+  @include set-component-css-var(control-treeview-content, $control-treeview-content);
+  @include set-component-css-var(control-treeview-more, $control-treeview-more);
+
+  position: relative;
+  height: 100%;
+  padding: getCssVar(control-treeview, padding);
+
+  @include e(nav-icon) {
+    position: absolute;
+    top: 14px;
+    right: 10px;
+    color: getCssVar(color, primary);
+    cursor: pointer;
+  }
+
+  .el-tree-node {
+    @include when(load-more) {
+      pointer-events: none;
+
+      .el-icon, .el-checkbox {
+        display: none;
+      }
+
+      @include b(control-treeview-node) {
+        justify-content: center;
+        color: getCssVar(control-treeview-more, color);
+        pointer-events: all;
+      }
+    }
+  }
+}
+
+@include b(control-treeview-node) {
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 1;
+  align-items: center;
+  min-width: 1px;
+  height: 100%;
+
+  // 常用操作默认隐藏，节点hover时显示
+  .#{bem('context-menu')} {
+    display: flex;
+    flex-shrink: 0;
+  }
+  .#{bem('context-menu','item', 'level-200')} {
+    display: none;
+  }
+
+  &:hover {
+    .#{bem('context-menu','item', 'level-200')} {
+      display: block;
+    }
+  }
+  @include e(icon) {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: getCssVar(control-treeview-item, icon-width);
+    height: getCssVar(control-treeview-item, icon-height);
+    margin-right: getCssVar(control-treeview-item, icon-gap);
+
+    > svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  @include e(label) {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 1px;
+    @include utils-ellipsis;
+  }
+
+  &:hover {
+    .#{bem(control-treeview-context-menu-trigger)} {
+      display: inline-block;
+    }
+  }
+
+  @include m(disabled) {
+    color: getCssVar(control-treeview-item, disabled-color);
+    cursor: not-allowed;
+  }
+
+  @include e(buttons) {
+    @include m(hover) {
+      .#{bem('context-menu','item')} {
+        display: none;
+      }
+    }
+  }
+
+  &:hover {
+    .#{bem('control-treeview-node', 'buttons', 'hover')} {
+      .#{bem('context-menu','item')} {
+        display: block;
+      }
+    }
+  }
+}
+
+@include b(control-treeview-new-node){
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: getCssVar(control-treeview-item, new-node-padding);
+  font-size: getCssVar(control-treeview-item, font-size);
+}
+
+@include b(control-treeview-context-menu-trigger) {
+  display: none;
+  flex-shrink: 0;
+  width: getCssVar(control-treeview-item-menu, width);
+  text-align: center;
+  cursor: pointer;
+  @include e(caption-icon) {
+    vertical-align: middle;
+  }
+}
+
+// 树节点上下文菜单样式
+@include b(control-treeview-context-menu) {
+  @include set-component-css-var(control-treeview-item-menu, $control-treeview-item-menu);
+
+  &.mx-context-menu {
+    padding: getCssVar(control-treeview-item-menu, padding);
+    background-color: getCssVar(control-treeview-item-menu, bg-color);
+    border-radius: getCssVar(control-treeview-item-menu, border-radius);
+
+    --mx-menu-text: #{getCssVar(control-treeview-item-menu, text-color)};
+
+    .mx-context-menu-item {
+      height: getCssVar(control-treeview-item-menu, item-height);
+      padding: getCssVar(control-treeview-item-menu, item-padding);
+      cursor: pointer;
+
+      &:hover {
+        color: getCssVar(control-treeview-item-menu, text-color);
+        background-color: getCssVar(control-treeview-item-menu, hover-color);
+      }
+    }
+  }
+}
+
+@include b(control-treeview-quick-search) {
+  width: getCssVar(control-treeview-search, width);
+  margin: getCssVar(control-treeview-search, margin);
+}
+
+@include b(control-treeview-tree) {
+  &.el-tree {
+    --el-tree-text-color: #{getCssVar(control-treeview, text-color)};
+    --el-tree-node-content-height: #{getCssVar(control-treeview-item, height)};
+
+    .el-tree-node__content:hover {
+      color: #{getCssVar(control-treeview-item, hover-color)};
+      background-color: #{getCssVar(control-treeview-item, hover-bg-color)};
+    }
+
+    padding: getCssVar(control-treeview-content, padding);
+    background-color: #{getCssVar(control-treeview-content, bg-color)};
+
+    .el-tree-node__content:has(.#{bem(control-treeview-new-node)}) {
+      .#{bem(control-treeview-new-node)} {
+        width: 100%;
+        padding-right: 0;
+        padding-left: 0;
+      }
+    } 
+  }
+
+
+  &.el-tree.el-tree--highlight-current
+  .el-tree-node.is-current
+  > .el-tree-node__content {
+    color: #{getCssVar(control-treeview-item, select-color)};
+    background-color: #{getCssVar(control-treeview-item, select-bg-color)};
+  }
+}
+
+@include b(control-treeview-editing-node) {
+  --el-input-height: #{getCssVar(control-treeview, item, height)};
+}

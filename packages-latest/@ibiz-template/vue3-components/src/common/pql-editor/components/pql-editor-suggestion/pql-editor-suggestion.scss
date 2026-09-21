@@ -1,0 +1,33 @@
+@include b(pql-editor-suggestion) {
+  max-height: 320px;
+  padding: getCssVar('spacing', 'base-tight') 0;
+  overflow-y: auto;
+}
+
+@include b(pql-editor-suggestion-item) {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: getCssVar('spacing', 'extra-tight') getCssVar('spacing', 'base-loose');
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  outline: none;
+
+  &:hover {
+    background-color: getCssVar(color, fill, 1);
+  }
+
+  @include e(text) {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @include m(empty) {
+    text-align: center;
+  }
+}

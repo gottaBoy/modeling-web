@@ -1,0 +1,73 @@
+{
+  "name": "@ibiz-template/vue3-util",
+  "version": "0.7.38-alpha.57",
+  "description": "vue3 工具包",
+  "main": "lib/index.cjs",
+  "types": "es/index.d.ts",
+  "system": "./dist/index.system.js",
+  "exports": {
+    ".": {
+      "import": "./es/index.mjs",
+      "require": "./lib/index.cjs"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitee.com/iBizModeling/ibiz-template.git"
+  },
+  "files": [
+    "dist",
+    "es",
+    "lib"
+  ],
+  "scripts": {
+    "dev": "ibiz-temp build -w",
+    "build": "ibiz-temp build -c && vue-tsc --declaration --emitDeclarationOnly",
+    "lint": "vue-tsc --noEmit && eslint 'src/**/*.tsx' 'src/**/*.ts'",
+    "lint:fix": "vue-tsc --noEmit && eslint --fix 'src/**/*.tsx' 'src/**/*.ts'",
+    "clean": "rimraf es dist",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "publish:next": "npm run build && npm publish --access public --tag=next --registry=https://registry.npmjs.org/",
+    "publish:dev": "npm run build && npm publish --access public --tag=dev --registry=https://registry.npmjs.org/",
+    "publish:alpha": "npm run build && npm publish --access public --tag=alpha --registry=https://registry.npmjs.org/",
+    "publish:beta": "npm run build && npm publish --access public --tag=beta --registry=https://registry.npmjs.org/",
+    "publish:npm": "npm run build && npm publish --access public --registry=https://registry.npmjs.org/",
+    "publish:local": "npm run build && npm publish --access public --registry=http://172.16.240.221:8081/repository/local/"
+  },
+  "author": "chitanda",
+  "license": "MIT",
+  "devDependencies": {
+    "@ibiz-template/cli": "^0.3.10",
+    "@ibiz-template/core": "^0.7.38-alpha.57",
+    "@ibiz-template/runtime": "^0.7.38-alpha.57",
+    "@ibiz-template/theme": "^0.7.32",
+    "@ibiz/model-core": "^0.1.64",
+    "@types/path-browserify": "^1.0.2",
+    "@types/qs": "^6.9.11",
+    "@types/systemjs": "^6.13.5",
+    "dayjs": "^1.11.10",
+    "path-browserify": "^1.0.1",
+    "pinia": "^2.1.7",
+    "qs": "^6.11.2",
+    "qx-util": "^0.4.8",
+    "ramda": "^0.29.1",
+    "vue": "^3.3.8",
+    "vue-router": "^4.2.5",
+    "vue-tsc": "^1.8.27"
+  },
+  "peerDependencies": {
+    "@ibiz-template/core": "^0.6.0",
+    "@ibiz-template/runtime": "^0.6.0",
+    "@ibiz/model-core": "^0.1.64",
+    "dayjs": "^1.11.10",
+    "path-browserify": "^1.0.1",
+    "pinia": "^2.1.7",
+    "qs": "^6.11.1",
+    "qx-util": "^0.4.8",
+    "ramda": "^0.29.0",
+    "vue": "^3.3.8",
+    "vue-router": "^4.2.4"
+  }
+}

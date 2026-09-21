@@ -1,0 +1,363 @@
+import { PanelItemController } from '@ibiz-template/runtime';
+import { reject, isNil } from 'ramda';
+import { route2routePath, routePath2string } from '@ibiz-template/vue3-util';
+import { notNilEmpty } from 'qx-util';
+import { NavBreadcrumbState } from './nav-breadcrumb.state.mjs';
+import { NavBreadcrumbService } from './nav-breadcrumb.service.mjs';
+import { getCurViewName, getMenuTag, getAppIndexViewName, getIndexBreadcrumb, getMenuItemByTag, getViewInfoByViewStack, getAppFuncByViewName, getMenuItemsByAppFunc } from './nav-breadcrumb.util.mjs';
+
+"use strict";
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => {
+  __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+  return value;
+};
+class NavBreadcrumbController extends PanelItemController {
+  constructor() {
+    super(...arguments);
+    /**
+     * @description 面包屑分割符
+     * @exposedoc
+     * @type {string}
+     * @memberof NavBreadcrumbController
+     */
+    __publicField(this, "separator", "/");
+    /**
+     * @description 导航模式，路由模式：根据路由计算导航数据，菜单模式：根据菜单模型计算导航数据，缓存模式：根据缓存计算导航数据
+     * @exposedoc
+     * @type {('router' | 'menu' | 'store')}
+     * @memberof NavBreadcrumbController
+     */
+    __publicField(this, "navMode", "router");
+    /**
+     * @description 是否显示应用标题
+     * @exposedoc
+     * @type {boolean}
+     * @memberof NavBreadcrumbController
+     */
+    __publicField(this, "showHome", true);
+    /**
+     * @description 面包屑服务
+     * @type {NavBreadcrumbService}
+     * @memberof NavBreadcrumbController
+     */
+    __publicField(this, "service");
+    /**
+     * @description 自定义补充参数
+     * @exposedoc
+     * @type {IData}
+     * @memberof NavBreadcrumbController
+     */
+    __publicField(this, "rawItemParams", {});
+  }
+  createState() {
+    var _a;
+    return new NavBreadcrumbState((_a = this.parent) == null ? void 0 : _a.state);
+  }
+  /**
+   * @description 应用菜单控制器
+   * @exposedoc
+   * @readonly
+   * @type {(IAppMenuController | undefined)}
+   * @memberof NavBreadcrumbController
+   */
+  get appmenu() {
+    return this.panel.view.getController("appmenu");
+  }
+  /**
+   * @description 首页导航占位控制器
+   * @readonly
+   * @exposedoc
+   * @type {(NavPosIndexController | undefined)}
+   * @memberof NavBreadcrumbController
+   */
+  get navPos() {
+    return this.panel.panelItems.nav_pos_index;
+  }
+  async onInit() {
+    await super.onInit();
+    this.handleRawItemParams();
+    this.navMode = this.rawItemParams.navmode || "router";
+    this.separator = this.rawItemParams.separator || "/";
+    this.showHome = this.rawItemParams.showhome === "true";
+    this.service = new NavBreadcrumbService(this.navMode, this.panel.context);
+  }
+  /**
+   * @description 初始化
+   * @param {Router} router
+   * @memberof NavBreadcrumbController
+   */
+  onCreated(router) {
+    if (this.navMode === "menu") {
+      this.setBreadcrumbByMenu(router);
+    }
+    if (this.navMode === "store") {
+      this.setBreadcrumbByStore(router);
+    }
+  }
+  /**
+   * @description 路由改变
+   * @param {Router} router
+   * @memberof NavBreadcrumbController
+   */
+  onRouteChange(router) {
+    if (this.navMode === "router") {
+      this.setBreadcrumbByRouter(router);
+      return;
+    }
+    if (this.navMode === "store") {
+      const { currentRoute } = router;
+      const routePath = route2routePath(currentRoute.value);
+      const fullPath = currentRoute.value.fullPath;
+      const viewName = getCurViewName(router);
+      const menuTag = getMenuTag(routePath.pathNodes);
+      const chacheItem = this.service.getItem({ fullPath, viewName });
+      const indexViewName = getAppIndexViewName(this.panel.context);
+      if (chacheItem) {
+        if (chacheItem.viewName === indexViewName) {
+          this.service.setChache([
+            { ...getIndexBreadcrumb(this.panel.context), fullPath }
+          ]);
+          this.resetBreadcrumbs();
+          return;
+        }
+        this.service.update({ ...chacheItem, fullPath });
+        const removeItems = this.service.removeAfter(fullPath);
+        removeItems.forEach((item) => {
+          var _a;
+          (_a = this.navPos) == null ? void 0 : _a.removeCache(item.fullPath);
+        });
+        this.resetBreadcrumbs();
+      } else if (this.state.menuTag !== menuTag) {
+        this.setBreadcrumbByRouter(router);
+      } else {
+        this.service.add({ viewName, fullPath, type: "default" });
+      }
+      this.state.menuTag = menuTag;
+    }
+  }
+  /**
+   * @description 重置面包屑数据
+   * @memberof NavBreadcrumbController
+   */
+  resetBreadcrumbs() {
+    this.state.breadcrumbItems = this.service.getChache();
+  }
+  /**
+   * @description 更新视图信息
+   * @param {string} fullPath
+   * @param {{ viewName: string; caption?: string; dataInfo?: string }} info
+   * @return {*}  {void}
+   * @memberof NavBreadcrumbController
+   */
+  updateViewInfo(fullPath, info) {
+    if (this.navMode === "menu") {
+      return;
+    }
+    this.service.update({ fullPath, type: "default", ...info });
+    this.resetBreadcrumbs();
+  }
+  /**
+   * @description 删除缓存数据
+   * @param {string} fullPath
+   * @memberof NavBreadcrumbController
+   */
+  removeCache(fullPath) {
+    this.service.remove(fullPath);
+  }
+  /**
+   * @description 根据路由计算面包屑数据
+   * @param {Router} router
+   * @memberof NavBreadcrumbController
+   */
+  async setBreadcrumbByRouter(router) {
+    const { currentRoute } = router;
+    const routePath = route2routePath(currentRoute.value);
+    const { appContext = {}, pathNodes } = routePath;
+    const menuTag = getMenuTag(pathNodes);
+    let hasMenuItem = false;
+    const menuData = await getMenuItemByTag(
+      menuTag,
+      this.appmenu,
+      this.panel.context
+    );
+    const calcPathNodes = routePath.pathNodes.map(
+      async (node, index) => {
+        if (this.appmenu && menuData && menuData.viewName === node.viewName) {
+          hasMenuItem = true;
+        }
+        const fullPath = routePath2string({
+          appContext,
+          pathNodes: pathNodes.slice(0, index + 1)
+        });
+        const result = {
+          viewName: node.viewName,
+          fullPath,
+          type: "default"
+        };
+        const chacheItem = this.service.getItem({ viewName: node.viewName });
+        if (chacheItem) {
+          if (!chacheItem.fullPath) {
+            chacheItem.fullPath = fullPath;
+          }
+          Object.assign(result, chacheItem);
+        }
+        const viewInfo = getViewInfoByViewStack(
+          node.viewName,
+          this.panel.context
+        );
+        if (viewInfo) {
+          Object.assign(result, reject(isNil, viewInfo));
+        }
+        return result;
+      }
+    );
+    const items = await Promise.all(calcPathNodes);
+    if (!hasMenuItem && menuData) {
+      this.state.menuTag = menuData.tag;
+      const item = {
+        viewName: menuData.viewName,
+        caption: menuData.menuItem.caption,
+        fullPath: "",
+        type: "menuItem",
+        menuTag: menuData.tag
+      };
+      items.splice(1, 0, item);
+    }
+    this.service.setChache(items);
+    this.resetBreadcrumbs();
+  }
+  /**
+   * @description 根据路由设置菜单面包屑导航数据
+   * @param {Router} router
+   * @memberof NavBreadcrumbController
+   */
+  setBreadcrumbByMenu(router) {
+    const { currentRoute } = router;
+    const routePath = route2routePath(currentRoute.value);
+    let appFunc;
+    routePath.pathNodes.some((item, index) => {
+      if (index === 0) {
+        return false;
+      }
+      const { viewName } = item;
+      const func = getAppFuncByViewName(viewName, this.panel.context.srfappid);
+      if (func) {
+        appFunc = func;
+      }
+      return appFunc;
+    });
+    if (this.appmenu) {
+      if (appFunc) {
+        const menuItems = getMenuItemsByAppFunc(
+          appFunc,
+          this.appmenu.model.appMenuItems || []
+        );
+        const items = menuItems.map((item) => {
+          return {
+            caption: item.caption,
+            fullPath: "",
+            type: "default",
+            viewName: item.id
+          };
+        });
+        items.unshift(getIndexBreadcrumb(this.panel.context));
+        this.service.setChache(items);
+        this.resetBreadcrumbs();
+      } else {
+        this.service.setChache([getIndexBreadcrumb(this.panel.context)]);
+        this.resetBreadcrumbs();
+      }
+      this.appmenu.evt.on("onClick", (data) => {
+        const { event } = data;
+        const items = event.map((key) => {
+          const item = this.appmenu.allAppMenuItems.find((x) => x.id === key);
+          if (item) {
+            return {
+              caption: item.caption,
+              fullPath: "",
+              viewName: item.id
+            };
+          }
+        });
+        items.unshift(getIndexBreadcrumb(this.panel.context));
+        this.service.setChache(items);
+        this.resetBreadcrumbs();
+      });
+    }
+  }
+  /**
+   * @description 设置缓存模式面包屑数据
+   * @param {Router} router
+   * @memberof NavBreadcrumbController
+   */
+  setBreadcrumbByStore(router) {
+    const chache = this.service.getChache();
+    if (chache.length === 0) {
+      this.setBreadcrumbByRouter(router);
+    } else {
+      this.resetBreadcrumbs();
+    }
+    if (this.appmenu) {
+      this.appmenu.evt.on("onClick", async (data) => {
+        const { eventArg } = data;
+        const menuData = await getMenuItemByTag(
+          eventArg,
+          this.appmenu,
+          this.panel.context
+        );
+        if (menuData) {
+          const { viewName, appFunc, viewConfig } = menuData;
+          if (appFunc.openMode !== "INDEXVIEWTAB" || viewConfig && viewConfig.openMode && viewConfig.openMode !== "INDEXVIEWTAB") {
+            return;
+          }
+          const chacheItem = this.service.getItem({ viewName });
+          const items = [];
+          if (chacheItem) {
+            items.push(chacheItem);
+          } else {
+            items.push({
+              viewName,
+              fullPath: "",
+              type: "default"
+            });
+          }
+          items.unshift(getIndexBreadcrumb(this.panel.context));
+          this.service.setChache(items);
+          this.resetBreadcrumbs();
+        }
+      });
+    }
+  }
+  /**
+   * @description 处理自定义补充参数
+   * @protected
+   * @memberof NavBreadcrumbController
+   */
+  handleRawItemParams() {
+    var _a;
+    let params = {};
+    const rawItemParams = (_a = this.model.rawItem) == null ? void 0 : _a.rawItemParams;
+    if (notNilEmpty(rawItemParams)) {
+      params = rawItemParams.reduce((param, item) => {
+        param[item.key.toLowerCase()] = item.value;
+        return param;
+      }, {});
+    }
+    Object.assign(this.rawItemParams, params);
+  }
+  /**
+   * @description 打开菜单项视图
+   * @param {IData} item
+   * @param {MouseEvent} event
+   * @memberof NavBreadcrumbController
+   */
+  openMenuItemView(item, event) {
+    if (this.appmenu) {
+      this.appmenu.onClickMenuItem(item.menuTag, event);
+    }
+  }
+}
+
+export { NavBreadcrumbController };

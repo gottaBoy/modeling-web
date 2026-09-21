@@ -1,0 +1,110 @@
+// 用户消息样式
+$user-message: (
+  height: calc(getCssVar('width-icon', 'extra-large') + 4px),  // 图标按钮高度
+  width: calc(getCssVar('width-icon', 'extra-large') + 4px),   // 图标按钮宽度
+);
+
+// 用户消息未读计数器样式
+$user-message-counter: (
+  top: getCssVar('spacing', 'extra-tight'),    // 徽标顶部定位
+  right: getCssVar('spacing', 'base'),         // 徽标右侧定位
+);
+
+// 用户消息弹出层样式
+$user-message-popup: (
+  width: 500px,                                          // 弹出层宽度
+  height: 500px,                                         // 弹出层高度
+  color-hover: getCssVar(color,primary),                  // 消息项悬浮文本色
+  padding-top: getCssVar('spacing', 'super-tight'),       // 弹出层顶部内边距
+  header-height: getCssVar('height-control', 'large'),    // 弹出层头部高度
+);
+
+@include b(user-message) {
+  @include set-component-css-var('user-message', $user-message);
+  @include set-component-css-var('user-message-counter', $user-message-counter);
+  
+  width: 100%;
+  height: 100%;
+
+  @include flex(row, center, center);
+
+  @include e(image){
+    width: getCssVar(user-message, width);
+    height: getCssVar(user-message, height);
+    cursor: pointer;
+  }
+
+  @include e(badge){
+    // 修复mac环境滚动条异常
+    display: inline-flex;
+
+    .el-badge__content {
+      top: getCssVar(user-message, counter, top);
+      right: getCssVar(user-message, counter, right);
+      border-width: 0
+    }
+  }
+  
+}
+
+@include b(user-message-popover) {
+  @include set-component-css-var('user-message-popup', $user-message-popup);
+
+  width: getCssVar(user-message, popup, width) !important;
+  height: getCssVar(user-message, popup, height) !important;
+  
+  &.el-popover{
+    padding-top: getCssVar(user-message, popup, padding-top);
+    padding-bottom: 0;
+  }
+}
+
+@include b(user-message-popover-content-box) {
+  position: relative;
+  height: 100%;  
+}
+
+@include b(user-message-popover-icons){
+  position: absolute;
+  top: 0;
+  right: 0;
+  line-height: getCssVar('user-message', popup, 'header-height');
+
+  @include b(user-message-popover-icons-read){
+    cursor: pointer;
+
+    &:hover{
+      color: getCssVar('user-message', popup, color-hover);
+    }
+  }
+
+}
+
+
+@include b(user-message-popover-content) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .el-tabs__content {
+    flex: 1;
+  }
+
+  .el-tab-pane{
+    height: 100%;
+    overflow: auto;
+  }
+}
+
+
+@include b(user-message-notice) {
+  padding: getCssVar(spacing, tight);
+  padding-right: getCssVar(spacing, base, loose);
+
+  .el-notification__group{
+    max-width: 100%;
+    margin: getCssVar('spacing', 'none');
+    cursor: pointer;
+  }
+
+}

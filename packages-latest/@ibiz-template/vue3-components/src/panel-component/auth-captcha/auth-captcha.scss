@@ -1,0 +1,53 @@
+// 人机识别控件样式
+$auth-captcha: (
+  width: calc(100% - 120px),                  // 输入框宽度（减去验证码图片宽度）
+  error-color: getCssVar(color, danger),       // 校验错误文本色
+  error-font-size: getCssVar(font-size, small), // 校验错误字体大小
+);
+
+// 人机识别控件图片样式
+$auth-captcha-image: (
+  width: 120px,                          // 验证码图片宽度
+  color: getCssVar(color, text, 3),       // 验证码占位文本色
+  bg-color: getCssVar(color, fill, 0),    // 验证码背景色
+);
+
+@include b(auth-captcha) {
+  @include set-component-css-var('auth-captcha', $auth-captcha);
+  @include set-component-css-var('auth-captcha-image', $auth-captcha-image);
+
+  position: relative;
+  display: flex;
+  @include e('captcha') {
+    width: getCssVar(auth-captcha, width);
+  }
+  @include e('image') {
+    flex-shrink: 0;
+    width: getCssVar(auth-captcha, image, width);
+    height: 100%;
+    cursor: pointer;
+    @include m('hint') {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      color: getCssVar(auth-captcha, image, color);
+      background-color: getCssVar(auth-captcha, image, bg-color);
+    }
+  }
+  @include e('error') {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    padding-top: 2px;
+    font-size: getCssVar(auth-captcha, error-font-size);
+    line-height: 1;
+    color: getCssVar(auth-captcha, error-color);
+  }
+  @include when(error) {
+    .el-input__wrapper {
+      box-shadow: 0 0 0 1px getCssVar(auth-captcha, error-color) inset;
+    }
+  }
+}

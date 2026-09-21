@@ -1,0 +1,460 @@
+// 工具栏部件样式
+$control-toolbar: (
+  font-size: getCssVar(font-size, regular),                       // 按钮字体大小
+);
+
+// 工具栏按钮项样式
+$control-toolbar-item: (
+  font-size: getCssVar(control-toolbar, font-size),                // 按钮字体大小
+  color: getCssVar(color, primary, text),                          // 按钮文本色
+  bg-color: getCssVar(color, primary),                             // 按钮背景色
+  margin: 0 getCssVar(spacing, extra-tight),                       // 按钮左右外边距
+  padding: getCssVar(spacing, tight) getCssVar(spacing, base),     // 按钮内边距
+  disabled-bg-color: rgba(var(#{getCssVarName(grey, 4)}), 0.5),  // 禁用态按钮背景色
+  border-radius: getCssVar(border-radius, small),                  // 按钮圆角
+);
+
+// 工具栏按钮图标样式
+$control-toolbar-item-icon: (
+  font-size: getCssVar(control-toolbar, font-size),     // 图标字体大小
+  max-width: getCssVar(width-icon, medium),             // 图标最大宽度
+  max-height: getCssVar(width-icon, medium),            // 图标最大高度
+  gap: getCssVar(spacing, extra-tight),                 // 图标与文字间距
+);
+
+// 工具栏计数器样式
+$control-toolbar-item-counter: (
+  gap: getCssVar('spacing', 'super-tight'),  // 计数器徽标与文字间距
+);
+
+// 工具栏分割线样式
+$control-toolbar-divider: (
+  color: getCssVar(color, fill, 2),  // 分割线颜色
+);
+
+// 工具栏分组容器样式
+$control-toolbar-menu: (
+  height: 32px,                                     // 分组容器高度
+  margin: 0 getCssVar(spacing, extra-tight),         // 分组容器左右外边距
+);
+
+// 工具栏下拉菜单项样式
+$control-toolbar-menu-item: (
+  color: getCssVar(color, primary, text),             // 菜单项文本色
+  hover-color: getCssVar(color, primary, hover, text), // 菜单项悬浮文本色
+  hover-bg-color: getCssVar(color, primary, hover),   // 菜单项悬浮背景色
+);
+
+// 工具栏分组按钮样式
+$control-toolbar-submenu: (
+  font-size: getCssVar(control-toolbar, font-size),     // 分组按钮字体大小
+  color: getCssVar(color, primary, text),               // 分组按钮文本色
+  bg-color: getCssVar(color, primary),                  // 分组按钮背景色
+  hover-color: getCssVar(color, primary, hover, text),  // 分组按钮项悬浮文本色
+  hover-bg-color: getCssVar(color, primary, hover),     // 分组按钮项悬浮背景色
+  active-color: getCssVar(color, primary, text),        // 分组按钮项激活文本色
+  padding: 0 10px,                                      // 分组按钮项内边距
+);
+
+// 工具栏弹出层样式
+$control-toolbar-popup: (
+  color: getCssVar(color, primary, text),   // 弹出层文本色
+  bg-color: getCssVar(color, primary),      // 弹出层背景色
+);
+
+// 工具栏行为组下拉样式
+$control-toolbar-actions: (
+  color: getCssVar(color, primary, text),                                      // 行为组按钮文本色
+  bg-color: getCssVar(color, primary),                                         // 行为组按钮背景色
+  hover-color: getCssVar(color, primary, hover, text),                         // 行为组按钮悬浮文本色
+  hover-bg-color: getCssVar(color, primary, hover),                            // 行为组按钮悬浮背景色
+  margin: 0 getCssVar(spacing, extra-tight),                                   // 行为组按钮外边距
+  popover-button-padding: getCssVar(spacing, tight) getCssVar(spacing, base-loose), // 弹出层按钮内边距
+  dropdown-item-height: 36px,                                                  // 下拉列表项高度
+  wrapper-padding: getCssVar(spacing, extra-tight) 0,                          // 下拉列表容器上下内边距
+);
+
+// 工具栏项样式
+@mixin toolbar-item-style {
+  font-size: getCssVar(font-size, regular);
+
+  .#{bem(toolbar-item-icon)}{
+    @include flex(row, center, center); 
+
+    width: getCssVar(control-toolbar, item-icon, max-width);
+    height: getCssVar(control-toolbar, item-icon, max-height);
+
+    .#{bem(icon)}{
+      @include flex(row, center, center);
+
+      width: 100%;
+      height: 100%;
+    }
+
+    i{
+      font-size: getCssVar(control-toolbar, item-icon, font-size);   
+    }
+
+    img{
+      display: inline-block;
+      width: 100%;
+      height: 100%;
+    }
+
+    & + .#{bem(toolbar-item-text)}{
+      margin-left: getCssVar(control-toolbar, item-icon, gap);   
+    }
+  }
+  .#{bem(toolbar-item-counter)} {
+    margin-left: getCssVar(control-toolbar, item-counter, gap);
+  }
+}
+
+@include b(control-toolbar) {
+  @include set-component-css-var(control-toolbar, $control-toolbar);
+  @include set-component-css-var(control-toolbar-item, $control-toolbar-item);
+  @include set-component-css-var(control-toolbar-item-icon, $control-toolbar-item-icon);
+  @include set-component-css-var(control-toolbar-item-counter, $control-toolbar-item-counter);
+  @include set-component-css-var(control-toolbar-divider, $control-toolbar-divider);
+  @include set-component-css-var(control-toolbar-menu, $control-toolbar-menu);
+  @include set-component-css-var(control-toolbar-submenu, $control-toolbar-submenu);
+  @include set-component-css-var(control-toolbar-actions, $control-toolbar-actions);
+  
+  display: flex;
+  align-items: center;
+
+  @include e(item) {
+    display: flex;
+    align-items: center;
+    margin: getCssVar(control-toolbar, item-margin);
+    overflow: hidden;
+
+    .el-button {
+      @include flex(row, center, center);
+
+      padding: getCssVar(control-toolbar, item-padding);
+
+      &.is-disabled{
+        background-color:getCssVar(control-toolbar, item-disabled-bg-color);
+      }
+
+      > span {
+        @include flex(row, center, center);        
+
+        pointer-events: none; // 禁用点击事件，保证event.target是button元素        
+        @include toolbar-item-style;
+      }
+    }
+
+    @include when(loading){
+      .el-button{
+        .#{bem(icon)}{
+          display: none;
+        }
+      }
+    }
+  }
+
+  @include e(item-separator) {
+    @include no-repeat;
+
+    color: getCssVar(control-toolbar, divider, color);
+  }
+
+
+  @include e(menu){
+    &.el-menu{
+      height: getCssVar(control-toolbar, menu, height);
+      margin: getCssVar(control-toolbar, menu, margin);
+      border: none;
+    } 
+
+    .el-sub-menu.is-disabled .el-sub-menu__title {
+      opacity: 1;
+    }
+    .#{bem(control-toolbar-submenu)}{
+      .el-sub-menu__title{
+        @include flex(row, center, center);
+
+        padding: 0;    
+        font-size: getCssVar(control-toolbar, item, font-size);
+        color: getCssVar(control-toolbar, item-color);
+        background-color: getCssVar(control-toolbar, item-bg-color);
+        border-bottom: none;
+        border-radius: getCssVar(control-toolbar, item, border-radius);
+        
+        .el-sub-menu__icon-arrow{
+          display: none;
+        }
+        
+        .el-button {
+          @include flex(row, center, center);
+
+          > span {
+            @include flex(row, center, center);        
+            
+            @include toolbar-item-style;
+          }
+        }
+        
+        >span{      
+          @include flex(row, center, center);
+
+          line-height: 1;
+        }
+
+        &:hover{
+          color: getCssVar(control-toolbar, submenu, hover-color);
+          background-color: getCssVar(control-toolbar, submenu, hover-bg-color);
+        }
+      }
+
+      &.is-active{
+        .el-sub-menu__title{
+          color: getCssVar(control-toolbar, submenu, active-color);
+        }
+      }
+    }
+  }
+}
+
+@include b(control-toolbar-submenu-popper){
+  @include set-component-css-var(control-toolbar, $control-toolbar);
+  @include set-component-css-var(control-toolbar-popup, $control-toolbar-popup);
+  @include set-component-css-var(control-toolbar-submenu, $control-toolbar-submenu);
+  @include set-component-css-var(control-toolbar-menu-item, $control-toolbar-menu-item);
+  @include set-component-css-var(control-toolbar-item, $control-toolbar-item);
+  @include set-component-css-var(control-toolbar-item-icon, $control-toolbar-item-icon);
+
+  color: getCssVar(color, primary, text);
+  background-color: getCssVar(color, primary); 
+  
+  .el-menu{
+    .el-sub-menu.is-disabled .el-sub-menu__title {
+      opacity: 1;
+    }
+    .#{bem(control-toolbar-submenu)}{
+      .el-sub-menu__title{
+        padding: getCssVar(control-toolbar, submenu, padding);
+        font-size: getCssVar(control-toolbar, submenu, font-size);
+        color: getCssVar(control-toolbar, submenu, color);
+        background-color: getCssVar(control-toolbar, submenu, bg-color);
+        
+        &:hover{
+          color: getCssVar(control-toolbar, submenu, hover-color);
+          background-color: getCssVar(control-toolbar, submenu, hover-bg-color);    
+        }
+      }
+
+      &.is-active{
+        .el-sub-menu__title{
+          color: getCssVar(control-toolbar, submenu, active-color);
+        }
+      }
+    } 
+    
+    .#{bem(control-toolbar-submenu-rawitem)}{
+      color: getCssVar(control-toolbar, submenu, color);
+    }
+
+    .#{bem(control-toolbar-submenu__groupdetails)}{
+      .el-sub-menu__title{
+        .el-menu-item{
+          padding: 0;
+        }
+      }
+    }
+    
+    .el-menu-item{
+      @include toolbar-item-style;   
+
+      color: getCssVar(control-toolbar, menu-item, color);
+       
+  
+      &.is-active{
+        color: getCssVar(control-toolbar, menu-item, color);
+      }
+
+      &:hover{
+        color: getCssVar(control-toolbar, menu-item, hover-color);   
+        background-color: getCssVar(control-toolbar, menu-item, hover-bg-color);     
+      }
+
+      .el-button {
+        justify-content: flex-start;
+        width: 100%;
+        padding: 0;
+
+        --el-button-active-bg-color: transparent;
+        --el-button-hover-bg-color: transparent;
+        --el-button-bg-color: transparent;
+        --el-mask-color-extra-light: transparent;
+      }
+    }
+  }
+
+}
+
+// 行为组展开样式
+@include b(control-toolbar-actions) {
+  display: flex;
+  margin: getCssVar(control-toolbar, actions, margin);
+  white-space: normal;
+  visibility: visible;
+
+  @include e('extract-mode-itemx') {
+    .el-button-group {
+      display: flex;
+      white-space: normal;
+
+      &>.el-button {
+        padding: getCssVar('spacing', 'none');
+      }
+
+      &>.el-button:nth-child(2):focus-visible {
+        outline: none;
+        outline-offset: 0;
+      }
+    }
+  }
+
+  @include e('item-deuiaction') {
+    display: flex;
+    align-items: center;
+    margin: getCssVar(control-toolbar, item-margin);
+    overflow: hidden;
+
+    &:first-child {
+      margin-left: 0;
+    }
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  .el-button {
+    @include flex(row, center, center);
+
+    padding: getCssVar(control-toolbar, item-padding);
+    pointer-events: auto;
+
+    &.is-disabled{
+      background-color:getCssVar(control-toolbar, item-disabled-bg-color);
+    }
+
+    > span {
+      @include flex(row, center, center);        
+
+      pointer-events: none; // 禁用点击事件，保证event.target是button元素        
+      @include toolbar-item-style;
+    }
+  }
+}
+
+@include b(control-toolbar-actions-dropdown-popper) {
+  --el-popover-padding:#{getCssVar('spacing', 'none')};
+
+  min-width: 200px;
+
+  @include set-component-css-var(control-toolbar-actions, $control-toolbar-actions);
+  @include set-component-css-var(control-toolbar-item, $control-toolbar-item);
+  @include set-component-css-var(control-toolbar-item-icon, $control-toolbar-item-icon);
+
+  @include e('dropdown-item') {
+    height: getCssVar(control-toolbar-actions, dropdown-item-height);
+  }
+
+  @include when(disabled) {
+    display: none;
+  }
+
+  &.el-popper.el-dropdown__popper {
+    .el-scrollbar {
+      .el-dropdown__list {
+        .el-dropdown-menu__item {
+          padding: getCssVar('spacing', 'none');
+
+          &.is-disabled {
+            background-color: transparent;
+            opacity: 0.25;
+          }
+        }
+      }
+    }
+  }
+
+  .el-button {
+    --el-button-active-bg-color: transparent;
+    --el-button-hover-bg-color: transparent;
+    --el-button-bg-color: transparent;
+    --el-mask-color-extra-light: transparent;
+
+    display: block;
+    width: 100%;
+    padding: getCssVar(control-toolbar-actions, popover-button-padding);
+    margin: getCssVar('spacing', 'none');
+    color: getCssVar(control-toolbar-actions, color);
+    text-align: left;
+    background-color: transparent;
+    border-radius: 0;
+
+    &:hover {
+      color: getCssVar(control-toolbar-actions, color);
+      background-color: transparent;
+    }
+
+    &>span {
+      @include toolbar-item-style;
+
+      width: 100%;
+    }
+  }
+}
+
+// 行为组次级气泡显示样式
+@include b(control-toolbar-actions-popper) {
+  @include set-component-css-var(control-toolbar-actions, $control-toolbar-actions);
+  @include set-component-css-var(control-toolbar-item, $control-toolbar-item);
+  @include set-component-css-var(control-toolbar-item-icon, $control-toolbar-item-icon);
+
+  @include e('reference-btn') {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    @include m(content) {
+      display: flex;
+      flex: auto;
+      align-items: center;
+    }
+    @include m('chevron') {
+      flex-shrink: 0;
+    }
+  }
+  @include e('wrapper') {
+    padding: getCssVar(control-toolbar-actions, wrapper-padding);
+    background-color: getCssVar(control-toolbar-actions, bg-color);
+  }
+
+  @include e('item') {
+    display: flex;
+    align-items: center;
+    height: getCssVar(control-toolbar-actions, dropdown-item-height);
+    color: getCssVar(control-toolbar-actions, color);
+    background-color: getCssVar(control-toolbar-actions, bg-color);
+
+    &:hover{
+      color: getCssVar(control-toolbar-actions, hover-color);
+      background-color: getCssVar(control-toolbar-actions, hover-bg-color);       
+    }
+  }
+
+  &.el-popover.el-popper {
+    // 解决el-popover在下拉菜单中显示时，被隐藏的问题
+    position: fixed !important;
+
+    // 解决el-popover的宽度自适应问题 必须要加 !important
+    width: auto !important;
+    min-width: 200px;
+  }
+}

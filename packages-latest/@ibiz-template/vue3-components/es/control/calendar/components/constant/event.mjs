@@ -1,0 +1,9 @@
+"use strict";
+const UPDATE_MODEL_EVENT = "update:modelValue";
+const CHANGE_EVENT = "change";
+const INPUT_EVENT = "input";
+const EVENT_CLICK_EVENT = "eventClick";
+const EVENT_DBL_CLICK_EVENT = "eventDblClick";
+const EVENT_CONTEXT_MENU = "eventContextmenu";
+
+export { CHANGE_EVENT, EVENT_CLICK_EVENT, EVENT_CONTEXT_MENU, EVENT_DBL_CLICK_EVENT, INPUT_EVENT, UPDATE_MODEL_EVENT };

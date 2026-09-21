@@ -1,0 +1,53 @@
+// 选项框列表根元素
+$checkbox-list: (
+  row-number: 0,                                                            // 每行项数量(为0时自适应)
+  font-size: getCssVar(form-item, font-size),                               // 字体大小
+  text-color: getCssVar(form-item, text-color),                             // 字体颜色
+  line-height: getCssVar(form-item, line-height),                           // 行高
+  readonly-color: getCssVar(form-item, readonly-color),                     // 只读字体色
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+  border-radius: getCssVar('spacing', 'base'),                              // 按钮项倒角
+);
+
+@include b('checkbox-list') {
+  @include set-component-css-var(checkbox-list, $checkbox-list);
+
+  @include e('text') {
+    font-size: getCssVar(checkbox-list, 'font-size');
+    color: getCssVar(checkbox-list, 'text-color');
+  }
+
+  @include m(readonly) {
+    font-size: getCssVar(checkbox-list, font-size);
+    line-height: getCssVar(checkbox-list, line-height);
+    color: getCssVar(checkbox-list, readonly-color);
+  }
+
+  @include when(grid-layout) {
+    .el-checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(getCssVar(checkbox-list, row-number), 1fr);
+    }
+  }
+
+  // 按钮组样式
+  @include e(button-group) {
+    // 圆角按钮样式
+    @include when(round-btn) {
+      .el-checkbox-button__inner {
+        margin-right: getCssVar('spacing', 'base');
+        border-radius: getCssVar(checkbox-list, border-radius);
+      }
+    }
+  }
+}
+
+
+@include b(form-item) {
+
+  @include b(checkbox-list) {
+    @include when(show-default) {
+      padding: getCssVar(checkbox-list, hover-edit-padding);
+    }
+  }
+}

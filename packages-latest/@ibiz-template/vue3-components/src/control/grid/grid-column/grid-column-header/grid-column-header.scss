@@ -1,0 +1,46 @@
+// 表格列头样式
+$grid-column-header: (
+  filter-color: getCssVar(control-grid, filter, color),           // 列头过滤图标默认色（继承自 control-grid-filter）
+  filter-active-color: getCssVar(control-grid, filter, active-color),    // 列头过滤图标激活色（继承自 control-grid-filter）
+  icon-gap: getCssVar(spacing, extra, tight),                     // 列头过滤图标与标题间隔
+  popover-padding-bottom: getCssVar(spacing, tight),              // 列头弹出层底部内边距
+  popover-divider: 1px solid getCssVar(color, border),            // 列头弹出层分割线样式
+);
+
+@include b(grid-column-header) {
+  @include set-component-css-var(grid-column-header, $grid-column-header);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  @include e(caption) {
+    display: flex;
+    gap: getCssVar(grid-column-header, icon-gap);
+    align-items: center;
+  }
+
+  @include e(filter) {
+    @include m(icon) {
+      height: 23px;
+      margin-left: getCssVar(grid-column-header, icon-gap);
+      color: getCssVar(grid-column-header, filter-color);
+      visibility: visible;
+      @include when(active) {
+        color: getCssVar(grid-column-header, filter-active-color);
+      }
+    }
+  }
+
+  @include e(popover) {
+    @include set-component-css-var(grid-column-header, $grid-column-header);
+    @include m(editor) {
+      padding-bottom: getCssVar(grid-column-header, popover-padding-bottom);
+      border-bottom: getCssVar(grid-column-header, popover-divider);
+    }
+    @include m(bottom) {
+      display: flex;
+      align-items: center;
+      float: right;
+    }
+  }
+}

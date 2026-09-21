@@ -1,0 +1,239 @@
+// 天日历根元素
+$control-calendar-day: (
+  min-width: 380px,                                                                 // 最小宽
+  active-color: getCssVar('color', 'primary'),                                      // 激活色
+  border-color: getCssVar('control-calendar', 'border-color')                       // 边框色
+);
+
+// 天日历标题栏
+$control-calendar-day-title: (
+  padding: 0 40px,                                                                  // 头内边距
+  min-width: 80px,                                                                  // 头标题最小宽
+  top-height: 70px,                                                                 // 头顶部高 
+  bottom-height: 56px,                                                              // 头底部高 
+  font-size: getCssVar('font-size', 'header-4'),                                    // 头标题字体大小
+  border-color: getCssVar('control-calendar-day', 'border-color'),                  // 头边框色（继承天日历根元素）
+);
+
+// 天日历图例
+$control-calendar-day-legend: (
+  gap: getCssVar('spacing', 'tight'),                                               // 图例间隔
+);
+
+// 天日历图例项
+$control-calendar-day-legend-item: (
+  width: 1.5em,                                                                     // 图例项色块宽
+  height: 0.9em,                                                                    // 图例项色块高
+  line-height: 1em,                                                                 // 图例项行高
+  max-width: 100px,                                                                 // 图例项标题最大宽
+  gap: getCssVar('spacing', 'extra-tight'),                                         // 图例项间隔
+  border-radius: getCssVar('border', 'radius', 'extra', 'small'),                   // 图例项色块倒角
+);
+
+// 周日历根元素
+$control-calendar-week: (
+  min-width: 380px,                                                                 // 最小宽
+  active-color: getCssVar('color', 'primary'),                                      // 激活色
+  border-color: getCssVar('control-calendar', 'border-color')                       // 边框色
+);
+
+// 周日历标题栏
+$control-calendar-week-title: (
+  padding: 0 40px,                                                                  // 头内边距
+  min-width: 80px,                                                                  // 头标题最小宽
+  top-height: 70px,                                                                 // 头顶部高 
+  bottom-height: 56px,                                                              // 头底部高 
+  font-size: getCssVar('font-size', 'header-4'),                                    // 头标题字体大小
+  border-color: getCssVar('control-calendar-week', 'border-color'),                 // 头边框色（继承周日历根元素）
+);
+
+// 周日历图例
+$control-calendar-week-legend: (
+  gap: getCssVar('spacing', 'tight'),                                               // 图例间隔
+);
+
+// 周日历图例项
+$control-calendar-week-legend-item: (
+  width: 1.5em,                                                                     // 图例项色块宽
+  height: 0.9em,                                                                    // 图例项色块高
+  line-height: 1em,                                                                 // 图例项行高
+  max-width: 100px,                                                                 // 图例项标题最大宽
+  gap: getCssVar('spacing', 'extra-tight'),                                         // 图例项间隔
+  border-radius: getCssVar('border', 'radius', 'extra', 'small'),                   // 图例项色块倒角
+);
+
+// 年周日历标题栏
+$control-calendar-user-title: (
+  padding: getCssVar('spacing', 'none') getCssVar('spacing', 'base'),               // 头内边距
+);
+
+@include b('custom-calendar') {
+  width: 100%;
+  height: 100%;
+  @include e('calendar-day') {
+    @include set-component-css-var('control-calendar-day', $control-calendar-day);
+    @include set-component-css-var('control-calendar-day-title', $control-calendar-day-title);
+    @include set-component-css-var('control-calendar-day-legend', $control-calendar-day-legend);
+    @include set-component-css-var('control-calendar-day-legend-item', $control-calendar-day-legend-item);
+
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: solid getCssVar('control-calendar-day', 'min-width');
+    height: 100%;
+    border: 1px solid getCssVar('control-calendar-day', 'border-color');
+    @include m('header') {
+      padding: getCssVar('control-calendar-day-title', 'padding');
+      border-bottom: 1px solid getCssVar('control-calendar-day-title', 'border-color');
+    }
+    @include m('header-top') {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: getCssVar('control-calendar-day-title', 'top-height');
+    }
+    @include m('title') {
+      min-width: getCssVar('control-calendar-day-title', 'min-width');
+      font-size: getCssVar('control-calendar-day-title', 'font-size');
+    }
+    @include m('text-secondary') {
+      height: getCssVar('control-calendar-day-title', 'bottom-height');
+      line-height: getCssVar('control-calendar-day-title', 'bottom-height');
+      text-align: left;
+    }
+    @include m('select-time') {
+      width: 130px;
+      height: 32px;
+
+      .el-input__suffix {
+        display: none;
+      }
+    }
+    @include m('legend') {
+      display: flex;
+      flex-grow: 1;
+      gap: getCssVar('control-calendar-day-legend', 'gap');
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      overflow: auto;
+    }
+    @include m('legend-item') {
+      display: flex;
+      gap: getCssVar('control-calendar-day-legend-item', 'gap');
+      align-items: center;
+      width: auto;
+      height: auto;
+      line-height: getCssVar('control-calendar-day-legend-item', 'line-height');
+      cursor: pointer;
+    }
+    @include m('legend-item-tip') {
+      display: inline-block;
+      width: getCssVar('control-calendar-day-legend-item', 'width');
+      height: getCssVar('control-calendar-day-legend-item', 'height');
+      border-radius: getCssVar('control-calendar-day-legend-item', 'border-radius');
+    }
+    @include m('legend-item-text') {
+      display: inline-block;
+      width: auto;
+      max-width: getCssVar('control-calendar-day-legend-item', 'max-width');
+      overflow: hidden;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  @include e('calendar-week') {
+    @include set-component-css-var('control-calendar-week', $control-calendar-week);
+    @include set-component-css-var('control-calendar-week-title', $control-calendar-week-title);
+    @include set-component-css-var('control-calendar-week-legend', $control-calendar-week-legend);
+    @include set-component-css-var('control-calendar-week-legend-item', $control-calendar-week-legend-item);
+  
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: getCssVar('control-calendar-week', 'min-width');
+    height: 100%;
+    border: 1px solid getCssVar('control-calendar-week', 'border-color');
+    @include m('header') {
+      padding: getCssVar('control-calendar-week-title', 'padding');
+      border-bottom: 1px solid getCssVar('control-calendar-week-title', 'border-color');
+    }
+    @include m('header-top') {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: getCssVar('control-calendar-week-title', 'top-height');
+    }
+    @include m('title') {
+      min-width: getCssVar('control-calendar-week-title', 'min-width');
+      font-size: getCssVar('control-calendar-week-title', 'font-size');
+    }
+    @include m('select-time') {
+      width: 130px;
+      height: 32px;
+
+      .el-input__suffix {
+        display: none;
+      }
+    }
+    @include m('legend') {
+      display: flex;
+      flex-grow: 1;
+      gap: getCssVar('control-calendar-week-legend', 'gap');
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      overflow: auto;
+    }
+    @include m('legend-item') {
+      display: flex;
+      gap: getCssVar('control-calendar-week-legend-item', 'gap');
+      align-items: center;
+      width: auto;
+      height: auto;
+      line-height: getCssVar('control-calendar-week-legend-item', 'line-height');
+      cursor: pointer;
+    }
+    @include m('legend-item-tip') {
+      display: inline-block;
+      width: getCssVar('control-calendar-week-legend-item', 'width');
+      height: getCssVar('control-calendar-week-legend-item', 'height');
+      border-radius: getCssVar('control-calendar-week-legend-item', 'border-radius');
+    }
+    @include m('legend-item-text') {
+      display: inline-block;
+      width: auto;
+      max-width: getCssVar('control-calendar-week-legend-item', 'max-width');
+      overflow: hidden;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  @include e('calendar-user') {
+    @include set-component-css-var('control-calendar-user-title', $control-calendar-user-title);
+
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  @include e('calendar-user-header') {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: getCssVar('control-calendar-user-title', 'padding');
+    @include m('right'){ 
+      .el-date-editor.el-date-editor--week.el-input {
+        width: 250px
+      }
+    }
+  }
+
+  .el-date-editor.el-input,
+  .el-date-editor.el-input__wrapper {
+    width: 130px;
+    height: 32px;
+  }
+}

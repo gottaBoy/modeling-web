@@ -1,0 +1,234 @@
+// 关系分页流式布局
+$control-drtab-flow: (
+  bg-color: getCssVar('color', 'bg', '0'),               // 流式布局背景色
+);
+
+// 关系分页流式布局锚点
+$control-drtab-flow-anchor: (
+	gap: getCssVar('spacing', 'base'),										 // 锚点内容隔间
+	font-size: getCssVar('font-size', 'regular'),					 // 锚点字体大小
+	bg-color: getCssVar('color', 'bg', '1'),							 // 锚点背景颜色
+	border-radius: getCssVar('border-radius', 'medium'),	 // 锚点倒角
+);
+
+// 关系分页流式布局锚点项
+$control-drtab-flow-anchor-item: (
+	padding: 0 getCssVar('spacing', 'base'),							 // 锚点项倒角
+	hover-color: getCssVar('color', 'primary'),						 // 锚点项悬浮色
+	active-color: getCssVar('color', 'primary'), 					 // 锚点项激活色
+);
+
+// 关系分页流式布局项
+$control-drtab-flow-item: (
+  gap: getCssVar('spacing', 'extra', 'tight'),					 // 项内容间隔
+	padding: getCssVar('spacing', 'base'),								 // 项内边距
+	bg-color: getCssVar('color', 'bg', '1'),							 // 项背景色
+	border-color: getCssVar('color', 'fill', '1'),				 // 项边框色
+	font-size: getCssVar('font-size', 'header', '5'), 		 // 项字体大小
+	border-radius: getCssVar('border-radius', 'medium'),   // 项倒角
+);
+
+// 关系分页流式布局项计数器
+$control-drtab-flow-item-counter: (
+	font-size: getCssVar('font-size', 'regular'),					 // 项计数器字体大小
+	text-align: center,																		 // 项计数器文本对齐
+);
+
+@include b('flow-drtab') {
+	@include set-component-css-var('control-drtab-flow', $control-drtab-flow);
+	@include set-component-css-var('control-drtab-flow-item', $control-drtab-flow-item);
+	@include set-component-css-var('control-drtab-flow-anchor', $control-drtab-flow-anchor);
+	@include set-component-css-var('control-drtab-flow-item-counter', $control-drtab-flow-item-counter);
+	@include set-component-css-var('control-drtab-flow-anchor-item', $control-drtab-flow-anchor-item);
+
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: getCssVar('control-drtab-flow', 'bg-color');
+
+  @include e('icon') {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @include e('container') {
+    height: 100%;
+    overflow: auto;
+  }
+
+  @include e('tab-item') {
+    background-color: getCssVar('control-drtab-flow-item', 'bg-color');
+    border-radius: getCssVar('control-drtab-flow-item', 'border-radius');
+
+    @include when('enable-collapse') {
+      .#{bem('flow-drtab', 'tab-item', 'label')} {
+        cursor: pointer;
+      }
+    }
+
+    @include when('collapse') {
+      .#{bem('flow-drtab', 'icon', 'collapse')} {
+        transform: rotate(-90deg);
+      }
+      .#{bem('flow-drtab', 'tab-item', 'tab-view')} {
+        display: none;
+      }
+    }
+
+    @include m('label') {
+      display: flex;
+      gap: getCssVar('control-drtab-flow-item', 'gap');
+      align-items: center;
+      padding: getCssVar('control-drtab-flow-item', 'padding');
+      font-size: getCssVar('control-drtab-flow-item', 'font-size');
+      border-bottom: 1px solid getCssVar('control-drtab-flow-item', 'border-color');
+    }
+
+    @include m('tab-view') {
+      padding: getCssVar('spacing', 'tight') 0;
+    }
+
+    & + .#{bem('flow-drtab','tab-item')} {
+      margin-top: getCssVar('spacing', 'base');
+    }
+  }
+
+  @include e('counter') {
+    font-size: getCssVar('control-drtab-flow-item-counter', 'font-size');
+    text-align: getCssVar('control-drtab-flow-item-counter', 'text-align');
+  }
+
+  .#{bem('flow-drtab')} {
+    background-color: inherit;
+  }
+
+  @include when('enable-anchor') {
+    display: flex;
+    gap: getCssVar('spacing', 'base');
+    @include e('container') {
+      flex: 1;
+    }
+
+    @include e('anchor-bar') {
+      display: flex;
+      min-width: 200px;
+      padding: getCssVar('control-drtab-flow-anchor', 'gap') 0;
+      font-size: getCssVar('control-drtab-flow-anchor', 'font-size');
+      background-color: getCssVar('control-drtab-flow-anchor', 'bg-color');
+      border-radius: getCssVar('control-drtab-flow-anchor', 'border-radius');
+
+      @include when('topleft') {
+        align-items: start;
+      }
+
+      @include when('bottomleft') {
+        align-items: end;
+      }
+
+      @include when('topright') {
+        flex-direction: row-reverse;
+        align-items: start;
+      }
+
+      @include when('bottomright') {
+        flex-direction: row-reverse;
+        align-items: end;
+      }
+
+      @include when('middleleft') {
+        align-items: center;
+      }
+
+      @include when('middleright') {
+        flex-direction: row-reverse;
+        align-items: center;
+      }
+    }
+
+    @include e('anchor-items') {
+      width: 100%;
+      max-height: 100%;
+      overflow: auto;
+    }
+
+    @include e('anchor-item') {
+      width: 100%;
+      height: 32px;
+      padding: getCssVar('control-drtab-flow-anchor-item', 'padding');
+      overflow: hidden;
+      line-height: 32px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: pointer;
+
+      &:hover {
+        color: getCssVar('control-drtab-flow-anchor-item', 'hover-color');
+      }
+
+      @include when('active') {
+        position: relative;
+        color: getCssVar('control-drtab-flow-anchor-item', 'active-color');
+
+        &::before {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 4px;
+          height: 100%;
+          content: '';
+          background-color:  getCssVar('control-drtab-flow-anchor-item', 'active-color');
+          border-radius: 2px;
+        }
+      }
+    }
+
+    @include when('left') {
+      flex-direction: row;
+      overflow: auto;
+
+      > .#{bem('flow-drtab','container')} {
+        --navbarwidth: 200px;
+
+        flex: 1 0;
+        width: calc(100% - var(--navbarwidth) - (2 * getCssVar(spacing, base)));
+        overflow: unset;
+      }
+
+      @include e('anchor-bar') {
+        position: sticky;
+        top: 0;
+      }
+
+      @include e('anchor-items') {
+        &::-webkit-scrollbar {
+          display: none;
+        }
+      }
+    }
+
+    @include when('right') {
+      flex-direction: row-reverse;
+      overflow: auto;
+
+      > .#{bem('flow-drtab','container')} {
+        --navbarwidth: 200px;
+
+        flex: 1 0;
+        width: calc(100% - var(--navbarwidth) - (2 * getCssVar(spacing, base)));
+        overflow: unset;
+      }
+
+      @include e('anchor-bar') {
+        position: sticky;
+        top: 0;
+      }
+
+      @include e('anchor-items') {
+        &::-webkit-scrollbar {
+          display: none;
+        }
+      }
+    }
+  }
+}

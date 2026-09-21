@@ -1,0 +1,16 @@
+import { HelperBase } from '../helper-base';
+/**
+ * 首字母转大写
+ *
+ * @description 用法 {{pascalCase word}}，效果: myName => MyName
+ * @author chitanda
+ * @date 2021-12-24 15:12:13
+ * @export
+ * @class HelperPascalCase
+ * @extends {HelperBase}
+ */
+export declare class HelperPascalCase extends HelperBase {
+    constructor(hbs: IData);
+    onExecute(param: string): string;
+}
+//# sourceMappingURL=pascal-case.d.ts.map

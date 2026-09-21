@@ -1,0 +1,55 @@
+// 向导面板根元素
+$control-wizard-panel: (
+  header-height: 60px,                            // 向导面板头部高度
+  footer-height: 40px,                            // 向导面板底部高度
+  bg-color: transparent,                          // 向导面板背景色
+);
+
+// 向导面板步骤栏
+$control-wizard-panel-step: (
+  font-size: 22px,                                // 步骤栏字体大小  
+  bg-color: getCssVar('color', 'bg', '1'),        // 步骤栏背景色
+);
+
+@include b('control-wizardpanel') {
+  @include set-component-css-var('control-wizard-panel', $control-wizard-panel);
+  @include set-component-css-var('control-wizard-panel-step', $control-wizard-panel-step);
+
+  height: 100%;
+  background-color: getCssVar('control-wizard-panel', 'bg-color');
+
+  // 防止权重不够
+  .#{bem(control-wizardpanel, form)} {
+    height: calc(100% - getCssVar('control-wizard-panel', 'footer-height'));
+    overflow: auto;
+  }
+
+  @include when('header') {
+    @include e('form') {
+      height: calc(
+        100% - getCssVar('control-wizard-panel', 'footer-height') - getCssVar(
+            'control-wizard-panel',
+            'header-height'
+          )
+      );
+    }
+  }
+}
+
+@include b('control-wizardpanel-header') {
+  height: getCssVar('control-wizard-panel', 'header-height');
+
+  @include m('step-icon') {
+    font-size: getCssVar('control-wizard-panel-step', 'font-size');
+  }
+
+  .el-step__icon {
+    --el-bg-color: #{getCssVar('control-wizard-panel-step', 'bg-color')};
+  }
+}
+
+@include b('control-wizardpanel-footer') {
+  @include flex(row, flex-end, center);
+
+  height: getCssVar('control-wizard-panel', 'footer-height');
+}

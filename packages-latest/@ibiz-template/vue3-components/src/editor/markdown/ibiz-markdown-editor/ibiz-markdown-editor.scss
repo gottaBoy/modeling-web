@@ -1,0 +1,442 @@
+// markdown根元素
+$markdown: (
+  light-thumb-bg-color: rgb(var(#{getCssVarName(grey,4)})),                             // 高亮主题滑块背景色
+  light-thumb-hover-bg-color: rgba(var(#{getCssVarName(grey,4)}),.5),                   // 高亮主题滑块悬浮背景色
+  border-color: getCssVar(color, border),                                                 // 边框色
+  dark-border-color: rgb(var(#{getCssVarName(grey,2)})),                                // 暗黑主题边框色
+  dark-thumb-bg-color: rgb(var(#{getCssVarName(grey,4)})),                              // 暗黑主题滑块背景色
+  dark-thumb-hover-bg-color: rgba(var(#{getCssVarName(grey,4)}),.5),                    // 暗黑主题滑块悬浮背景色
+  placeholder-color: getCssVar(form-item, placeholder-color),                             // 空白占位文本颜色
+  disabled-font-size: getCssVar('font-size', 'regular'),                                  // 禁用字体大小
+  disabled-color: getCssVar(color, text, 0),                                              // 禁用字体色
+  disabled-hover-bg-color: getCssVar(color, bg, 3),                                       // 禁用悬浮背景色
+  text-color: getCssVar(form-item, text-color),                                           // 文本颜色
+  diff-inserted-color: getCssVar(color, success, text),                                   // 对比代码块-添加字体色
+  diff-inserted-bg-color: getCssVar(color, success),                                      // 对比代码块-添加背景色
+  diff-deleted-color: getCssVar(color, danger, text),                                     // 对比代码块-删除背景色
+  diff-deleted-bg-color: getCssVar(color, danger),                                        // 对比代码块-删除背景色
+);
+
+// markdown工具栏元素
+$markdown-toolbar: (
+  light-bg-color: getCssVar(color, bg, 0),                                                // 高亮主题背景色
+  dark-bg-color: getCssVar(color, shadow),                                                // 暗黑主题背景色
+);
+
+// markdown目录元素
+$markdown-toc: (
+  color: getCssVar(color, black),                                                       // 文本颜色
+  head-color: getCssVar(color, primary),                                                  // 目录头部文本颜色
+  light-color: getCssVar(color, text, 0),                                                 // 高亮主题文本颜色
+  dark-color: getCssVar(color, fill, 0),                                                  // 暗黑主题文本颜色
+);
+
+// markdown头部元素
+$markdown-header: (
+  gap: getCssVar(spacing, base),                                                          // 内容项间隔
+  height: getCssVar(height, control-default),                                             // 高度
+  padding: 0 getCssVar(spacing, extra-loose),                                             // 内边距
+);
+
+// markdown底部元素
+$markdown-footer: (
+  gap: getCssVar(spacing, base),                                                          // 内容项间隔
+  height: getCssVar(height, control-default),                                             // 高度
+  padding: 0 getCssVar(spacing, extra-loose),                                             // 内边距
+  margin: getCssVar(spacing, base-tight) getCssVar(spacing, tight) 0 0,                   // 外边距
+);
+
+// markdown底部按钮元素
+$markdown-footer-button: (
+  height: getCssVar(height, control-default),                                             // 高度
+  save-color: getCssVar(color, primary-active-text),                                      // 保存按钮字体色
+  save-bg-color: getCssVar(color, primary),                                               // 保存按钮背景色
+  save-border-radius: getCssVar(border-radius, small),                                    // 保存按钮倒角
+  cancel-color: getCssVar(color, text, 1),                                                // 取消按钮字体色
+  cancel-hover-color: getCssVar(color, primary),                                          // 取消按钮背景色
+);
+
+@include b(markdown) {
+  @include set-component-css-var('markdown', $markdown);
+  @include set-component-css-var('markdown-header', $markdown-header);
+  @include set-component-css-var('markdown-footer', $markdown-footer);
+  @include set-component-css-var('markdown-toolbar', $markdown-toolbar);
+  @include set-component-css-var('markdown-toc', $markdown-toc);
+  @include set-component-css-var('markdown-footer-button', $markdown-footer-button);
+
+  @include e('header'){
+    display: flex;
+    flex-shrink: 0;
+    gap: getCssVar(markdown-header, gap);
+    align-items: center;
+    justify-content: end;
+    height: getCssVar(markdown-header, height);
+    @include m('edit'){
+      cursor: pointer;
+    }
+    @include m('full'){ 
+      cursor: pointer;
+    }
+    @include when('fullscreen'){
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: 0;
+      z-index: 1000;
+      width: 100%;
+      height: getCssVar(markdown-header, height);
+      padding: getCssVar(markdown-header, padding);
+      margin-top: 0; 
+      background-color: var(--ibiz-view-bg-color);
+
+      & + .ibiz-markdown-cherry .cherry.fullscreen{
+        top: getCssVar(spacing, super-loose);
+        height: calc(100% - getCssVar(spacing, super-loose));
+      }
+    }
+
+  }
+
+  @include e('footer'){
+    display: flex;
+    gap: getCssVar(markdown-footer, gap);
+    align-items: center;
+    justify-content: end;
+    height: getCssVar(markdown-footer, height);
+    margin: getCssVar(markdown-footer, margin);
+    @include m('save'){
+      height: getCssVar(markdown-footer-button, height);
+      padding: 0 getCssVar(spacing, base);
+      line-height: getCssVar(markdown-footer-button, height);
+      color: getCssVar(markdown-footer-button, save-color);
+      text-align: center;
+      cursor: pointer;
+      background-color: getCssVar(markdown-footer-button, save-bg-color);
+      border-radius: getCssVar(markdown-footer-button, border-radius);
+    }
+    @include m('cancel'){
+      color: getCssVar(markdown-footer-button, cancel-color);
+      cursor: pointer;
+
+      &:hover{
+        color: getCssVar(markdown-footer-button, cancel-hover-color);
+      }
+    }
+    @include when('fullscreen'){
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 1000;
+      width: 100%;
+      height: calc(getCssVar(markdown-footer, height) * 2);
+      padding: getCssVar(markdown-footer, padding);
+      margin-top: 0; 
+      background-color: var(--ibiz-view-bg-color);
+      border-top: 1px solid getCssVar(markdown, border-color);
+
+      & + .ibiz-markdown-cherry .cherry.fullscreen{
+        height: calc(100% - getCssVar(markdown-footer, height) * 2);
+      }
+    }
+  }
+
+  @include e('img-preview') {
+    // 图片预览样式，默认需不占位
+    &.el-image {
+      position: absolute;
+      height: 0;
+    }
+
+    // 图片预览态样式
+    .el-image-viewer__wrapper {
+      width: 90%;
+      height: 90%;
+      margin: auto;
+    }
+
+    .el-image-viewer__mask {
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      cursor: zoom-out;
+      opacity: 0.7;
+    }
+
+    // 图片预览态关闭按钮样式
+    .el-image-viewer__close {
+      top: -32px;
+      right: -36px;
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  @include b(markdown-cherry) {
+    width: 100%;
+    outline: none;
+
+    .cherry {
+      width: 100%;
+      border: 1px solid getCssVar(markdown, border-color);
+      box-shadow: none;
+
+      .cherry-toolbar {
+        box-shadow: none;
+      }
+
+      .cherry-editor {
+        border-top: 1px solid getCssVar(markdown, border-color);
+      }
+
+      .cherry-previewer{
+        border-top: 1px solid getCssVar(markdown, border-color);
+        
+        // 调整预览区图片鼠标移入样式
+        img {
+          cursor: zoom-in;
+        }
+      }
+
+      .cherry-sidebar{
+        top: 49px;
+        border-left: 1px solid getCssVar(markdown, border-color);
+        box-shadow: none;
+      }
+
+      .cherry-floatmenu {
+        left: 50% !important;
+        margin: 0;
+        transform: translateX(-50%);
+      }
+
+      .CodeMirror-placeholder {
+        color: getCssVar(markdown, placeholder-color);
+      }
+
+      // 下拉菜单英文模式下防止换行
+      .cherry-dropdown {
+        width: min-content;
+      }
+
+      .cherry-dropdown-item {
+        white-space: nowrap;
+      }
+    }
+  }
+
+  @include when(disabled) {
+    .cherry {
+      min-height: auto;
+    }
+
+    .#{bem('markdown__fullscreen')} {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      z-index: 98;
+      font-size: getCssVar(markdown, disabled-font-size);
+      line-height: 2.8;
+    }
+
+    .theme__dark .#{bem('markdown__fullscreen')} {
+      color: getCssVar(markdown, disabled-color);
+
+      &:hover {
+        background-color: getCssVar(markdown, disabled-hover-bg-color);
+      }
+    }
+  }
+
+  @include when(manual){
+    display: flex;
+    flex-direction: column; 
+    .#{bem(markdown-cherry)}{
+      flex-grow: 1;
+      height: calc(100% - getCssVar(height, control-default))!important;
+    }
+
+    .cherry.fullscreen .cherry-previewer{
+      padding-top: getCssVar(spacing, extra-loose);
+    }
+    @include when(editing){
+      flex-direction: column-reverse;
+
+      .cherry.fullscreen{
+        height: calc(100% - getCssVar(height, control-default) * 2);
+      }
+    }
+
+    .#{bem(markdown-menu)} {
+      display: none;
+    }
+
+    @include when(editing) {
+      .#{bem(markdown-menu)} {
+        display: block;
+      }
+    }
+  }
+
+  @include when('show-editor-switch-menu') {
+    .#{bem(composite-form-item-ex-menu)} {
+      #{getCssVarName('composite-form-item-ex', 'menu-height')}: 47px;
+      #{getCssVarName('composite-form-item-ex', 'menu-padding')}: getCssVar('spacing', 'tight') getCssVar('spacing', 'base-tight') 0;
+      max-height: 100%;
+    }
+
+    .cherry-toolbar {
+      padding-right: calc(getCssVar('composite-form-item-ex', 'menu-width') + getCssVar('spacing', 'extra-tight'));
+    }
+
+    .#{bem(markdown-menu)} {
+      position: absolute;
+      top: 1px;
+      right: 1px;
+      z-index: getCssVar('composite-form-item-ex', 'menu-z-index');
+      display: flex;
+      align-items: center;
+      height: calc(getCssVar('composite-form-item-ex', 'menu-height') - 1px);
+      background: getCssVar('composite-form-item-ex', 'menu-bg-color');
+      border-right: 1px solid getCssVar(markdown, border-color);
+      border-left: 1px solid getCssVar(markdown, border-color);
+
+
+      @include when('fullscreen'){
+        position: fixed;
+        z-index: 1000;
+      }
+
+      .#{bem(composite-form-item-ex-menu)} {
+        position: relative;
+      }
+    }
+  }
+  
+  .cherry-preview--full {
+    border-left: none;
+  }
+
+  .cherry-flex-toc__fixed{
+    color: getCssVar(markdown-toc, color);
+
+    &.cherry-flex-toc__pure .cherry-toc-head{
+      color: getCssVar(markdown-toc, head-color);
+    }
+
+    &:hover{
+      z-index: 100;
+    }
+  } 
+
+  .theme__light,
+  .theme__dark {
+    color: getCssVar(markdown, text-color);
+  }
+
+  .cherry-markdown h1,
+  .cherry-markdown h2,
+  .cherry-markdown h3,
+  .cherry-markdown h4,
+  .cherry-markdown h5,
+  .cherry-markdown h6 {
+    a::before {
+      display: none;
+    }
+  }
+
+  .cherry.fullscreen{
+    z-index: 999;
+  }
+
+  // 对比代码块
+  .cherry-markdown div[data-type='codeBlock'] {
+    code.language-diff {
+      display: inline-block;
+      width: 100%;
+
+      .code-line {
+        display: inline-block;
+        width: 100%;
+        line-height: 1.3em;
+
+        > .token {
+            display: flex;
+
+          .line {
+            display: inline-block;
+          }
+
+          .line:empty {
+            display: none;
+          }
+        }
+      }
+
+      .token.inserted {
+        color: getCssVar(markdown, diff-inserted-color);
+        background: getCssVar(markdown, diff-inserted-bg-color);
+      }
+
+      .token.deleted {
+        color: getCssVar(markdown, diff-deleted-color);
+        background: getCssVar(markdown, diff-deleted-bg-color);
+      }
+    }
+  }
+
+  @include m('light'){ 
+    .theme__light,
+    .theme__green,
+    .theme__violet{
+      .cherry-toolbar{
+        background-color: getCssVar(markdown-toolbar, light-bg-color);
+      } 
+    }
+
+    .theme__dark.cherry{
+      .cherry-flex-toc{
+        color: getCssVar(markdown-toc, light-color);
+      }
+
+      & *::-webkit-scrollbar-thumb{
+        background: getCssVar(markdown, light-thumb-bg-color);
+        
+        &:hover{
+          background: getCssVar(markdown, light-thumb-hover-bg-color);
+        } 
+      }   
+    }
+  }
+
+  @include m('dark'){ 
+    &.#{bem(markdown-cherry)} {
+      .cherry {
+        border: 1px solid getCssVar(markdown, dark-border-color);
+      }
+    }
+    
+
+    .theme__green,
+    .theme__violet,
+    .theme__light{
+      .cherry-toolbar{
+        background-color: getCssVar(markdown-toolbar, dark-bg-color);
+      } 
+    }
+
+    .theme__dark.cherry{
+      .cherry-toc-head{
+        color: getCssVar(markdown-toc, dark-color);
+      }
+
+      & *::-webkit-scrollbar-thumb{
+        background: getCssVar(markdown, dark-thumb-bg-color);
+        
+        &:hover{
+          background: getCssVar(markdown, dark-thumb-hover-bg-color);
+        } 
+      } 
+    }  
+  }
+}

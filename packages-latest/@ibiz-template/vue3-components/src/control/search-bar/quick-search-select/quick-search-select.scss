@@ -1,0 +1,75 @@
+// 快速搜索选择按钮样式
+$quick-search-select: (
+  width: 40px,                                            // 按钮宽度
+  color: getCssVar(color, primary, text),                 // 按钮字体颜色 
+  bg-color: getCssVar(color, primary),                    // 按钮背景颜色  
+  hover-bg-color: getCssVar(color, primary, hover),       // 按钮悬浮背景颜色
+);
+
+// 快速搜索选择弹出框样式
+$quick-search-select-popup: (
+  'item-text-color':  getCssVar(color, text, 2),            // 下拉项字体颜色
+  'item-bg-color': getCssVar(color, bg, 1),                 // 下拉项背景颜色
+  'item-hover-text-color': getCssVar(color, text, 0),       // 下拉项悬浮字体颜色
+  'item-hover-bg-color': getCssVar(color, fill, 0),         // 下拉项选中字体颜色
+  'item-selected-text-color': getCssVar(color, primary),    // 下拉项选中字体颜色
+  'item-selected-bg-color': getCssVar(color, bg, 1),        // 下拉项选中背景颜色
+);
+
+@include b(quick-search-select) {
+  @include set-component-css-var('quick-search-select', $quick-search-select);
+
+  width: getCssVar(quick-search-select, width);
+  height: 100%;
+  color: getCssVar(quick-search-select, color);
+  cursor: pointer;
+  background-color: getCssVar(quick-search-select, bg-color);
+  border-top-left-radius: var(--el-input-border-radius);
+  border-bottom-left-radius: var(--el-input-border-radius);
+  
+  &:hover{
+    background-color: getCssVar(quick-search-select, hover-bg-color);
+  }
+    
+  @include e(icon){
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+
+}
+
+@include b(quick-search-select-popover) {
+  @include set-component-css-var('quick-search-select-popup', $quick-search-select-popup);
+
+  &.el-popper.el-dropdown__popper .el-scrollbar .el-dropdown__list{
+    background-color: getCssVar('quick-search-select-popup','item-bg-color');
+
+    .el-dropdown-menu{
+      background-color: getCssVar('quick-search-select-popup','item-bg-color');
+    }
+  }
+
+  &.el-popper.el-dropdown__popper .el-scrollbar .el-dropdown__list .el-dropdown-menu__item{
+    color: getCssVar('quick-search-select-popup','item-text-color');
+    background-color: getCssVar('quick-search-select-popup','item-bg-color');
+
+    &:hover{
+      color: getCssVar('quick-search-select-popup','item-hover-text-color');
+      background-color:getCssVar('quick-search-select-popup','item-hover-bg-color');
+    }
+  }
+
+
+  @include e(item){
+    
+    @include m(selected){
+      font-weight: bold;
+      #{getCssVarName('quick-search-select-popup','item-text-color')}: getCssVar('quick-search-select-popup','item-selected-text-color');
+      #{getCssVarName('quick-search-select-popup','item-bg-color')}: getCssVar('quick-search-select-popup','item-selected-bg-color');
+    }
+  }
+
+}

@@ -1,0 +1,15 @@
+@include b(code-list) {
+  @include flex(row, flex-start, center);
+
+  flex-wrap: wrap;
+
+  @include e(item){
+    color: getCssVar('code-list','item-color');
+    @include flex(row, flex-start, center);
+  }
+
+  @include b(icon){
+    display: inline-flex;
+    padding-right: getCssVar(spacing, tight);
+  }
+}

@@ -1,0 +1,58 @@
+// 表单多数据样式
+$form-mdctrl: (
+  font-size: getCssVar('font-size', 'header-5'),                                          // 表单多数据字体大小
+  font-weight: getCssVar('font-weight', 'bold'),                                          // 表单多数据字重
+);
+
+// 表单多数据头部样式
+$form-mdctrl-header: (
+  'height': 49px,                                                                         // 表单多数据头部高度
+  padding: getCssVar(spacing, base, tight) 0,                                             // 表单多数据头部内间距
+  margin: calc(getCssVar(spacing, base-tight) / 2) getCssVar(spacing, base, tight),       // 表单多数据头部外间距
+  border-color: getCssVar('color', 'border'),                                             // 表单多数据头部边框颜色
+);
+
+// 表单多数据按钮样式
+$form-mdctrl-button: (
+  gap: getCssVar(spacing, tight),  // 按钮与按钮之前的间隔
+  width: 80px,                      // 按钮宽度
+);
+
+@include b(form-mdctrl){
+  @include set-component-css-var('form-mdctrl', $form-mdctrl);
+  @include set-component-css-var('form-mdctrl-button', $form-mdctrl-button);
+
+  @include e(toolbar){
+    display: flex;
+    justify-content: flex-end;
+    width: 50%;
+  }
+
+  @include e(title) {
+    width: 50%;
+    font-size: getCssVar(form-mdctrl, font-size);
+    font-weight: getCssVar(form-mdctrl, font-weight);
+  }
+}
+
+@include b(form-mdctrl-header){
+  @include set-component-css-var('form-mdctrl-header', $form-mdctrl-header);
+
+  display: flex;
+  place-content: center space-between;
+  align-items: center;
+  height: getCssVar(form-mdctrl, header, height);
+  padding: getCssVar(form-mdctrl, header, padding);
+  margin:  getCssVar(form-mdctrl, header, margin);
+  line-height: getCssVar(form-mdctrl, header, height);
+  border-bottom: 1px solid getCssVar(form-mdctrl, header, border-color);
+}
+
+@include b(form-mdctrl-preview-content) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  margin: getCssVar('spacing', 'tight');
+  box-shadow: 0 0 0 1px #{getCssVar(color, border)} inset;
+}

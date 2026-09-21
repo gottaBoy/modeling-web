@@ -1,0 +1,106 @@
+// 年周日历单元格
+$control-calendar-user-cell: (
+  min-height: 60px,                                                         // 单元格最小高
+  min-width: 114px,                                                         // 单元格最小宽
+  head-min-width: 75px,                                                     // 头部单元格最小宽
+  border-color: getCssVar('color', 'tertiary'),                             // 单元格边框色
+  padding: getCssVar('spacing', 'none') getCssVar('spacing', 'base'),       // 单元格内边距
+);
+
+// 年周日历更多
+$control-calendar-user-more: (
+  font-size: getCssVar('font-size', 'small'),                               // 更多字体大小
+  padding: 0 0 0 getCssVar('spacing', 'tight'),                             // 更多内边距
+  hover-bg-color:  getCssVar('color', 'fill', '0'),                         // 更多悬浮背景色
+  border-radius: getCssVar('spacing', 'extra', 'tight'),                    // 更多倒角
+);
+
+@include b('calendar-user') {
+  @include set-component-css-var('control-calendar-user-cell', $control-calendar-user-cell);
+  @include set-component-css-var('control-calendar-user-more', $control-calendar-user-more);
+
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - getCssVar('spacing', 'base') * 2);
+  height: calc(100% - getCssVar('spacing', 'base') * 2);
+  margin: getCssVar('spacing', 'base');
+  overflow: auto hidden;
+
+  @include e('row') {
+    display: flex;
+  }
+
+  @include e('cell') {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    min-height: getCssVar('control-calendar-user-cell', 'min-height');
+    padding: getCssVar('control-calendar-user-cell', 'padding');
+    border-bottom: 1px solid getCssVar('control-calendar-user-cell', 'border-color');
+    border-left: 1px solid getCssVar('control-calendar-user-cell', 'border-color');
+
+    &:first-child {
+      min-width: getCssVar('control-calendar-user-cell', 'head-min-width');
+    }
+
+    &:not(:first-child) {
+      min-width: getCssVar('control-calendar-user-cell', 'min-width');
+    }
+
+    &:last-child {
+      border-right: 1px solid getCssVar('control-calendar-user-cell', 'border-color');
+    }
+
+    @include m('top') {
+      border-top: 1px solid getCssVar('control-calendar-user-cell', 'border-color');
+    }
+  }
+
+  @include e('black') {
+    width: 100%;
+    height: 100%;
+  }
+
+  @include e('custom-user-popover') {
+    max-height: 300px;
+    overflow: auto;
+  }
+
+  .#{bem('control-calendar-item')} {
+    height: auto;
+    @include when('active') {
+      color: getCssVar('color', 'primary', 'text');
+      background-color: getCssVar('color', 'primary');
+    }
+  }
+
+  @include e('more') {
+    flex-shrink: 0;
+    padding: getCssVar('control-calendar-user-more', 'padding');
+    overflow: hidden;
+    font-size: getCssVar('control-calendar-user-more', 'font-size');
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    border-radius: getCssVar('control-calendar-user-more', 'border-radius');
+
+    &:hover {
+      background-color: getCssVar('control-calendar-user-more', 'hover-bg-color');
+    }
+  }
+
+  @include e('header') {
+    flex-shrink: 0;
+    width: 100%;
+    min-width: fit-content;
+    overflow: hidden scroll;
+  }
+
+  @include e('body') {
+    flex: 1;
+    width: 100%;
+    min-width: fit-content;
+    overflow: hidden scroll;
+  }
+}

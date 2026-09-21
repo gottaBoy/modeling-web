@@ -1,0 +1,124 @@
+// 文件上传根元素
+$file-upload: (
+  font-size: getCssVar(form-item, font-size),                               // 字体大小
+  text-color: getCssVar(form-item, text-color),                             // 字体颜色
+  hover-bg-color: getCssVar(form-item, disabled-bg-color),                  // 悬浮背景色
+  disabled-color: getCssVar(form-item, disabled-color),                     // 禁用色
+  readonly-color: getCssVar(form-item, readonly-color),                     // 只读字体色
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+@include b(file-upload) {
+  width: 100%;
+  @include set-component-css-var('file-upload', $file-upload);
+  @include b(file-upload-button) {
+    span {
+      font-size: getCssVar(file-upload, font-size);
+    }
+  }
+
+
+  .el-upload-list {
+    @include flex(row, flex-start, flex-start, wrap);
+  }
+
+  .el-upload-list__item {
+    @include flex(row, flex-start, center, nowrap);
+
+    flex: 0 0 auto;
+
+    .el-upload-list__item-info {
+      .el-upload-list__item-name {
+        color: getCssVar(file-upload, text-color);
+      }
+    }
+
+    &:hover {
+      @include flex(row, flex-start, center, nowrap);
+
+      background: getCssVar(file-upload, hover-bg-color);
+
+      span {
+        color: getCssVar(file-upload, text-color);
+      }
+    }
+  }
+
+  // 禁用态样式
+  @include m(disabled) {
+    .el-upload-list__item>span {
+      color: getCssVar(file-upload, disabled-color);
+    }
+  }
+
+  // 只读态样式
+  @include m(readonly) {
+    .el-upload-list__item>span {
+      color: getCssVar(file-upload, readonly-color);
+    }
+
+    .#{bem(file-upload-button)} {
+      display: none;
+    }
+  }
+
+  // 上传模式为all，文件上传和文件夹上传按钮都显示
+  @include b(file-upload-uploadmode__all) {
+    position: relative;
+  }
+
+  @include b(file-upload-folder__all) {
+    position: absolute;
+    top: 0;
+    left: 92px;
+  }
+
+  // 上传模式为folder，只显示文件夹上传按钮
+  @include b(file-upload-uploadmode__folder) {
+    position: relative;
+  }
+
+  @include b(file-upload-button__folder) {
+    visibility: hidden;
+  }
+
+  @include b(file-upload-folder__folder) {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+}
+
+// 不显示上传按钮
+@include b(file-upload-icon) {
+  @include when(not-show) {
+    .el-upload--text {
+      display: none;
+    }
+  }
+}
+
+// 嵌入表格编辑列特殊样式
+.#{bem(grid-field-edit-column, editor)} {
+  &.#{bem(file-upload)} {
+
+    .#{bem(file-upload-icon)} {
+      @include flex(column, center, center);
+
+      .el-upload-list--text {
+        width: 100%;
+      }
+    }
+
+  }
+}
+
+
+@include b(form-item) {
+
+  @include b(file-upload) {
+    @include when(show-default) {
+      padding: getCssVar(file-upload, hover-edit-padding);
+    }
+  }
+}

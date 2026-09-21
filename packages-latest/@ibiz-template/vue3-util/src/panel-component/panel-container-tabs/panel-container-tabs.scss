@@ -1,0 +1,25 @@
+/* stylelint-disable selector-class-pattern */
+// 默认样式
+@include b(panel-container-tabs) {
+  position: relative;
+  
+  .el-tabs{
+    --el-tabs-header-height: 52px;
+  }
+
+  .el-tabs__nav-wrap::after{
+    display: none;
+  }
+
+  &::after{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: var(--el-index-normal);
+    width: 100%;
+    height: getCssVarName('spacing', 'super-tight');
+    content: "";
+    background-color: var(--el-border-color-light);
+  }
+
+}

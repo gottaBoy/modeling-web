@@ -1,0 +1,201 @@
+// 快捷操作样式
+$short-cut: (
+  right: getCssVar(spacing, base, loose),                    // 操作面板右侧定位
+  bottom: getCssVar(spacing, base, loose),                    // 操作面板底部定位
+  padding: getCssVar(spacing, extra, tight),                 // 操作面板内边距
+  bg-color: getCssVar(color, bg, 1),                          // 操作面板背景色
+  border-color: getCssVar(color, border),                     // 操作面板边框色
+  border-radius: getCssVar(border, radius, small),           // 操作面板圆角
+  box-shadow: 0 0 getCssVar(spacing, base) #00000014,         // 操作面板阴影
+);
+
+// 快捷操作项样式
+$short-cut-item: (
+  icon-gap: getCssVar(spacing, tight),                                    // 图标与文字间距
+  icon-size: getCssVar(width, icon, medium),                              // 图标尺寸
+  vertical-bg-color-hover: getCssVar(color, fill, 1),                     // 纵向布局悬浮背景色
+  remove-color: getCssVar(color, danger, hover),                          // 删除按钮悬浮色
+  padding: 0 getCssVar(spacing, base, tight),                             // 内边距
+  vertical-padding: getCssVar(spacing, tight) getCssVar(spacing, base, loose), // 纵向布局内边距
+  border-color: getCssVar(color, border),                                  // 边框色
+  remove-gap: getCssVar(spacing, tight),                                   // 删除按钮间距
+  remove-bg-color: getCssVar(color, bg, 1),                                // 删除按钮背景色
+  remove-box-shadow: -10px 0 20px 8px getCssVar(color, bg, 1),             // 删除按钮渐隐遮罩阴影
+);
+
+// 快捷操作操作按钮样式
+$short-cut-operate: (
+  padding: getCssVar(spacing, tight),                          // 内边距
+  line-height: getCssVar(spacing, base, loose),                // 行高
+  color-hover: getCssVar(color, primary),                       // 悬浮文本色
+  bg-color-hover: getCssVar(color, primary, light, default),    // 悬浮背景色
+  border-radius: getCssVar(border, radius, extra, small),       // 圆角
+  icon-gap: getCssVar(spacing, tight),                          // 图标间距
+  recover-gap: getCssVar(spacing, extra-tight),                 // 还原按钮间距
+);
+
+// 快捷操作弹出层样式
+$short-cut-popup: (
+  padding: getCssVar(spacing, base, tight) 0,  // 弹出层上下内边距
+);
+
+@include b('short-cut') {
+  @include set-component-css-var('short-cut', $short-cut);
+  @include set-component-css-var('short-cut-item', $short-cut-item);
+  @include set-component-css-var('short-cut-operate', $short-cut-operate);
+
+  position: fixed;
+  right: getCssVar(short-cut, right);
+  bottom: getCssVar(short-cut, bottom);
+  z-index: 2;
+  display: flex;
+  padding: getCssVar(short-cut, padding);
+  background: getCssVar(short-cut, bg-color);
+  border: 1px solid getCssVar(short-cut, border-color);
+  border-radius: getCssVar(short-cut, border-radius);
+  box-shadow: getCssVar(short-cut, box-shadow);
+
+  @include when('conceal') {
+    visibility: hidden;
+  }
+
+  .icon {
+    flex-shrink: 0;
+    font-size: getCssVar(short-cut, item, font-size)
+  }
+
+  @include e('operate') {
+    cursor: pointer;
+
+    .el-tooltip__trigger {
+      padding: getCssVar(short-cut, operate, padding);
+      line-height: getCssVar(short-cut, operate, line-height);
+
+      &:hover {
+        color: getCssVar(short-cut, operate, color-hover);
+        background-color: getCssVar(short-cut, operate, bg-color-hover);
+        border-radius:  getCssVar(short-cut, operate, border-radius);
+      }
+    }
+  }
+
+  @include e('more') {
+    .more-icon {
+      margin-left: getCssVar(short-cut, operate, icon-gap);
+    }
+  }
+
+  @include e('recover') {
+    margin-left: getCssVar(short-cut, operate, recover-gap);
+
+    .recover-icon {
+      transform: translate(0, 3px);
+    }
+  }
+
+  @include e('item') {
+    position: relative;
+    display: flex;
+    flex-flow: row nowrap;
+    place-content: center flex-start;
+    align-items: center;
+    cursor: pointer;
+
+    .drag-icon {
+      display: none;
+    }
+
+    .drag-icon,
+    .caption-icon,
+    .expand-icon {
+      margin-right: getCssVar(short-cut, item, icon-gap);
+    }
+
+    .close-icon {
+      visibility: hidden;
+
+      &:hover {
+        color: getCssVar(short-cut, item, remove-color);
+      }
+    }
+    @include m('caption') {
+      flex-grow: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &:hover {
+      .drag-icon {
+        display: block;
+      }
+
+      .caption-icon {
+        display: none;
+      }
+
+      .close-icon {
+        visibility: visible;
+      }
+    }
+    @include when('hidden') {
+      display: none;
+    }
+  }
+
+  @include e('draggable') {
+    @include when('horizontal') {
+      display: flex;
+      @include e('item') {
+        min-width: 90px;
+        max-width: 150px;
+        padding: getCssVar(short-cut, item, padding);
+        border-right: 1px solid getCssVar(short-cut, item, border-color);
+
+        .close-icon {
+          position: absolute;
+          right: 0;
+          padding-right: getCssVar(short-cut, item, remove-gap);
+          background-color: getCssVar(short-cut, item, remove-bg-color);
+          box-shadow: getCssVar(short-cut, item, remove-box-shadow);
+        }
+      }
+    }
+    @include when('vertical') {
+      max-height: 400px;
+      overflow-y: auto;
+      @include e('item') {
+        width: 225px;
+        height: 44px;
+        padding: getCssVar(short-cut, item, vertical-padding);
+
+        &:hover {
+          background-color: getCssVar(short-cut, item, vertical-bg-color);
+        }
+      }
+    }
+    + .#{bem('short-cut', 'more')} {
+      margin-left: getCssVar(short-cut, operate, recover-gap);
+    }
+  }
+
+  // popover垂直样式
+  @include e('popover') {
+    @include set-component-css-var('short-cut-item', $short-cut-item);
+    @include set-component-css-var('short-cut-popup', $short-cut-popup);
+
+    .icon {
+      flex-shrink: 0;
+      font-size: getCssVar(short-cut, item, icon-size);
+    }
+
+    &.el-popover.el-popper {
+      padding: getCssVar(spacing, base, tight) 0;
+    }
+    @include e('action-item') {
+      width: 225px;
+      height: 44px;
+      padding: getCssVar(short-cut, item, vertical-padding);
+    }
+  }
+}

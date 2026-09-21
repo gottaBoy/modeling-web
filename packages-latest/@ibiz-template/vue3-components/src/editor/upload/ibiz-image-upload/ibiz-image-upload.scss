@@ -1,0 +1,171 @@
+// 图片上传根元素
+$image-upload: (
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+// 图片上传项元素
+$image-upload-item: (
+  width: 120px,                                                             // 项宽度
+  height: 120px,                                                            // 项高度
+  width-1: 80px,                                                            // 项宽度（表格列中生效）
+  height-1: 32px,                                                           // 项高度（表格列中生效）
+  margin: 0 5px 0 0,                                                        // 外边距
+  bg-color: transparent,                                                    // 项背景色
+  mask-bg-color: rgb(0 0 0 / 60%),                                        // 项遮罩背景色
+  mask-color: getCssVar(color, white),                                    // 项遮罩字体色
+);
+
+// 图片上传添加元素
+$image-upload-add: (
+  font-size: getCssVar('font-size', 'header-2'),                            // 字体大小
+  text-color: getCssVar(color, text, 3),                                    // 字体颜色
+);
+
+@include b('image-upload') {
+  @include set-component-css-var('image-upload', $image-upload);
+  @include set-component-css-var('image-upload-item', $image-upload-item);
+  @include set-component-css-var('image-upload-add', $image-upload-add);
+
+  display: flex;
+  align-items: center;
+
+  .el-upload--picture-card {
+    width: getCssVar('image-upload-item', 'width');
+    height: getCssVar('image-upload-item', 'height');
+  }
+
+  @include e('list-item') {
+    position: relative;
+    display: inline-block;
+    width: getCssVar('image-upload-item', 'width');
+    height: getCssVar('image-upload-item', 'height');
+    margin: getCssVar('image-upload-item', 'margin');
+    line-height: getCssVar('image-upload-item', 'height');
+    text-align: center;
+    background: getCssVar('image-upload-item', 'bg-color');
+
+    img {
+      width: 100%;
+      height: 100%;
+      vertical-align: top;
+      object-fit: contain;
+    }
+
+    &:hover {
+      @include e('list-item-cover') {
+        display: block;
+      }
+    }
+  }
+
+  @include e('list-item-cover') {
+    position: absolute;
+    inset: 0;
+    display: none;
+    background: getCssVar('image-upload-item', 'mask-bg-color');
+
+    ion-icon {
+      margin: 0 2px;
+      color: getCssVar('image-upload-item', 'mask-color');
+      cursor: pointer;
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      vertical-align: top;
+    }
+  }
+
+  @include e('image-upload-add') {
+    font-size: getCssVar('image-upload-add', 'font-size');
+    color: getCssVar('image-upload-add', 'text-color');
+  }
+
+  // 禁用态样式
+  @include m('disabled') {
+    @include e('download-icon') {
+      display: none;
+    }
+    @include e('remove-icon') {
+      display: none;
+    }
+  }
+
+  // 只读态样式
+  @include m('readonly') {
+    @include e('remove-icon') {
+      display: none;
+    }
+
+    .el-upload--picture-card{
+      display: none;
+    }    
+  }
+
+  // 预览态自适应大小模式
+  @include m('autosize'){   
+    object-fit: cover;
+    justify-content: center;
+    .#{bem('image-upload','list-item')}{
+      width: 100%;
+      height: 100%;
+    }
+    .#{bem('image-upload','list-item-cover')}{
+      display: none;
+      visibility: hidden;
+    }
+    
+  }
+}
+
+@include b('image-upload-modal') {
+  @include e('img') {
+    width: 100%;
+  }
+}
+
+@include b(image-upload-icon){
+  @include when(not-show){
+    display: none;
+  }
+}
+
+// 嵌入表格编辑列特殊样式
+.#{bem(grid-field-edit-column, editor)} {
+  &.#{bem(image-upload)} {
+    flex-wrap: wrap;
+
+    .el-upload--picture-card{
+      width: getCssVar(image-upload-item, width, 1);
+      height: getCssVar(image-upload-item, height, 1);
+    }
+
+    .#{bem(image-upload, image-upload-list)} {
+      @include flex(row, flex-start, center);
+
+      flex-wrap: wrap;
+    }
+
+    .#{bem(image-upload, list-item)} {
+      width: getCssVar(image-upload-item, width, 1);
+      height: getCssVar(image-upload-item, height, 1);
+      margin: getCssVar(spacing, extra-tight) getCssVar(spacing, extra-tight) getCssVar(spacing, extra-tight) 0;
+      line-height: getCssVar(image-upload-item, height, 1);
+
+      img {
+        object-fit: fill;
+      }      
+    }
+  }
+}
+
+
+@include b(form-item){
+
+  @include b(image-upload) {
+    @include when(show-default){
+      padding: getCssVar(image-upload, hover-edit-padding);
+    }
+  }
+}

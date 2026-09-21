@@ -1,0 +1,83 @@
+/* stylelint-disable declaration-block-single-line-max-declarations */
+@include b(pdf-print-process) {
+    @include e(wrapper) {
+        width: 400px;
+        padding: 0;
+
+        .el-notification__group {
+            width: 100%;
+            margin: 0;
+        }
+    }
+    @include e(header) {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        padding: getCssVar(spacing, base);
+        background-color: getCssVar(color, fill, 0);
+    }
+    @include e(header-caption) {
+        display: flex;
+        align-items: center;
+        font-size: getCssVar(spacing, base);
+        font-weight: getCssVar(font-weight, bold);
+    }
+    @include e(status) {
+        width: getCssVar(spacing, tight);
+        height: getCssVar(spacing, tight);
+        margin-right: getCssVar(spacing, tight);
+        border-radius: getCssVar(border-radius, circle);
+        @include when(processing) {
+            background-color: getCssVar(color, primary);
+            animation: pulse 1.5s infinite;
+        }
+        @include when(success) {
+            background-color: getCssVar(color, success);
+        }
+        @include when(failed) {
+            background-color: getCssVar(color, danger);
+        }
+    }
+    @include e(toolbar) {
+        display: flex;
+
+        ion-icon {
+            padding: getCssVar(spacing, extra, tight);
+            font-size: getCssVar(font-size, header, 4);
+            cursor: pointer;
+            border-radius: getCssVar(spacing, extra, tight);
+
+            &:hover {
+                background-color: getCssVar(color, fill, 1);
+            }
+        }
+    }
+
+    @include e(content) {
+        padding: getCssVar(spacing, base);
+    }
+    @include e(process) {
+        padding-bottom: getCssVar(spacing, base);
+    }
+    @include e(steps) {
+        display: flex;
+        flex-direction: column;
+        height: 200px;
+        padding: getCssVar(spacing, base, tight);
+        overflow: auto;
+        background-color: getCssVar(color, fill, 0);
+        border-radius: getCssVar(spacing, extra, tight);
+    }
+    @include e(step) {
+        display: flex;
+        gap: getCssVar(spacing, tight);
+        color: getCssVar(color, text, 2);
+    }
+
+    /* 动画 */
+    @keyframes pulse {
+        0% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.2); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+}

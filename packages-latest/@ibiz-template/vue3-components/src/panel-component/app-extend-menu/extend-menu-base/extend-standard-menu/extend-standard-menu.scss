@@ -1,0 +1,492 @@
+// 扩展标准菜单样式
+$extend-standard-menu: (
+  'horizontal-height': 50px,                                       // 横向菜单高度
+  'color': getCssVar(color, primary, text),                        // 菜单文本色
+  "bg-color": getCssVar(color, primary),                              // 菜单背景色
+  'hover-color': getCssVar(color, primary, hover, text),           // 菜单悬浮文本色
+  'hover-bg-color': getCssVar(color, primary, hover),              // 菜单悬浮背景色
+  'active-color': getCssVar(color, primary, active, text),         // 菜单激活文本色
+  'active-bg-color': getCssVar(color, primary, active),            // 菜单激活背景色
+  'scroll-color': getCssVar(color, scroll, menu),                  // 菜单滚动条颜色
+  "padding": getCssVar(spacing, none) getCssVar(spacing, base),      // 纵向菜单内边距
+  "horizontal-padding": getCssVar(spacing, none) getCssVar(spacing, base-tight), // 横向菜单内边距
+  'collapse-item-gap': getCssVar(spacing, tight),                   // 收缩菜单项间距
+  'collapse-padding': getCssVar(spacing, tight),                    // 收缩菜单内边距
+);
+
+// 扩展标准菜单项样式
+$extend-standard-menu-item: (
+  'height': 42px,                                                                                  // 菜单项高度
+  'color': getCssVar(color, text, menu),                                                           // 菜单项文本色
+  'selected-color': getCssVar(color, primary, active, text),                                       // 选中文本色
+  'selected-bg-color': getCssVar(color, primary, active),                                          // 选中背景色
+  'selected-border-color': transparent,                                                            // 选中边框色
+  'hover-color': getCssVar(color, primary, hover, text),                                           // 悬浮文本色
+  'hover-bg-color': getCssVar(color, primary, hover),                                              // 悬浮背景色
+  'padding': getCssVar(spacing, tight),                                                            // 内边距
+  'border-radius': getCssVar(border-radius, small),                                                // 圆角
+  'font-size': getCssVar(font-size, header-6),                                                     // 字体大小
+  'gap': 2px,                                                                                       // 菜单项与菜单项之间的间距
+  'arrow-position': calc(getCssVar(spacing, base) - 2px),                                           // 菜单分组项右侧箭头图标定位
+  'horizontal-height': 100%,                                                                        // 横向菜单高度
+  'horizontal-popup-height': 40px,                                                                  // 横向菜单弹出子菜单项高度
+  'horizontal-color': getCssVar(color, text, menu),                                                 // 横向菜单文本色
+  'horizontal-selected-color': getCssVar(color, primary, active, text),                            // 横向菜单选中文本色
+  'horizontal-selected-bg-color': getCssVar(color, primary, active),                                // 横向菜单选中背景色
+  'horizontal-hover-color': getCssVar(color, primary, hover, text),                                 // 横向菜单悬浮文本色
+  'horizontal-hover-bg-color': getCssVar(color, primary, hover),                                    // 横向菜单悬浮背景色
+  'horizontal-padding': 0 getCssVar(spacing, base-loose),                                           // 横向菜单内边距
+  'horizontal-padding-right': calc(getCssVar(width-icon, large) + getCssVar(spacing, base-loose)),  // 横向分组菜单右内边距
+  'horizontal-font-size': getCssVar(font-size, header-5),                                           // 横向菜单字体大小
+  'horizontal-border-radius': 0,                                                                    // 横向菜单圆角
+  'horizontal-selected-border': 2px solid getCssVar(color, text, 1),                                // 横向菜单选中项上边框
+);
+
+// 扩展标准菜单项图标样式
+$extend-standard-menu-item-icon: (
+  'width': getCssVar(width-icon, large),               // 图标宽度
+  'height': getCssVar(width-icon, large),               // 图标高度
+  'margin': 0 getCssVar(spacing, tight) 0 0,             // 图标外边距
+  'size': getCssVar(width-icon,medium),                  // 图标尺寸
+  gap: getCssVar('spacing', 'tight'),                   // 图标与文本之间的间隔 
+);
+
+// 扩展标准菜单项计数徽标样式
+$extend-standard-menu-item-counter: (
+  height: 20px,                                              // 徽标高度
+  color: getCssVar('color', danger, text),                   // 徽标文本色
+  bg-color: getCssVar('color', 'danger'),                     // 徽标背景色
+  padding: getCssVar('spacing', 'none') getCssVar('spacing', 'tight'), // 徽标内边距
+  gap: 5px,                                                  // 徽标与边距间隔
+  border-radius: getCssVar('border','radius','medium'),      // 徽标圆角
+);
+
+// 扩展标准菜单弹出层样式
+$extend-standard-menu-popup: (
+  padding: getCssVar('spacing', 'extra-tight'),    // 弹出层内边距
+  bg-color: getCssVar('color', 'primary'),          // 弹出层背景色
+  box-shadow: getCssVar('shadow', 'elevated'),      // 弹出层阴影
+);
+
+// 扩展标准菜单直接内容项样式
+$extend-standard-menu-rawitem: (
+  'height': 42px,                              // 直接内容项高度
+  'color': getCssVar(color, text, menu),       // 直接内容项文本色
+  'font-size': getCssVar(font-size, header-6), // 直接内容项字体大小
+);
+
+// 扩展标准菜单分割线样式
+$extend-standard-menu-divider: (
+  'color': getCssVar(color, scroll, menu),     // 分割线颜色
+  margin: getCssVar(spacing, tight) 0,         // 分割线上下外边距
+);
+
+// 垂直菜单项样式
+@mixin menu-item-vertical-style {
+  @include flex(row, flex-start, center);
+
+  --el-menu-base-level-padding: #{getCssVar('extend-standard-menu-item', 'padding')};
+
+  width: 100%;
+  height: getCssVar('extend-standard-menu-item', 'height');
+  font-size: getCssVar('extend-standard-menu-item', 'font-size');
+  color: getCssVar('extend-standard-menu-item', 'color');
+  white-space: nowrap;
+  border-radius: getCssVar('extend-standard-menu-item', 'border-radius');
+
+  &.is-active {
+    color: getCssVar('extend-standard-menu-item', 'selected-color') !important;
+    background-color: getCssVar('extend-standard-menu-item', 'selected-bg-color');
+  }
+
+  &:hover {
+    color: getCssVar('extend-standard-menu-item', 'hover-color');
+    background-color: getCssVar('extend-standard-menu-item', 'hover-bg-color');
+  }
+}
+
+// 水平菜单项样式
+@mixin menu-item-horizontal-style {
+  height: getCssVar('extend-standard-menu-item', 'horizontal-height');
+  padding: getCssVar('extend-standard-menu-item', 'horizontal-padding');
+  font-size: getCssVar('extend-standard-menu-item', 'horizontal-font-size');
+  line-height: getCssVar('extend-standard-menu-item', 'horizontal-height');
+  color: getCssVar('extend-standard-menu-item', 'horizontal-color');
+  white-space: nowrap;
+  border-width: 0;
+  border-radius: getCssVar('extend-standard-menu-item', 'horizontal-border-radius');
+
+  &:hover {
+    color: getCssVar('extend-standard-menu-item', 'horizontal-hover-color');
+    background-color: getCssVar(
+      'extend-standard-menu-item',
+      'horizontal-hover-bg-color'
+    );
+  }
+
+  &.is-active {
+    // element-plus 给了 !important，所以这里也要加上
+    color: getCssVar('extend-standard-menu-item', 'selected-color') !important;
+    background-color: getCssVar('extend-standard-menu-item', 'horizontal-selected-bg-color');
+    border-top: getCssVar('extend-standard-menu-item', 'horizontal-selected-border');
+  }
+}
+
+// 收缩菜单项样式
+@mixin menu-collapse-item-style {
+  @include flex-center;
+
+  padding: getCssVar(spacing, none);
+  margin-bottom: getCssVar('extend-standard-menu', 'collapse-item-gap');
+
+}
+
+// 菜单项选中样式
+@mixin menu-item-selected-style {
+  color: getCssVar('extend-standard-menu-item', 'selected-color');
+  background-color: getCssVar('extend-standard-menu-item', 'selected-bg-color');
+}
+
+// 直接内容菜单项样式
+@mixin raw-item-menu-style {
+  --el-menu-hover-text-color: #{getCssVar('extend-standard-menu-item', 'color')};
+  --el-menu-hover-bg-color: transparent;
+  @include set-component-css-var('extend-standard-menu-item', $extend-standard-menu-item);
+  @include set-component-css-var('extend-standard-menu-item-icon', $extend-standard-menu-item-icon);
+  @include set-component-css-var('extend-standard-menu-item-counter', $extend-standard-menu-item-counter);
+  @include set-component-css-var('extend-standard-menu-rawitem', $extend-standard-menu-rawitem);
+  .#{bem('extend-standard-menu', 'rawitem')} {
+    min-height: getCssVar('extend-standard-menu-rawitem', 'height');
+    line-height: getCssVar('extend-standard-menu-rawitem', 'height');
+    .#{bem('rawitem')} {
+      @include flex(row, flex-start, center);
+
+      font-size: getCssVar('extend-standard-menu-rawitem', 'font-size');
+      color: getCssVar('extend-standard-menu-rawitem', 'color');
+
+      &>.#{bem('icon')} {
+        display: flex;
+        align-items: center;
+        width: getCssVar('extend-standard-menu', 'item-icon', 'width');
+        height: getCssVar('extend-standard-menu', 'item-icon', 'height');
+        font-size: getCssVar('extend-standard-menu', 'item-icon', 'size');
+      }
+
+      * {
+        @include utils-ellipsis;
+      }
+    }
+  }
+}
+
+@include b(extend-standard-menu) {
+  width: 100%;
+  height: 100%;
+
+  @include e('content') {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: getCssVar(extend-standard-menu, bg-color);
+
+    @include set-component-css-var('extend-standard-menu', $extend-standard-menu);
+    @include set-component-css-var('extend-standard-menu-item', $extend-standard-menu-item);
+    @include set-component-css-var('extend-standard-menu-item-icon', $extend-standard-menu-item-icon);
+    @include set-component-css-var('extend-standard-menu-item-counter', $extend-standard-menu-item-counter);
+    @include set-component-css-var('extend-standard-menu-divider', $extend-standard-menu-divider);
+
+    &>.el-menu {
+      height: 100%;
+      padding: etCssVar(extend-standard-menu, padding);
+      overflow: hidden auto;
+      border-right: 0;
+      @include raw-item-menu-style;
+    }
+
+    .el-sub-menu {
+      .el-sub-menu__icon-arrow {
+        right: 10px;
+        width: getCssVar('extend-standard-menu', item-icon, 'width');
+        height: getCssVar('extend-standard-menu', item-icon, 'height');
+        margin-top: -10px;
+        font-size: getCssVar('extend-standard-menu', item-icon, 'width');
+      }
+
+      .el-menu-item {
+        padding: calc(getCssVar('extend-standard-menu', 'item-padding') * 0.875)
+          calc(getCssVar('extend-standard-menu', 'item-padding') * 2.5);
+      }
+
+      .el-sub-menu__title >.#{bem('extend-standard-menu', 'counter')} {
+        right: 30px;
+      }
+    }
+
+    // 垂直
+    .el-menu--vertical {
+      width: 100%;
+
+      // 菜单项样式
+      .el-menu-item,
+      .el-sub-menu__title {
+        @include menu-item-vertical-style;
+      }
+
+      .el-menu-item + .el-menu-item {
+        margin-top: getCssVar('extend-standard-menu-item', 'gap');
+      }
+
+      .el-sub-menu + .el-menu-item {
+        margin-top: getCssVar('extend-standard-menu-item', 'gap');
+      }
+
+      .el-sub-menu + .el-sub-menu {
+        margin-top: getCssVar('extend-standard-menu-item', 'gap');
+      }
+
+      .el-menu-item + .el-sub-menu {
+        margin-top: getCssVar('extend-standard-menu-item', 'gap');
+      }
+
+      .el-sub-menu__title + .el-menu {
+        margin-top: getCssVar('extend-standard-menu-item', 'gap');
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background-color: getCssVar('extend-standard-menu', 'scroll-color');
+      }
+    }
+
+    // 水平
+    .el-menu--horizontal {
+      align-items: center;
+      height: 100%;
+      padding: getCssVar(extend-standard-menu, horizontal-padding);
+
+      // 水平菜单默认为ellipsis模式，无需滚动条
+      overflow-x: hidden;
+      border-bottom: none;
+
+      // 菜单项样式
+      .el-menu-item,
+      .el-sub-menu__title {
+        @include menu-item-horizontal-style;
+
+        .el-sub-menu__icon-arrow {
+          right: getCssVar('extend-standard-menu', item, 'arrow-position');
+        }
+      }
+
+      .el-sub-menu {
+        height: getCssVar('extend-standard-menu-item', 'horizontal-height');
+
+        >.el-sub-menu__title {
+          padding-right: getCssVar('extend-standard-menu-item', 'horizontal-padding-right');
+        }
+      }
+
+      // 副菜单悬浮
+      > .el-sub-menu:hover .el-sub-menu__title {
+        color: getCssVar('extend-standard-menu-item', 'horizontal-hover-color');
+        background-color: getCssVar(
+          'extend-standard-menu-item',
+          'horizontal-hover-bg-color'
+        );
+      }
+
+      // 副菜单激活
+      > .el-sub-menu.is-active .el-sub-menu__title {
+        color: getCssVar('extend-standard-menu-item', 'horizontal-selected-color');
+        background-color: getCssVar('extend-standard-menu-item', 'horizontal-selected-bg-color');
+        border-top: getCssVar('extend-standard-menu-item', 'border');
+        border-bottom: 0;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background-color: getCssVar('extend-standard-menu', 'scroll-color');
+      }
+
+      .el-divider--vertical {
+        border-color: getCssVar(extend-standard-menu-divider, color);
+      }
+    }
+    @include when('horizontal') {
+      #{getCssVarName(color, text, 0)}: getCssVar(extend-standard-menu, color);
+      #{getCssVarName(color, text, 1)}: getCssVar(extend-standard-menu, color);
+      #{getCssVarName(color, text, 2)}: getCssVar(extend-standard-menu, color);
+      #{getCssVarName(color, text, 3)}: getCssVar(extend-standard-menu, color);
+      width: 100%;
+      height: getCssVar('extend-standard-menu', 'horizontal-height');
+    } 
+
+    @include when('bottom') {
+      .el-menu--horizontal {
+        .el-menu-item.is-active,
+        .el-sub-menu.is-active .el-sub-menu__title {
+          border-top: 0;
+          border-bottom: getCssVar('extend-standard-menu-item', 'horizontal-selected-border');
+        }
+      }
+    }
+
+    @include when('collapse') {
+      &>.el-menu {
+        padding: getCssVar('extend-standard-menu', 'collapse-padding');
+      }
+    }
+
+    .el-menu {
+      #{getCssVarName(color, primary, hover)}: getCssVar(extend-standard-menu, active, bg, color);
+      #{getCssVarName(color, primary, hover, text)}: getCssVar(extend-standard-menu, active, color);
+      #{getCssVarName(color, primary, active)}: getCssVar(extend-standard-menu, hover, bg, color);
+      #{getCssVarName(color, primary, active, text)}: getCssVar(extend-standard-menu, hover, color);
+
+      --el-button-text-color: #{getCssVar(extend-standard-menu, color)};
+    }
+  }
+
+  // 图标样式
+  @include e(icon) {
+    @include flex(row, center, center);
+
+    width: getCssVar('extend-standard-menu', item-icon, 'width');
+    height: getCssVar('extend-standard-menu', item-icon, 'height');
+    font-size: getCssVar('extend-standard-menu',item-icon, 'size');
+
+    &+.#{bem('extend-standard-menu__caption')} {
+      margin-left: getCssVar('extend-standard-menu', item-icon, 'gap');
+    }
+  }
+
+  // 文字样式
+  @include e('caption') {
+    @include utils-ellipsis;
+
+    line-height: getCssVar('extend-standard-menu-item', 'height');
+  }
+}
+
+@include b(extend-standard-menu-popup-container){
+  @include raw-item-menu-style;
+
+  // 收缩时菜单项样式
+  // 以及水平菜单悬浮出来菜单样式
+  &.el-menu--popup-container {
+    @include set-component-css-var('extend-standard-menu', $extend-standard-menu);
+    @include set-component-css-var('extend-standard-menu-item', $extend-standard-menu-item);
+    @include set-component-css-var('extend-standard-menu-popup', $extend-standard-menu-popup);
+
+    border: none;
+    box-shadow: getCssVar(extend-standard-menu-popup, box-shadow);
+
+    .el-menu--popup {
+      max-height: 100vh;
+      padding: getCssVar(extend-standard-menu-popup, padding);
+      overflow: auto;
+      background-color: getCssVar(extend-standard-menu-popup, bg-color);
+
+      .el-menu-item,
+      .el-sub-menu__title {
+        @include flex(row, flex-start, center);
+
+        width: 100%;
+        height: getCssVar('extend-standard-menu-item', 'horizontal-popup-height');
+        font-size: getCssVar('extend-standard-menu-item', 'font-size');
+        color: getCssVar('extend-standard-menu-item', 'horizontal-color');
+        white-space: nowrap;
+        border-radius: getCssVar('extend-standard-menu-item', 'horizontal-border-radius');
+
+        &.is-active {
+          color: getCssVar('extend-standard-menu-item', 'horizontal-selected-color');
+          background-color: getCssVar('extend-standard-menu-item', 'horizontal-selected-bg-color');
+        }
+
+        &:hover {
+          color: getCssVar('extend-standard-menu-item', 'hover-color');
+          background-color: getCssVar('extend-standard-menu-item', 'hover-bg-color');
+        }
+
+        .el-icon {
+          display: none;
+        }
+      }
+    }
+  }
+
+  // 计数器样式
+  .#{bem('extend-standard-menu', 'counter')} {
+    position: absolute;
+    top: 50%;
+    right: getCssVar('extend-standard-menu-item-counter', 'gap');
+    height: getCssVar('extend-standard-menu-item-counter', 'height');
+    padding: getCssVar('extend-standard-menu-item-counter', 'padding');
+    line-height: initial;
+    color: getCssVar('extend-standard-menu-item-counter', 'color');
+    background-color: getCssVar('extend-standard-menu-item-counter', 'bg-color');
+    border-radius: getCssVar('extend-standard-menu-item-counter', 'border-radius');
+    transform: translateY(-50%);
+  }
+
+}
+
+// 分割线
+.#{bem('extend-standard-menu', 'separator', 'horizontal')} {
+  margin: getCssVar(extend-standard-menu-divider, margin);
+  border-color: getCssVar(extend-standard-menu-divider, color);
+}
+
+.el-menu--horizontal.el-menu--popup-container:has(.#{bem(extend-standard-menu, item)},.#{bem(extend-standard-menu-submenu)}) {
+
+  @include raw-item-menu-style;
+
+  @include set-component-css-var('extend-standard-menu', $extend-standard-menu);
+  @include set-component-css-var('extend-standard-menu-item', $extend-standard-menu-item);
+  @include set-component-css-var('extend-standard-menu-divider', $extend-standard-menu-divider);
+  @include set-component-css-var('extend-standard-menu-popup', $extend-standard-menu-popup);
+
+  border: none;
+  box-shadow: getCssVar(extend-standard-menu-popup, box-shadow);
+
+  .el-menu--popup {
+    padding: getCssVar(extend-standard-menu-popup, padding);
+    background-color: getCssVar(extend-standard-menu-popup, bg-color);
+
+    .el-menu-item,
+    .el-sub-menu__title {
+      @include flex(row, flex-start, center);
+
+      width: 100%;
+      height: getCssVar('extend-standard-menu-item', 'horizontal-popup-height');
+      font-size: getCssVar('extend-standard-menu-item', 'font-size');
+      color: getCssVar('extend-standard-menu-item', 'horizontal-color');
+      white-space: nowrap;
+      border-radius: getCssVar('extend-standard-menu-item', 'horizontal-border-radius');
+
+      &.is-active {
+        color: getCssVar('extend-standard-menu-item', 'horizontal-selected-color');
+        background-color: getCssVar('extend-standard-menu-item', 'horizontal-selected-bg-color');
+      }
+
+      &:hover {
+        color: getCssVar('extend-standard-menu-item', 'hover-color');
+        background-color: getCssVar('extend-standard-menu-item', 'hover-bg-color');
+      }
+
+      .el-icon {
+        display: none;
+      }
+    }
+  }
+
+  .el-menu .el-sub-menu.is-active>.el-sub-menu__title {
+    color: getCssVar(extend-standard-menu-item, horizontal-selected-color);
+  }
+
+  // 分割线
+  .#{bem('extend-standard-menu', 'separator', 'vertical')} {
+    width: 100%;
+    height: 1px;
+    margin: getCssVar(extend-standard-menu-divider, margon);
+    border-top: 1px getCssVar(extend-standard-menu-divider, color) solid;
+  }
+}

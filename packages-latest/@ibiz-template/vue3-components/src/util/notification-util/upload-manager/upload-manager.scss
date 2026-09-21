@@ -1,0 +1,128 @@
+@include b(upload-manager-notic) {
+  --el-notification-width: 400px;
+  --el-notification-padding: 0;
+  --el-notification-group-margin-left: 0;
+  --el-notification-group-margin-right: 0;
+  .el-notification__group {
+    width: 100%;
+  }
+}
+
+@include b(upload-manager) {
+  .icon {
+    font-size: 20px;
+    &.success {
+      color: getCssVar(color, success-hover);
+    }
+    &.danger {
+      color: getCssVar(color, danger);
+    }
+  }
+
+  @include e(header) {
+    display: flex;
+    line-height: 30px;
+    align-items: center;
+    padding: getCssVar(spacing, base);
+    padding-left: getCssVar(spacing, loose);
+
+    @include m(loading) {
+      display: flex;
+      align-items: center;
+      .el-progress-circle {
+        --el-fill-color-light: #{getCssVar(color, disabled-bg)};
+        width: 30px !important;
+        height: 30px !important;
+      }
+      .icon {
+        font-size: 30px;
+      }
+    }
+
+    @include m(title) {
+      display: flex;
+      flex-grow: 1;
+      align-items: center;
+      margin-left: 12px;
+      .caption {
+        font-size: getCssVar(font-size, header-6);
+      }
+      .progress {
+        color: getCssVar(color, disabled-text);
+        margin-left: getCssVar(spacing, tight);
+      }
+    }
+
+    @include m(actions) {
+      display: flex;
+      align-items: center;
+      color: getCssVar(color, disabled-text);
+      .icon {
+        font-size: 24px;
+        cursor: pointer;
+        margin-left: getCssVar(spacing, extra-tight);
+        &.down-up {
+          font-size: 20px;
+        }
+        &:hover {
+          color: getCssVar(color, primary-hover);
+        }
+      }
+    }
+  }
+
+  @include e(content) {
+    max-height: 240px;
+    overflow-y: auto;
+    padding: 0 getCssVar(spacing, base) getCssVar(spacing, base) getCssVar(spacing, loose);
+  }
+
+  @include e(file-item) {
+    height: 48px;
+    display: flex;
+    position: relative;
+    align-items: center;
+    padding: getCssVar(spacing, base-tight) 0;
+
+    @include m(icon) {
+      display: flex;
+      align-items: center;
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    @include m(name) {
+      flex-grow: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin: 0 getCssVar(spacing, base-tight);
+    }
+
+    @include m(status) {
+      display: flex;
+      align-items: center;
+      .el-progress {
+        padding-left: getCssVar(spacing, base);
+      }
+      .el-progress-circle {
+        --el-fill-color-light: #{getCssVar(color, disabled-bg)};
+        width: 20px !important;
+        height: 20px !important;
+      }
+      .el-progress__text {
+        font-size: getCssVar(font-size, small) !important;
+        left: -45px !important;
+      }
+    }
+    @include m(status-text) {
+      left: 32px;
+      bottom: -6px;
+      position: absolute;
+      color: getCssVar(color, danger);
+      font-size: getCssVar(font-size, small);
+    }
+  }
+}

@@ -1,0 +1,370 @@
+// 扩展按钮菜单样式
+$extend-menu-button: (
+    'color': getCssVar(color, text, menu),                          // 菜单文本色
+    'hover-color': getCssVar(color, primary, hover, text),          // 菜单悬浮文本色
+    'hover-bg-color': getCssVar(color, primary, hover),             // 菜单悬浮背景色
+    'active-color': getCssVar(color, primary, active, text),        // 菜单激活文本色
+    'active-bg-color': getCssVar(color, primary, active),           // 菜单激活背景色
+    'font-size': getCssVar('font-size', 'header-6'),                 // 菜单字体大小
+    'padding': getCssVar('spacing', 'extra-tight') 0,                // 菜单内边距
+    'content-padding': 0 getCssVar('spacing', 'tight'),              // 菜单内容区内边距
+);
+
+// 扩展按钮菜单项样式
+$extend-menu-button-item: (
+    'height': 42px,                                                      // 菜单项高度
+    'font-size': getCssVar(extend-menu-button, font-size),              // 菜单项字体大小
+    'horizontal-min-width': 200px,                                       // 横向菜单最小宽度
+    'horizontal-margin': 0 0 0 getCssVar('spacing', 'extra-tight'),     // 横向菜单项左侧外边距
+    'horizontal-font-size': getCssVar(font-size, header-5),             // 横向菜单字体大小
+    'vertical-margin': getCssVar('spacing', 'extra-tight') 0 0 0,       // 纵向菜单项顶部外边距
+    'vertical-padding': getCssVar(spacing, tight) 0,                    // 纵向菜单项上下内边距
+);
+
+// 扩展按钮菜单项图标样式
+$extend-menu-button-item-icon: (
+    'width':getCssVar(width-icon, large),    // 图标宽度
+    'height': getCssVar(width-icon, large),  // 图标高度
+    'size': getCssVar(width-icon,medium),    // 图标尺寸
+    gap: getCssVar('spacing', 'tight'),      // 图标与文字间距
+);
+
+// 扩展按钮菜单弹出层样式
+$extend-menu-button-popover: (
+    'padding': getCssVar('spacing', 'super-tight') getCssVar('spacing', 'extra-tight'),  // 弹出层内边距
+    'min-width': 200px,                                  // 弹出层最小宽度
+    'z-index': 3,                                        // 弹出层层级
+    'background': getCssVar('color', 'primary'),         // 弹出层背景色
+    box-shadow: getCssVar(shadow, elevated),              // 弹出层阴影
+);
+
+// 扩展按钮菜单分割线样式
+$extend-menu-button-divider: (
+    'color': getCssVar(color, scroll, menu),  // 分割线颜色
+    'horizontal-margin': 0 getCssVar('spacing', 'tight'),     // 横向分隔符外边距
+    'vertical-margin': getCssVar('spacing', 'tight') 0,       // 纵向菜单分隔符外边距
+);
+
+// 扩展按钮菜单直接内容项样式
+$extend-menu-button-rawitem: (
+    'min-width': getCssVar('font-size', 'header-6'),    // 直接内容项最小宽度
+    color: getCssVar(extend-menu-button, color),        // 直接内容项文本色
+);
+
+// 设置上下菜单样式与标准菜单保持一致
+@mixin menu-horizontal-style {
+    @include when('horizontal') {
+        .#{bem('extend-menu-button__menuitem')} {
+            font-size: getCssVar('extend-menu-button-item', 'horizontal-font-size');
+        }
+
+        .#{bem('extend-menu-button__icon')} {
+            justify-content: center;
+        }
+    }
+}
+
+@include b(extend-menu-button) {
+    @include set-component-css-var('extend-menu-button', $extend-menu-button);
+    @include set-component-css-var('extend-menu-button-item', $extend-menu-button-item);
+    @include set-component-css-var('extend-menu-button-item-icon', $extend-menu-button-item-icon);
+    @include set-component-css-var('extend-menu-button-rawitem', $extend-menu-button-rawitem);
+
+    width: 100%;
+    height: 100%;
+    padding: getCssVar('extend-menu-button', 'padding');
+
+    @include e('menuitem') {
+        width: 100%;
+        height: 100%;
+        font-size: getCssVar('extend-menu-button-item', 'font-size');
+    }
+
+    @include e('rawitem') {
+        width: 100%;
+        height: 100%;
+        
+        .#{bem('rawitem')} { 
+            min-width: getCssVar('extend-menu-button', rawitem, 'min-width');
+            font-size: initial;
+            color: getCssVar(extend-menu-button, color);
+        }
+    }
+
+    @include e('separator') {
+        @include m('horizontal') {
+            margin: 0;
+        }
+        @include m('vertical') {
+            margin: 0;
+        }
+    }
+
+    @include e('icon') {
+        display: flex;
+        align-items: center;    
+        width: getCssVar('extend-menu-button', item-icon, 'width');
+        height: getCssVar('extend-menu-button', item-icon, 'height');
+        font-size: getCssVar('extend-menu-button', item-icon, 'size');
+        & + .#{bem('extend-menu-button__caption')} {
+            margin-left: getCssVar('extend-menu-button', item-icon, 'gap');
+        }
+    }
+
+    @include e('content') {
+        display: flex;
+        flex-wrap: nowrap;
+        height: 100%;
+        padding: getCssVar('extend-menu-button', 'content-padding');
+        overflow: auto;
+        @include m('item') {
+            display: flex;
+            align-items: center;
+
+            
+            @include when('show-arrow') {
+                position: relative;
+                .#{bem('extend-menu-button__menuitem')}::after {
+                    display: block;
+                    width: 1em;
+                    height: 1em;
+                    margin-left: auto;
+                    content: '';
+                }
+            }
+
+            @include when('rotate-arrow') {
+                svg {
+                    transform: rotate(180deg);
+                }
+            }
+        }
+
+        @include m('item-container') {
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+
+        @include m('menuitem') {
+            height: getCssVar('extend-menu-button-item', 'height');
+        }
+
+        @include m('rawitem') {
+            height: getCssVar('extend-menu-button-item', 'height');
+        }
+
+        @include m('item-arrow') {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: getCssVar(extend-menu-button, color);
+            transform: translateY(-50%);
+
+            svg {
+                transition: transform 0.3s ease;
+            }
+        }
+ 
+        @include when('horizontal') {
+            align-items: center;
+            @include e('content'){
+                @include m('item') {
+                    margin: getCssVar('extend-menu-button-item', 'horizontal-margin');
+
+                    &:first-child {
+                        margin-left: 0;
+                    }
+                }
+
+                @include m('item-container') {
+                    &:not(:has(.el-divider)) {    
+                        min-width: getCssVar('extend-menu-button-item', 'horizontal-min-width');
+                    }
+                }
+
+                @include m('seperator') {
+                    width: auto;
+                    margin: getCssVar('extend-menu-button-divider', 'horizontal-margin');
+
+                    &+.#{bem('extend-menu-button__content--item')} {
+                        margin-left: 0;
+                    }
+                }
+            }
+        }
+
+        @include when('vertical') {
+            flex-direction:column;
+            @include e('content'){
+                @include m('item') {
+                    margin: getCssVar('extend-menu-button-item', 'vertical-margin');
+
+                    &:first-child {
+                        margin-top: 0;
+                    }
+                }
+
+                @include m('seperator') {
+                    margin: getCssVar('extend-menu-button-divider', 'vertical-margin');
+
+                    &+.#{bem('extend-menu-button__content--item')} {
+                        margin-top: 0;
+                    }
+                }
+            }
+
+            @include e('menuitem') { 
+                justify-content: flex-start;
+            }
+
+            @include e('rawitem') { 
+                justify-content: flex-start;
+            }
+        }
+
+        .el-button {
+            #{getCssVarName(color, primary, hover)}: getCssVar(extend-menu-button, active, bg, color);
+            #{getCssVarName(color, primary, hover, text)}: getCssVar(extend-menu-button, active, color);
+            #{getCssVarName(color, primary, active)}: getCssVar(extend-menu-button, hover, bg, color);
+            #{getCssVarName(color, primary, active, text)}: getCssVar(extend-menu-button, hover, color);
+
+            --el-button-text-color: #{getCssVar(extend-menu-button, color)};
+
+            &:focus {
+                background-color: #{getCssVar(extend-menu-button, hover-bg-color)};
+            }
+
+            &:hover {
+                background-color: #{getCssVar(extend-menu-button, active-bg-color)};
+            }
+        }
+    }
+
+    @include when('vertical')  {
+        #{getCssVarName('extend-menu-button', 'padding')}: #{getCssVar(extend-menu-button-item, vertical-padding)};
+        
+        .#{bem('extend-menu-button__content')},
+        .#{bem('extend-menu-button__content--item')},
+        .#{bem('extend-menu-button__content--item-container')} {
+            width: 100%;
+        }
+    }
+
+    @include menu-horizontal-style;
+}
+
+@mixin extend-menu-button-popover {
+    @include set-component-css-var('extend-menu-button', $extend-menu-button);
+    @include set-component-css-var('extend-menu-button-item', $extend-menu-button-item);
+    @include set-component-css-var('extend-menu-button-item-icon', $extend-menu-button-item-icon);
+    @include set-component-css-var('extend-menu-button-popover', $extend-menu-button-popover);
+    @include set-component-css-var('extend-menu-button-divider', $extend-menu-button-divider);
+    
+    #{getCssVarName('extend-menu-button', 'content-padding')}: 0;
+    #{getCssVarName('extend-menu-button-item', 'vertical-margin')}: 0;
+    z-index: getCssVar('extend-menu-button-popover', 'z-index');
+    width: auto;
+    padding: getCssVar('extend-menu-button-popover', 'padding');
+    background-color: getCssVar('extend-menu-button-popover', 'background');
+    box-shadow: getCssVar('extend-menu-button-popover', 'box-shadow');
+    
+    .#{bem('extend-menu-button__content')} {
+        min-width: getCssVar('extend-menu-button-popover', 'min-width');
+    }
+
+    .#{bem('extend-menu-button__separator--horizontal')} {
+        border-color: getCssVar('extend-menu-button-divider', 'color');
+    }
+    .#{bem('extend-menu-button__content')},
+    .#{bem('extend-menu-button__content--item')},
+    .#{bem('extend-menu-button__content--item-container')} {
+        width: 100%;
+    }
+}
+
+@include b('extend-menu-button-cascader-popover') {
+    @include extend-menu-button-popover;
+}
+
+@include b('extend-menu-button-border-popover') {
+    @include extend-menu-button-popover;
+
+    .#{bem('extend-menu-button__content')}.is-horizontal {
+        .#{bem('extend-menu-button__content--item-arrow')} {
+            transform: translateY(-50%) rotate(90deg);
+        }
+    }
+
+    @include menu-horizontal-style;
+}
+
+
+@include b('extend-menu-button-placehold') {
+    position: fixed;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    
+    @include e('line') {
+        position: absolute;
+    }
+
+    @include e('arrow') {
+        color: getCssVar(color, text, 2);
+    }
+
+    @include when('left') {
+        @include e('line') {
+            top: 0;
+            left: 0;
+            width: 1px;
+            height: 100%;
+        }
+    }
+
+    @include when('right') {
+        @include e('line') {
+            top: 0;
+            right: 0;
+            width: 1px;
+            height: 100%;
+        }
+
+        svg {
+            transform: rotate(180deg);
+        }
+    }
+            
+    @include when('top') {
+        @include e('line') {
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+        }
+
+        svg {
+            transform: rotate(90deg);
+        }
+    }
+        
+    @include when('bottom') {
+        @include e('line') {
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+        }
+
+        svg {
+            transform: rotate(-90deg);
+        }
+    }
+}

@@ -1,0 +1,11 @@
+@include b(global-toolbar) {
+  width: 100%;
+  padding: 0 8px;
+  @include flex(row, space-between, center);
+
+  @include b(global-toolbar-right) {
+    .ibiz-devtool-button+.ibiz-devtool-button{
+      margin-left: 6px;
+    }
+  }  
+}

@@ -1,0 +1,33 @@
+// 第三方登录样式
+$auth-sso: (
+  icon-width: getCssVar(editor, default, line-height),          // 图标宽度
+  icon-height: getCssVar(editor, default, line-height),         // 图标高度
+  gap: getCssVar(spacing,base),                                 // 图标与图标间隔
+);
+
+@include b('auth-sso'){
+    @include set-component-css-var('auth-sso', $auth-sso);
+
+    display:flex;
+    gap: getCssVar('auth-sso', 'gap');
+    justify-content: center;
+    width: 100%;
+    @include e('sign-btn'){
+        width: getCssVar('auth-sso', 'icon-width');
+        height: getCssVar('auth-sso', 'icon-height');
+        cursor: pointer;
+
+        svg{
+            width: 100%;
+            height: 100%;
+        }
+
+        @include b(icon) {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+    }
+}

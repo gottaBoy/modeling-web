@@ -1,0 +1,452 @@
+// 看板部件样式
+$control-kanban: (
+  text-color: getCssVar(color, text, 0),              // 看板文本色
+  font-size: getCssVar('font-size', 'regular'),       // 看板基础字体大小
+  font-weight: getCssVar('font-weight', 'bold'),      // 看板基础字体粗细
+);
+
+// 看板部件内容区域样式
+$control-kanban-content: (
+  padding-bottom: getCssVar(spacing, tight),  // 内容区域底部内边距
+  height: calc(100% - 50px),                  // 内容区域高度,减去分页栏高度
+);
+
+// 看板分组样式
+$control-kanban-group: (
+  gap: getCssVar('spacing', 'base'),                    // 分组间距
+  border: 1px solid getCssVar(color, border),           // 分组边框
+  border-radius: getCssVar(border, radius, small),      // 分组圆角
+  collapse-width: 32px,                                 // 分组折叠态宽度
+);
+
+// 看板分组列头部样式
+$control-kanban-group-header: (
+  height: 48px,                                               // 分组列头部高度
+  icon-gap: getCssVar(spacing, tight),                        // 头部图标间距
+  padding: getCssVar('spacing', 'none') getCssVar(spacing, base), // 头部内边距
+  font-size: getCssVar(control-kanban, 'font-size'),          // 头部字体大小
+  font-weight: getCssVar(control-kanban, 'font-weight'),      // 头部字体粗细
+  border: 1px solid getCssVar(color, border),                 // 头部下边框
+);
+
+// 看板分组列标题区域样式
+$control-kanban-group-caption: (
+  gap: getCssVar(spacing, tight),  // 标题与计数间距
+);
+
+// 看板分组卡片列表样式
+$control-kanban-group-list: (
+  padding: getCssVar('spacing', 'none') getCssVar(spacing, tight),  // 卡片列表内边距
+  draggable-padding: getCssVar(spacing, base) 0,                    // 拖拽区域内边距
+);
+
+// 看板分组行为操作区域样式
+$control-kanban-group-action: (
+  height: 32px,                                              // 操作区域高度
+  width: 32px,                                              // 操作区域宽度
+  padding: getCssVar('spacing', 'tight'),                   // 操作区域内边距
+  gap: getCssVar('spacing', 'extra-tight'),                 // 操作区域按钮间距
+  font-size: getCssVar(control-kanban, 'font-size'),        // 操作区域字体大小
+  color: getCssVar(color, primary),                         // 操作区域文本色
+  border-radius: getCssVar(border, radius, circle),         // 操作区域圆角
+  hover-bg-color: getCssVar(color, fill, 0),               // 操作区域悬浮背景色
+  button-size: getCssVar(height-control, large),           // 操作按钮高度
+  button-color: getCssVar(color, primary, text),                  // 操作按钮文本色
+  button-padding: getCssVar(spacing, tight) getCssVar(spacing, base),     // 操作按钮内边距
+);
+
+// 看板项样式
+$control-kanban-item: (
+  hover-bg-color: getCssVar(color, fill, 0),            // 卡片悬浮背景色
+  selected-bg-color: getCssVar(color, fill, 0),         // 卡片选中背景色
+  gap: getCssVar(spacing, base),                        // 卡片内容区域项与项间隔
+  action-padding: getCssVar(spacing, tight),            // 卡片操作按钮内边距
+  action-margin: getCssVar(spacing, tight),             // 卡片操作按钮外边距
+  action-gap: getCssVar(spacing, extra-tight),          // 卡片操作按钮间距
+  action-border: 1px solid getCssVar(color, border),   // 卡片操作区域上边框
+  drag-icon-gap: getCssVar('spacing', 'tight'),         // 卡片拖拽图标与内容间隔
+);
+
+// 看板工具栏样式
+$control-kanban-toolbar: (
+  gap: getCssVar(spacing, tight),  // 工具栏按钮间距
+);
+
+// 看板全屏按钮样式
+$control-kanban-fullscreen: (
+  border: 1px solid getCssVar(color, border),  // 全屏按钮边框
+);
+
+// 看板计数器样式
+$control-kanban-counter: (
+  color: getCssVar(color, primary, active, text),  // 计数器徽标文本色
+);
+
+// 看板批操作工具栏样式
+$control-kanban-batch-toolbar: (
+  padding: getCssVar(spacing, base, tight),                         // 批操作工具栏内间距
+  gap: getCssVar(spacing, tight),                                   // 批操作工具栏项间隔
+  check-size: getCssVar('font-size', regular),                       // 批操作工具栏选项框大小
+  check-gap:getCssVar(spacing, base, tight),                          // 批操作工具栏选项框与工具栏间隔
+  count-color: getCssVar(color, primary),                                   // 批操作工具栏选中数据字体颜色
+  count-gap: getCssVar(spacing, extra, tight),                      // 批操作工具栏选中数据左右间隔
+  border-color: getCssVar('color', 'border'),                       // 批操作工具栏边框颜色
+);
+
+@include b(control-kanban) {
+  @include set-component-css-var(control-kanban, $control-kanban);
+  @include set-component-css-var(control-kanban-content, $control-kanban-content);
+  @include set-component-css-var(control-kanban-group, $control-kanban-group);
+  @include set-component-css-var(control-kanban-group-header, $control-kanban-group-header);
+  @include set-component-css-var(control-kanban-group-caption, $control-kanban-group-caption);
+  @include set-component-css-var(control-kanban-group-list, $control-kanban-group-list);
+  @include set-component-css-var(control-kanban-group-action, $control-kanban-group-action);
+  @include set-component-css-var(control-kanban-item, $control-kanban-item);
+  @include set-component-css-var(control-kanban-toolbar, $control-kanban-toolbar);
+  @include set-component-css-var(control-kanban-fullscreen, $control-kanban-fullscreen);
+  @include set-component-css-var(control-kanban-counter, $control-kanban-counter);
+  @include set-component-css-var(control-kanban-batch-toolbar, $control-kanban-batch-toolbar);
+
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+
+  @include when(enable-page) {
+    .#{bem(control-kanban, content)} {
+      height: getCssVar(control-kanban-content, height)
+    }
+  }
+
+  @include e(drag-icon) {
+    margin-right: getCssVar(control-kanban-item, drag-icon-gap);
+    cursor: move;
+    visibility: hidden;
+  }
+
+  @include e(content) {
+    display: flex;
+    flex-grow: 1;
+  }
+
+  @include m(row) {
+    @include b(control-kanban-group-container) {
+      @include flex(row);
+
+      padding-bottom: getCssVar(control-kanban-content, padding-bottom);
+      overflow: auto;
+
+      & > * + * {
+        margin-left: getCssVar(control-kanban-group, gap);
+      }
+    }
+    @include b(control-kanban-group) {
+      @include when(collapse) {
+        width: getCssVar(control-kanban-group, collapse-width);
+        @include e(header) {
+          position: relative;
+          flex-direction: column;
+          align-items: start;
+          height: 100%;
+          padding: getCssVar('spacing', 'none');
+
+          ion-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+          }
+        }
+        @include e(header-caption) {
+          align-self: center;
+          transform: rotate(90deg)
+            translate(calc(100% / 2 - #{getCssVar(control-kanban-group-caption, gap)}), 0);
+        }
+      }
+    }
+  }
+
+  @include m(column) {
+    @include b(control-kanban-group-container) {
+      @include flex(row);
+
+      flex-direction: column;
+
+      & > * + * {
+        margin-top: getCssVar(control-kanban-group, gap);
+      }
+    }
+
+    @include b(control-kanban-group) {
+      @include when(collapse) {
+        width: 100%;
+
+        ion-icon {
+          transform: rotate(-90deg);
+        }
+      }
+    }
+  }
+
+  .#{bem(control-kanban, default-item)},
+  .#{bem(control-kanban, panel-item)} {
+    flex-grow: 1;
+  }
+}
+
+@include b(control-kanban-group-container) {
+  flex: 1;
+}
+
+@include b(control-kanban-group) {
+  @include flex(column);
+
+  flex-shrink: 0;
+  border: getCssVar(control-kanban-group, border);
+  border-radius: getCssVar(control-kanban-group, border-radius);
+  transition: all 0.3s;
+  @include e(header) {
+    position: relative;
+    height: getCssVar(control-kanban-group-header, height);
+    padding: getCssVar(control-kanban-group-header, padding);
+    font-size: getCssVar(control-kanban-group-header, font-size);
+    font-weight: getCssVar(control-kanban-group-header, font-weight);
+    cursor: pointer;
+    border-bottom: getCssVar(control-kanban-group-header, border);
+    @include flex(row, space-between, center);
+
+    &::before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
+      width: 100%;
+      content: '';
+      border-color: inherit;
+      border-top: 2px solid;
+    }
+  }
+  @include e(header-left) {
+    @include flex(row, center, center);
+
+    ion-icon {
+      margin-right: getCssVar(control-kanban-group-header, icon-gap);
+      transition: transform 0.3s;
+    }
+  }
+  @include e(header-caption) {
+    padding: 0 getCssVar(control-kanban-group-caption, gap);
+    white-space: nowrap;
+    @include when(badge) {
+      color: getCssVar(control-kanban-counter, color);
+    }
+  }
+  @include e(list) {
+    position: relative;
+    flex: auto;
+    width: 100%;
+    height: calc(100% - getCssVar(control-kanban-group-header, height));
+    padding: getCssVar(control-kanban-group-list, padding);
+    overflow: auto;
+
+    &:hover {
+      .#{bem(control-kanban, quicktoolbar)} {
+        visibility: visible;
+      }
+    }
+
+    @include e(draggable) {
+      min-height: 100%;
+      padding: getCssVar(control-kanban-group-list, draggable-padding);
+    }
+    @include when(empty) {
+      display: flex;
+      flex-direction: column;
+      .#{bem(control-kanban-group, draggable)} {
+        flex-shrink: 0;
+        min-height: 0;
+      }
+      .#{bem(control-kanban, quicktoolbar)} {
+        flex-grow: 1;
+        width: calc(100% - getCssVar(spacing, base));
+      }
+
+      .#{bem(control-toolbar, item)} {
+        justify-content: center;
+      }
+    }
+  }
+  @include e(header-actions) {
+    position: relative;
+    z-index: 100;
+    width: getCssVar(control-kanban-group-action, width);
+    height: getCssVar(control-kanban-group-action, height);
+    padding: getCssVar(control-kanban-group-action, padding);
+    font-size: getCssVar(control-kanban-group-action, font-size);
+    color: getCssVar(control-kanban-group-action, color);
+    cursor: pointer;
+    border-radius: getCssVar(control-kanban-group-action, border-radius);
+
+    &:hover {
+      background-color: getCssVar(control-kanban-group-action, hover-bg-color);
+    }
+  }
+  @include e(header-right) {
+    >.el-button + .#{bem(control-kanban, header-actions)} {
+      margin-left: getCssVar(control-kanban-group-action, gap);
+    }
+  }
+  @include e(actions-dropdown) {
+    &:has(.el-button) {
+      padding: getCssVar(control-kanban-group-action, gap) 0;
+    }
+    .#{bem(action-toolbar)} {
+      @include flex(column);
+    }
+
+    .el-button {
+      --el-button-size: #{getCssVar(control-kanban-group-action, button-size)};
+
+      justify-content: flex-start;
+      width: 100%;
+      padding: getCssVar(control-kanban-group-action, button-padding);
+      margin: 0;
+      font-size: getCssVar(control-kanban-group-action, 'font-size');
+      color: getCssVar(control-kanban-group-action, 'button-color');
+
+      ion-icon {
+        margin-right: getCssVar(control-kanban-group-action, gap);
+      }
+    }
+
+    .el-button.is-text:not(.is-disabled) {
+      &:hover {
+        background-color: var(--el-button-hover-bg-color);
+        border-color: var(--el-button-hover-border-color);
+      }
+    }
+  }
+}
+
+@include b(control-kanban-item) {
+  cursor: pointer;
+
+  &:hover {
+    background-color: getCssVar(control-kanban-item, hover-bg-color);
+    .#{bem(control-kanban, drag-icon)} {
+      visibility: visible;
+    }
+  }
+
+  @include when(selected) {
+    background-color: getCssVar(control-kanban-item, selected-bg-color);
+  }
+
+  @include when(disabled) {
+    cursor: no-drop;
+  }
+
+  @include e(content) {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  @include e(bottom) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: getCssVar(control-kanban-item, action-padding);
+    margin-top: getCssVar(control-kanban-item, action-margin);
+    border-top: getCssVar(control-kanban-item, action-border);
+    @include m(actions) {
+      display: flex;
+      column-gap: getCssVar(control-kanban-item, action-gap);
+      justify-content: center;
+      .#{bem(action-toolbar, item)} {
+        margin: 0;
+      }
+      .#{bem(action-toolbar, item, label)} {
+        &.is-has-caption {
+          margin: 0;
+        }
+      }
+    }
+  }
+}
+
+.#{bem(control-kanban-item)} + .#{bem(control-kanban-item)} {
+  margin-top: getCssVar(control-kanban-item, gap);
+}
+
+@include b(control-kanban) {
+  position: relative;
+
+  @include e(popover) {
+    > .el-scrollbar {
+      min-width: 150px;
+      overflow: visible;
+    }
+    .#{bem(action-toolbar, popover)} {
+      padding: getCssVar(spacing, extra, tight) getCssVar('spacing', 'none') !important;
+      background-color: getCssVar(color, primary) !important;
+      border-radius: 0 !important;
+    }
+  }
+
+  @include e(quicktoolbar) {
+    margin-bottom: getCssVar(spacing, base);
+    visibility: hidden;
+    @include flex(column);
+
+    & > * + * {
+      margin-top: getCssVar(spacing, tight);
+    }
+  }
+
+  @include when(full) {
+    padding: getCssVar(spacing, base);
+    background-color: getCssVar(color, bg, 2);
+  }
+}
+
+@include b(control-kanban-toolbar) {
+  display: flex;
+  flex-shrink: 0;
+  gap: getCssVar(control-kanban-toolbar, gap);
+  height: max-content;
+
+  .el-button {
+    border: getCssVar(control-kanban-fullscreen, border);
+  }
+}
+
+@include b(control-kanban-batch) {
+  padding: getCssVar(control-kanban-batch-toolbar, padding);
+  border-bottom: 1px solid getCssVar(control-kanban-batch-toolbar, border-color);
+
+  @include e(toolbar) {
+    .#{bem(control-toolbar)} {
+      flex-wrap: wrap;
+      row-gap: getCssVar(control-kanban-batch-toolbar, gap);
+    }
+    .#{bem(control-toolbar, item)}:first-child {
+      margin-left: 0;
+    }
+  }
+
+  @include e(check) {
+    @include flex(row, space-between, center);
+
+    margin-top: getCssVar(control-kanban-batch-toolbar, check-gap);
+    font-size: getCssVar(control-kanban-batch-toolbar, check-size);
+  }
+
+  @include e(info) {
+    span {
+      margin: 0 getCssVar(control-kanban-batch-toolbar, count-gap);
+      color: getCssVar(control-kanban-batch-toolbar, count-color);
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "name": "@ibiz-template/core",
+  "version": "0.7.41-alpha.119",
+  "description": "运行时核心库",
+  "type": "module",
+  "main": "out/index.js",
+  "types": "out/index.d.ts",
+  "system": "./dist/system/index.system.js",
+  "files": [
+    "dist",
+    "out",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "npm run lint && node ./scripts/build.js && npm run build:rollup && tsc --build",
+    "build:rollup": "rollup -c",
+    "lint": "eslint 'src/**/*.ts'",
+    "lint:fix": "eslint --fix 'src/**/*.ts'",
+    "clean": "rimraf out dist",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "publish:next": "npm run build && npm publish --access public --tag=next --registry=https://registry.npmjs.org/",
+    "publish:dev": "npm run build && npm publish --access public --tag=dev --registry=https://registry.npmjs.org/",
+    "publish:alpha": "npm run build && npm publish --access public --tag=alpha --registry=https://registry.npmjs.org/",
+    "publish:beta": "npm run build && npm publish --access public --tag=beta --registry=https://registry.npmjs.org/",
+    "publish:npm": "npm run build && npm publish --access public --registry=https://registry.npmjs.org/",
+    "publish:local": "npm run build && npm publish --access public --registry=http://172.16.240.221:8081/repository/local/"
+  },
+  "author": "iBiz",
+  "license": "MIT",
+  "dependencies": {
+    "@microsoft/fetch-event-source": "^2.0.1",
+    "axios": "^1.8.2",
+    "lodash-es": "^4.17.21",
+    "loglevel": "^1.8.1",
+    "loglevel-plugin-prefix": "^0.8.4",
+    "qs": "^6.11.2",
+    "qx-util": "^0.4.8",
+    "ramda": "^0.29.1"
+  },
+  "devDependencies": {
+    "@types/qs": "^6.9.11"
+  },
+  "peerDependencies": {
+    "axios": "^1.8.2",
+    "lodash-es": "^4.17.21",
+    "qs": "^6.11.0",
+    "qx-util": "^0.4.8",
+    "ramda": "^0.29.0"
+  },
+  "gitHead": "7d3a048b166b9dc02cd0381da7d7edbcd1e0c346"
+}

@@ -1,0 +1,41 @@
+import { MDControlService, UIMapField } from '../../../service';
+/**
+ * 多数据部件服务
+ *
+ * @author lxm
+ * @date 2023-05-15 09:53:35
+ * @export
+ * @class MDCtrlService
+ * @extends {MDControlService<IDEMobMDCtrl>}
+ */
+export class MDCtrlService extends MDControlService {
+    /**
+     * 初始化属性映射
+     *
+     * @author lxm
+     * @date 2022-08-31 18:08:37
+     */
+    initUIDataMap() {
+        var _a;
+        super.initUIDataMap();
+        // *初始化表格数据项的属性映射
+        (_a = this.model.delistDataItems) === null || _a === void 0 ? void 0 : _a.forEach(item => {
+            const uiKey = item.id.toLowerCase();
+            const deField = item.appDEFieldId;
+            let mapField;
+            // 后台实体属性
+            if (deField) {
+                const deFieldKey = deField.toLowerCase();
+                mapField = new UIMapField(uiKey, deFieldKey, {
+                    isOriginField: true,
+                    dataType: item.dataType,
+                });
+            }
+            else {
+                // 前台属性
+                mapField = new UIMapField(uiKey, uiKey);
+            }
+            this.dataUIMap.set(uiKey, mapField);
+        });
+    }
+}

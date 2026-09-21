@@ -1,0 +1,17 @@
+import { ISysMapItem } from '@ibiz/model-core';
+import { IMapData } from '../../../interface';
+export declare class MapData implements IMapData {
+    [key: string | symbol]: any;
+    _id: string;
+    _itemStyle: string;
+    _mapItemId: string;
+    _longitude?: string;
+    _latitude?: string;
+    _areaCode?: string;
+    _tooltip?: string;
+    _value?: number;
+    _text?: string;
+    _symbol?: string;
+    constructor(deData: IData, mapItem: ISysMapItem);
+}
+//# sourceMappingURL=map-data.d.ts.map

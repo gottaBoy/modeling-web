@@ -1,0 +1,59 @@
+{
+  "name": "@ibiz-template-plugin/gantt",
+  "version": "0.1.8-alpha.299",
+  "description": "甘特图",
+  "author": "tony001",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.es.js",
+  "module": "dist/index.es.js",
+  "types": "dist/types/index.d.ts",
+  "system": "dist/index.legacy.js",
+  "styles": [
+    "dist/style.css"
+  ],
+  "files": [
+    "dist",
+    "types",
+    "CHANGELOG.md",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "publish:next": "npm run build && npm publish --access public --tag=next --registry=https://registry.npmjs.org/",
+    "publish:dev": "npm run build && npm publish --access public --tag=dev --registry=https://registry.npmjs.org/",
+    "publish:alpha": "npm run build && npm publish --access public --tag=alpha --registry=https://registry.npmjs.org/",
+    "publish:beta": "npm run build && npm publish --access public --tag=beta --registry=https://registry.npmjs.org/",
+    "publish:npm": "npm run build && npm publish --access public --registry=https://registry.npmjs.org/"
+  },
+  "dependencies": {
+    "@types/lodash": "^4.14.192",
+    "@vueuse/core": "^10.0.0",
+    "@vueuse/integrations": "^10.1.2",
+    "dayjs": "^1.11.10",
+    "element-plus": "^2.4.2",
+    "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
+    "sortablejs": "^1.15.0",
+    "vue": "^3.3.8"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.192",
+    "@vueuse/core": "^10.0.0",
+    "@vueuse/integrations": "^10.1.2",
+    "dayjs": "^1.11.10",
+    "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
+    "sortablejs": "^1.15.0",
+    "vite-plugin-libcss": "^1.1.1",
+    "vue": "^3.3.8"
+  },
+  "peerDependencies": {
+    "dayjs": "^1.11.10",
+    "lodash-es": "^4.17.21",
+    "vue": "^3.3.8"
+  },
+  "gitHead": "eef64305fea9ba895079df5bbc2b481c0658fdef"
+}

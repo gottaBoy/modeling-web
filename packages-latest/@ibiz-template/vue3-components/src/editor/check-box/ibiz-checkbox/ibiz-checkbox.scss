@@ -1,0 +1,17 @@
+// 选项框根元素
+$checkbox: (
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+@include b(checkbox) {
+  @include set-component-css-var('checkbox', $checkbox);
+}
+
+@include b(form-item){
+
+  @include b(checkbox) {
+    @include when(show-default){
+      padding: getCssVar(checkbox, hover-edit-padding);
+    }
+  }
+}

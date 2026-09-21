@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN" theme="light" class="light">
+  <head>
+    <meta charset="UTF-8" />
+    <base href="/modeldesign/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link id="favicon" rel="icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="./assets/css/app-loading.css" />
+    <link
+      rel="stylesheet"
+      href="./assets/font-awesome-4.7.0/css/font-awesome.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="./extras/js/element-plus/2.4.4/element-plus.min.css"
+    />
+    <script src="./extras/js/system/6.14.2/system.min.js"></script>
+    <script
+      type="systemjs-importmap"
+      src="./extras/json/system-import.json"
+    ></script>
+    <script src="./environments/environment.js"></script>
+    <script src="./source-app/environment.js"></script>
+    <link rel="stylesheet" href="./source-app/candidate.css" />
+    <script src="./assets/ionicons/7.1.2/ionicons.js"></script>
+    <title>iBiz</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div id="app-loading-x" class="app-loading-x">
+      <div class="app-loading-x-container">
+        <label>&#9679;</label><label>&#9679;</label><label>&#9679;</label>
+      </div>
+    </div>
+    <script src="./source-app/polyfills.js"></script>
+    <script>
+      const loading = document.getElementById('app-loading-x');
+      loading.classList.add(
+        (window.Environment?.appLoadingTheme || 'DEFAULT').toLowerCase(),
+      );
+      System.import('./source-app/index.system.js').catch(error =>
+        console.error(error),
+      );
+    </script>
+  </body>
+</html>

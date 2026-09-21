@@ -1,0 +1,1 @@
+{"version":3,"file":"await-timeout.d.ts","sourceRoot":"","sources":["../../../src/utils/sync/await-timeout.ts"],"names":[],"mappings":"AACA;;;;;;;;;;;;;;;;;GAiBG;AACH,wBAAsB,YAAY,CAAC,CAAC,SAAS,CAAC,GAAG,IAAI,EAAE,GAAG,KAAK,GAAG,EAChE,IAAI,EAAE,MAAM,EACZ,GAAG,CAAC,EAAE,CAAC,EACP,MAAM,CAAC,EAAE,GAAG,EAAE,GACb,OAAO,CAAC,UAAU,CAAC,CAAC,CAAC,GAAG,SAAS,CAAC,CASpC"}

@@ -1,0 +1,28 @@
+@include b(form-mdctrl-form-item) {
+  @include flex(row);
+
+  @include e(form){
+    flex-grow: 1;
+  }
+}
+
+@include b(form-mdctrl-form-item-actions) {
+  flex-shrink: 0;
+  width: getCssVar('form-mdctrl-button', 'width');
+  text-align: center;
+
+  .el-button+.el-button{
+    margin-left: getCssVar(spacing, none);;
+  }
+
+  @include e(btn){
+    margin-top: getCssVar('form-mdctrl-button', 'gap');
+  }
+}
+
+@include b(form-mdctrl-form-no-data) {
+  width: 100%;
+  @include flex(row, flex-end)
+
+}
+

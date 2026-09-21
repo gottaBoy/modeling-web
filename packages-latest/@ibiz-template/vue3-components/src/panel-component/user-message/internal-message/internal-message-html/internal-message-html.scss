@@ -1,0 +1,9 @@
+@include b(internal-message-html) {
+  @include flex(column);
+
+  @include e(content){
+    flex-grow: 1;
+    padding-right: getCssVar('spacing', 'loose');
+  }
+
+}

@@ -1,0 +1,17 @@
+/* 重置标准样式 */
+@import './generic/index';
+
+/* 标准元素样式 */
+@import './elements/index';
+
+/* 面向对象编写样式 */
+@import './objects/index';
+
+/* 特异性最高的样式，唯一可以使用 !important */
+@import './tumps/index';
+
+/* 默认主题 */
+@import './theme/index';
+
+/* 定义变量 */
+@import './var';

@@ -1,0 +1,21 @@
+$panel: (
+  scroll: auto,
+);
+
+// 默认样式
+@include b(panel-container) {
+  @include set-component-css-var(panel, $panel);
+  
+  width: 100%;
+  height: 100%;
+
+  > .#{bem('row')} {
+    height: 100%;
+    overflow: hidden getCssVar(panel, scroll);
+
+  }
+
+  @include when(hidden) {
+    display: none;
+  }
+}

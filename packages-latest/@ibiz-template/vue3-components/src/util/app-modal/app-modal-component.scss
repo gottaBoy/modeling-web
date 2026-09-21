@@ -1,0 +1,71 @@
+/* 模态 start */
+$modal: (
+  z-index: getCssVar(z-index, modal),
+  background-color: #{getCssVar(color, bg, 1)},
+);
+
+/* 模态 end */
+
+@include b(modal) {
+  @include set-component-css-var(modal, $modal);
+
+  @include e('record') {
+    @include m('prev') {
+      position: absolute;
+      top: 50%;
+      left: -6px;
+      transform: translate(-100%, -50%);
+    }
+    @include m('next') {
+      position: absolute;
+      top: 50%;
+      right: -6px;
+      font-size: getCssVar('font-size', 'regular' );
+      transform: translate(100%, -50%);
+    }
+
+    .el-button {
+      height: auto;
+      padding: getCssVar('spacing', 'loose') getCssVar('spacing', 'tight');
+      margin: 0;
+
+      --el-button-bg-color: #{getCssVar(color, bg, 0)};
+      --el-button-text-color: #{getCssVar(color, text, 2)};
+      --el-button-hover-bg-color: #{getCssVar(color, bg, 1)};
+      --el-button-hover-text-color: #{getCssVar(color, text, 3)};
+      --el-button-active-bg-color: #{getCssVar(color, bg, 0)};
+      --el-button-active-text-color: #{getCssVar(color, text, 2)};
+    }
+  }
+
+  &.el-dialog {
+    overflow: visible;
+  }
+
+  .el-dialog__header {
+    position: relative;
+    padding: 0;
+  }
+
+  .el-dialog__body {
+    height: 100%;
+    padding: 0;
+    background-color: getCssVar(modal, background-color);
+  }
+
+  // 模态关闭图标位置
+  .el-dialog__headerbtn {
+    top: -40px;
+    right: -60px;
+
+    // z-index: getCssVar(modal, z-index);
+    border: getCssVar('spacing', 'super-tight') solid getCssVar(color, primary, text);
+    border-radius: getCssVar(border, radius, circle);
+    @include flex(row, center, center);
+
+    .el-dialog__close{
+      font-size: getCssVar(font-size, header-4);
+      color: getCssVar(color, primary, text);
+    }
+  }
+}

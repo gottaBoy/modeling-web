@@ -1,0 +1,45 @@
+// 面包屑导航样式
+$nav-breadcrumb: (
+  'padding': getCssVar('spacing', 'base-loose'),       // 容器内边距
+  'link-color': getCssVar('color', 'link'),            // 链接项文本色
+  'disabled-color': getCssVar('color', 'text', 0),     // 禁用项文本色
+  active-color: getCssVar('color', 'primary'),          // 当前项激活色
+);
+
+@include b(nav-breadcrumb) {
+  @include set-component-css-var('nav-breadcrumb', $nav-breadcrumb);
+
+  padding: getCssVar('nav-breadcrumb', 'padding');
+
+  --el-text-color-primary: #{getCssVar('nav-breadcrumb', 'link-color')};
+
+  // 菜单模式禁用点击
+  @include m(menu) {
+    color: #{getCssVar('nav-breadcrumb', 'disabled-color')};
+
+    --el-text-color-primary: #{getCssVar('nav-breadcrumb', 'disabled-color')};
+
+    .el-breadcrumb__item {
+      cursor: text;
+
+      &:last-child .el-breadcrumb__inner {
+        color: getCssVar('nav-breadcrumb', 'active-color')
+      }
+    }
+
+    .el-breadcrumb__inner.is-link {
+      font-weight: normal;
+      pointer-events: none;
+    }
+  }
+
+  .el-breadcrumb__item.is-link {
+    .el-breadcrumb__inner {
+      font-weight: bold;
+      color: var(--el-text-color-primary);
+      text-decoration: none;
+      cursor: pointer;
+      transition: var(--el-transition-color);
+    }
+  }
+}

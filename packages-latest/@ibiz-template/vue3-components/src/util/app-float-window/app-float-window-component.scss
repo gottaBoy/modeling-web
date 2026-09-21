@@ -1,0 +1,15 @@
+@include b(float-window) {
+  position: absolute;
+  background-color: getCssVar(color, bg, 3);
+
+  @include flex(column);
+}
+
+@include b(float-window-header) {
+  flex-shrink: 0;
+}
+
+@include b(float-window-content) {
+  flex-grow: 1;
+  overflow: hidden auto;
+}

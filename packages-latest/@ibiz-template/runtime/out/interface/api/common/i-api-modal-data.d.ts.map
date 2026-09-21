@@ -1,0 +1,1 @@
+{"version":3,"file":"i-api-modal-data.d.ts","sourceRoot":"","sources":["../../../../src/interface/api/common/i-api-modal-data.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,QAAQ,EAAE,UAAU,EAAE,MAAM,qBAAqB,CAAC;AAE3D;;;;GAIG;AACH,MAAM,WAAW,aAAa;IAC5B;;;;OAIG;IACH,EAAE,EAAE,OAAO,CAAC;IACZ;;;;OAIG;IACH,IAAI,CAAC,EAAE,QAAQ,EAAE,CAAC;IAClB;;;;OAIG;IACH,MAAM,CAAC,EAAE,UAAU,CAAC;CACrB"}

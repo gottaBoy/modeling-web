@@ -1,0 +1,145 @@
+// 表单分页面板样式
+$form-tab-panel: (
+  'font-size': getCssVar(font-size, header-4),               // 标签页字体大小
+  'header-border-color': getCssVar(color, border),           // 标签页头部底部边框色
+  'text-color': getCssVar(color, text, 2),                   // 标签页文本色
+  'bg-color': transparent,                                   // 标签页背景色
+  'hover-text-color': getCssVar(color, primary),             // 标签页悬浮文本色
+  'hover-bg-color': transparent,                             // 标签页悬浮背景色
+  'active-text-color': getCssVar(color, primary),            // 标签页激活文本色
+  'active-bg-color': transparent,                            // 标签页激活背景色
+  'active-border-color': getCssVar(color, primary),          // 标签页激活下划线色
+  'select-all-height': 40px,                                 // 启用全选时全选按钮行高度
+);
+
+@include b(form-tab-panel) {
+  width: 100%;
+  height: 100%;
+  @include set-component-css-var('form-tab-panel', $form-tab-panel);
+
+  > .el-tabs__header.is-top {
+    margin-bottom: getCssVar(spacing, tight);
+
+    .el-tabs__item.is-top {
+      font-size: getCssVar('form-tab-panel', 'font-size');
+      color: getCssVar('form-tab-panel', 'text-color');
+      background-color: getCssVar('form-tab-panel', 'bg-color');
+    }
+
+    .el-tabs__item.is-top:hover {
+      color: getCssVar('form-tab-panel', 'hover-text-color');
+      background-color: getCssVar('form-tab-panel', 'hover-bg-color');
+    }
+
+    .el-tabs__item.is-top.is-active {
+      color: getCssVar('form-tab-panel', 'active-text-color');
+      background-color: getCssVar('form-tab-panel', 'active-bg-color');
+    }
+  }
+
+  // 分页头部底边
+  .el-tabs__nav-wrap::after {
+    height: 1px;
+    background-color: getCssVar('form-tab-panel', 'header-border-color');
+  }
+
+  // 标示线颜色
+  .el-tabs__active-bar{
+    background-color: getCssVar('form-tab-panel','active-border-color');
+  }
+
+  .el-tabs__item{
+    .#{bem(form-tab-panel,badge)}{
+      @include when('no-counter') {
+        padding-right: getCssVar(spacing,none);
+      }
+    }
+  }
+
+
+  // 计数器样式
+  @include e(badge){
+    .el-badge__content{
+      padding: getCssVar(spacing, extra-tight);
+      font-size: getCssVar(font-size,small);
+      background-color: getCssVar(color, danger);
+
+      &.is-fixed {
+        top: getCssVar('spacing', 'super-tight');
+        right: 0;
+      }
+    }
+  }
+  @include m('style2'){
+    .el-tabs__nav-prev.is-disabled,
+    .el-tabs__nav-next.is-disabled{
+      display: none;
+    }
+
+    .el-tabs__nav-wrap.is-top{
+      &:has(.el-tabs__nav-prev.is-disabled){
+        padding-left: 0;
+      }
+
+      &:has(.el-tabs__nav-next.is-disabled){
+        padding-right: 0;
+      }
+    }
+  }
+}
+
+@include b('form-tab-panel-tab-panel-container-style2') {
+  position: relative;
+  display: flex;
+  width: 100%;
+  @include set-component-css-var('form-tab-panel', $form-tab-panel);
+
+  .#{bem(form-tab-panel)} {
+    width: 100%;
+
+    .el-tabs__header {
+      width: calc(100% - 72px);
+    }
+  }
+  @include e('popover') {
+    @include set-component-css-var('form-tab-panel', $form-tab-panel);
+
+    &.el-popover {
+      padding: 0;
+    }
+  }
+  @include e('select') {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    gap: getCssVar(spacing, extra-tight);
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: getCssVar('form-tab-panel', 'select-all-height');
+    font-size: getCssVar('form-tab-panel', 'font-size');
+    color: getCssVar('form-tab-panel', 'text-color');
+    cursor: pointer;
+    border-bottom: 1px solid getCssVar('form-tab-panel', 'header-border-color');
+  }
+  @include e('content') {
+    padding: getCssVar(spacing, base) 0;
+  }
+  @include e('tab-item-content') {
+    width: 100%;
+    padding: getCssVar(spacing, extra-tight) getCssVar(spacing, extra-tight) getCssVar(spacing, extra-tight) getCssVar(spacing, base);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover{
+      color: getCssVar('form-tab-panel', 'hover-text-color');
+      background-color: getCssVar('form-tab-panel', 'hover-bg-color');
+    }
+    @include when('active'){
+      color: getCssVar('form-tab-panel', 'active-text-color');
+    }
+  }
+}

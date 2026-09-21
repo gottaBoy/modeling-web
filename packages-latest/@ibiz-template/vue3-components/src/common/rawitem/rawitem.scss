@@ -1,0 +1,28 @@
+$rawitem: (
+  text-color: getCssVar(editor, default, text-color),
+  font-size: getCssVar(font-size, regular),
+  alert-margin: getCssVar(spacing, extra, tight) 0,
+  divider-margin: getCssVar(spacing, loose) 0,
+);
+
+@include b(rawitem) {
+  @include set-component-css-var('rawitem', $rawitem);
+
+  width: 100%;
+  height: 100%;
+  font-size: getCssVar(rawitem, font-size);
+  color: getCssVar(rawitem, text-color);
+
+  @include b(icon){
+    width: 100%;
+    height: 100%;
+  }
+
+  .el-alert {
+    margin: getCssVar(rawitem, alert-margin);
+  }
+
+  .el-divider--horizontal {
+    margin: getCssVar(rawitem, divider-margin);
+  }
+}

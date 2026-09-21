@@ -1,0 +1,1 @@
+{"version":3,"file":"click-outside.d.ts","sourceRoot":"","sources":["../../../src/use/click-outside/click-outside.ts"],"names":[],"mappings":"AAAA,OAAO,EAGL,qBAAqB,EACrB,qBAAqB,EACrB,oBAAoB,EACrB,MAAM,qBAAqB,CAAC;AAE7B,OAAO,EAAmB,GAAG,EAAS,MAAM,KAAK,CAAC;AAElD;;;;;;;;;;GAUG;AACH,wBAAgB,eAAe,CAC7B,KAAK,EAAE,GAAG,EACV,OAAO,EAAE,qBAAqB,EAC9B,OAAO,GAAE,qBAA0B,GAClC,oBAAoB,CA8CtB"}

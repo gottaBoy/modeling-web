@@ -1,0 +1,44 @@
+@include b('async-action-notice'){
+  &.el-notification{
+    width: auto;
+
+    .el-notification__group{
+      margin: getCssVar('spacing','none');
+    }
+
+    .el-notification__closeBtn{
+      top: 5px;
+      right: 5px;
+    }
+  }
+}
+
+@include b(doing-notice){
+  @include e(text) {
+    margin-right: getCssVar('spacing','tight');
+  }
+
+  @include e(num) {
+    margin:  getCssVar('spacing','none') getCssVar('spacing','tight');
+    font-size:  getCssVar('font-size','header-5');
+    font-weight: getCssVar(font-weight, bold);
+    color: getCssVar(color, primary);
+  }
+
+  @include e(loading-icon) {
+    width: 18px;
+    height: 18px;
+    margin-right: getCssVar('spacing','extra-tight');
+    vertical-align: middle;
+    animation: loading-rotate 2s linear infinite;
+
+    .path{
+      stroke: getCssVar(color, primary);
+      stroke-dasharray: 90, 150;
+      stroke-dashoffset: 0;
+      stroke-linecap: round;
+      stroke-width: 2;
+      animation: loading-dash 1.5s ease-in-out infinite;
+    }
+  }
+}

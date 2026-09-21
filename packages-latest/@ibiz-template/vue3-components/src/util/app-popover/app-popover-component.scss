@@ -1,0 +1,50 @@
+@include b(popover) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  display: none;
+  width: max-content;
+  background-color: getCssVar('color-bg-2');
+  border: 1px solid getCssVar('color-border');
+  border-radius: getCssVar('border-radius', 'medium');
+
+  @include e(arrow) {
+    position: absolute;
+    z-index: -1;
+    width: getCssVar('width-icon', 'extra-small');
+    height: getCssVar('width-icon', 'extra-small');
+    background: getCssVar('color-bg-2');
+    transform: rotate(45deg);
+
+    &[data-placement^=top] {
+      border-right: 1px solid getCssVar('color-border');
+      border-bottom: 1px solid getCssVar('color-border');
+    }
+
+    &[data-placement^=bottom] {
+      border-top: 1px solid getCssVar('color-border');
+      border-left: 1px solid getCssVar('color-border');
+    }
+
+    &[data-placement^=left] {
+      border-top: 1px solid getCssVar('color-border');
+      border-right: 1px solid getCssVar('color-border');
+    }
+
+    &[data-placement^=right] {
+      border-bottom: 1px solid getCssVar('color-border');
+      border-left: 1px solid getCssVar('color-border');
+    }
+  }
+
+  @include when(show) {
+    display: block;
+  }
+  
+  @include e(overlay){
+    position: fixed;
+    inset: 0;
+    background-color: transparent;
+  }
+}

@@ -1,0 +1,23 @@
+@include b(data-import2) {
+  @include flex(column);
+
+  min-width: 644px;
+  background: getCssVar(color, bg, 1);
+  
+  &.#{bem(view)} {
+    height: 568px;
+  }
+
+  @include e('data-import2-toolbar') {
+    @include flex(row, space-between, center);
+  }
+
+  @include e('data-import2-toolbar-container') {
+    @include flex(row, space-between, center);
+  }
+
+  @include e('select-option-item-button') {
+    height: 100%;
+  }
+
+}

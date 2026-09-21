@@ -1,0 +1,43 @@
+{
+  "name": "@ibiz/model-core",
+  "version": "0.1.89",
+  "license": "MIT",
+  "description": "iBiz网页端模型接口",
+  "author": "iBiz",
+  "type": "module",
+  "main": "out/index.js",
+  "types": "out/index.d.ts",
+  "files": [
+    "dist",
+    "out",
+    "src",
+    "CHANGELOG.md",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "rimraf out && tsc --build",
+    "cp:temp": "cp -r ./temp/* ./src && npm run prettier && npm run lint:fix && rm -rf ./temp/*",
+    "test": "jest",
+    "lint": "eslint 'src/**/*.ts'",
+    "lint:fix": "eslint --fix 'src/**/*.ts'",
+    "prettier": "prettier 'src/**/*.ts' -w",
+    "publish:npm": "npm run build && npm publish --access public --registry=https://registry.npmjs.org/",
+    "publish:npm-beta": "npm run build && npm publish --access public --tag beta --registry=https://registry.npmjs.org/",
+    "publish:local": "npm run build && npm publish --access public --registry=http://172.16.240.221:8081/repository/local/"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.11",
+    "@typescript-eslint/eslint-plugin": "^5.58.0",
+    "@typescript-eslint/parser": "^5.58.0",
+    "esbuild": "^0.17.16",
+    "eslint": "^8.38.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.7",
+    "rimraf": "^5.0.0",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.5.0",
+    "typescript": "^5.0.4"
+  }
+}

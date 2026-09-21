@@ -1,0 +1,22 @@
+// 门户部件过滤部件样式
+$portlet-filter: (
+  button-padding: getCssVar(spacing, base, tight),  // 右侧按钮区内边距
+);
+
+@include b(portlet-filter){
+    @include set-component-css-var('portlet-filter', $portlet-filter);
+    @include e('left') {
+        display: flex;
+        flex-wrap: wrap;
+        overflow: auto;
+    }
+    @include e('right') {
+        display: flex;
+        align-items: flex-end;
+        padding: getCssVar(portlet-filter, button-padding);
+    }
+    .#{bem(portlet-layout-content)} >div {
+        display: flex;
+        justify-content: space-between;
+    }
+}

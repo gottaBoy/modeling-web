@@ -1,0 +1,95 @@
+$anchor-container: (
+  default-width: 200px,
+  min-height: 60px,
+);
+
+@include b('anchor-container') {
+  @include set-component-css-var(anchor-container, $anchor-container);
+
+  display: flex;
+  gap: getCssVar(spacing, tight);
+  width: 100%;
+  height: 100%;
+  padding: getCssVar(spacing, tight);
+
+  @include e('content') {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+
+    .no-slider {
+      overflow: auto;
+
+      &::-webkit-scrollbar {
+        background-color: transparent;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background-color: transparent;
+      }
+
+      &::-webkit-scrollbar-track {
+        background-color: transparent;
+      }
+    }
+  }
+
+  // 侧边6种模式下样式
+  @include when('broadside') {
+    @include e('anchor') {
+      width: getCssVar(anchor-container, default-width);
+      margin: getCssVar(spacing, base) getCssVar(spacing, tight);
+      overflow: auto;
+    }
+  }
+  @include when('topleft') {
+    @include e('anchor') {
+      align-self: start;
+    }
+  }
+  @include when('topright') {
+    flex-direction: row-reverse;
+    @include e('anchor') {
+      align-self: start;
+    }
+  }
+  @include when('middleleft') {
+    @include e('anchor') {
+      align-self: center;
+    }
+  }
+  @include when('middleright') {
+    flex-direction: row-reverse;
+    @include e('anchor') {
+      align-self: center;
+    }
+  }
+  @include when('bottomleft') {
+    @include e('anchor') {
+      align-self: end;
+    }
+  }
+  @include when('bottomright') {
+    flex-direction: row-reverse;
+    @include e('anchor') {
+      align-self: end;
+    }
+  }
+
+  // 上下两种样式
+  @include when('usermode') {
+    flex-direction: column;
+    @include e('anchor') {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      min-height: getCssVar(anchor-container, min-height);
+      padding: 0 getCssVar(spacing, base);
+      overflow: auto;
+    }
+  }
+
+  @include when('user2') {
+    flex-direction: column-reverse;
+  }
+}

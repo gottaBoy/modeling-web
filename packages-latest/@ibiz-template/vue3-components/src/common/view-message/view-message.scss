@@ -1,0 +1,95 @@
+$view-message: (
+	border--warning: 1px solid getCssVar(color, warning, active),
+	border--error: 1px solid getCssVar(color, danger, active),
+	border--info: 1px solid getCssVar(color, info, active),
+	carousel-alert-height: 64px,
+);
+
+@include b(view-message) {
+	@include set-component-css-var('view-message', $view-message);
+
+	padding: getCssVar('spacing', 'tight') getCssVar('spacing', 'base');
+
+	@include m(hidden) {
+		display: none;
+	}
+
+	@include m(alert) {
+		.el-message-box__status.el-icon {
+			display: none;
+		}
+
+		.el-message-box__status + .el-message-box__message {
+			padding-left: getCssVar('spacing', 'none');
+		}
+	}
+
+	.el-alert--warning.is-light {
+		border: getCssVar('view-message', 'border--warning');
+	}
+
+	.el-alert--error.is-light {
+		border: getCssVar('view-message', 'border--error');
+	}
+
+	.el-alert--info.is-light {
+		background-color: getCssVar('color',info,light,default);
+		border: getCssVar('view-message', 'border--info');
+	}
+}
+
+@include b(view-message-alert) {
+	margin-bottom: getCssVar('spacing', 'tight');
+
+	&:last-child {
+		margin-bottom: getCssVar('spacing', 'none');
+	}
+
+	@include m(single) {
+		.el-alert__description {
+			margin: getCssVar(spacing,none);
+		}
+	}
+
+	@include m(single-message) {
+		.el-alert__close-btn {
+			top: calc(getCssVar('spacing', 'tight') + getCssVar('spacing', 'super-tight'));
+		}
+	}
+
+	@include e(title) {
+		line-height: calc(getCssVar('spacing', 'base-loose') - getCssVar('spacing', 'super-tight'));
+	}
+
+	@include e(message) {
+		line-height: getCssVar('spacing', 'base');
+	}
+}
+
+@include b(view-message-carousel-alert) {
+	height: getCssVar('view-message', 'carousel-alert-height');
+
+	.el-alert__content {
+		overflow: hidden;
+	}
+
+	@include m(single) {
+		.el-alert__description {
+			margin: getCssVar(spacing,none);
+		}
+	}
+
+	@include e(title) {
+		overflow: hidden;
+		line-height: calc(getCssVar('spacing', 'base-loose') - getCssVar('spacing', 'super-tight'));
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	@include e(message) {
+		overflow: hidden;
+		line-height: getCssVar('spacing', 'base');
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}

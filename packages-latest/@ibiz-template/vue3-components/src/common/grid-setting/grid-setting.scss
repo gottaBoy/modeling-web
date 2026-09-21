@@ -1,0 +1,65 @@
+@include b(grid-setting-column-states){
+  width: 100%;
+  max-height: 500px;
+  overflow-y: auto;
+
+  @include b(grid-setting-column-state){
+    @include flex(row, flex-start, center);
+
+    width: 100%;
+    padding: getCssVar(spacing, extra-tight) 0;
+    font-size: getCssVar(font-size, regular);
+    cursor: pointer;
+
+    ion-icon{
+      display: inline-block;
+      width: getCssVar(font-size, small);
+      margin-right: getCssVar(spacing, extra-tight);
+      font-size: getCssVar(font-size, regular);
+    }
+
+    @include b(grid-setting-drag-icon){
+      color: getCssVar(color, text);
+    }
+    @include b(grid-setting-enable-icon){
+      color: getCssVar(color, success);
+    }
+    @include b(grid-setting-disable-icon){
+      display: none;
+      color: getCssVar(color, danger);
+    }
+    @include b(grid-setting-state-caption){
+      @include utils-ellipsis;
+    }
+
+    @include when(disabled){
+      @include b(grid-setting-enable-icon){
+        display: none;
+      }
+      @include b(grid-setting-disable-icon){
+        display: block;
+      }      
+      @include b(grid-setting-state-caption){
+        color: getCssVar(color, disabled, text);
+      }      
+    }    
+  }
+
+  @include b(grid-setting-column-state-ghost){
+    background-color: getCssVar(color, primary, light, default);
+    opacity: 0.5;          
+  }  
+}
+
+@include b(grid-setting-set-icon){
+  color: getCssVar(color, primary);
+  cursor: pointer;
+}
+
+@include b(grid-setting) {
+  @include e(nav-icon) {
+    cursor: pointer;
+    color: getCssVar(color, primary);
+    padding-left: getCssVar(spacing, tight);
+  }
+}

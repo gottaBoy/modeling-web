@@ -1,0 +1,395 @@
+// 泳道看板样式
+$swimlane-kanban: (
+  padding: getCssVar('spacing', 'tight'),     // 泳道看板内间距
+  bg-color: getCssVar('color', 'white'),      // 泳道看板背景色
+  border-color: getCssVar('color', 'border'),     // 泳道看板边框颜色
+);
+
+// 泳道看板头部样式
+$swimlane-kanban-header: (
+);
+
+// 泳道看板内容样式
+$swimlane-kanban-content: (
+  padding-bottom: getCssVar('spacing', 'extra', 'tight')     // 泳道内容区底部内间距
+);
+
+// 泳道看板单元格样式
+$swimlane-kanban-cell: (
+  color: getCssVar('color', 'text', 3),     // 泳道单元格文字颜色
+  width: 320px,                   // 泳道单元格宽度
+  min-height: 200px,               // 泳道单元格最小高度
+  collapsed-width: 50px,          // 泳道单元格折叠时宽度
+  padding: getCssVar('spacing', 'tight'),   // 泳道单元格内间距
+  separator-gap: getCssVar('spacing', 'extra', 'tight'), // 泳道单元格分隔符间距
+  expand-icon-gap: getCssVar('spacing', 'tight'), // 泳道单元格展开图标与标题间隔
+  expand-icon-size: getCssVar('font-size', 'header-6'),   // 泳道单元格展开图标大小
+);
+
+// 泳道看板项样式
+$swimlane-kanban-item: (
+  margin: getCssVar('spacing', 'tight'),        // 泳道项间距
+  border-radius: getCssVar('spacing', 'super', 'tight'),      // 泳道项圆角
+  active-bg-color: getCssVar(color, fill, 0),     // 泳道项激活背景色
+  drag-icon-gap: getCssVar('spacing', 'tight'), // 泳道项拖拽图标与内容间隔
+  footer-padding: getCssVar('spacing', 'tight'),      // 泳道项底部间距
+  footer-margin-top: getCssVar('spacing', 'tight'),      // 泳道项底部上外间距
+  action-gap: getCssVar('spacing', 'extra', 'tight'),   // 泳道项界面行为项间隔
+);
+
+// 泳道看板工具栏样式
+$swimlane-kanban-toolbar-item: (
+  height: getCssVar(height-control, large),                       // 泳道工具栏项高度
+  padding: getCssVar(spacing, tight) getCssVar(spacing, base),    // 泳道工具栏项内间距
+  font-size: getCssVar('font-size', 'regular'),                   // 泳道工具栏项字体大小
+  color: getCssVar(color, primary, text),                         // 泳道工具栏项字体颜色
+  icon-gap: getCssVar(spacing, extra, tight),                     // 泳道工具栏项图标与内容间隔
+);
+
+// 泳道看板工具栏弹窗样式
+$swimlane-kanban-popup: (
+  bg-color: getCssVar(color, primary),                             // 泳道弹窗背景色
+  padding: getCssVar('spacing', 'extra', 'tight') 0,                // 泳道弹窗内间距
+);
+
+// 泳道看板批操作工具栏样式
+$swimlane-kanban-batch-toolbar: (
+  padding: getCssVar(spacing, base, tight),                         // 泳道批操作工具栏内间距
+  gap: getCssVar(spacing, tight),                                   // 泳道批操作工具栏项间隔
+  check-size: getCssVar('font-size', regular),                       // 泳道批操作工具栏选项框大小
+  check-gap:getCssVar(spacing, base, tight),                          // 泳道批操作工具栏选项框与工具栏间隔
+  count-color: getCssVar(color, primary),                                   // 泳道批操作工具栏选中数据字体颜色
+  count-gap: getCssVar(spacing, extra, tight),                      // 泳道批操作工具栏选中数据左右间隔
+);
+
+// 泳道看板快速操作工具栏样式
+$swimlane-kanban-quick-toolbar: (
+  gap: getCssVar(spacing, tight),                                     // 泳道快速操作工具栏间隔 
+);
+
+@include b('swimlane-kanban') {
+  @include set-component-css-var('swimlane-kanban', $swimlane-kanban);
+  @include set-component-css-var('swimlane-kanban-header', $swimlane-kanban-header);
+  @include set-component-css-var('swimlane-kanban-content', $swimlane-kanban-content);
+  @include set-component-css-var('swimlane-kanban-cell', $swimlane-kanban-cell);
+  @include set-component-css-var('swimlane-kanban-item', $swimlane-kanban-item);
+  @include set-component-css-var('swimlane-kanban-toolbar-item', $swimlane-kanban-toolbar-item);
+  @include set-component-css-var('swimlane-kanban-popup', $swimlane-kanban-popup);
+  @include set-component-css-var('swimlane-kanban-batch-toolbar', $swimlane-kanban-batch-toolbar);
+  @include set-component-css-var('swimlane-kanban-quick-toolbar', $swimlane-kanban-quick-toolbar);
+
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: getCssVar('swimlane-kanban', 'padding');
+  background-color: getCssVar('swimlane-kanban', 'bg-color');
+
+  .#{bem(swimlane-kanban, default-item)},
+  .#{bem(swimlane-kanban, panel-item)} {
+    flex-grow: 1;
+  }
+
+  @include e('default') {
+    .#{bem('swimlane-kanban', 'cell')}:not(.is-collapsed) {
+      width: getCssVar('swimlane-kanban-cell', 'width');
+    }
+  }
+
+  @include e('style2') {
+    .#{bem('swimlane-kanban', 'cell')}:not(.is-collapsed) {
+      flex: 1 0 0;
+      min-width: getCssVar('swimlane-kanban-cell', 'width');
+    }
+  }
+
+  @include e('table') {
+    overflow: auto hidden;
+  }
+
+  @include e(drag-icon) {
+    margin-right: getCssVar('swimlane-kanban-item', 'drag-icon-gap');
+    cursor: move;
+    visibility: hidden;
+  }
+
+  @include e('header') {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: fit-content;
+    padding-right: 4px;
+    border-top: 1px solid getCssVar('swimlane-kanban', 'border-color');
+    @include m('action') {
+      visibility: hidden;
+      @include when('visible') {
+        visibility: visible;
+      }
+    }
+
+    @include m('row') {
+      display: flex;
+    }
+
+    @include m('cell') {
+      .#{bem('swimlane-kanban', 'cell', 'content')} {
+        display: flex;
+        justify-content: space-between;
+      }
+
+      &:hover {
+        .#{bem('swimlane-kanban', 'header', 'action')} {
+          visibility: visible;
+        }
+      }
+      @include when('collapsed') {
+        position: relative;
+        width: getCssVar('swimlane-kanban-cell', 'collapsed-width');
+        border-bottom: none;
+        .#{bem('swimlane-kanban', 'cell', 'content')} {
+          position: absolute;
+          top: getCssVar('spacing', 'base');
+          left: 0;
+          flex-direction: column;
+        }
+        .#{bem('swimlane-kanban', 'cell', 'left')} {
+          flex-direction: column;
+          gap: getCssVar('swimlane-kanban-cell', 'separator-gap');
+        }
+        .#{bem('swimlane-kanban', 'cell', 'caption')} {
+          writing-mode: tb;
+        }
+        .#{bem('swimlane-kanban', 'cell', 'separator')} {
+          margin: getCssVar('swimlane-kanban-cell', 'separator-gap') 0;
+        }
+      }
+    }
+
+    @include m('toolbar') {
+      .#{bem(action-toolbar)} {
+        @include flex(column);
+      }
+
+      .el-button {
+        --el-button-size: #{getCssVar('swimlane-kanban-toolbar-item', 'height')};
+
+        justify-content: flex-start;
+        width: 100%;
+        padding: getCssVar('swimlane-kanban-toolbar-item', 'padding');
+        margin: 0;
+        font-size: getCssVar('swimlane-kanban-toolbar-item', 'font-size');
+        color: getCssVar('swimlane-kanban-toolbar-item', 'color');
+
+        ion-icon {
+          margin-right: getCssVar('swimlane-kanban-toolbar-item', 'icon-gap');
+        }
+      }
+
+      .el-button.is-text:not(.is-disabled) {
+        &:hover {
+          background-color: var(--el-button-hover-bg-color);
+          border-color: var(--el-button-hover-border-color);
+        }
+      }
+    }
+
+    @include m('popper') {
+      &.el-popper {
+        >.el-scrollbar {
+          overflow: visible;
+        }
+        .#{bem(action-toolbar, popover)} {
+          background-color: getCssVar(swimlane-kanban-popup, bg-color);
+        }
+
+        &.el-dropdown__popper {
+          .el-scrollbar__view {
+            &.el-dropdown__list {
+              padding: getCssVar(swimlane-kanban-popup, padding);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @include e('body') {
+    width: 100%;
+    min-width: fit-content;
+    height: calc(100% - 66px);
+    padding-bottom: getCssVar(swimlane-kanban-content, padding-bottom);
+    overflow: hidden scroll;
+
+    @include m('row') {
+      display: flex;
+      @include when('expand') {
+        .#{bem('swimlane-kanban', 'cell')} {
+          height: auto;
+          min-height: getCssVar(swimlane-kanban-cell, min-height);
+          padding: getCssVar(swimlane-kanban-cell, padding);
+        }
+      }
+
+      &:not(.is-expand) {
+        .#{bem('swimlane-kanban', 'cell')}:not(.is-collapsed) {
+          border-right: none;
+        }
+      }
+    }
+
+    @include m(cell) {
+      &:first-child {
+        .#{bem('swimlane-kanban', 'cell', 'content')} {
+          display: flex;
+          align-items: start;
+          justify-content: space-between;
+        }
+      }
+      @include when('collapsed') {
+        width: getCssVar(swimlane-kanban-cell, collapsed-width);
+        min-width: getCssVar(swimlane-kanban-cell, collapsed-width);
+        border-right: 1px solid getCssVar(swimlane-kanban, 'border-color');
+        border-bottom: none;
+      }
+
+      &:has(+ .is-collapsed) {
+        border-right: 1px solid getCssVar(swimlane-kanban, 'border-color') !important;
+      }
+    }
+  }
+
+  @include e('cell') {
+    padding: getCssVar('spacing', 'base') getCssVar('spacing', 'tight');
+    border-right: 1px solid getCssVar(swimlane-kanban, 'border-color');
+    border-bottom: 1px solid getCssVar(swimlane-kanban, 'border-color');
+
+    @include m('expand-icon') {
+      display: flex;
+      align-items: center;
+      margin-right: getCssVar(swimlane-kanban-cell, expand-icon-gap);
+      font-size: getCssVar(swimlane-kanban-cell, expand-icon-size);
+      color: getCssVar(swimlane-kanban-cell, color);
+      cursor: pointer;
+    }
+
+    @include m('content') {
+      width: 100%;
+      height: 100%;
+    }
+
+    @include m('left') {
+      display: flex;
+      align-items: center;
+    }
+
+    @include m('right') {
+      display: flex;
+      align-items: center;
+    }
+
+    @include m('toolbar') {
+      margin: getCssVar('spacing', 'tight');
+      visibility: hidden;
+    }
+
+    @include m('separator') {
+      margin: 0 getCssVar(swimlane-kanban-cell, separator-gap);
+    }
+
+    @include m('description') {
+      font-size: getCssVar('font-size', 'regular');
+      color: getCssVar(swimlane-kanban-cell, color);
+    }
+
+    &:hover {
+      .#{bem('swimlane-kanban', 'cell', 'toolbar')} {
+        visibility: visible;
+      }
+    }
+  }
+
+  @include e('card') {
+    margin: getCssVar(swimlane-kanban-item, margin);
+    cursor: pointer;
+    border-radius: getCssVar(swimlane-kanban-item, border-radius);
+
+    @include when('disabled') {
+      cursor: no-drop;
+    }
+
+    @include when('selected') {
+      background-color: getCssVar(swimlane-kanban-item, active-bg-color);
+    }
+
+    @include m(content) {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    &:hover {
+      .#{bem(swimlane-kanban, drag-icon)} {
+        visibility: visible;
+      }
+    }
+  }
+
+  @include e('default-item') {
+    @include m('footer') {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: getCssVar(swimlane-kanban-item, footer-padding);
+      margin-top: getCssVar(swimlane-kanban-item, footer-margin-top);
+      border-top: 1px solid getCssVar(swimlane-kanban, border-color);
+    }
+    @include m('actions') {
+      display: flex;
+      column-gap: getCssVar(swimlane-kanban-item, action-gap);
+      justify-content: center;
+      .#{bem(action-toolbar, item)} {
+        margin: 0;
+      }
+      .#{bem(action-toolbar, item, label)} {
+        &.is-has-caption {
+          margin: 0;
+        }
+      }
+    }
+  }
+
+  @include e('batch') {
+    padding: getCssVar(swimlane-kanban-batch-toolbar, padding);
+    border-bottom: 1px solid getCssVar(swimlane-kanban, border-color);
+    @include m('toolbar') {
+      flex-wrap: wrap;
+      row-gap: getCssVar(swimlane-kanban-batch-toolbar, gap);
+    }
+    @include m('check') {
+      @include flex(row, space-between, center);
+
+      margin-top: getCssVar(swimlane-kanban-batch-toolbar, check-gap);
+      font-size: getCssVar(swimlane-kanban-batch-toolbar, check-size);
+    }
+
+    @include m('info') {
+      span {
+        margin: 0 getCssVar(swimlane-kanban-batch-toolbar, count-gap);
+        color: getCssVar(swimlane-kanban-batch-toolbar, count-color);
+      }
+    }
+  }
+
+  @include e('scrollbar') {
+    .el-scrollbar__view {
+      width: 100%;
+    }
+  }
+
+  @include e('quicktoolbar') {
+    flex-flow: column nowrap;
+    gap: getCssVar(swimlane-kanban-quick-toolbar, gap);
+    align-items: center;
+    justify-content: center;
+  }
+}

@@ -1,0 +1,9 @@
+@include b(portlet-container){
+  &.#{bem(portlet-layout)}{
+    padding: getCssVar(spacing, none);;
+  }
+
+  >.#{bem(portlet-layout-content)}{
+    background-color: transparent;
+  }
+}

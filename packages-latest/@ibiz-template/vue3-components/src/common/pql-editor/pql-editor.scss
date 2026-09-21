@@ -1,0 +1,71 @@
+@include b(pql-editor) {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: getCssVar('spacing', 'base-tight');
+  overflow: auto;
+  font-size: getCssVar('font-size', 'regular');
+  border: 1px solid getCssVar(color, border);
+  border-radius: getCssVar(border, radius, small);
+  outline: none;
+
+  [data-slate-node='element'][data-slate-void='true'] {
+    margin: getCssVar('spacing', 'extra-tight'),
+  }
+}
+
+@include b(pql-editor-content) {
+  flex: 1 0 0;
+
+  .w-e-text-placeholder {
+    top: getCssVar('spacing', 'super-tight');
+    left: 0;
+    font-style: normal;
+  }
+
+  .w-e-text-container [data-slate-editor] {
+    padding: 0;
+  }
+
+  .w-e-text-container [data-slate-editor] p {
+    margin: 0;
+  }
+}
+
+@include b(pql-editor-footer) {
+  flex: 0 0 auto;
+  font-size: getCssVar('font-size', 'small');
+  color: getCssVar(color, danger);
+}
+
+@include b(pql-editor-error-msg) {
+  position: relative;
+
+  &::after {
+    position: absolute;
+    bottom: -0.12rem;
+    left: 0;
+    width: 100%;
+    height: 0.25rem;
+    content: '';
+    background: linear-gradient(
+        135deg,
+        transparent,
+        transparent 45%,
+        #{getCssVar(color, danger)},
+        transparent 55%,
+        transparent 100%
+      ),
+      linear-gradient(
+        45deg,
+        transparent,
+        transparent 45%,
+        #{getCssVar(color, danger)},
+        transparent 55%,
+        transparent 100%
+      );
+    background-repeat: repeat-x, repeat-x;
+    background-size: 0.5rem 0.5rem;
+  }
+}

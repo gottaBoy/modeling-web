@@ -1,0 +1,102 @@
+// 应用标题样式
+$panel-app-title: (
+  'color': getCssVar(color, text, 0),                     // 标题文本色
+  'font-size': getCssVar(font-size, header-3),            // 标题字体大小
+  'font-weight': getCssVar(font-weight, bold),            // 标题字体粗细
+  'padding': 0 getCssVar(spacing, base, tight),           // 标题内边距
+  'collapse-padding': 0 getCssVar(spacing, tight),        // 折叠态标题内边距
+  'collapse-font-size': getCssVar(font-size, header-4),     // 折叠态主标题字体大小
+  'collapse-sub-font-size': getCssVar(font-size, header-5), // 折叠态副标题字体大小
+  'not-index-height': 60px,                                // 非首页场景下标题区域高度
+);
+
+// 应用标题 Logo 样式
+$panel-app-title-logo: (
+  padding: 0 getCssVar('spacing', 'tight'),                       // Logo 左右内边距
+  font-size: calc(getCssVar('font-size', 'header-1') + 8px),     // Logo 图标字体大小
+);
+
+@include b(panel-app-title) {
+  @include set-component-css-var('panel-app-title', $panel-app-title);
+  @include set-component-css-var('panel-app-title-logo', $panel-app-title-logo);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: getCssVar('panel-app-title', 'padding');
+  cursor: pointer;
+
+  @include e(title) {
+    @include utils-ellipsis;    
+
+    font-size: getCssVar('panel-app-title', 'font-size');
+    font-weight: bold;
+    color: getCssVar('panel-app-title', 'color');
+  }
+
+  @include e(logo) {
+    @include flex(row, center, center);
+
+    height: 100%;
+    padding: getCssVar('panel-app-title', logo, 'padding');
+    font-size: getCssVar('panel-app-title', logo, font-size);
+    
+    img {
+      display: inline-block;
+      width: auto;
+      height: 100%;
+    }  
+    
+    svg {
+      fill: getCssVar('panel-app-title', 'color');
+    }
+    @include m('expand') {
+      width: auto;
+      max-width: 66px;
+      height: 66px;
+      @include flex(row, center, center);
+    }
+  }
+
+
+  @include when(only-img){
+    @include e(logo) {
+      padding: 0;
+    }    
+  }
+
+
+  @include when(collapse){
+    max-width: 100%;
+    padding:  getCssVar(panel-app-title, collapse-padding);
+    @include e(collapse-title){
+      width: 100%;
+    }
+
+    @include e(collpase-icon){
+      img{
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    @include e(caption2){
+      overflow: hidden;
+      font-size: getCssVar(panel-app-title, collapse-font-size);
+      font-weight: getCssVar(panel-app-title, font-weight);
+      text-align: center;
+      white-space: nowrap;      
+    }
+    @include e(subCaption2){
+      overflow: hidden;
+      font-size: getCssVar(panel-app-title, collapse-sub-font-size);
+      text-align: center;
+      white-space: nowrap;        
+    }
+  }
+
+  @include when('only-title'){
+    height: getCssVar('panel-app-title','not-index-height');
+  }
+}

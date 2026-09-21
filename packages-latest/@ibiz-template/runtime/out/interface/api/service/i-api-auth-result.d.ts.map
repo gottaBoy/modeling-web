@@ -1,0 +1,1 @@
+{"version":3,"file":"i-api-auth-result.d.ts","sourceRoot":"","sources":["../../../../src/interface/api/service/i-api-auth-result.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,QAAQ,EAAE,aAAa,EAAE,aAAa,EAAE,MAAM,qBAAqB,CAAC;AAE7E;;;;GAIG;AACH,MAAM,WAAW,cAAc;IAC7B;;;;OAIG;IACH,EAAE,EAAE,OAAO,CAAC;IAEZ;;;;OAIG;IACH,MAAM,EAAE,QAAQ,GAAG,aAAa,GAAG,aAAa,CAAC;CAClD"}

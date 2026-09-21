@@ -1,0 +1,107 @@
+// 进度条根元素
+$slider: (
+  button-width: rem(6px),                                                   // 滑块按钮宽度          
+  button-height: getCssVar('height-control', 'default'),                    // 滑块按钮高度
+  text-width: rem(38px),                                                    // 文本宽度
+  pie-bg: getCssVar(color, warning),                                        // 饼图背景色
+  border-radius: getCssVar('border-radius', 'small'),                       // 进度条倒角
+  pie-percent-bg: getCssVar(color, primary, light, active),                 // 饼图占比色
+  bg-color: getCssVar(color, primary),                                      // 进度条背景色
+  font-size: getCssVar('font-size', 'regular'),                             // 文本字体大小
+  fill-color: getCssVar(color, fill, 0),                                    // 进度条填充色
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+@include b('slider') {
+  @include set-component-css-var(slider, $slider);
+
+  display: flex;
+  align-items: center;
+  width: 100%;
+  @include e(text) {
+    .el-slider__button,
+    .el-slider__button-wrapper {
+      width: getCssVar('slider', 'button-width');
+      height: getCssVar('slider', 'button-height');
+      border: none;
+      opacity: 0;
+    }
+
+    .el-slider__bar {
+      border-radius: getCssVar('slider', 'border-radius');
+    }
+
+    .el-slider__runway.is-disabled .el-slider__bar {
+      background-color: getCssVar('slider', 'bg-color');
+    }
+    @include m(val) {
+      min-width: getCssVar('slider', 'text-width');
+      margin-left: getCssVar(spacing, tight);
+    }
+  }
+
+  @include e('circle') {
+    @include m('text') {
+      font-size: getCssVar('slider','font-size');
+    }
+
+    .el-progress {
+      --el-fill-color-light: getCssVar('slider','fill-color');
+
+      width: 100%;
+
+      .el-progress-circle {
+        svg>path:nth-child(2) {
+          stroke: getCssVar('slider', 'bg-color');
+        }
+      }
+    }
+  }
+  @include e('pie'){
+    justify-content: center;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(.5turn); }
+  }
+   
+  @keyframes bg {
+    50% { background: getCssVar('slider', 'pie-percent-bg'); }
+  }
+
+  @include e('pie-content'){
+    min-width: 30px;
+    min-height: 30px;
+    background:  getCssVar('slider', 'pie-bg');
+    background-image:linear-gradient(to right, transparent 50%, getCssVar('slider', 'pie-percent-bg') 0);
+    border-radius: 50%;
+    @include when(hundred-percent){
+      background: getCssVar('slider', 'pie-percent-bg');
+    }
+
+    &::before {
+      display: block;
+      height: 100%;
+      margin-left: 50%;
+      content: '';
+      background-color: inherit;
+      border-radius: 0 100% 100% 0 / 50%;
+      transform-origin: left;
+      animation: spin 50s linear infinite,
+        bg 100s step-end infinite;
+      animation-play-state: paused;
+      animation-delay: inherit;
+    }
+  }
+}
+
+
+
+@include b(form-item){
+
+  @include b(slider) {
+    @include when(show-default){
+      padding: getCssVar(slider, hover-edit-padding);
+    }
+  }
+}

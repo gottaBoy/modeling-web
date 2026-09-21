@@ -1,0 +1,62 @@
+$trigger-bar-background: getCssVar(color, border);
+$trigger-width: 6px;
+$trigger-bar-width: 4px;
+$trigger-bar-offset: calc(($trigger-width - $trigger-bar-width) / 2);
+$trigger-bar-interval: 3px;
+$trigger-bar-weight: 1px;
+$trigger-bar-con-height: calc(($trigger-bar-weight + $trigger-bar-interval) * 8);
+
+@include b(split-trigger) {
+  border: 1px solid #{getCssVar(color, border)};
+
+  @include m(vertical) {
+    width: $trigger-width;
+    height: 100%;
+    cursor: col-resize;
+    border-top: none;
+    border-bottom: none;
+
+    @include b(split-trigger-bar) {
+      float: left;
+      width: $trigger-bar-width;
+      height: 1px;
+      margin-top: $trigger-bar-interval;
+      background: $trigger-bar-background;
+    }
+  }
+
+  @include m(horizontal) {
+    width: 100%;
+    height: $trigger-width;
+    cursor: row-resize;
+    border-right: none;
+    border-left: none;
+
+    @include b(split-trigger-bar) {
+      float: left;
+      width: 1px;
+      height: $trigger-bar-width;
+      margin-right: $trigger-bar-interval;
+      background: $trigger-bar-background;
+    }
+  }
+}
+
+@include b(split-trigger-bar-con) {
+  position: absolute;
+  overflow: hidden;
+
+  @include m(vertical) {
+    top: 50%;
+    left: $trigger-bar-offset;
+    height: $trigger-bar-con-height;
+    transform: translate(0, -50%);
+  }
+
+  @include m(horizontal) {
+    top: $trigger-bar-offset;
+    left: 50%;
+    width: $trigger-bar-con-height;
+    transform: translate(-50%, 0);
+  }
+}

@@ -1,0 +1,608 @@
+// 菜单部件样式
+$control-appmenu: (
+  'scroll-color': getCssVar(color, scroll, menu),                       // 菜单滚动条颜色
+);
+
+// 菜单项样式
+$control-appmenu-item: (
+  'selected-color': getCssVar(color, primary, active, text),                                      // 菜单项选中文本色
+  'selected-bg-color': getCssVar(color, primary, active),                                         // 菜单项选中背景色
+  'hover-color': getCssVar(color, primary, hover, text),                                          // 菜单项悬浮文本色
+  'hover-bg-color': getCssVar(color, primary, hover),                                             // 菜单项悬浮背景色
+  'padding': getCssVar(spacing, tight),                                                           // 菜单项内边距
+  'border-radius': getCssVar(border-radius, small),                                               // 菜单项圆角
+  'border': 2px solid getCssVar(color, text, 1),                                                  // 菜单项边框
+  'font-size': getCssVar(font-size, header-6),                                                    // 菜单项字体大小
+  'height': 42px,                                                                                 // 菜单项高度
+  'gap': 2px,                                                                                     // 菜单项与菜单项间距
+  'color': getCssVar(color, text, menu),                                                          // 菜单项文本色
+  'horizontal-selected-color': getCssVar(color, primary, active, text),                          // 横向菜单项选中文本色
+  'horizontal-selected-bg-color': getCssVar(color, primary, active),                             // 横向菜单项选中背景色
+  'horizontal-hover-color': getCssVar(color, primary, hover, text),                              // 横向菜单项悬浮文本色
+  'horizontal-hover-bg-color': getCssVar(color, primary, hover),                                 // 横向菜单项悬浮背景色
+  'horizontal-color': getCssVar(color, text, menu),                                              // 横向菜单项文本色
+  'horizontal-font-size': getCssVar(font-size, header-5),                                        // 横向菜单项字体大小
+  'horizontal-height': 100%,                                                                     // 横向菜单项高度
+  'horizontal-border-radius': 0,                                                                 // 横向菜单项圆角
+  'horizontal-padding': 0 getCssVar(spacing, base-loose),                                        // 横向菜单项内边距
+  'horizontal-popup-height': 40px,                                                               // 横向菜单弹出子菜单项高度
+);
+
+// 菜单项图标样式
+$control-appmenu-item-icon: (
+  'width': getCssVar(width-icon, large),                       // 菜单项图标宽度
+  'height': getCssVar(width-icon, large),                      // 菜单项图标高度
+  'margin': 0 getCssVar(spacing, tight) 0 0,                   // 菜单项图标外边距
+  'size': getCssVar(width-icon,medium),                        // 菜单项图标尺寸
+);
+
+// 菜单项计数器样式
+$control-appmenu-item-counter: (
+  height: 20px,                                                 // 菜单项计数器高度
+  color: getCssVar('color', danger, text),                      // 菜单项计数器字体色
+  bg-color: getCssVar('color', 'danger'),                       // 菜单项计数器背景色
+  padding: getCssVar('spacing', 'none') getCssVar('spacing', 'tight'),    // 菜单项计数器内边距
+  gap: 5px,                                                     // 菜单项计数器与右侧间距 
+  border-radius: getCssVar('border','radius','medium'),         // 菜单项计数器圆角
+);
+
+// 菜单子菜单样式
+$control-appmenu-submenu: (
+  gap: getCssVar(control-appmenu-item, gap),  // 子菜单项间距
+);
+
+// 菜单分割线样式
+$control-appmenu-divider: (
+  color: getCssVar(color, scroll, menu),     // 分割线颜色
+  margin: getCssVar(spacing, tight) 0,       // 分割线外边距
+);
+
+// 菜单定制按钮样式
+$control-appmenu-design: (
+  font-size: getCssVar(font-size, header, 5),       // 定制按钮字体大小
+  bottom: getCssVar(spacing, tight),               // 定制按钮距底部距离
+  left: getCssVar(spacing, base, tight),           // 定制按钮距左侧距离
+  right: getCssVar(spacing, base, tight),          // 菜单折叠时定制按钮距右侧距离
+  height: getCssVar(spacing, super-loose),          // 定制按钮高度
+);
+
+// 菜单折叠/展开按钮样式
+$control-appmenu-collapse: (
+  font-size: getCssVar(font-size, header, 5),       // 折叠按钮字体大小
+  bottom: getCssVar(spacing, tight),               // 折叠按钮距底部距离
+  right: getCssVar(spacing, base, tight),           // 折叠按钮距右侧距离
+  height: getCssVar(spacing, super-loose),          // 折叠按钮高度
+);
+
+
+// 垂直菜单项样式
+@mixin menu-item-vertical-style {
+  @include flex(row, flex-start, center);
+
+  --el-menu-base-level-padding: #{getCssVar('control-appmenu-item', 'padding')};
+
+  width: 100%;
+  height: getCssVar('control-appmenu-item', 'height');
+  font-size: getCssVar('control-appmenu-item', 'font-size');
+  color: getCssVar('control-appmenu-item', 'color');
+  white-space: nowrap;
+  border-radius: getCssVar('control-appmenu-item', 'border-radius');
+
+  &.is-active {
+    color: getCssVar('control-appmenu-item', 'selected-color') !important;
+    background-color: getCssVar('control-appmenu-item', 'selected-bg-color');
+  }
+
+  &:hover {
+    color: getCssVar('control-appmenu-item', 'hover-color');
+    background-color: getCssVar('control-appmenu-item', 'hover-bg-color');
+  }
+
+  .#{bem('control-appmenu', 'caption')} {
+    width: 100%;
+    overflow: hidden;
+    line-height: getCssVar('control-appmenu-item', 'height');
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// 水平菜单项样式
+@mixin menu-item-horizontal-style {
+  height: getCssVar('control-appmenu-item', 'horizontal-height');
+  padding: getCssVar('control-appmenu-item', 'horizontal-padding');
+  font-size: getCssVar('control-appmenu-item', 'horizontal-font-size');
+  line-height: getCssVar('control-appmenu-item', 'horizontal-height');
+  color: getCssVar('control-appmenu-item', 'horizontal-color');
+  white-space: nowrap;
+  border-width: 0;
+  border-radius: getCssVar('control-appmenu-item', 'horizontal-border-radius');
+
+  &:hover {
+    color: getCssVar('control-appmenu-item', 'horizontal-hover-color');
+    background-color: getCssVar(
+      'control-appmenu-item',
+      'horizontal-hover-bg-color'
+    );
+  }
+
+  &.is-active {
+    // element-plus 给了 !important，所以这里也要加上
+    color: getCssVar('control-appmenu-item', 'selected-color') !important;
+    background-color: getCssVar('control-appmenu-item', 'horizontal-selected-bg-color');
+    border-top: getCssVar('control-appmenu-item', 'border');
+  }
+}
+
+// 收缩菜单项样式
+@mixin menu-collapse-item-style {
+  @include flex-center;
+
+  padding: getCssVar(spacing, none);
+  margin-bottom: getCssVar(spacing, tight);
+
+}
+
+// 菜单项选中样式
+@mixin menu-item-selected-style {
+  color: getCssVar('control-appmenu-item', 'selected-color');
+  background-color: getCssVar('control-appmenu-item', 'selected-bg-color');
+}
+
+// 直接内容菜单项样式
+@mixin raw-item-menu-style {
+  --el-menu-hover-text-color: #{getCssVar('control-appmenu-item', 'color')};
+  --el-menu-hover-bg-color: transparent;
+  @include set-component-css-var('control-appmenu-item', $control-appmenu-item);
+  .#{bem('control-appmenu', 'rawitem')} {
+    min-height: getCssVar('control-appmenu-item', 'height');
+    line-height: getCssVar('control-appmenu-item', 'height');
+    .#{bem('rawitem')} {
+      @include flex(row, flex-start, center);
+
+      font-size: getCssVar('control-appmenu-item', 'font-size');
+      color: getCssVar('control-appmenu-item', 'color');
+
+      * {
+        @include utils-ellipsis;
+      }
+    }
+  }
+}
+
+@include b(control-appmenu) {
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  @include set-component-css-var('control-appmenu', $control-appmenu);
+  @include set-component-css-var('control-appmenu-item', $control-appmenu-item);
+  @include set-component-css-var('control-appmenu-submenu', $control-appmenu-submenu);
+  @include set-component-css-var('control-appmenu-item-icon', $control-appmenu-item-icon);
+  @include set-component-css-var('control-appmenu-item-counter', $control-appmenu-item-counter);
+  @include set-component-css-var('control-appmenu-divider', $control-appmenu-divider);
+  @include set-component-css-var('control-appmenu-collapse', $control-appmenu-collapse);
+  @include set-component-css-var('control-appmenu-design', $control-appmenu-design);
+
+  >.el-menu {
+    height: 100%;
+    padding:  getCssVar(spacing, none) getCssVar(spacing, base);
+    overflow-y: auto;
+    border-right: 0;
+    @include raw-item-menu-style;
+  }
+
+  // 分组菜单样式
+  .#{bem('control-appmenu-groupmenu')} {
+    .el-menu-item-group__title {
+      padding: getCssVar('spacing', 'extra-tight') 0 getCssVar('spacing', 'extra-tight') 10px;
+      font-size: getCssVar('control-appmenu-item', 'font-size');
+      color: getCssVar('control-appmenu-item', 'horizontal-color');
+    }
+
+    > ul {
+      > .el-menu-item {
+        padding: 0 getCssVar('spacing', 'extra-loose');
+      }
+
+      > .el-divider {
+        width: calc(100% - 40px);
+        margin: getCssVar('spacing', 'tight') getCssVar('spacing', 'base-loose')
+      }
+    }
+  }
+
+  .el-sub-menu {
+    .el-sub-menu__icon-arrow {
+      right: 10px;
+      width: getCssVar('control-appmenu', item-icon, 'width');
+      height: getCssVar('control-appmenu', item-icon, 'height');
+      margin-top: -10px;
+      font-size: getCssVar('control-appmenu', item-icon, 'width');
+    }
+
+    .el-menu-item {
+      padding: calc(getCssVar('control-appmenu', 'item-padding') * 0.875)
+        calc(getCssVar('control-appmenu', 'item-padding') * 2.5);
+    }
+
+    .el-sub-menu__title >.#{bem('control-appmenu', 'counter')} {
+      right: 30px;
+    }
+  }
+
+  // 垂直
+  .el-menu--vertical {
+    width: 100%;
+
+    // 菜单项样式
+    .el-menu-item,
+    .el-sub-menu__title,
+    .el-menu-item-group__title {
+      @include menu-item-vertical-style;
+    }
+
+    .el-menu-item + .el-menu-item {
+      margin-top: getCssVar('control-appmenu-item', 'gap');
+    }
+
+    .el-sub-menu + .el-menu-item {
+      margin-top: getCssVar('control-appmenu-item', 'gap');
+    }
+
+    .el-sub-menu + .el-sub-menu {
+      margin-top: getCssVar('control-appmenu-submenu', 'gap');
+    }
+
+    .el-menu-item + .el-sub-menu {
+      margin-top: getCssVar('control-appmenu-submenu', 'gap');
+    }
+
+    .el-sub-menu__title + .el-menu {
+      margin-top: getCssVar('control-appmenu-item', 'gap');
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: getCssVar('control-appmenu', 'scroll-color');
+    }
+  }
+
+  // 水平
+  .el-menu--horizontal {
+    align-items: center;
+    height: 100%;
+    padding: getCssVar(spacing, none) getCssVar(spacing, base-tight);
+
+    // 水平菜单默认为ellipsis模式，无需滚动条
+    overflow-x: hidden;
+    background-color: transparent;
+    border-bottom: none;
+
+    // 菜单项样式
+    .el-menu-item,
+    .el-sub-menu__title {
+      @include menu-item-horizontal-style;
+
+      .el-sub-menu__icon-arrow {
+        right: 2px;
+      }
+    }
+
+    .el-sub-menu {
+      height: getCssVar('control-appmenu-item', 'horizontal-height');
+
+      >.el-sub-menu__title {
+        padding-right: calc(2 * getCssVar('control-appmenu-item-icon', 'width'));
+      }
+    }
+
+    // 副菜单悬浮
+    > .el-sub-menu:hover .el-sub-menu__title {
+      color: getCssVar('control-appmenu-item', 'horizontal-hover-color');
+      background-color: getCssVar(
+        'control-appmenu-item',
+        'horizontal-hover-bg-color'
+      );
+    }
+
+    // 副菜单激活
+    > .el-sub-menu.is-active .el-sub-menu__title {
+      color: getCssVar('control-appmenu-item', 'horizontal-selected-color');
+      background-color: getCssVar('control-appmenu-item', 'horizontal-selected-bg-color');
+      border-top: getCssVar('control-appmenu-item', 'border');
+      border-bottom: 0;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: getCssVar('control-appmenu', 'scroll-color');
+    }
+
+    .el-divider--vertical {
+      border-color: getCssVar('control-appmenu', divider, 'color');
+    }
+
+    // 横向菜单计数器样式
+    .#{bem('control-appmenu', 'counter')} {
+      position: unset;
+      margin-left: getCssVar('control-appmenu', item-counter, 'gap');
+      transform: none;
+    }
+  }
+
+  // 图标样式
+  @include e(icon) {
+    @include flex(row, center, center);
+
+    width: getCssVar('control-appmenu', item-icon, 'width');
+    height: getCssVar('control-appmenu', item-icon, 'height');
+    margin: getCssVar('control-appmenu', item-icon, 'margin');
+    font-size: getCssVar('control-appmenu', item-icon, 'size');
+
+    > svg {
+      max-width: getCssVar('control-appmenu', item-icon, 'width');
+      max-height: getCssVar('control-appmenu', item-icon, 'height');
+    }
+  }
+
+  // 收缩
+  @include when(collapse) {
+    >.el-menu.el-menu--vertical {
+      padding: 0 getCssVar(spacing, tight);
+    }
+    @include e(icon) {
+      margin: getCssVar('spacing', 'none');
+    }
+    @include e(item) {
+      @include menu-collapse-item-style;
+    }
+    @include b(control-appmenu-tooltip) {
+      width: 100%;
+    }
+    @include b(control-appmenu-submenu) {
+      display: block;
+
+      > .el-sub-menu__title {
+        @include flex-center;
+        @include menu-collapse-item-style;
+
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      @include e(item) {
+        padding: getCssVar('spacing', 'none');
+      }
+    }
+  }
+
+  @include when(show-collapse){
+    >.el-menu {
+      height: calc(100% - getCssVar(control-appmenu, collapse-height));
+      padding: 0 getCssVar(spacing, base);
+    }
+  }
+
+  // 计数器样式
+  .#{bem('control-appmenu', 'counter')} {
+    position: absolute;
+    top: 50%;
+    right: getCssVar('control-appmenu-item-counter', 'gap');
+    transform: translateY(-50%);
+  }
+
+  // 滚动条样式
+  @include when(scroll) {
+    .el-menu.el-menu--vertical {
+      padding-right: getCssVar(spacing, extra-tight);
+    }
+  }
+}
+
+
+@include b(control-appmenu-popup-container){
+  @include raw-item-menu-style;
+  @include set-component-css-var('control-appmenu-item-counter', $control-appmenu-item-counter);
+
+  .#{bem('control-appmenu-popup-container', 'extview1')} {
+    &.el-menu--popup-container {
+      .el-menu--popup {
+        padding: getCssVar('spacing', 'extra-tight') 0 !important;
+      }
+    }
+  }
+
+  // 收缩时菜单项样式
+  // 以及水平菜单悬浮出来菜单样式
+  &.el-menu--popup-container {
+    @include set-component-css-var('control-appmenu', $control-appmenu);
+    @include set-component-css-var('control-appmenu-item', $control-appmenu-item);
+    @include set-component-css-var('control-appmenu-item-icon', $control-appmenu-item-icon);
+
+    border: none;
+    box-shadow: getCssVar('shadow', 'elevated');
+
+    .el-menu--popup {
+      max-height: 100vh;
+      padding: getCssVar('spacing', 'extra-tight');
+      overflow: auto;
+      background-color: getCssVar('color', 'primary');
+
+      // 分组菜单样式
+      .#{bem('control-appmenu-groupmenu')} {
+        .el-menu-item-group__title {
+          padding: getCssVar('spacing', 'extra-tight') 0 getCssVar('spacing', 'extra-tight') 10px;
+          font-size: getCssVar('control-appmenu-item', 'font-size');
+          color: getCssVar('control-appmenu-item', 'horizontal-color');
+        }
+
+        > ul {
+          > .el-menu-item {
+            padding: 0 getCssVar('spacing', 'extra-loose');
+          }
+
+          > .el-divider {
+            width: calc(100% - 40px);
+            margin: getCssVar('spacing', 'tight') getCssVar('spacing', 'base-loose')
+          }
+        }
+      }
+    
+      .el-menu-item,
+      .el-sub-menu__title {
+        @include flex(row, flex-start, center);
+
+        width: 100%;
+        height: getCssVar('control-appmenu-item', 'horizontal-popup-height');
+        font-size: getCssVar('control-appmenu-item', 'font-size');
+        color: getCssVar('control-appmenu-item', 'horizontal-color');
+        white-space: nowrap;
+        border-radius: getCssVar('control-appmenu-item', 'horizontal-border-radius');
+
+        &.is-active {
+          color: getCssVar('control-appmenu-item', 'horizontal-selected-color');
+          background-color: getCssVar('control-appmenu-item', 'horizontal-selected-bg-color');
+        }
+
+        &:hover {
+          color: getCssVar('control-appmenu-item', 'hover-color');
+          background-color: getCssVar('control-appmenu-item', 'hover-bg-color');
+        }
+
+        .el-icon {
+          display: none;
+        }
+      }
+
+      // 直接内容菜单项
+      .#{bem(rawitem)} {
+        #{getCssVarName(rawitem, text, color)}: #{getCssVar('control-appmenu-item', 'horizontal-color')};
+      }
+    }
+  }
+
+  // 计数器样式
+  .#{bem('control-appmenu', 'counter')} {
+    position: absolute;
+    top: 50%;
+    right: getCssVar('control-appmenu-item-counter', 'gap');
+    height: getCssVar('control-appmenu-item-counter', 'height');
+    padding: getCssVar('control-appmenu-item-counter', 'padding');
+    line-height: initial;
+    color: getCssVar('control-appmenu-item-counter', 'color');
+    background-color: getCssVar('control-appmenu-item-counter', 'bg-color');
+    border-radius: getCssVar('control-appmenu-item-counter', 'border-radius');
+    transform: translateY(-50%);
+  }
+
+}
+
+// 底部收缩按钮,自定义设置按钮
+@include b(control-appmenu){
+  @include b(control-appmenu-collapse-icon){
+    position: absolute;
+    right: getCssVar('control-appmenu-collapse', 'right');
+    bottom: getCssVar('control-appmenu-collapse', 'bottom');
+    font-size: getCssVar('control-appmenu-collapse', 'font-size');
+    cursor: pointer;
+    @include when(collapse){
+      transform: rotate(180deg);
+    }
+  }
+  @include b('control-appmenu-menu-set'){
+    position: absolute;
+    bottom: getCssVar('control-appmenu-design', 'bottom');
+    left: getCssVar('control-appmenu-design', 'left');
+    font-size: getCssVar('control-appmenu-design', 'font-size');
+    cursor: pointer;
+    @include when(horizontal){
+      right: getCssVar('control-appmenu-design', 'right');
+      bottom: 0;
+      left: unset;
+      display: flex;
+      align-items: center;
+      height: 100%;
+    }
+
+  }
+  @include when(collapse) {
+    @include b(control-appmenu-collapse-icon){
+      right: 0;
+      width: 100%;
+      text-align: center;
+    }
+    @include b('control-appmenu-menu-set'){
+      position: absolute;
+      right: getCssVar(control-appmenu, design-right);
+      bottom: getCssVar(control-appmenu, collapse-height);
+      display: flex;
+      justify-content: center;
+      cursor: pointer;
+  
+    }
+    @include when(show-menu-design){
+      >.el-menu {
+        height: calc(100% - getCssVar(control-appmenu, design-height) - getCssVar(control-appmenu, collapse-height));
+      }
+    }
+  }
+}
+
+// 分割线
+.#{bem('control-appmenu', 'separator', 'horizontal')} {
+    margin: getCssVar(control-appmenu-divider, margin);
+    border-color: getCssVar(control-appmenu-divider, color);
+}
+
+.el-menu--horizontal.el-menu--popup-container:has(.#{bem(control-appmenu, item)},.#{bem(control-appmenu-submenu)}) {
+  @include set-component-css-var('control-appmenu', $control-appmenu);
+  @include set-component-css-var('control-appmenu-item', $control-appmenu-item);
+  @include set-component-css-var('control-appmenu-item-icon', $control-appmenu-item-icon);
+
+  border: none;
+  box-shadow: getCssVar('shadow', 'elevated');
+
+  .el-menu--popup {
+    padding: getCssVar('spacing', 'extra-tight');
+    background-color: getCssVar('color', 'primary');
+
+    .el-menu-item,
+    .el-sub-menu__title {
+      @include flex(row, flex-start, center);
+
+      width: 100%;
+      height: getCssVar('control-appmenu-item', 'horizontal-popup-height');
+      font-size: getCssVar('control-appmenu-item', 'font-size');
+      color: getCssVar('control-appmenu-item', 'horizontal-color');
+      white-space: nowrap;
+      border-radius: getCssVar('control-appmenu-item', 'horizontal-border-radius');
+
+      &.is-active {
+        color: getCssVar('control-appmenu-item', 'horizontal-selected-color');
+        background-color: getCssVar('control-appmenu-item', 'horizontal-selected-bg-color');
+      }
+
+      &:hover {
+        color: getCssVar('control-appmenu-item', 'hover-color');
+        background-color: getCssVar('control-appmenu-item', 'hover-bg-color');
+      }
+
+      .el-icon {
+        display: none;
+      }
+    }
+
+    .el-menu-item.is-disabled:hover{
+      background-color: getCssVar('control-appmenu-item', 'hover-bg-color')!important;
+    }
+
+    // 直接内容菜单项
+    .#{bem(rawitem)} {
+      #{getCssVarName(rawitem, text, color)}: #{getCssVar('control-appmenu-item', 'horizontal-color')};
+    }
+  }
+
+  .el-menu .el-sub-menu.is-active>.el-sub-menu__title {
+    color: getCssVar('control-appmenu-item', 'horizontal-selected-color');
+  }
+}
+
+

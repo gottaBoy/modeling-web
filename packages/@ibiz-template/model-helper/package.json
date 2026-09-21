@@ -1,0 +1,50 @@
+{
+  "name": "@ibiz-template/model-helper",
+  "version": "0.7.38-alpha.57",
+  "description": "控制器包",
+  "main": "out/index.js",
+  "types": "out/index.d.ts",
+  "type": "module",
+  "system": "./dist/system/index.system.js",
+  "repository": {
+    "type": "git",
+    "url": "https://gitee.com/iBizModeling/ibiz-template.git"
+  },
+  "files": [
+    "dist",
+    "out"
+  ],
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "npm run lint && node ./scripts/build.js && npm run build:rollup && tsc --build",
+    "build:rollup": "rollup -c",
+    "lint": "eslint 'src/**/*.ts'",
+    "lint:fix": "eslint --fix 'src/**/*.ts'",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "publish:next": "npm run build && npm publish --access public --tag=next --registry=https://registry.npmjs.org/",
+    "publish:dev": "npm run build && npm publish --access public --tag=dev --registry=https://registry.npmjs.org/",
+    "publish:alpha": "npm run build && npm publish --access public --tag=alpha --registry=https://registry.npmjs.org/",
+    "publish:beta": "npm run build && npm publish --access public --tag=beta --registry=https://registry.npmjs.org/",
+    "publish:npm": "npm run build && npm publish --access public --registry=https://registry.npmjs.org/",
+    "publish:local": "npm run build && npm publish --access public --registry=http://172.16.240.221:8081/repository/local/"
+  },
+  "author": "chitanda",
+  "license": "MIT",
+  "dependencies": {
+    "@ibiz/model-core": "^0.1.64",
+    "@ibiz/rt-model-api": "0.2.59",
+    "pluralize": "^8.0.0",
+    "ramda": "^0.29.1"
+  },
+  "devDependencies": {
+    "@ibiz-template/runtime": "^0.7.38-alpha.57",
+    "@types/pluralize": "^0.0.33",
+    "@types/ramda": "^0.29.10"
+  },
+  "peerDependencies": {
+    "@ibiz-template/runtime": "^0.6.0",
+    "ramda": "^0.29.0"
+  }
+}

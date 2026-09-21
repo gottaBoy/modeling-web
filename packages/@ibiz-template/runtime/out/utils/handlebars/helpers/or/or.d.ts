@@ -1,0 +1,16 @@
+import { HelperBase } from '../helper-base';
+/**
+ * 或者条件
+ *
+ * @description 判断: word word2 word3 其中任意一个值在判断中为 true, 用法 {{#or word word2 word3}}xxx{{else}}yyy{{/or}}、{{or word word2 word3}} 返回值为 boolean 类型
+ * @author chitanda
+ * @date 2021-12-29 10:12:00
+ * @export
+ * @class HelperOr
+ * @extends {HelperBase}
+ */
+export declare class HelperOr extends HelperBase {
+    constructor(hbs: IData);
+    onExecute(...args: unknown[] | Handlebars.HelperOptions[]): string;
+}
+//# sourceMappingURL=or.d.ts.map

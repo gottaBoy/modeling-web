@@ -1,0 +1,1 @@
+.ibiz-float-window{position:absolute;background-color:var(--ibiz-color-bg-3);display:flex;flex-flow:column nowrap}.ibiz-float-window-header{flex-shrink:0}.ibiz-float-window-content{flex-grow:1;overflow:hidden auto}

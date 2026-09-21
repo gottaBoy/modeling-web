@@ -1,0 +1,193 @@
+// 年范围选择器头部
+$year-range-select-header: (
+  height: 40px,                                             // 高度
+  border-color: getCssVar('color', border),                 // 边框色
+  padding: 0 getCssVar(spacing, base-loose),                // 内边距
+  text-color: getCssVar(color, primary, light, active),     // 文本颜色
+  icon-color: getCssVar(color, black),                    // 图标颜色
+  icon-hover-color: getCssVar(color, primary),              // 图标悬浮色
+);
+
+// 年范围选择器内容
+$year-range-select-content: (
+  range-bg-color: getCssVar(color, secondary, light-default),// 范围背景色
+  selected-color: getCssVar(color, primary, text),           // 选中字体色
+  selected-bg-color: getCssVar(color, primary),              // 选中背景色
+  hover-color: getCssVar(color, primary),                    // 悬浮色
+  current-color: getCssVar(color, primary),                  // 当前年字体色
+);
+
+@include b('bi-year-range-select') {
+    @include e('date-panel') {
+      display: flex;
+      height: 200px;
+      @include set-component-css-var(year-range-select-header, $year-range-select-header);
+      @include set-component-css-var(year-range-select-content, $year-range-select-content);
+      @include m('left') {
+        flex: 1;
+      }
+      @include m('left-header') {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: getCssVar(year-range-select-header, height);
+        padding: getCssVar(year-range-select-header, padding);
+        color: getCssVar(year-range-select-header, text-color);
+        border-bottom: 1px solid getCssVar(year-range-select-header, border-color);
+
+        svg {
+          color: getCssVar(year-range-select-header, icon-color);
+          cursor: pointer;
+
+          &:hover {
+            color: getCssVar(year-range-select-header, icon-hover-color);
+          }
+        }
+      }
+
+      @include m('left-content') {
+        padding: getCssVar(spacing, tight) getCssVar(spacing, base-loose);
+      }
+      @include m('left-item') {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: getCssVar('height-control', 'default');
+        margin-top: getCssVar('spacing', 'extra-tight');
+        margin-left: getCssVar(spacing, loose);
+        cursor: pointer;
+        border-radius: getCssVar(border-radius, small);
+
+        &::before {
+          position: absolute;
+          right: 0;
+          display: inline-block;
+          width: calc(100% + getCssVar(spacing, loose));
+          height: calc(100% + getCssVar(spacing, extra-tight));
+          content: '';
+        }
+
+        @include when('include') {
+          background: getCssVar(year-range-select-content, range-bg-color);
+        }
+        @include when('selected') {
+          color: getCssVar(year-range-select-content, selected-color);
+          background-color: getCssVar(year-range-select-content, selected-bg-color);
+          @include when('curyear') {
+            color: getCssVar(year-range-select-content, selected-color);
+          }
+        }
+        @include when('hoverinclude') {
+          background: getCssVar(year-range-select-content, range-bg-color);
+          @include when('include') {
+            color: getCssVar(year-range-select-content, selected-color);
+            background-color: getCssVar(year-range-select-content, selected-bg-color);
+          }
+          @include when('hover') {
+            color: getCssVar(year-range-select-content, selected-color);
+            background-color: getCssVar(year-range-select-content, selected-bg-color);
+          }
+          @include when('selected') {
+            color: getCssVar(year-range-select-content, selected-color);
+            background-color: getCssVar(year-range-select-content, selected-bg-color);
+          }
+        }
+        @include when('hover') {
+          color: getCssVar(year-range-select-content, hover-color);
+          @include when('selected') {
+            color: getCssVar(year-range-select-content, selected-color);
+            background-color: getCssVar(year-range-select-content, hover-color);
+          }
+        }
+        @include when('curyear') {
+          font-weight: bold;
+          color: getCssVar(year-range-select-content, current-color);
+        }
+      }
+
+      @include m('right') {
+        flex: 1;
+      }
+      @include m('right-header') {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: getCssVar(year-range-select-header, height);
+        padding: getCssVar(year-range-select-header, padding);
+        color: getCssVar(year-range-select-header, text-color);
+        border-bottom: 1px solid getCssVar(year-range-select-header, border-color);
+
+        svg {
+          color: getCssVar(year-range-select-header, icon-color);
+          cursor: pointer;
+
+          &:hover {
+            color: getCssVar(year-range-select-header, icon-hover-color);
+          }
+        }
+      }
+
+      @include m('right-content') {
+        padding: getCssVar(spacing, tight) getCssVar(spacing, base-loose);
+      }
+      @include m('right-item') {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: getCssVar('height-control', 'default');
+        margin-top: getCssVar('spacing', 'extra-tight');
+        margin-left: getCssVar(spacing, loose);
+        cursor: pointer;
+        border-radius: getCssVar(border-radius, small);
+
+        &::before {
+          position: absolute;
+          right: 0;
+          display: inline-block;
+          width: calc(100% + getCssVar(spacing, loose));
+          height: calc(100% + getCssVar(spacing, extra-tight));
+          content: '';
+        }
+        @include when('include') {
+          background: getCssVar(year-range-select-content, range-bg-color);
+        }
+        @include when('selected') {
+          color: getCssVar(year-range-select-content, selected-color);
+          background-color: getCssVar(year-range-select-content, selected-bg-color);
+          @include when('curyear') {
+            color: getCssVar(year-range-select-content, selected-color);
+          }
+        }
+        @include when('hoverinclude') {
+          background: getCssVar(year-range-select-content, range-bg-color);
+          @include when('include') {
+            color: getCssVar(year-range-select-content, selected-color);
+            background-color: getCssVar(year-range-select-content, selected-bg-color);
+          }
+          @include when('hover') {
+            color: getCssVar(year-range-select-content, selected-color);
+            background-color: getCssVar(year-range-select-content, selected-bg-color);
+          }
+          @include when('selected') {
+            color: getCssVar(year-range-select-content, selected-color);
+            background-color: getCssVar(year-range-select-content, selected-bg-color);
+          }
+        }
+        @include when('hover') {
+          color: getCssVar(year-range-select-content, hover-color);
+          @include when('selected') {
+            color: getCssVar(year-range-select-content, selected-color);
+            background-color: getCssVar(year-range-select-content, hover-color);
+          }
+        }
+        @include when('curyear') {
+          font-weight: bold;
+          color: getCssVar(year-range-select-content, current-color);
+        }
+      }
+    }
+}

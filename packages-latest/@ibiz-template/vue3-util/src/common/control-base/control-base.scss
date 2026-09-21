@@ -1,0 +1,42 @@
+/* stylelint-disable length-zero-no-unit */
+$control-base: (
+  scrollbar-width: 0px,
+  mask-text-color: getCssVar(color, primary, text),
+  mask-background-color-blank: transparent,
+  mask-background-color-mask: rgb(0 0 0 / 50%),
+);
+
+@include b(control) {
+  @include set-component-css-var(control-base, $control-base);
+
+  width: 100%;
+  height: 100%;
+
+  @include e(control-render) {
+    width: 100%;
+    height: 100%;
+  }
+
+  @include when(disabled) {
+    position: relative;
+  }
+
+  @include e(mask-container) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    width: calc(100% - getCssVar(control-base, scrollbar-width));
+    height: 100%;
+  }
+
+  @include m(blank) {
+    background-color: getCssVar(control-base, mask-background-color-blank);
+  }
+
+  @include m(mask) {
+    color: getCssVar(control-base, mask-text-color);
+    background-color: getCssVar(control-base, mask-background-color-mask);
+    @include flex(row, center, center);
+  }
+}

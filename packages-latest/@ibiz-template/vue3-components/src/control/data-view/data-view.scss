@@ -1,0 +1,257 @@
+// 卡片根元素
+$control-dataview: (
+  bg-color: transparent,                                                      // 卡片背景色
+  icon-color: getCssVar('color', 'text', '2'),                                // 卡片图标色
+  hover-color: getCssVar('color', 'primary', 'hover'),                        // 卡片悬浮色
+  icon-size: getCssVar('font-size', 'header', '3'),                           // 卡片图标大小
+  padding: getCssVar('spacing', 'none'),                                      // 卡片内边距
+  border-color: getCssVar('color', 'border'),                                 // 卡片边框色
+  font-size: getCssVar('font-size', 'regular'),                               // 卡片字体大小
+  font-weight: getCssVar('font-weight', 'regular'),                           // 卡片字体粗细
+);
+
+// 卡片内容
+$control-dataview-content: (
+  bg-color: getCssVar('control-dataview', 'bg-color'),                        // 内容背景色（继承自卡片根元素）
+  padding: getCssVar('spacing', 'tight') getCssVar('spacing', 'base'),        // 内容内边距
+);
+
+// 卡片分组
+$control-dataview-group: (
+  text-color: getCssVar('color', 'text', '0'),                                // 分组字体色
+  font-size: getCssVar('font-size', 'header-5'),                              // 分组字体大小
+  padding: getCssVar('spacing', 'base', 'tight'),                             // 分组内边距
+  font-weight: getCssVar('font-weight', 'bold'),                              // 分组字体粗细
+  border-color: getCssVar('control-dataview', 'border-color'),                // 分组边框色（继承自卡片根元素）
+);
+
+// 卡片项
+$control-dataview-item: (
+  bg-color: transparent,                                                      // 内容项背景色
+  padding: getCssVar('spacing', 'base'),                                      // 内容项内边距
+  text-color: getCssVar('color', 'text', '0'),                                // 内容项字体色
+  font-size: getCssVar('font-size', 'header-6'),                              // 内容项字体大小
+  hover-bg-color: getCssVar('color', 'fill', '1'),                            // 内容项悬浮背景色
+  active-bg-color: getCssVar('color', 'fill', '2'),                           // 内容项激活背景色
+  font-weight: getCssVar('control-dataview', 'font-weight'),                  // 内容项字体粗细（继承自卡片根元素）                                             
+  border-color: getCssVar('control-dataview', 'border-color'),                // 内容项边框色（继承自卡片根元素）
+);
+
+@include b('control-dataview') {
+  @include set-component-css-var('control-dataview', $control-dataview);
+  @include set-component-css-var('control-dataview-content', $control-dataview-content);
+  @include set-component-css-var('control-dataview-group', $control-dataview-group);
+  @include set-component-css-var('control-dataview-item', $control-dataview-item);
+  @include flex(column, flex-start, stretch);
+
+  position: relative;
+  height: 100%;
+  padding: getCssVar('control-dataview', 'padding');
+  background-color: getCssVar('control-dataview', 'bg-color');
+
+  @include e('nav-icon') {
+    position: absolute;
+    top: 20px;
+    right: 10px;
+    color: getCssVar('control-dataview', 'icon-color');
+    cursor: pointer;
+
+    &:hover {
+      color: getCssVar('control-dataview', 'hover-color');
+    }
+  }
+
+  @include e('drag-icon') {
+    cursor: move;
+    visibility: hidden;
+  }
+
+  @include e('layout-content') {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  // 内容区样式
+  @include e('content') {
+    flex-grow: 1;
+    height: 100%;
+    padding: getCssVar('control-dataview-content', 'padding');
+    overflow: auto;
+    background-color: getCssVar('control-dataview-content', 'bg-color');
+
+    @include m('icon') {
+      text-align: center;
+
+      i {
+        font-size: getCssVar('control-dataview', 'icon-size');
+        color: getCssVar('control-dataview', 'icon-color');
+        cursor: pointer;
+  
+        &:hover {
+          color: getCssVar('control-dataview', 'hover-color');
+        }
+      }
+    }
+  }
+
+  // 分页样式
+  @include e('pagination') {
+    flex-shrink: 0;
+  }
+
+  @include e('layout-row') {
+    padding: getCssVar('spacing', 'base', 'tight');
+  }
+
+  @include e('layout-col') {
+    padding: 0 getCssVar('spacing', 'base', 'tight') getCssVar('spacing', 'base', 'tight') 0;
+  }
+
+  @include e('layout-flex') {
+    @include flex(row, null, null, wrap);
+
+    gap: getCssVar('spacing', 'tight');
+    align-content: flex-start;
+    overflow: auto;
+  }
+
+  @include e('batchtoolbar') {
+    display: none;
+    padding: 0 getCssVar('spacing', 'base');
+    margin: getCssVar('spacing', 'extra', 'tight') 0;
+    .#{bem('control-toolbar')} {
+      gap: getCssVar('spacing', 'tight'); 
+    }
+    .#{bem('control-toolbar', 'item')} {
+      margin: 0;
+    }
+    @include when('show') {
+      display: block;
+    }
+  }
+
+  @include e('quicktoolbar') {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+@include b('control-dataview-item') {
+  color: getCssVar('control-dataview-item', 'text-color');
+  cursor: pointer;
+  background-color: getCssVar('control-dataview-item', 'bg-color');
+
+  &:hover {
+    background-color: getCssVar('control-dataview-item', 'hover-bg-color');
+    .#{bem('control-dataview', 'drag-icon')} {
+      visibility: visible;
+    }
+  }
+
+  @include e('new') {
+    color: getCssVar('color', 'text', '3');
+    border: 2px dashed getCssVar('control-dataview-item', 'border-color');
+
+    .el-card__body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  @include e('content') {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    @include m('checkbox') {
+      flex-shrink: 0;
+      margin-right: getCssVar('spacing', 'tight') !important;
+    }
+  }
+
+  @include when('active') {
+    background-color: getCssVar('control-dataview-item', 'active-bg-color');
+  }
+}
+
+@include b('control-dataview-item-content') {
+  flex-grow: 1;
+  @include e('top') {
+    @include m('title') {
+      text-align: center;
+    }
+
+    @include m('description') {
+      min-width: 150px;
+      text-align: justify;
+      text-justify: newspaper;
+      word-break: break-all;
+    }
+  }
+
+  @include e('bottom') {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: getCssVar('spacing', 'tight');
+    margin-top: getCssVar('spacing', 'tight');
+    border-top: 1px solid getCssVar('control-dataview-item', 'border-color');
+    @include m('actions') {
+      display: flex;
+      column-gap: getCssVar('spacing', 'extra', 'tight');
+      justify-content: center;
+      .#{bem('action-toolbar', 'item')} {
+        margin: 0;
+      }
+      .#{bem('action-toolbar', 'item', 'label')} {
+        &.is-has-caption {
+          margin: 0;
+        }
+      }
+    }
+  }
+}
+
+@include b('control-dataview-group-content') {
+  width: 100%;
+
+  @include e('item') {
+    .el-collapse-item__content {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    @include m('empty') {
+      width: 100%;
+      text-align: center;
+    }
+
+    @include when('collapse') {
+      .#{bem('control-dataview-group-content', 'item-content')} {
+        height: 0;
+        overflow: hidden;
+      }
+    }
+  }
+
+  @include e('item-header') {
+    @include flex(row, space-between, center);
+
+    width: 100%;
+    padding: getCssVar('control-dataview-group', 'padding');
+    margin-bottom: getCssVar('spacing', 'tight');
+    border-bottom: 1px solid
+      getCssVar('control-dataview-group', 'border-color');
+  }
+
+  @include e('item-title') {
+    @include utils-ellipsis;
+
+    font-size: getCssVar('control-dataview-group', 'font-size');
+    font-weight: getCssVar('control-dataview-group', 'font-weight');
+    color: getCssVar('control-dataview-group', 'text-color');
+  }
+}

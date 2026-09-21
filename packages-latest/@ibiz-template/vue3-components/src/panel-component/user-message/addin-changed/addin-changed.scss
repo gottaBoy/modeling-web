@@ -1,0 +1,43 @@
+@include b(addin-changed-notice) {
+    &.el-notification {
+        width: auto;
+
+        .el-notification__group {
+            margin: getCssVar('spacing', 'none');
+        }
+
+        .el-notification__closeBtn {
+            top: 5px;
+            right: 5px;
+        }
+    }
+}
+
+@include b(addin-changed) {
+    @include flex(row, space-between, center);
+
+    width: 392px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: getCssVar(color, fill, 1);
+    }
+
+    @include e(caption) {
+        margin-bottom: getCssVar('spacing', 'tight');
+        font-weight: getCssVar(font-weight, bold);
+    }
+}
+
+@include b(addin-changed-left) {
+    flex-grow: 0;
+    flex-shrink: 0;
+    width: 50px;
+    font-size: getCssVar(font-size, header-3);
+    text-align: center;
+}
+
+
+@include b(addin-changed-center) {
+    flex-grow: 1;
+}

@@ -1,0 +1,39 @@
+$no-data: (
+  min-height: 200px,
+  max-height: 100%,
+);
+
+@include b(no-data) {
+  @include set-component-css-var('no-data', $no-data);
+
+  width: 100%;
+  height: 100%;
+  min-height: getCssVar(no-data, min-height);
+  max-height: getCssVar(no-data, max-height);
+
+  --el-empty-bottom-margin-top: 0;
+
+  .el-empty__description p {
+    color: getCssVar(color, text, 0);
+  }
+
+  .el-empty__image {
+    flex: 0;
+    width: 100%;
+    max-width: var(--el-empty-image-width);
+    height: inherit;
+  }
+
+  
+  &.hideImage {
+    padding: 0;
+
+    .el-table__empty-text {
+      line-height: 30px;
+    }
+
+    .el-empty__image {
+      display: none;
+    }
+  }
+}

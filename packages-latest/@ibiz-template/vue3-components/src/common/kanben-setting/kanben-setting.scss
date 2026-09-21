@@ -1,0 +1,12 @@
+@include b('kanban-setting') {
+
+  @include e('popover') {
+    @include m('content') {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+  }
+}

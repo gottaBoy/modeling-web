@@ -1,0 +1,8 @@
+@include b('quick-edit') {
+  
+  @include e('footer') {
+    display: flex;
+    justify-content: end;
+    padding: getCssVar('spacing', 'tight');
+  }
+}

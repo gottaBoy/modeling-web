@@ -1,0 +1,478 @@
+import { IBizContext, ModelError, RuntimeModelError, } from '@ibiz-template/core';
+import { clone, isNil } from 'ramda';
+import { QXEvent, notNilEmpty } from 'qx-util';
+import { convertNavData, ScriptFactory } from '../../../utils';
+import { fieldValueToBoolean } from '../../utils';
+import { calcDeCodeNameById } from '../../../model';
+/**
+ * 动态代码表缓存对象
+ *
+ * @author lxm
+ * @date 2022-08-26 13:08:08
+ * @export
+ * @class DynamicCodeListCache
+ */
+export class DynamicCodeListCache {
+    constructor(codeList) {
+        /**
+         * 缓存的map,key是context和params合成的字符串
+         *
+         * @author lxm
+         * @date 2022-08-26 14:08:19
+         * @protected
+         */
+        this.cache = new Map();
+        /**
+         * 是否是预定义类型
+         *
+         * @author lxm
+         * @date 2022-10-20 10:10:48
+         * @protected
+         * @type {boolean}
+         */
+        this.isPredefined = false;
+        /**
+         * 是否是系统操作者类型
+         *
+         * @author tony001
+         * @date 2024-10-14 15:10:19
+         * @protected
+         * @type {boolean}
+         */
+        this.isOperatorType = false;
+        /**
+         * 应用上下文
+         *
+         * @author tony001
+         * @date 2024-04-10 15:04:25
+         * @protected
+         * @type {IContext}
+         */
+        this.context = IBizContext.create();
+        /**
+         * 视图参数
+         *
+         * @author tony001
+         * @date 2024-04-10 15:04:39
+         * @protected
+         * @type {IParams}
+         */
+        this.params = {};
+        /**
+         * 事件对象
+         *
+         * @author tony001
+         * @date 2024-04-10 17:04:00
+         * @protected
+         */
+        this.evt = new QXEvent();
+        /**
+         * 常见关键字
+         *
+         * @author zzq
+         * @date 2024-04-15 17:08:06
+         * @type {Promise<void>}
+         */
+        this.commonKeys = ['query', 'queryconds', 'searchconds'];
+        this.codeList = codeList;
+        // 动态代码表监听数据变化
+        if (this.codeList.enableCache) {
+            this.codelistChange = this.codelistChange.bind(this);
+            const { appDataEntityId, appDEDataSetId } = this.codeList;
+            if (appDataEntityId && appDEDataSetId) {
+                ibiz.mc.command.change.on(this.codelistChange);
+            }
+        }
+    }
+    /**
+     * 设置上下文以及查询参数
+     *
+     * @author tony001
+     * @date 2024-04-10 15:04:04
+     * @protected
+     * @param {IContext} [context]
+     * @param {IParams} [params]
+     */
+    setParams(context, params) {
+        if (context) {
+            this.context = IBizContext.create({}, Object.assign({}, context));
+        }
+        if (params) {
+            this.params = clone(params);
+        }
+    }
+    /**
+     * 初始化
+     *
+     * @author lxm
+     * @date 2022-08-26 14:08:28
+     * @returns {*}  {Promise<void>}
+     */
+    async init() {
+        const fn = async () => {
+            // 预定义类型处理
+            const { predefinedType } = this.codeList;
+            if (predefinedType) {
+                this.isPredefined = true;
+                this.isOperatorType = predefinedType === 'OPERATOR';
+                if (!['OPERATOR', 'RUNTIME', 'DEMAINSTATE'].includes(predefinedType)) {
+                    throw new ModelError(this.codeList, ibiz.i18n.t('runtime.service.predefinedType', { predefinedType }));
+                }
+                return;
+            }
+            this.initPromise = undefined;
+        };
+        this.initPromise = fn();
+        return this.initPromise;
+    }
+    /**
+     * 把数据转换成代码项
+     *
+     * @author lxm
+     * @date 2022-08-26 15:08:24
+     * @param {IData} data
+     * @returns {*}
+     */
+    convertData(data, index, items) {
+        const result = {};
+        const { valueAppDEFieldId, textAppDEFieldId, iconClsAppDEFieldId, iconClsXAppDEFieldId, iconPathAppDEFieldId, iconPathXAppDEFieldId, disableAppDEFieldId, dataAppDEFieldId, clsAppDEFieldId, colorAppDEFieldId, thresholdGroup, beginValueAppDEFieldId, endValueAppDEFieldId, incBeginValueMode, incEndValueMode, bkcolorAppDEFieldId, } = this.codeList;
+        // 值属性
+        const value = valueAppDEFieldId ? data[valueAppDEFieldId] : data.srfkey;
+        result.id = value;
+        result.value = value;
+        // 文本属性
+        result.text = textAppDEFieldId ? data[textAppDEFieldId] : data.srfmajortext;
+        if (iconClsAppDEFieldId ||
+            iconClsXAppDEFieldId ||
+            iconPathAppDEFieldId ||
+            iconPathXAppDEFieldId) {
+            result.sysImage = { appId: this.codeList.appId };
+            // 图标样式属性
+            if (iconClsAppDEFieldId) {
+                result.sysImage.cssClass = data[iconClsAppDEFieldId];
+            }
+            // 图标样式(倍数)属性
+            if (iconClsXAppDEFieldId) {
+                result.sysImage.cssClassX = data[iconClsXAppDEFieldId];
+            }
+            // 图标路径属性
+            if (iconPathAppDEFieldId) {
+                result.sysImage.imagePath = data[iconPathAppDEFieldId];
+            }
+            // 图标路径(倍数)属性
+            if (iconPathXAppDEFieldId) {
+                result.sysImage.imagePathX = data[iconPathXAppDEFieldId];
+            }
+        }
+        // 禁止选择属性
+        if (disableAppDEFieldId) {
+            result.disableSelect = fieldValueToBoolean(data[disableAppDEFieldId]);
+        }
+        // 样式表属性
+        if (clsAppDEFieldId) {
+            result.textCls = data[clsAppDEFieldId];
+        }
+        // 颜色值属性
+        if (colorAppDEFieldId) {
+            result.color = data[colorAppDEFieldId];
+        }
+        // 背景颜色属性
+        if (bkcolorAppDEFieldId) {
+            result.bkcolor = data[bkcolorAppDEFieldId];
+        }
+        // 数据属性
+        if (dataAppDEFieldId && data[dataAppDEFieldId]) {
+            try {
+                result.data = ScriptFactory.execSingleLine(dataAppDEFieldId, data);
+            }
+            catch (error) {
+                ibiz.log.error(ibiz.i18n.t('runtime.service.dynamicCodeTable'));
+            }
+        }
+        if (thresholdGroup) {
+            if (beginValueAppDEFieldId) {
+                result.beginValue = data[beginValueAppDEFieldId];
+            }
+            if (endValueAppDEFieldId) {
+                result.endValue = data[endValueAppDEFieldId];
+            }
+            if (incBeginValueMode) {
+                // 0：不包含、 1：包含、 2：首项包含、 3：尾项包含
+                switch (incBeginValueMode) {
+                    case 1:
+                        result.includeBeginValue = true;
+                        break;
+                    case 2:
+                        result.includeBeginValue = index === 0;
+                        break;
+                    case 3:
+                        result.includeBeginValue = index === items.length - 1;
+                        break;
+                    default:
+                }
+            }
+            if (incEndValueMode) {
+                // 0：不包含、 1：包含、 2：首项包含、 3：尾项包含
+                switch (incEndValueMode) {
+                    case 1:
+                        result.includeEndValue = true;
+                        break;
+                    case 2:
+                        result.includeEndValue = index === 0;
+                        break;
+                    case 3:
+                        result.includeEndValue = index === items.length - 1;
+                        break;
+                    default:
+                }
+            }
+        }
+        return result;
+    }
+    presetconvertData(data) {
+        const result = {};
+        const { color, bkcolor, disabled, id, text, value, cls } = data;
+        result.value = value;
+        result.color = color;
+        result.bkcolor = bkcolor;
+        result.text = text;
+        result.id = id;
+        result.disableSelect = disabled;
+        result.cls = cls;
+        result.data = data;
+        return result;
+    }
+    sortShoworder(arr) {
+        arr.forEach((item) => {
+            if (!('showorder' in item)) {
+                Object.assign(item, { showorder: 1000 });
+            }
+        });
+        return arr.sort((a, b) => a.showorder - b.showorder);
+    }
+    /**
+     * 加载服务获取数据，返回代码项
+     *
+     * @author lxm
+     * @date 2022-08-26 14:08:08
+     * @protected
+     * @param {IParams} [context={}]
+     * @param {IParams} [params={}]
+     * @returns {*}  {Promise<CodeListItem[]>}
+     */
+    async load(context, params = {}) {
+        // 删除常见查询关键字属性，防止查询失败
+        const tempParams = Object.assign({}, params);
+        this.commonKeys.forEach((key) => {
+            delete tempParams[key];
+        });
+        this.setParams(context, tempParams);
+        const app = ibiz.hub.getApp(context.srfappid);
+        const { appDataEntityId, appDEDataSetId, minorSortAppDEFieldId, minorSortDir, pvalueAppDEFieldId, customCond, } = this.codeList;
+        // 排序
+        if (minorSortAppDEFieldId && minorSortDir) {
+            Object.assign(tempParams, {
+                sort: `${minorSortAppDEFieldId.toLowerCase()},${minorSortDir.toLowerCase()}`,
+            });
+        }
+        // 自定义查询
+        if (customCond) {
+            const navParams = ScriptFactory.execSingleLine(customCond);
+            const addParams = convertNavData(navParams, tempParams, context);
+            Object.assign(tempParams, addParams);
+        }
+        // 特殊处理，避免预置代码表加载不全
+        if (!tempParams.size) {
+            tempParams.size = 10000;
+        }
+        // *预定义加载
+        if (this.isPredefined && this.codeList.codeName) {
+            let tag = this.codeList.codeName;
+            if (this.codeList.predefinedType === 'OPERATOR') {
+                const index = this.codeList.codeName.indexOf('__');
+                tag =
+                    index !== -1
+                        ? this.codeList.codeName.substring(index + 2)
+                        : this.codeList.codeName;
+            }
+            const res = await app.net.get(`/dictionaries/codelist/${tag}`, tempParams);
+            const presetresultItems = [];
+            const { items = [] } = res.data;
+            const sortItems = this.sortShoworder(items);
+            if (sortItems.length) {
+                items.forEach((item) => {
+                    presetresultItems.push(this.presetconvertData(item));
+                });
+            }
+            return Object.freeze(presetresultItems);
+        }
+        // *加载实体服务数据
+        if (!appDataEntityId) {
+            throw new RuntimeModelError(this.codeList, ibiz.i18n.t('runtime.controller.utils.viewMsg.unconfiguredEntities'));
+        }
+        if (!appDEDataSetId) {
+            throw new RuntimeModelError(this.codeList, ibiz.i18n.t('runtime.service.unconfiguredDataset'));
+        }
+        const res = await app.deService.exec(appDataEntityId, appDEDataSetId, context, undefined, tempParams);
+        let resultItems = [];
+        if (res.data.length) {
+            if (pvalueAppDEFieldId) {
+                const tempItems = this.prepareTreeData(res.data);
+                if (tempItems) {
+                    resultItems = tempItems;
+                }
+            }
+            else {
+                res.data.forEach((item, index) => {
+                    resultItems.push(this.convertData(item, index, res.data));
+                });
+            }
+        }
+        return Object.freeze(resultItems);
+    }
+    /**
+     * 组装树形代码表数据
+     *
+     * @return {codeListItem[] | undefined}
+     */
+    prepareTreeData(items) {
+        const { valueAppDEFieldId, pvalueAppDEFieldId } = this.codeList;
+        const map = {};
+        const nestedList = [];
+        items.forEach((data, index) => {
+            map[data[valueAppDEFieldId]] = this.convertData(data, index, items);
+        });
+        items.forEach((data) => {
+            const parent = map[data[pvalueAppDEFieldId]];
+            if (parent) {
+                parent.children = parent.children || [];
+                parent.children.push(map[data[valueAppDEFieldId]]);
+            }
+            else {
+                nestedList.push(map[data[valueAppDEFieldId]]);
+            }
+        });
+        return nestedList;
+    }
+    /**
+     * 获取动态的代码项
+     *
+     * @author lxm
+     * @date 2022-08-26 14:08:44
+     * @param {IParams} [context={}]
+     * @param {IParams} [params={}]
+     * @returns {*}  {Promise<IData[]>}
+     */
+    async get(context, params = {}) {
+        // 初始化还未完成时被调用
+        if (this.initPromise) {
+            await this.initPromise;
+        }
+        // 不需要缓存的直接请求;
+        if (!this.codeList.enableCache) {
+            return this.load(context, params);
+        }
+        // 需要缓存的先找，在判断是否过期，是否正在加载等情况
+        const key = this.isOperatorType
+            ? this.codeList.codeListTag
+            : JSON.stringify(context) + JSON.stringify(params);
+        if (this.cache.has(key)) {
+            const cacheData = this.cache.get(key);
+            // 没过期的返回cacheData的promise或items
+            if (cacheData.expirationTime > new Date().getTime()) {
+                return cacheData.promise ? cacheData.promise : cacheData.items;
+            }
+            // 过期的删除缓存
+            this.cache.delete(key);
+        }
+        // 创建新的cacheData,存入cache,并添加load的promise
+        const promise = this.load(context, params);
+        const { cacheTimeout } = this.codeList;
+        const waitTime = cacheTimeout === -1 || isNil(cacheTimeout)
+            ? ibiz.config.codeList.timeout
+            : this.codeList.cacheTimeout;
+        const cacheData = {
+            expirationTime: new Date().getTime() + waitTime,
+            promise,
+        };
+        this.cache.set(key, cacheData);
+        // 加载完后删除promise,添加items
+        const result = await promise;
+        cacheData.items = result;
+        delete cacheData.promise;
+        return result;
+    }
+    /**
+     * 接受代码表实体数据变更，刷新代码表
+     *
+     * @author tony001
+     * @date 2024-04-10 15:04:42
+     * @protected
+     * @param {IPortalMessage} msg
+     */
+    codelistChange(msg) {
+        const data = msg.data;
+        const { appDataEntityId } = this.codeList;
+        if (appDataEntityId) {
+            const codeName = calcDeCodeNameById(appDataEntityId);
+            if (data &&
+                data.srfdecodename &&
+                data.srfdecodename.toLowerCase() === codeName) {
+                this.refresh();
+            }
+        }
+    }
+    /**
+     * 刷新代码表数据
+     *
+     * @author tony001
+     * @date 2024-04-10 17:04:20
+     * @return {*}  {Promise<void>}
+     */
+    async refresh() {
+        // 删除缓存数据
+        const key = JSON.stringify(this.context) + JSON.stringify(this.params);
+        this.cache.delete(key);
+        // 重新加载数据
+        const result = await this.get(this.context, this.params);
+        this.evt.emit('change', result);
+    }
+    /**
+     * 代码表数据变更事件监听
+     *
+     * @author tony001
+     * @date 2024-04-10 17:04:52
+     * @param {(data: CodeListItem[]) => void} fn
+     * @param {boolean} [immediate=true] 当有数据时，立即触发一次回调
+     */
+    onChange(fn, immediate = true) {
+        this.evt.on('change', fn);
+        const key = JSON.stringify(this.context) + JSON.stringify(this.params);
+        const cacheData = this.cache.get(key);
+        if (immediate && notNilEmpty(cacheData)) {
+            fn(cacheData.items);
+        }
+    }
+    /**
+     * 取消代码表数据变更监听
+     *
+     * @author tony001
+     * @date 2024-04-10 17:04:57
+     * @param {(data: CodeListItem[]) => void} fn
+     */
+    offChange(fn) {
+        this.evt.off('change', fn);
+    }
+    /**
+     * 销毁(取消数据变更监听)
+     *
+     * @author tony001
+     * @date 2024-04-10 15:04:11
+     */
+    destroy() {
+        const { appDataEntityId, appDEDataSetId } = this.codeList;
+        if (appDataEntityId && appDEDataSetId && this.codeList.enableCache) {
+            ibiz.mc.command.change.off(this.codelistChange);
+        }
+    }
+}

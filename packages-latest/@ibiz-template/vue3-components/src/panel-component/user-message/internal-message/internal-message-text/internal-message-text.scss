@@ -1,0 +1,17 @@
+@include b(internal-message-text) {
+  @include flex(column);
+
+  @include e(caption){
+    margin-bottom: getCssVar('spacing', 'tight');
+    font-weight: getCssVar(font-weight, bold);
+  }
+
+  @include e(content){
+    margin-bottom: getCssVar('spacing', 'tight');
+  }
+
+  @include e(status){
+    margin-right: getCssVar('spacing', 'tight');
+  }
+
+}

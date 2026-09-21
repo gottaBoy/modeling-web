@@ -1,0 +1,94 @@
+// 排序栏根元素
+$sort-bar: (
+  border-radius: getCssVar('border-radius', 'small'),                         // 排序栏倒角
+  padding: getCssVar('spacing', 'tight') getCssVar('spacing', 'base'),        // 排序栏内边距
+);
+
+// 排序栏项元素
+$sort-bar-item: (
+  text-color: getCssVar('color', 'text', '2'),                                // 排序栏字体色
+  font-size: getCssVar('font-size', 'regular'),                               // 排序栏字体大小
+  font-weight: getCssVar('font-weight', 'regular'),                           // 排序栏字体粗细
+  bg-color: getCssVar('color', 'bg', '1'),                                    // 排序栏项背景色
+  active-color: getCssVar('color', 'primary'),                                // 排序栏项激活色
+  icon-color: getCssVar('color', 'disabled', 'text'),                         // 排序栏项图标颜色
+  border-color: getCssVar('control-dataview', 'border-color'),                // 排序栏项边框色（继承自卡片根元素）
+  padding: getCssVar('spacing', 'tight') getCssVar('spacing', 'base'),        // 排序栏项内边距
+);
+
+@include b('sort-bar') {
+  @include set-component-css-var('sort-bar', $sort-bar);
+  @include set-component-css-var('sort-bar-item', $sort-bar-item);
+  @include flex(row, flex-start, center);
+
+  padding: getCssVar('sort-bar', 'padding');
+}
+
+@include b('sort-bar-item'){
+  padding: getCssVar('sort-bar-item', 'padding');
+  margin-right: -1px;
+  font-size: getCssVar('sort-bar-item', 'font-size');
+  font-weight: getCssVar('sort-bar-item', 'font-weight');
+  line-height: 1;
+  color: getCssVar('sort-bar-item', 'text-color');
+  cursor: pointer;
+  user-select: none;
+  background-color: getCssVar('sort-bar-item', 'bg-color');
+  border: 1px solid getCssVar('sort-bar-item', 'border-color');
+
+
+  // 第一个和最后一个圆角
+  &:first-child{
+    border-top-left-radius: getCssVar('sort-bar', 'border-radius');
+    border-bottom-left-radius: getCssVar('sort-bar', 'border-radius');
+  }
+
+  &:last-child{
+    border-top-right-radius: getCssVar('sort-bar', 'border-radius');
+    border-bottom-right-radius: getCssVar('sort-bar', 'border-radius');
+  }
+
+  @include m(asc){
+    .#{bem('sort-bar-icon-wrapper','icon-asc')}{
+      border-bottom-color: getCssVar('sort-bar-item', 'active-color');
+    }
+  }
+
+  @include m(desc){
+    .#{bem('sort-bar-icon-wrapper','icon-desc')}{
+      border-top-color: getCssVar('sort-bar-item', 'active-color');
+    }
+  }
+
+}
+
+// 顺序图标相关样式
+@include b('sort-bar-icon-wrapper') {
+  position: relative;
+  display: inline-block;
+  width: 10px;
+  height: 14px;
+  margin-left: getCssVar('spacing', 'tight');
+  vertical-align: middle;
+  
+
+  @include e(icon-asc){
+    position: absolute;
+    top: -5px;
+    left: 0;
+    width: 0;
+    height: 0;
+    border: solid 5px transparent;
+    border-bottom-color: getCssVar('sort-bar-item', 'icon-color');
+  }
+
+  @include e(icon-desc){
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 0;
+    height: 0;
+    border: solid 5px transparent;
+    border-top-color: getCssVar('sort-bar-item', 'icon-color');
+  }
+}

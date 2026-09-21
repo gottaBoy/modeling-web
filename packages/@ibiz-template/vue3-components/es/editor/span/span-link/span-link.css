@@ -1,0 +1,1 @@
+.ibiz-span-link{line-height:var(--ibiz-height-control-default);color:var(--ibiz-color-link);cursor:pointer}.ibiz-span-link:hover{color:var(--ibiz-color-link-hover)}.ibiz-span-link--disabled{cursor:not-allowed}.ibiz-span-link--readonly{color:var(--ibiz-form-item-readonly-color)}.ibiz-form-item .ibiz-span-link.is-show-default{padding:var(--ibiz-form-item-hover-edit-padding)}

@@ -1,0 +1,234 @@
+@include b(form-item-container) {
+  width: 100%;
+  height: 100%;
+  padding: getCssVar(spacing, tight) getCssVar(spacing, extra-tight)
+    getCssVar(spacing, tight) getCssVar(spacing, extra-tight);
+
+  @include e(label) {
+    flex-shrink: 0;
+    font-size: getCssVar('form-item-label', 'font-size');
+    color: getCssVar('form-item-label', 'color');
+
+    @include m(content) {
+      display: flex;
+      align-items: center;
+      max-width: 100%;
+
+      @include when(tooltip) {
+        cursor: pointer;
+      }
+    }
+
+    @include m('icon') {
+      margin-right: getCssVar(form-item-icon, gap);
+    }
+
+    @include m('text') {
+      min-width: 0;
+      @include utils-ellipsis;
+    }
+  }
+
+  @include e(popper) {
+    &.el-popper {
+      padding: getCssVar(spacing, extra-tight);
+      border: 1px solid getCssVar(color, border);
+      border-radius: 0;
+      box-shadow: getCssVar(shadow, elevated);
+
+      table {
+        border-spacing: 0;
+        border-collapse: collapse;
+      }
+
+      table tr td,
+      table tr th {
+        padding: getCssVar(spacing, extra-tight) getCssVar(spacing, tight);
+        border: 1px solid getCssVar(color, border);
+      }
+
+      .el-popper__arrow {
+        display: block;
+      }
+    }
+
+    @include m(content) {
+      max-width: 500px;
+      padding: getCssVar(spacing, extra-tight);
+
+      a {
+        color: getCssVar(color, link);
+      }
+    }
+
+    @include m(tooltip) {
+      min-width: 50px;
+      min-height: 20px;
+    }
+    
+    // 适配提示框信息markdown绘制模式
+    @include when('md') {
+      // 调整容器间距
+      &.el-popper.el-popper {
+        padding: 0;
+        .#{bem('form-item-container__popper--content')} {
+          padding: 0;
+        }
+      }
+      .#{bem('markdown')} {
+        max-height: 100vh;
+        padding: 0 calc(#{getCssVar(spacing, extra-tight)} + #{getCssVar(spacing, extra-tight)});
+        overflow: auto;
+      }
+
+      .#{bem('form-item-container__popper--tooltip')}{
+        padding: calc(#{getCssVar(spacing, extra-tight)} + #{getCssVar(spacing, extra-tight)}) 0;
+      }
+
+      .#{bem('markdown-cherry')} {
+        width: auto !important;
+      }
+
+      .cherry-previewer {
+        p:only-child {
+          margin: 0;
+        }
+
+        &>p:first-child {
+          margin-top: 0;
+        }
+      }
+
+      // 隐藏冗余元素
+      .cherry-toolbar,
+      .cherry-toolbar-button,
+      .cherry-sidebar {
+        display: none;
+      }
+
+      // 设置字体大小及行高
+      .cherry {
+        font-size: inherit;
+        line-height: inherit;
+      }
+
+      // 隐藏背景颜色及边框
+      .cherry,
+      .cherry .cherry-previewer {
+        padding: 0;
+        background-color: transparent;
+        border: none !important;
+        box-shadow: none;
+      }
+    }
+  }
+
+  @include m((left, right)) {
+    @include flex;
+
+    min-height: getCssVar('form-item-label', 'line-height');
+
+    @include e(label) {
+      width: getCssVar('form-item-label', 'width');
+    }
+    @include e(content) {
+      width: calc(100% - getCssVar('form-item-label', 'width'));
+    }
+  }
+
+  @include m((top, bottom)) {
+    @include flex(column);
+  }
+
+  @include m(top) {
+    @include e(label) {
+      margin-bottom: getCssVar('form-item-label', 'gap');
+    }
+  }
+
+  @include m(bottom) {
+    @include e(label) {
+      margin-top: getCssVar('form-item-label', 'gap');
+    }
+  }
+
+  @include m(left) {
+    @include e(label) {
+      padding: getCssVar('form-item-label', 'left-padding');
+      line-height: getCssVar('form-item-label', 'line-height');
+      @include m(content) {
+        float: right;
+      }
+    }
+  }
+
+  @include m(right) {
+    @include e(label) {
+      padding: getCssVar('form-item-label', 'right-padding');
+      line-height: getCssVar('form-item-label', 'line-height');
+      @include m(content) {
+        float: left;
+      }
+    }
+  }
+
+  // 必填*的样式
+  @include when(required) {
+    @include e(label) {
+      @include m(content) {
+        &::before {
+          display: inline-block;
+          margin-right: getCssVar('form-item-label', 'require-gap');
+          /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
+          font-family: SimSun;
+          line-height: 1;
+          color: getCssVar('form-item-label', 'require-color');
+          content: '*';
+        }
+      }
+    }
+  }
+
+  @include e(content) {
+    @include flex(column);
+
+    position: relative;
+    flex-grow: 1;
+
+    @include m((label-none, label-left, label-right)) {
+      height: 100%;
+    }
+  }
+
+  // 编辑器样式
+  @include e(editor) {
+    position: relative;
+    flex-grow: 1;
+    height: 100%;
+  }
+
+  // 错误区样式
+  @include e(error) {
+    @include utils-ellipsis;
+
+    position: absolute;
+    top: 100%;
+    width: 100%;
+    font-size: getCssVar('form-item-error', 'font-size');
+    line-height: calc(
+      getCssVar('form-item-error', 'font-size') + 2px
+    );
+    color: getCssVar('form-item-error', 'color');
+    word-wrap: break-word;
+  }
+
+  // 错误的样式
+  @include when(error) {
+    .#{bem(form-item-container, editor)} {
+      .el-input__wrapper {
+        box-shadow: 0 0 0 1px getCssVar('form-item-error', 'color')
+          inset;
+      }
+    }
+  }
+}

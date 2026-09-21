@@ -1,0 +1,17 @@
+ARG NODE_IMAGE=node:22-bookworm-slim
+FROM ${NODE_IMAGE}
+
+ENV NODE_ENV=production \
+    MODELING_PLUGIN_HOST=0.0.0.0 \
+    MODELING_PLUGIN_PORT=4175 \
+    MODELING_PLUGIN_DATA=/data
+
+WORKDIR /app
+COPY dist-modeling-plugins /app/dist
+
+RUN mkdir -p /data && chown -R node:node /data
+VOLUME ["/data"]
+EXPOSE 4175
+USER node
+RUN node /app/dist/server.mjs --check
+CMD ["node", "/app/dist/server.mjs"]

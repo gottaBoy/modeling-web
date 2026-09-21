@@ -1,0 +1,36 @@
+@include b('data-import2-select') {
+
+    @include e('select-option') {
+        padding: getCssVar(spacing, none);
+    }
+
+    @include e('select-option-item') {
+        height: 100%;
+        padding: getCssVar(spacing, none) 30px getCssVar(spacing, none) 10px;
+        @include flex(row, space-between, center);
+
+        &:hover {
+            @include e('select-option-item-button-delete') {
+                display: block;
+            }
+        }
+    }
+
+    @include e('select-option-item-button-delete') {
+        position: absolute;
+        right: getCssVar(spacing, none);
+        display: none;
+    }
+
+    @include e('dataimport-select') {
+        margin-top: -5px;
+    }
+    
+    @include e('select-option-item-button-delete-icon') {
+        color: getCssVar('color','danger');
+    }
+
+    @include e('select-option-item-input') {
+        width:100%
+    }
+}

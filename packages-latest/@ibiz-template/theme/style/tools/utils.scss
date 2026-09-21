@@ -1,0 +1,57 @@
+// 完全容器居中
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// 文字出省略号
+@mixin utils-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// flex样式复用
+@mixin flex(
+  $direction: row,
+  $horizontal: initial,
+  $vertical: initial,
+  $wrap: nowrap
+) {
+  display: flex;
+  @if $direction != row {
+    flex-flow: $direction $wrap;
+  }
+  @if $wrap != nowrap {
+    flex-wrap: $wrap;
+  }
+  @if $vertical != initial {
+    align-items: $vertical;
+  }
+  @if $horizontal != initial {
+    justify-content: $horizontal;
+  }
+}
+
+// mask样式复用
+@mixin mask($bg-color) {
+  position: absolute;
+  inset: 0;
+  color: #fff;
+  background: $bg-color;
+}
+
+// 分隔符样式复用，相邻不重复显示，父元素第一个不显示
+@mixin no-repeat {
+  & + &,
+  &:first-child {
+    display: none;
+  }
+}
+
+// 超出自动换行，识别换行空白符
+@mixin overflow-wrap{
+  word-break: break-word;
+  white-space: pre-wrap;
+}

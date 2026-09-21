@@ -1,0 +1,514 @@
+'use strict';
+
+var qxUtil = require('qx-util');
+var runtime = require('@ibiz-template/runtime');
+var vue3Util = require('@ibiz-template/vue3-util');
+
+"use strict";
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => {
+  __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+  return value;
+};
+class DRTabController extends runtime.ControlController {
+  constructor() {
+    super(...arguments);
+    /**
+     * 计数器对象
+     * @author lxm
+     * @date 2024-01-18 05:12:35
+     * @type {AppCounter}
+     */
+    __publicField(this, "counter");
+    /**
+     * @description 启用缓存
+     * @type {boolean}
+     * @memberof DRTabController
+     */
+    __publicField(this, "srfCachePos", false);
+    /**
+     * @description 缓存标记
+     * @type {string}
+     * @memberof DRTabController
+     */
+    __publicField(this, "srfCacheKeyTempl", "");
+    /**
+     * Router 对象
+     *
+     * @type {Router}
+     * @memberof DRTabController
+     */
+    __publicField(this, "router");
+  }
+  /**
+   * 导航占位控制器
+   *
+   * @readonly
+   * @memberof DRTabController
+   */
+  get navPos() {
+    var _a;
+    return (_a = this.view.layoutPanel) == null ? void 0 : _a.panelItems.nav_pos;
+  }
+  /**
+   * 表单部件
+   *
+   * @readonly
+   * @memberof DRTabController
+   */
+  get form() {
+    var _a;
+    return (_a = this.view) == null ? void 0 : _a.getController("form");
+  }
+  /**
+   * 路由层级
+   *
+   * @readonly
+   * @type {(number | undefined)}
+   * @memberof DRTabController
+   */
+  get routeDepth() {
+    return this.view.modal.routeDepth;
+  }
+  /**
+   * @description 选中缓存标识
+   * @readonly
+   * @type {string}
+   * @memberof DRTabController
+   */
+  get storageTag() {
+    if (this.srfCacheKeyTempl) {
+      return this.srfCacheKeyTempl;
+    }
+    const userId = this.context.srfuserid;
+    return "".concat(userId, "_").concat(this.view.model.codeName, "_").concat(this.model.codeName);
+  }
+  /**
+   * 设置 Router 对象
+   *
+   * @param {Router} router
+   * @memberof DRTabController
+   */
+  setRouter(router) {
+    this.router = router;
+  }
+  /**
+   * 获取数据
+   *
+   * @return {*}  {IData[]}
+   * @memberof DRTabController
+   */
+  getData() {
+    var _a;
+    return ((_a = this.form) == null ? void 0 : _a.getData()) || [{}];
+  }
+  /**
+   * 初始化state的属性
+   *
+   * @protected
+   * @memberof DRTabController
+   */
+  initState() {
+    super.initState();
+    this.state.drTabPages = [];
+    this.state.showMore = false;
+    this.state.hideEditItem = !Object.is(this.model.hideEditItem, false);
+  }
+  /**
+   * 创建完成
+   *
+   * @return {*}  {Promise<void>}
+   * @memberof DRTabController
+   */
+  async onCreated() {
+    await super.onCreated();
+    await this.initCounter();
+    this.srfCacheKeyTempl = this.controlParams.srfcachekeytempl || "";
+    if (this.controlParams.showmore) {
+      this.state.showMore = this.controlParams.showmore === "true";
+    }
+    if (this.controlParams.srfcachepos) {
+      this.srfCachePos = this.controlParams.srfcachepos.toLowerCase() === "true";
+    }
+  }
+  /**
+   * 通过计数器数据，计算项状态
+   *
+   * @author zhanghengfeng
+   * @date 2024-05-16 17:05:01
+   */
+  calcItemStateByCounter() {
+    this.state.drTabPages.forEach((item) => {
+      const visible = runtime.calcItemVisibleByCounter(item, this.counter);
+      if (visible !== void 0) {
+        item.hidden = !visible;
+      }
+    });
+    if (this.state.activeName) {
+      const { visible, defaultVisibleItem } = this.getItemVisibleState(
+        this.state.activeName
+      );
+      if (!visible && defaultVisibleItem) {
+        this.state.activeName = defaultVisibleItem.tag;
+        this.handleTabChange();
+      }
+    }
+  }
+  /**
+   * 获取对应项的显示状态
+   *
+   * @author zhanghengfeng
+   * @date 2024-05-16 17:05:18
+   * @param {string} key
+   * @return {*}  {{
+   *     visible: boolean;
+   *     defaultVisibleItem?: IDRTabPagesState;
+   *   }}
+   */
+  getItemVisibleState(key) {
+    let visible = true;
+    let defaultVisibleItem;
+    this.state.drTabPages.forEach((item) => {
+      if (!defaultVisibleItem && !item.hidden) {
+        defaultVisibleItem = item;
+      }
+      if (item.tag === key) {
+        visible = !item.hidden;
+      }
+    });
+    return {
+      visible,
+      defaultVisibleItem
+    };
+  }
+  /**
+   * 计算项权限
+   *
+   * @author zhanghengfeng
+   * @date 2024-05-16 17:05:40
+   * @param {IDRTabPagesState} item
+   * @return {*}  {Promise<void>}
+   */
+  async calcPermitted(item) {
+    var _a;
+    let permitted = true;
+    const data = ((_a = this.getData()) == null ? void 0 : _a.length) ? this.getData()[0] : void 0;
+    const visible = await runtime.calcItemVisible(
+      item,
+      this.context,
+      this.params,
+      this.model.appDataEntityId,
+      this.model.appId,
+      data
+    );
+    if (visible !== void 0) {
+      permitted = visible;
+    }
+    item.hidden = !permitted;
+  }
+  /**
+   * 计算项状态
+   *
+   * @author zhanghengfeng
+   * @date 2024-05-16 17:05:05
+   * @return {*}  {Promise<void>}
+   */
+  async calcDrTabPagesState() {
+    await Promise.all(
+      this.state.drTabPages.map(async (item) => {
+        await this.calcPermitted(item);
+      })
+    );
+    this.calcItemStateByCounter();
+    this.state.isCalculatedPermission = true;
+  }
+  /**
+   * 加载完成
+   *
+   * @return {*}  {Promise<void>}
+   * @memberof DRTabController
+   */
+  async onMounted() {
+    await super.onMounted();
+    if (this.form) {
+      this.form.evt.on("onLoadSuccess", async (event) => {
+        const data = event.data[0];
+        this.view.state.srfactiveviewdata = data;
+        if (Object.prototype.hasOwnProperty.call(data, "srfreadonly")) {
+          this.view.context.srfreadonly = data.srfreadonly;
+        }
+        await this.calcDrTabPagesState();
+        this.handleFormChange();
+      });
+      this.form.evt.on("onLoadDraftSuccess", () => {
+        this.handleFormChange();
+      });
+      this.form.evt.on("onSaveSuccess", () => {
+        this.handleFormChange();
+      });
+    }
+    this.initDRTabPages();
+    if (!this.form) {
+      await this.calcDrTabPagesState();
+    }
+  }
+  /**
+   * 处理表单数据变更
+   *
+   * @memberof DRTabController
+   */
+  handleFormChange() {
+    const disabled = this.getData()[0].srfuf !== runtime.Srfuf.UPDATE;
+    this.setDRTabPagesState(this.state.drTabPages, disabled);
+  }
+  /**
+   * 设置关系分页状态
+   *
+   * @param {IDRTabPagesState[]} drTabPages 关系分页
+   * @param {boolean} disabled 禁用状态
+   * @memberof DRTabController
+   */
+  setDRTabPagesState(drTabPages, disabled) {
+    drTabPages.forEach((item) => {
+      if (item.tag !== this.model.uniqueTag) {
+        item.disabled = disabled;
+      }
+    });
+  }
+  /**
+   * 初始化关系分页数据
+   *
+   * @memberof DRTabController
+   */
+  initDRTabPages() {
+    const {
+      editItemCaption,
+      editItemCapLanguageRes,
+      editItemSysImage,
+      uniqueTag,
+      dedrtabPages
+    } = this.model;
+    const drTabPages = [];
+    let caption = editItemCaption;
+    if (editItemCapLanguageRes) {
+      caption = ibiz.i18n.t(editItemCapLanguageRes.lanResTag, editItemCaption);
+    }
+    if (!this.state.hideEditItem) {
+      drTabPages.push({
+        tag: uniqueTag,
+        caption,
+        hidden: !!this.state.hideEditItem,
+        disabled: false,
+        sysImage: editItemSysImage,
+        fullPath: this.routeDepth ? vue3Util.getNestedRoutePath(this.router.currentRoute.value, this.routeDepth) : ""
+      });
+      this.state.defaultName = "";
+    } else {
+      this.state.defaultName = (dedrtabPages == null ? void 0 : dedrtabPages[0].id) || "";
+    }
+    dedrtabPages == null ? void 0 : dedrtabPages.forEach((item) => {
+      let itemCaption = item.caption;
+      if (item.capLanguageRes) {
+        itemCaption = ibiz.i18n.t(item.capLanguageRes.lanResTag, item.caption);
+      }
+      const {
+        enableMode,
+        dataAccessAction,
+        testAppDELogicId,
+        testScriptCode,
+        counterMode
+      } = item;
+      drTabPages.push({
+        tag: item.id,
+        caption: itemCaption,
+        sysImage: item.sysImage,
+        hidden: false,
+        disabled: false,
+        counterId: item.counterId,
+        dataAccessAction,
+        enableMode,
+        testAppDELogicId,
+        testScriptCode,
+        counterMode
+      });
+    });
+    this.state.drTabPages = drTabPages;
+    if (this.view.state.srfnav) {
+      this.state.activeName = this.view.state.srfnav;
+    } else {
+      this.state.activeName = drTabPages[0].tag;
+      if (this.srfCachePos && localStorage.getItem(this.storageTag)) {
+        const activeName = localStorage.getItem(this.storageTag);
+        this.state.activeName = activeName;
+      }
+    }
+    const isRoutePushed = !!this.routeDepth && runtime.hasSubRoute(this.routeDepth);
+    this.handleTabChange(isRoutePushed);
+  }
+  /**
+   * 处理分页改变
+   *
+   * @author lxm
+   * @date 2023-12-21 05:31:59
+   * @param {boolean} [isRoutePushed=false] 是否是路由已经跳转过了
+   */
+  handleTabChange(isRoutePushed = false) {
+    var _a;
+    const { activeName } = this.state;
+    const drBarItem = (_a = this.model.dedrtabPages) == null ? void 0 : _a.find(
+      (item) => item.id === activeName
+    );
+    if (this.srfCachePos && activeName) {
+      localStorage.setItem("".concat(this.storageTag), activeName);
+    }
+    if (drBarItem) {
+      this.setVisible("navPos");
+      this.openNavPosView(drBarItem, isRoutePushed);
+    } else {
+      this.setVisible("form");
+      if (this.routeDepth && this.state.drTabPages[0]) {
+        this.router.push(this.state.drTabPages[0].fullPath);
+      }
+    }
+  }
+  /**
+   * 设置显示状态
+   *
+   * @param {('form' | 'navPos')} ctrlName 显示的部件名称
+   * @memberof DRTabController
+   */
+  setVisible(ctrlName) {
+    var _a;
+    if (this.state.hideEditItem) {
+      return;
+    }
+    const viewForm = (_a = this.view.layoutPanel) == null ? void 0 : _a.panelItems.view_form;
+    if (ctrlName === "form") {
+      if (viewForm) {
+        viewForm.state.visible = true;
+        viewForm.state.keepAlive = true;
+      }
+      if (this.navPos) {
+        this.navPos.state.visible = false;
+        this.navPos.state.keepAlive = true;
+      }
+    } else {
+      if (viewForm) {
+        viewForm.state.visible = false;
+        viewForm.state.keepAlive = true;
+      }
+      if (this.navPos) {
+        this.navPos.state.visible = true;
+        this.navPos.state.keepAlive = true;
+      }
+    }
+  }
+  /**
+   * 准备参数
+   *
+   * @param {IDEDRCtrlItem} drTabPages 关系分页
+   * @return {*}
+   * @memberof DRTabController
+   */
+  prepareParams(drTabPages) {
+    const { navigateContexts, navigateParams } = drTabPages;
+    const model = {
+      navContexts: navigateContexts,
+      navParams: navigateParams
+    };
+    const originParams = {
+      context: this.context,
+      params: this.params,
+      data: this.getData()[0]
+    };
+    const { resultContext, resultParams } = runtime.calcNavParams(model, originParams);
+    const context = Object.assign(this.context.clone(), resultContext, {
+      currentSrfNav: drTabPages.id
+    });
+    const params = { ...this.params, ...resultParams };
+    return { context, params };
+  }
+  /**
+   * 打开导航占位视图
+   *
+   * @author lxm
+   * @date 2023-12-21 05:40:07
+   * @param {IDEDRCtrlItem} drTabPages
+   * @param {boolean} [isRoutePushed=false]
+   * @return {*}  {Promise<void>}
+   */
+  async openNavPosView(drTabPages, isRoutePushed = false, navViewKey) {
+    var _a;
+    const { context, params } = this.prepareParams(drTabPages);
+    if (!drTabPages.appViewId)
+      return;
+    (_a = this.navPos) == null ? void 0 : _a.openView({
+      key: navViewKey || drTabPages.id,
+      context,
+      params,
+      viewId: drTabPages.appViewId,
+      isRoutePushed
+    });
+  }
+  /**
+   * 初始化计数器
+   * @author lxm
+   * @date 2024-01-18 05:12:02
+   * @protected
+   * @return {*}  {Promise<void>}
+   */
+  async initCounter() {
+    const { appCounterRefs } = this.model;
+    const appCounterRef = appCounterRefs == null ? void 0 : appCounterRefs[0];
+    if (appCounterRef) {
+      this.counter = await runtime.CounterService.getCounterByRef(
+        appCounterRef,
+        this.context,
+        { ...this.params }
+      );
+      this.calcItemStateByCounter = this.calcItemStateByCounter.bind(this);
+      this.counter.onChange(this.calcItemStateByCounter);
+    }
+  }
+  /**
+   * 刷新
+   *
+   * @author tony001
+   * @date 2024-10-21 11:10:10
+   * @return {*}  {Promise<void>}
+   */
+  async refresh() {
+    var _a;
+    const { activeName } = this.state;
+    const drBarItem = (_a = this.model.dedrtabPages) == null ? void 0 : _a.find(
+      (item) => item.id === activeName
+    );
+    if (drBarItem) {
+      this.setVisible("navPos");
+      this.openNavPosView(drBarItem, false, qxUtil.createUUID());
+    } else {
+      this.setVisible("form");
+      if (this.routeDepth && this.state.drTabPages[0]) {
+        this.router.push(this.state.drTabPages[0].fullPath);
+      }
+    }
+  }
+  /**
+   * 监听组件销毁
+   *
+   * @author zhanghengfeng
+   * @date 2024-04-10 19:04:40
+   * @protected
+   * @return {*}  {Promise<void>}
+   */
+  async onDestroyed() {
+    await super.onDestroyed();
+    if (this.counter) {
+      this.counter.offChange(this.calcItemStateByCounter);
+      this.counter.destroy();
+    }
+  }
+}
+
+exports.DRTabController = DRTabController;

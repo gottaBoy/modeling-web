@@ -1,0 +1,17 @@
+// 开关根元素
+$switch: (
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+@include b(switch) {
+  @include set-component-css-var('switch', $switch);
+}
+
+@include b(form-item){
+
+  @include b(switch) {
+    @include when(show-default){
+      padding: getCssVar(switch, hover-edit-padding);
+    }
+  }
+}

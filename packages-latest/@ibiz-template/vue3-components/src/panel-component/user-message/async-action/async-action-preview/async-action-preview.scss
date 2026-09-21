@@ -1,0 +1,82 @@
+$async-action-preview: (
+);
+
+@include b(async-action-preview) {
+  @include set-component-css-var('async-action-preview', $async-action-preview);
+
+  height: 100%;
+  @include flex(column);
+
+  padding: getCssVar(spacing, tight);
+
+  @include e(title){
+    font-size: getCssVar('font-size', 'header-5');
+    font-weight: getCssVar('font-weight', 'bold');
+  }
+
+  .el-form-item{
+    margin: 0;
+  }
+
+  .el-form-item__label,.el-form-item__content{
+    font-weight: getCssVar('font-weight', 'bold');
+  }
+
+}
+
+@include b(async-action-preview-header) {
+  @include flex(row, space-between, center);
+
+  height: 48px;
+  padding: getCssVar(spacing, tight);
+  border-bottom: 1px solid getCssVar(color, border);
+
+}
+
+@include b(async-action-preview-time) {
+  padding: getCssVar(spacing, tight);
+}
+
+@include b(async-action-preview-count) {
+  height: 48px;
+  padding: getCssVar(spacing, tight);
+  @include flex(row, space-between, center);
+
+}
+
+@include b(async-action-preview-detail) {
+  flex-grow: 1;
+  overflow: auto;
+  border-top: 1px solid getCssVar(color, border);
+}
+
+@include b(async-action-preview-detail-item) {
+  @include flex(row, space-between, center);
+
+  height: 72px;
+  padding: getCssVar('spacing', 'base-tight') getCssVar(spacing, base);
+  border-bottom: 1px solid getCssVar(color, border);
+
+  @include e(index){
+    width: getCssVar('height-control', 'large');
+    height: getCssVar('height-control', 'large');
+    margin-right: getCssVar('spacing', 'base');
+    font-size: getCssVar('font-size', 'header-4');
+    line-height: getCssVar('height-control', 'large');
+    color: getCssVar(color, primary, text);
+    text-align: center;
+    background-color: getCssVar(color,primary);
+    border-radius: 0;
+  }
+
+  @include e(error){
+    flex-grow: 1;
+    height: 100%;
+    text-align: left;
+    @include flex(column, space-between, flex-start);
+  }
+
+  @include e(error-reason){
+    color: getCssVar(color, text, 1);
+  }
+}

@@ -1,0 +1,89 @@
+/* stylelint-disable selector-class-pattern */
+@include b(login-view) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(120deg, getCssVar(color, primary, light, active) 0%, getCssVar(color, primary, light, default) 100%);
+}
+
+
+@include b(login-view-box) {
+  width: 430px;
+  margin-bottom: 80px;
+  overflow: hidden;
+  background: getCssVar(color, bg, 2);
+}
+
+/* stylelint-disable-next-line media-feature-range-notation */
+@media screen and (max-width: 720px) {
+  @include b(login-view-box) {
+    width: 340px;
+    margin-top: 0;
+  }
+}
+
+@include b(login-view-box-header) {
+  position: relative;
+
+  > img {
+    display: block;
+    width: 430px;
+    margin: 0 auto;
+    user-select: none;
+  }
+
+  @include b(login-view-box-header-title){
+    position: absolute;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 80%;
+    font-size: getCssVar(font-size, header-2);
+    font-weight: getCssVar(font-weight, bold);
+    color: getCssVar(color, primary, text);
+    text-shadow: getCssVar(color, shadow);
+    white-space: nowrap;
+  }
+}
+
+@include b(login-view-box-main) {
+  position: relative;
+
+  @include e(avatar) {
+    position: absolute;
+    top: -50px;
+    right: calc(50% - 50px);
+    z-index: 2;
+    display: block;
+    width: 100px;
+    height: 100px;
+    user-select: none;
+    border: 4px solid getCssVar(color, bg, 1);
+    border-radius: getCssVar(border, radius, circle);
+  }
+}
+
+@include b(login-view-box-main-content) {
+  padding: 100px 40px 40px;
+
+  // 浏览器自动填写之后的输入框的背景色和文字颜色
+  .el-input__inner:-webkit-autofill{
+    box-shadow:0 0 0 1000px getCssVar(color, bg, 1) inset;
+    -webkit-text-fill-color: getCssVar(editor, default, text-color);
+  }
+
+  .el-button {
+    width: 100%;
+    margin-top: getCssVar(spacing, base);
+    letter-spacing: getCssVar(spacing, super-tight);
+  }
+
+
+  ion-icon {
+    font-size: getCssVar(width-icon, medium);
+  }
+}

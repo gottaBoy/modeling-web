@@ -1,0 +1,136 @@
+// 分页导航样式
+$nav-tabs: (
+  'padding': getCssVar('spacing', 'base-loose'),  // 容器内边距
+);
+
+// 分页导航项样式
+$nav-tabs-item: (
+  'height': 40px,                                              // 标签项高度
+  max-width: 300px,                                             // 标签项最大宽度
+  'padding': 0 getCssVar('spacing', 'base-loose'),             // 标签项内边距
+  'margin': 0 getCssVar('spacing', 'base') 0 0,                // 标签项外边距
+  'font-size': getCssVar('font-size', 'regular'),              // 标签项字体大小
+  'font-weight': getCssVar('font-weight', 'regular'),          // 标签项字体粗细
+  'border': 1px solid getCssVar('color', 'border'),            // 标签项边框
+  'border-radius': getCssVar('border-radius', 'medium'),       // 标签项圆角
+  'bg-color': transparent,                                      // 标签项背景色
+  'color': getCssVar('color', 'text', 0),                      // 标签项文本色
+  'hover-color': getCssVar('color', 'primary', 'hover'),       // 标签项悬浮文本色
+  'active-color': getCssVar('color', 'white'),                 // 标签项激活态文本色
+  'active-bg-color': getCssVar('color', 'primary'),             // 标签项激活态背景色
+  box-shadow: 0 1px 2px 0 getCssVar('color', 'border'),         // 标签项阴影
+  gap: getCssVar('spacing', 'extra-tight'),                     // 标签项与标签项间隔
+);
+
+// 分页导航项图标样式
+$nav-tabs-item-icon: (
+  max-width: getCssVar('width-icon', 'medium'),                 // 图标最大宽度 
+);
+
+@include b('nav-tabs') {
+  @include set-component-css-var('nav-tabs', $nav-tabs);
+  @include set-component-css-var('nav-tabs-item', $nav-tabs-item);
+  @include set-component-css-var('nav-tabs-item-icon', $nav-tabs-item-icon);
+  @include flex(row, flex-start, center);
+
+  position: relative;
+  padding: getCssVar('nav-tabs', 'padding');
+
+  @include e('item') {
+    display: flex;
+    gap: getCssVar(nav-tabs-item, gap);
+    align-items: center;
+    max-width: getCssVar('nav-tabs-item', max-width);
+    @include m('icon') {
+      display: flex;
+      align-items: center;
+      max-width: getCssVar(nav-tabs-item-icon, max-width);
+    }
+    @include m('caption') {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .el-tabs {
+    width: 100%;
+
+    --el-tabs-header-height: getCssVar('nav-tabs-item', 'height');
+
+    .el-tabs__nav {
+      border: none;
+
+      .el-tabs__item {
+        display: flex;
+        align-items: center;
+        height: getCssVar('nav-tabs-item', 'height');
+        padding: getCssVar('nav-tabs-item', 'padding');
+        margin: getCssVar('nav-tabs-item', 'margin');
+        overflow: hidden;
+        font-size: getCssVar('nav-tabs-item', 'font-size');
+        font-weight: getCssVar('nav-tabs-item', 'font-weight');
+        color: getCssVar('nav-tabs-item', 'color');
+        vertical-align: middle;
+        background-color: getCssVar('nav-tabs-item', 'bg-color');
+        border: getCssVar('nav-tabs-item', 'border');
+        border-radius: getCssVar('nav-tabs-item', 'border-radius');
+        box-shadow: getCssVar('nav-tabs-item', 'box-shadow');
+        opacity: 1;
+
+        &:hover {
+          padding: getCssVar('nav-tabs-item', 'padding');
+          color: getCssVar('nav-tabs-item', 'hover-color');
+          box-shadow: 0 1px 4px 0 rgb(0 0 0 / 25%);
+
+          .is-icon-close {
+            color: getCssVar('nav-tabs-item', 'hover-color');
+          }
+
+          svg {
+            fill: getCssVar('nav-tabs-item', 'hover-color');
+          }
+        }
+
+        &.is-active {
+          padding: getCssVar('nav-tabs-item', 'padding');
+          color: getCssVar('nav-tabs-item', 'active-color');
+          background-color: getCssVar('nav-tabs-item', 'active-bg-color');
+          box-shadow: none;
+
+          .is-icon-close {
+            color: getCssVar('nav-tabs-item', 'active-color');
+          }
+
+          svg {
+            fill: getCssVar('nav-tabs-item', 'active-color');
+          }
+        }
+
+        &.is-closable {
+          padding: getCssVar('nav-tabs-item', 'padding');
+
+          &.hover {
+            padding: getCssVar('nav-tabs-item', 'padding');
+          }
+        }
+
+        .is-icon-close {
+          position: relative;
+          top: 1px;
+        }
+      }
+    }
+
+    .el-tabs__header {
+      margin-bottom: 0;
+      border-bottom: none;
+    }
+  }
+
+  @include e('context-menu') {
+    @include m('item') {
+      cursor: pointer;
+    }
+  }
+}

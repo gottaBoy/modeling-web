@@ -1,0 +1,370 @@
+// html根元素
+$html: (
+  height: 300px,                                          // 高度
+  bg-color: getCssVar(color, bg, 0),                      // 背景色
+  border-color: getCssVar(color, border),                 // 边框色
+);
+
+// html多行文本元素
+$html-textarea: (
+  color: getCssVar(color, text, 2),                       // 文本颜色
+  bg-color: getCssVar(color, bg, 1),                      // 背景色
+  slight-color: getCssVar(color, text, 3),                // 轻量文本颜色
+  slight-bg-color: getCssVar(color, bg, 1),               // 轻量背景色
+  border-color: getCssVar(html, border-color),            // 边框色（继承根元素）
+  handler-bg-color: getCssVar(color, primary),            // 处理背景色
+  slight-border-color: getCssVar(html, border-color),     // 轻量边框色（继承根元素）
+  selected-border-color: getCssVar(html, border-color),   // 选中边框色（继承根元素）
+);
+
+// html工具栏元素
+$html-toolbar: (
+  color: getCssVar(color, text, 0),                       // 文本颜色
+  bg-color: getCssVar(color, bg, 0),                      // 背景色
+  active-color: getCssVar(color, text, 0),                // 激活色
+  active-bg-color: getCssVar(color, bg, 0),               // 激活背景色
+  border-color: getCssVar(html, border-color),            // 边框色（继承根元素）
+  disabled-color: getCssVar(color, disabled, text),       // 禁用色
+  tooltip-bg-color: getCssVar(color, bg, 1),              // 提示背景色
+);
+
+// html自定义工具栏元素
+$html-custom-toolbar: (
+  height: getCssVar(height-control, default),             // 高度
+  font-size: getCssVar(font-size, header-6),              // 字体大小
+  hover-color: getCssVar(color, primary),                 // 悬浮色
+);
+
+// html模态按钮元素
+$html-modal-button: (
+  bg-color: getCssVar(color, bg, 1),                      // 背景色
+  border-color: getCssVar(html, border-color),            // 边框色（继承根元素）
+);
+
+// html表格元素
+$html-table: (
+  cell-height: getCssVar(height-control, default),        // 单元格高度
+  cell-padding: getCssVar(spacing, tight),                // 单元格内边距
+);
+
+// html底部按钮元素
+$html-footer-button: (
+  height: getCssVar(height-control, default),             // 高度
+  cancel-color: getCssVar(color, text, 1),                // 取消按钮文本色
+  cancel-hover-color: getCssVar(color, primary),          // 取消按钮悬浮文本色
+  save-color: getCssVar(color, primary, active, text),    // 保存按钮文本色
+  save-bg-color: getCssVar(color, primary),               // 保存按钮背景色
+  save-border-radius: getCssVar(border, radius, small),   // 保存按钮倒角
+);
+
+// html消息元素
+$html-message: (
+  tip-color: getCssVar(color, text, 3),                   // 提示信息文本色
+  cancel-color: getCssVar(color, text, 1),                // 取消按钮文本色
+  cancel-hover-color: getCssVar(color, primary),          // 取消按钮悬浮文本色
+  cancel-bg-color: transparent,                           // 取消按钮背景色
+  cancel-hover-bg-color: transparent,                     // 取消按钮悬浮背景色
+  confirm-bg-color: getCssVar(color, danger),             // 确定按钮背景色
+  confirm-border-color: getCssVar(color, danger),         // 确定按钮边框色
+);
+
+@include b(html) {
+  @include set-component-css-var('html', $html);
+  @include set-component-css-var('html-table', $html-table);
+  @include set-component-css-var('html-textarea', $html-textarea);
+  @include set-component-css-var('html-toolbar', $html-toolbar);
+  @include set-component-css-var('html-modal-button', $html-modal-button);
+  @include set-component-css-var('html-footer-button', $html-footer-button);
+  @include set-component-css-var('html-custom-toolbar', $html-custom-toolbar);
+
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+
+  @include b(html-content) {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: getCssVar(html, bg-color);
+  }
+
+  @include b(html-editor) {
+    height: getCssVar(html, height) !important;
+    padding: 0;
+    overflow-y: scroll;
+    border: 1px solid getCssVar(html, border-color);
+
+    @include when('readonly') {
+      height: auto !important;
+    }
+
+    table {
+      width: 100% !important;
+      border-collapse: collapse;
+
+      th {
+        height: getCssVar(html-table, cell-height);
+        min-height: getCssVar(html-table, cell-height);
+        padding: getCssVar(html-table, cell-padding);
+        border: 1px solid getCssVar(html, border-color);
+      }
+
+      td {
+        height: getCssVar(html-table, cell-height);
+        min-height: getCssVar(html-table, cell-height);
+        padding: getCssVar(html-table, cell-padding);
+        empty-cells: show;
+        border: 1px solid getCssVar(html, border-color);
+      }
+    }
+  }
+
+  --w-e-textarea-bg-color: #{getCssVar(html-textarea, bg-color)};
+  --w-e-textarea-color: #{getCssVar(html-textarea, color)};
+  --w-e-textarea-border-color: #{getCssVar(html-textarea, border-color)};
+  --w-e-textarea-slight-border-color: #{getCssVar(html-textarea, slight-border-color)};
+  --w-e-textarea-slight-color: #{getCssVar(html-textarea, slight-color)};
+  --w-e-textarea-slight-bg-color: #{getCssVar(html-textarea, slight-bg-color)};
+  --w-e-textarea-selected-border-color: #{getCssVar(html-textarea, selected-border-color)};
+  --w-e-textarea-handler-bg-color: #{getCssVar(html-textarea, handler-bg-color)};
+  --w-e-toolbar-color: #{getCssVar(html-toolbar, color)};
+  --w-e-toolbar-bg-color: #{getCssVar(html-toolbar, tooltip-bg-color)};
+  --w-e-toolbar-active-color: #{getCssVar(html-toolbar, active-color)};
+  --w-e-toolbar-active-bg-color: #{getCssVar(html-toolbar, active-bg-color)};
+  --w-e-toolbar-disabled-color: #{getCssVar(html-toolbar, disabled-color)};
+  --w-e-toolbar-border-color: #{getCssVar(html-toolbar, border-color)};
+  --w-e-modal-button-bg-color: #{getCssVar(html-modal-button, bg-color)};
+  --w-e-modal-button-border-color: #{getCssVar(html-modal-button, border-color)};
+
+  .w-e-menu-tooltip-v5::before {
+    color: getCssVar(html-toolbar, color);
+    background-color: getCssVar(html-toolbar, tooltip-bg-color);
+  }
+
+  .w-e-full-screen-container {
+    z-index: 9999;
+  }
+
+  .w-e-scroll {
+    >div {
+      background-color: getCssVar(html-textarea, bg-color);
+    }
+  }
+
+  .table-container {
+    table {
+      width: 100%;
+    }
+  }
+
+  @include when('enable-edit'){
+    // 整体处于允许编辑的情况下，默认的工具栏样式变为聚焦时的样式
+    .w-e-bar-item>button{
+      color: var(--w-e-toolbar-color);
+      cursor: pointer;
+
+      svg{
+        fill: var(--w-e-toolbar-color);
+      }
+    }
+  }
+
+  @include when('show-editor-switch-menu') {
+    @include b(html-content) {
+      position: relative;
+    }
+
+    @include b(composite-form-item-ex-menu) {
+      #{getCssVarName('composite-form-item-ex', 'menu-height')}: 40px;
+      position: relative;
+      max-height: 100%;
+    }
+
+    @include b('html-toolbar') {
+      >.w-e-toolbar.w-e-bar {
+        padding-right: getCssVar('composite-form-item-ex', 'menu-width');
+      }
+    }
+
+    @include b(html-menu) {
+      position: absolute;
+      top: 2px;
+      right: 1px;
+      z-index: getCssVar('composite-form-item-ex', 'menu-z-index');
+      display: flex;
+      align-items: center;
+      height: calc(getCssVar('composite-form-item-ex', 'menu-height') - 1px);
+      background: getCssVar('composite-form-item-ex', 'menu-bg-color');
+      border-left: 1px solid getCssVar(html, border-color);
+    }
+  }  
+}
+
+@include b('html-editor-readonly') {
+  @include b('html-toolbar') {
+    display: none;
+  }
+
+  @include b('html-editor') {
+    border: none;
+  }
+
+  @include b(composite-form-item-ex-menu) {
+    display: none;
+  }
+}
+
+@include b('html-toolbar'){
+  .w-e-toolbar{
+    background-color: getCssVar(html-toolbar, bg-color);
+    border: 1px solid getCssVar(html, border-color);
+    border-bottom: none;
+    box-shadow: none;
+
+    .w-e-bar-item>button{
+      &:hover{
+        background-color: getCssVar(html-toolbar, bg-color);
+      }
+    }
+  }
+}
+
+@include b('html-footer') {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  margin-top: getCssVar('spacing', 'base-tight');
+  margin-right: getCssVar('spacing', 'tight');
+
+  &>*+* {
+    margin-left: getCssVar('spacing', 'base');
+  }
+
+
+  @include e('cancel') {
+    height: getCssVar(html-footer-button, height);
+    line-height: getCssVar(html-footer-button, height);
+    color: getCssVar(html-footer-button, cancel-color);
+    cursor: pointer;
+    opacity: 0.7;
+
+    &:hover {
+      color: getCssVar(html-footer-button, cancel-hover-color);
+      opacity: 1;
+    }
+  }
+
+  @include e('save') {
+    height: getCssVar(html-footer-button, height);
+    padding: 0 getCssVar('spacing', 'base');
+    line-height: getCssVar(html-footer-button, height);
+    color: getCssVar(html-footer-button, save-color);
+    text-align: center;
+    cursor: pointer;
+    background-color: getCssVar(html-footer-button, save-bg-color);
+    border-radius: getCssVar(html-footer-button, save-border-radius);
+  }
+}
+
+@include b('html-custom-toolbar') {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  width: 100%;
+  height: getCssVar(html-custom-toolbar, height);
+  padding-right: getCssVar('spacing', 'base');
+  font-size: getCssVar(html-custom-toolbar, font-size);
+
+  &>*+* {
+    margin-left: getCssVar('spacing', 'base-loose');
+  }
+
+  i {
+    cursor: pointer;
+
+    &:hover {
+      color: getCssVar(html-custom-toolbar, hover-color);
+    }
+  }
+}
+
+@include b('html-message') {
+  width: 500px;
+  max-width: unset;
+  @include set-component-css-var('html-message', $html-message);
+  @include e('message-content') {
+    @include m('message-tip') {
+      color: getCssVar(html-message, tip-color);
+    }
+  }
+
+  @include e('message-cancel') {
+    color: getCssVar(html-message, cancel-color);
+    background-color: getCssVar(html-message, cancel-bg-color);
+
+    &:hover {
+      color: getCssVar(html-message, cancel-hover-color);
+      background-color: getCssVar(html-message, cancel-hover-bg-color);
+    }
+  }
+
+  @include e('message-comfire') {
+    background-color: getCssVar(html-message, confirm-bg-color) !important;
+
+    &:hover {
+      box-shadow: 0 2px 5px 1px getCssVar(html-message, confirm-border-color);
+    }
+  }
+}
+
+@include b('html-dialog-full-screen') {
+  height: 80%;
+
+  .el-dialog__header{
+    display: none;
+  }
+
+  .el-dialog__body{
+    height: 100%; 
+    padding-top: 0;
+  }
+
+  @include when('editing'){
+    .el-dialog__body{
+      padding-bottom: 0;
+    }
+  }
+
+  @include b('html') {
+    padding: 0;
+  }
+
+  @include b('html-custom-toolbar') {
+    height: 56px;
+    padding-right: 0;
+  }
+
+  @include b('html-content') {
+    height: calc(100% - 56px);
+
+    @include b('html-editor') {
+      height: 100% !important;
+    }
+
+    @include when('editing'){
+      height: calc(100% - 128px);
+    }
+  }
+
+}
+
+@include b('html-footer-dialog') {
+  height: 68px;
+  margin-top: 0;
+  margin-right: 0;
+}
+
+// 表情元素
+emoji-elem {
+  margin: 0 1px !important;
+}

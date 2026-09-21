@@ -1,0 +1,106 @@
+@include b(custom-filter-condition) {
+  height: 100%;
+  padding: getCssVar('spacing', 'tight') getCssVar('spacing', 'none');
+  font-size: getCssVar('font-size', 'regular');
+}
+
+@include b(custom-filter-condition-item-header) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(getCssVar('spacing', 'base-tight') / 2) getCssVar('spacing', 'base-tight') calc(getCssVar('spacing', 'base-tight') / 2) getCssVar('spacing', 'base-loose');
+  background-color: getCssVar(color, bg, 0);
+}
+
+@include b(custom-filter-condition-item-header-text) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@include b(custom-filter-condition-item-header-btn) {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: getCssVar('spacing', 'tight');
+  font-size: getCssVar('font-size', 'header-6');
+  cursor: pointer;
+
+  svg {
+    fill: getCssVar(color, text, 3);
+  }
+
+  &:hover {
+    background-color: getCssVar(color, danger, light, default);
+
+    svg {
+      fill: getCssVar(color, danger, hover);
+    }
+  }
+}
+
+@include b(custom-filter-condition-item-content) {
+  display: flex;
+  align-items: center;
+  padding: getCssVar('spacing', 'base-loose');
+  border-top: 1px solid getCssVar(color, border);
+}
+
+@include b(custom-filter-condition-item) {
+  margin-bottom: getCssVar('spacing', 'base');
+  border: 1px solid getCssVar(color, border);
+  border-radius: getCssVar(border-radius, small);
+
+  @include e(field) {
+    flex: 0 0 30%;
+    margin-right: getCssVar('spacing', 'base-tight');
+
+    >.el-select {
+      width: 100%;
+    }
+  }
+
+  @include e(valueOP) {
+    flex: 0 0 30%;
+    margin-right: getCssVar('spacing', 'base-tight');
+
+    >.el-select {
+      width: 100%;
+    }
+  }
+
+  @include e(editor) {
+    flex: 1 1 0;
+  }
+}
+
+@include b(custom-filter-condition-footer) {
+  width: 100%;
+  margin-top: getCssVar('spacing', 'base-loose');
+}
+
+@include b(custom-filter-condition-footer-btn) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: getCssVar('spacing', 'tight') getCssVar('spacing', 'base-loose');
+  cursor: pointer;
+  border: 1px solid getCssVar(color, border);
+  border-radius: getCssVar(border, radius, small);
+
+  @include e(icon) {
+    fill: currentcolor;
+  }
+
+  @include e(text) {
+    margin-left: calc(getCssVar('spacing', 'base-tight') / 2);
+  }
+
+  &:hover {
+    color: getCssVar(color, primary, hover);
+    background-color: getCssVar(color, bg, 0);
+    border-color: getCssVar(color, primary, hover);
+  }
+}

@@ -1,0 +1,49 @@
+// 表格内容编辑单元格弹出层样式
+$row-edit-popover: (
+  bg-color: getCssVar(control-grid, body-row, edit-bg-color),              // 行编辑弹出层背景色（继承自内容行编辑态背景色）
+  padding: getCssVar('spacing','tight') getCssVar('spacing','base'),       // 行编辑弹出层内边距
+);
+
+@include b(row-edit-popover) {
+  @include set-component-css-var(row-edit-popover, $row-edit-popover);
+
+  position: absolute;
+  z-index: 2;
+  padding: getCssVar(row-edit-popover, padding);
+  white-space: nowrap;
+  background-color: getCssVar(row-edit-popover, bg-color);
+
+  @include when(hidden){
+    top: -9999px;
+    left: -9999px;
+    z-index: -9999;
+  }
+
+  &::before{
+    position: absolute;
+    top: 0;
+    left: -50px;
+    width: 0;
+    height: 0;
+    content: '';
+    border-color: transparent getCssVar(row-edit-popover, bg-color) transparent transparent;
+    border-style: solid;
+    border-width: 0 50px 50px 0;
+  }
+
+  &::after{
+    position: absolute;
+    top: 0;
+    right: -50px;
+    width: 0;
+    height: 0;
+    content: '';
+    border-color: transparent transparent transparent getCssVar(row-edit-popover, bg-color);
+    border-style: solid;
+    border-width: 0 0 50px 50px;
+  }
+}
+
+.row-edit-popover__placeholder{
+  height: 50px;
+}

@@ -1,0 +1,38 @@
+@include b(async-data-export) {
+  height: 100%;
+  @include flex(column);
+
+  padding: getCssVar(spacing, tight);
+
+  @include e(title) {
+    font-size: getCssVar('font-size', 'header-5');
+    font-weight: getCssVar('font-weight', 'bold');
+  }
+
+  .el-form-item {
+    margin: 0;
+  }
+
+  .el-form-item__label,
+  .el-form-item__content {
+    font-weight: getCssVar('font-weight', 'bold');
+  }
+
+}
+
+@include b(async-data-export-header) {
+  @include flex(row, space-between, center);
+
+  height: 48px;
+  padding: getCssVar(spacing, tight);
+  border-bottom: 1px solid getCssVar(color, border);
+
+}
+
+@include b(async-data-export-time) {
+  padding: getCssVar(spacing, tight);
+
+  @include e(executing) {
+    font-weight: getCssVar('font-weight', 'bold');
+  }
+}

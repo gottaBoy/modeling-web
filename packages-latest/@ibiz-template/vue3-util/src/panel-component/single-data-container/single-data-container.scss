@@ -1,0 +1,10 @@
+$single-data-container: (
+);
+
+// 默认样式
+@include b(single-data-container) {
+  @include set-component-css-var('single-data-container', $single-data-container);
+
+  width: 100%;
+  height: 100%;
+}

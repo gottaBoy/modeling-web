@@ -1,0 +1,10 @@
+$multi-data-container: (
+);
+
+// 默认样式
+@include b(multi-data-container) {
+  @include set-component-css-var('multi-data-container', $multi-data-container);
+
+  width: 100%;
+  height: 100%;
+}

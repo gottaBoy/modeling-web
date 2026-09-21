@@ -1,0 +1,21 @@
+@include b(custom-dashboard-container){
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  @include b(custom-dashboard-container-build-btn){
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 10;
+
+    @include b(custom-dashboard-container-forward-btn){
+      padding: getCssVar(spacing, none);
+      margin: getCssVar(spacing, none) getCssVar(spacing, none) getCssVar(spacing, none) getCssVar(spacing, tight);
+    }
+    @include b(custom-dashboard-container-back-btn){
+      padding: getCssVar(spacing, none);
+      margin: getCssVar(spacing, none);
+    }
+  }
+}

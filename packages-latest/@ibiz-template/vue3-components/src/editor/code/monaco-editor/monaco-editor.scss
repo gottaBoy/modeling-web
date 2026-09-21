@@ -1,0 +1,341 @@
+// 代码编辑器根元素
+$code: (
+  box-shadow: getCssVar(shadow, elevated),                                    // 阴影
+);
+
+// 代码编辑器工具栏元素
+$code-toolbar: (
+  font-size: getCssVar(font-size, header-6),                                  // 字体大小
+);
+
+// 代码编辑器全屏元素
+$code-fullscreen: (
+  height: 38px,                                                               // 高度
+  padding: 0 12px,                                                            // 内边距
+  font-style: normal,                                                         // 字体风格
+  hover-bg-color: getCssVar(color, bg, 3),                                    // 悬浮背景色
+  font-size: getCssVar(font-size, header, 3),                                 // 字体大小
+);
+
+// 代码编辑器行内工具栏元素
+$code-inline-toolbar: (
+  top: 0,                                                                     // 顶部定位（外部不可修改）  
+  left: 0,                                                                    // 左侧定位（外部不可修改）  
+  z-index: 1,                                                                 // 层级（外部不可修改）  
+  height: 40px,                                                               // 高度
+  bg-color: getCssVar(color, bg, 2),                                          // 背景色
+  gap: getCssVar('spacing', 'tight'),                                         // 内容项间隔
+  text-color: getCssVar(color, text, 0),                                      // 字体色
+  box-shadow: getCssVar(code, box-shadow),                                    // 阴影（继承根元素）
+  font-size: getCssVar('font-size', 'regular'),                               // 字体大小
+  padding: getCssVar('spacing', 'extra-tight'),                               // 内边距
+  border-radius: getCssVar('border-radius', 'extra-small'),                  // 倒角
+);
+
+// 代码编辑器行内工具栏项元素
+$code-inline-toolbar-item: (
+  height: 40px,                                                               // 高度
+  hover-color: getCssVar(color, primary),                                     // 悬浮色
+  hover-bg-color: getCssVar(color, primary, light, default),                  // 悬浮背景色
+  border-radius: getCssVar('border-radius', 'extra-small'),                   // 倒角
+  padding: getCssVar('spacing', 'extra-tight') getCssVar('spacing', 'tight'), // 内边距
+);
+
+// 代码编辑器函数体元素
+$code-function: (
+  height: 38px,                                                               // 高度
+  padding: 0 getCssVar(spacing, base, tight),                                 // 内边距
+  font-size: getCssVar(font-size, header, 3),                                 // 字体大小
+  hover-bg-color: getCssVar(color, bg, 3),                                    // 悬浮背景色
+);
+
+// 代码编辑器函数体popper元素
+$code-function-popper: (
+  max-width: 50vw,                                                            // 最大宽
+  bg-color: getCssVar(color, fill, 1),                                        // 背景色
+  box-shadow: getCssVar(code, box-shadow),                                    // 阴影（继承根元素）
+  padding: getCssVar(spacing, tight) getCssVar(spacing, base),                // 内边距
+);
+
+// 代码编辑器底部元素
+$code-footer: (
+  height: 36px,                                                               // 高度
+);
+
+// 代码编辑器底部按钮元素
+$code-footer-button: (
+  height: 36px,                                                               // 高度
+  cancel-bg-color: transparent,                                               // 取消背景色
+  cancel-color: getCssVar(color, text, 1),                                    // 取消字体色
+  cancel-hover-color: getCssVar(color, primary),                              // 取消悬浮色
+  save-bg-color: getCssVar(color, primary),                                   // 保存背景色
+  save-color: getCssVar(color, primary, active, text),                        // 保存字体色
+  save-border-radius: getCssVar(border, radius, small),                       // 保存边框圆角
+  save-hover-shadow: 0 2px 5px 1px getCssVar(color, primary),                 // 保存悬浮阴影
+);
+
+// 代码编辑器消息
+$code-message: (
+  width: 500px,                                                               // 宽度
+  tip-color: getCssVar(color, text, 3),                                       // 提示字体色
+  cancel-color: getCssVar(color, text, 1),                                    // 取消字体色
+  cancel-bg-color: transparent,                                               // 取消背景色
+  cancel-hover-color: getCssVar(color, primary),                              // 取消悬浮色
+  cancel-hover-bg-color: transparent,                                         // 取消悬浮背景色
+  confirm-bg-color: getCssVar(color, danger),                                 // 确认背景色
+  confirm-hover-shadow: 0 2px 5px 1px getCssVar(color, danger),               // 确认悬浮阴影
+);
+
+@include b(code) {
+  @include set-component-css-var('code', $code);
+  @include set-component-css-var('code-footer', $code-footer);
+  @include set-component-css-var('code-toolbar', $code-toolbar);
+  @include set-component-css-var('code-function', $code-function);
+  @include set-component-css-var('code-fullscreen', $code-fullscreen);
+  @include set-component-css-var('code-footer-button', $code-footer-button);
+  @include set-component-css-var('code-inline-toolbar', $code-inline-toolbar);
+  @include set-component-css-var('code-inline-toolbar-item', $code-inline-toolbar-item);
+
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  @include e(box) {
+    width: 100%;
+    height: 100%;
+    min-height: 200px;
+    overflow: hidden;
+  }
+
+  @include e('first-prompt') {
+    &::before {
+      padding-right: getCssVar(spacing, base);
+      content: getCssVar('code', 'placeholder');
+    }
+  }
+}
+
+@include b('code-toolbar') {
+  position: absolute;
+  top: 4px;
+  right: 18px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  width: auto;
+  height: auto;
+  padding-right: 0;
+  font-size: getCssVar(code-toolbar, font-size);
+
+  &>*+* {
+    margin-left: getCssVar(spacing, base-loose);
+  }
+
+  @include e(fullscreen) {
+    display: flex;
+    align-items: center;
+    height: getCssVar(code-fullscreen, height);
+    padding: getCssVar(code-fullscreen, padding);
+    font-size: getCssVar(code-fullscreen, font-size);
+    font-style: getCssVar(code-fullscreen, font-style);
+    cursor: pointer;
+    
+    &:hover {
+      background-color: getCssVar(code-fullscreen, hover-bg-color);
+    }
+  }
+}
+
+@include b('code-footer') {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  width: 100%;
+  min-height: getCssVar(code-footer, height);
+  margin-top: getCssVar(spacing, base-tight);
+  margin-right: getCssVar(spacing, tight);
+
+  &>*+* {
+    margin-left: getCssVar(spacing, base);
+  }
+
+  @include e('cancel') {
+    height: getCssVar(code-footer-button, height);
+    line-height: getCssVar(code-footer-button, height);
+    color: getCssVar(code-footer-button, cancel-color);
+    cursor: pointer;
+    background-color: getCssVar(code-footer-button, cancel-bg-color);
+    opacity: 0.7;
+
+    &:hover {
+      color: getCssVar(code-footer-button, cancel-hover-color);
+      opacity: 1;
+    }
+  }
+
+  @include e('save') {
+    width: 96px;
+    height: getCssVar(code-footer-button, height);
+    line-height: getCssVar(code-footer-button, height);
+    color: getCssVar(code-footer-button, save-color);
+    text-align: center;
+    cursor: pointer;
+    background-color: getCssVar(code-footer-button, save-bg-color);
+    border-radius: getCssVar(code-footer-button, save-border-radius);
+
+    &:hover {
+      box-shadow: getCssVar(code-footer-button, save-hover-shadow);
+    }
+  }
+}
+
+@include b('code-message') {
+  @include set-component-css-var('code-message', $code-message);
+
+  width: getCssVar(code-message, width);
+  max-width: unset;
+
+  @include e('message-content') {
+    @include m('message-tip') {
+      color: getCssVar(code-message, tip-color);
+    }
+  }
+
+  @include e('message-cancel') {
+    color: getCssVar(code-message, cancel-color);
+    background-color: getCssVar(code-message, cancel-bg-color);
+
+    &:hover {
+      color: getCssVar(code-message, cancel-hover-color);
+      background-color: getCssVar(code-message, cancel-hover-bg-color);
+    }
+  }
+
+  @include e('message-comfire') {
+    background-color: getCssVar(code-message, confirm-bg-color) !important;
+
+    &:hover {
+      box-shadow: getCssVar(code-message, confirm-hover-shadow);
+    }
+  }
+}
+
+@include b('code-editor-enable') {
+  .#{bem(code__box)} {
+    height: 100%;
+  }
+  &:has(.#{bem(code-footer)}) {
+    .#{bem(code__box)} {
+      height: calc(100% - getCssVar(code-footer, height));
+    }
+  }
+}
+
+@include b('code-dialog-full-screen') {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+
+  .#{bem(code-footer)} {
+    #{getCssVarName(code-footer, height)}: 68px;
+  }
+
+
+  @include b('code') {
+    gap: 0;
+    padding: 0 getCssVar(spacing, extra-loose);
+
+    --w-e-toolbar-bg-color: #{getCssVar(color, bg, 0)};
+
+    .#{bem(code-toolbar)} {
+      right: calc(getCssVar('spacing-extra-loose') + 18px);
+    }
+
+  }
+
+  .el-dialog__header {
+    display: none !important;
+  }
+
+  .el-dialog__body {
+    width: 100%;
+    height: 100%;
+    padding: 0 0 getCssVar('spacing', 'base');
+
+    &:has(.#{bem(code-footer)}) {
+      padding-bottom: 0;
+    }
+  }
+}
+
+@include b('code-footer-dialog') {
+  margin-top: 0;
+}
+
+@include b('code-text-editor-toolbar') {
+  position: fixed;
+  top: getCssVar(code-inline-toolbar, top);
+  left: getCssVar(code-inline-toolbar, left);
+  z-index: getCssVar(code-inline-toolbar, z-index);
+  display: flex;
+  gap: getCssVar(code-inline-toolbar, gap);
+  height: getCssVar(code-inline-toolbar, height);
+  padding: getCssVar(code-inline-toolbar, padding);
+  font-size: getCssVar(code-inline-toolbar, font-size);
+  color: getCssVar(code-inline-toolbar, text-color);
+  background-color: getCssVar(code-inline-toolbar, bg-color);
+  border-radius: getCssVar(code-inline-toolbar, border-radius);
+  box-shadow: getCssVar(code-inline-toolbar, box-shadow);
+
+  @include e('item') {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: getCssVar(code-inline-toolbar-item, padding);
+    cursor: pointer;
+    border-radius: getCssVar(code-inline-toolbar-item, border-radius);
+
+    &:hover {
+      color: getCssVar(code-inline-toolbar-item, hover-color);
+      background-color: getCssVar(code-inline-toolbar-item, hover-bg-color);
+    }
+  }
+}
+
+@include b(code) {
+  @include when('dark') {
+    #{getCssVarName(code-inline-toolbar, bg-color)}: rgba(53 54 60 / 100%);
+    #{getCssVarName(code-inline-toolbar, text-color)}: rgb(249 249 249 / 100%);
+    #{getCssVarName(code-inline-toolbar-item, hover-bg-color)}: rgb(255 255 255 / 12%);
+    #{getCssVarName(code-inline-toolbar-item, hover-color)}: rgb(249 249 249 / 100%);
+  }
+}
+
+// 函数体样式
+@include b(code) {
+  @include e(function) {
+    display: flex;
+    align-items: center;
+    height: getCssVar(code-function, height);
+    padding: getCssVar(code-function, padding);
+    font-size: getCssVar(code-function, font-size);
+    cursor: pointer;
+
+    &:hover {
+      background-color: getCssVar(code-function, hover-bg-color);
+    }
+  }
+  @include e(function-popper) {
+    @include set-component-css-var('code', $code);
+    @include set-component-css-var('code-function-popper', $code-function-popper);
+
+    max-width: getCssVar(code-function-popper, max-width);
+    padding: getCssVar(code-function-popper, padding);
+    box-shadow: getCssVar(code-function-popper, box-shadow);
+    
+    &.el-popper.is-light {
+      background-color: getCssVar(code-function-popper, bg-color);
+    }
+  }
+}

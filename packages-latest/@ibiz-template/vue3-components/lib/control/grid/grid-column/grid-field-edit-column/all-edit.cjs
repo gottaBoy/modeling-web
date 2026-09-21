@@ -1,0 +1,44 @@
+'use strict';
+
+var vue = require('vue');
+
+"use strict";
+function useAllEdit(props, _componentRef) {
+  const c = props.controller;
+  const disabled = vue.computed(() => {
+    return props.row.editColStates[c.fieldName].disabled;
+  });
+  const readonly = vue.computed(() => {
+    return props.row.editColStates[c.fieldName].readonly;
+  });
+  const editable = vue.computed(() => props.controller.grid.state.rowEditOpen);
+  const editorReadOnly = vue.computed(() => {
+    return readonly.value || !editable.value;
+  });
+  const editorDisabled = vue.computed(() => {
+    return editable.value && disabled.value;
+  });
+  const stopPropagation = vue.computed(() => {
+    return editable.value;
+  });
+  const onBlur = () => {
+    if (c.grid.editSaveMode === "cell-blur") {
+      c.grid.save(props.row.data);
+    }
+  };
+  const gridEditItemProps = vue.reactive({
+    stopPropagation
+  });
+  const editorProps = vue.reactive({
+    disabled: editorDisabled,
+    readonly: editorReadOnly,
+    onBlur
+  });
+  return {
+    gridEditItemProps,
+    editorProps,
+    editable
+  };
+}
+
+exports.useAllEdit = useAllEdit;

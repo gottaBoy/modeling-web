@@ -1,0 +1,16 @@
+import { IDEReportPanel } from '@ibiz/model-core';
+import { IHttpResponse } from '@ibiz-template/core';
+import { ControlService, ControlVO } from '../../../service';
+export declare class ReportPanelService<T extends IDEReportPanel = IDEReportPanel> extends ControlService<T> {
+    /**
+     * @description 查询报表数据
+     * @param {string} reportTag 报表标识
+     * @param {string} appDataEntityId 报表实体标识
+     * @param {IContext} context 上下文
+     * @param {IParams} [params={}] 视图参数
+     * @returns {*}  {Promise<IHttpResponse<ControlVO[]>>}
+     * @memberof ReportPanelService
+     */
+    fetch(reportTag: string, appDataEntityId: string, context: IContext, params?: IParams): Promise<IHttpResponse<ControlVO[]>>;
+}
+//# sourceMappingURL=report-panel.service.d.ts.map

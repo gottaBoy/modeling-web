@@ -1,0 +1,128 @@
+{
+  // 使用 IntelliSense 了解相关属性。
+  // 悬停以查看现有属性的描述。
+  // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "逻辑设计工具调试",
+      "url": "http://l.zhr.icu:5173/#/psdevslnsys=617DA8AA-9C0E-42D5-A775-C24C97332751/index/psdevslnsys=617DA8AA-9C0E-42D5-A775-C24C97332751;psdelogic=6E32F830-9282-442B-B16D-97396884488D/psdelogicdataflowdesign/-",
+      // "url": "http://l.zhr.icu:4173/#/psdevslnsys=617DA8AA-9C0E-42D5-A775-C24C97332751/index/psdevslnsys=617DA8AA-9C0E-42D5-A775-C24C97332751;psdelogic=6E32F830-9282-442B-B16D-97396884488D/psdelogicdataflowdesign/-",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "工作流设计工具调试",
+      "url": "http://l.zhr.icu:5173/#/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A;psworkflow=B29AA989-4721-44D5-9CBE-30BB8A7CB91D;pswfversion=FFA74A7A-2AE4-47D2-86B1-D96D26430B01/index/-/pswfversiondesign/-",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "表单设计工具调试",
+      "url": "http://l.zhr.icu:5173/#/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A;psdataentity=385f739a768b73a1e3a307bfeafb80b7;psdeform=C34B4E13-0F43-4EAD-880D-79D1E2B72AAE/index/-/psdeformdesign/-",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "匿名登录地址",
+      "url": "http://l.zhr.icu:5173/?isAnonymous=ture#/-/index/-/feedbackuserlistexpview/srfnav=7ab78d5b10b067806437ef25fbbaf9f4/feedbackinfoeditview/srfnavctx=%257B%2522feedback%2522%253A%25227ab78d5b10b067806437ef25fbbaf9f4%2522%257D",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "modeling设计工具",
+      "url": "http://localhost:5173/#/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/modelingindex/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/psdataentitygridview/-",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "ER设计工具调试",
+      "url": "http://localhost:5173/#/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/index/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/pssysermapcursysgridview/-",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "表格设计工具调试",
+      "url": "http://localhost:5173/#/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/index/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/psdegridgridview/-",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "工具栏设计工具调试",
+      "url": "http://localhost:5173/#/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/index/-/psdetoolbarcursysgridview/-",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "数据查询设计工具调试",
+      "url": "http://localhost:5173/#/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/index/-/psdedataquerycursysgridview_tool/-",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "菜单设计工具调试",
+      "url": "http://localhost:5173/#/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/index/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/psappmenucursysgridview/-",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "树设计工具调试",
+      "url": "http://localhost:5173/#/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/index/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/psdetreeviewgridview/-",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "视图设计工具调试",
+      "url": "http://localhost:5173/#/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/index/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/psdeviewbasecursysgridview/-",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "多数据部件设计工具调试",
+      "url": "http://localhost:5173/#/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/index/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/psdelistcursysgridview/-",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "数据看板设计工具调试",
+      "url": "http://localhost:5173/#/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/index/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/psappportalviewgridview/-",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "值规则设计工具调试",
+      "url": "http://localhost:5173/#/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/index/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/psdefvaluerulecursysgridview/-",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "图表设计工具调试",
+      "url": "http://localhost:5173/#/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/index/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/psdechartcursysgridview/-",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "BI报表设计工具调试",
+      "url": "http://localhost:5173/#/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/index/psdevslnsys=6549C86B-D663-4701-889B-17328A97B45A/pssysbireportgridview/-",
+      "webRoot": "${workspaceFolder}"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+// 表单多数据样式
+$form-mdctrl-md: (
+  empty-image-width: 64px,                            // 空状态图片宽度
+  empty-padding: getCssVar(spacing,none),             // 空状态内边距
+  empty-margin-top: getCssVar('spacing', 'tight'),    // 空状态图片顶部外边距
+);
+
+@include b(form-mdctrl-md) {
+  @include set-component-css-var('form-mdctrl-md', $form-mdctrl-md);
+  @include flex(row);
+}
+
+@include b(form-mdctrl-md-content) {
+  flex: 1;
+  min-width: 0;
+
+  .#{bem(no-data)} {
+    --el-empty-image-width: #{getCssVar(form-mdctrl-md, empty-image-width)};
+    --el-empty-description-margin-top:#{getCssVar(form-mdctrl-md, empty-margin-top)};
+    --el-empty-padding:#{getCssVar(form-mdctrl-md, empty-padding)};
+
+    line-height: 1;
+  }
+}
+
+@include b(form-mdctrl-md-actions) {
+  flex-shrink: 0;
+  width: getCssVar('form-mdctrl-button', 'width');
+  text-align: center;
+
+  .el-button+.el-button {
+    margin-left: getCssVar(spacing,none);
+  }
+
+  @include e(btn) {
+    margin-bottom: getCssVar('form-mdctrl-button', 'gap');
+  }
+}

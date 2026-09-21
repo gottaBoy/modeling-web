@@ -1,0 +1,53 @@
+@include b(high-light-code) {
+  color: getCssVar(color, text, 3);
+  white-space: break-spaces;
+
+  .keyword{ 
+    color: #7f77dd;
+  }
+
+  .type{
+    color: #378add; 
+  }
+
+  .param{ 
+    color: #1d9e75; 
+  }
+
+  .ident{ 
+    color: #1d9e75; 
+  }
+
+  .fn-call{ 
+    color: #d2a8ff; 
+  }
+
+  .string{ 
+    color: #639922; 
+  }
+
+  .number{ 
+    color: #79c0ff; 
+  }
+
+  .comment{ 
+    font-style: italic; 
+    color: #8b949e; 
+  }
+
+  .operator{ 
+    color: #ff7b72; 
+  }
+
+  .punct{ 
+    color: #8b949e; 
+  }
+
+  .bracket-open{ 
+    color: #e3b341; 
+  }
+
+  .bracket-close{ 
+    color: #e3b341; 
+  }
+}

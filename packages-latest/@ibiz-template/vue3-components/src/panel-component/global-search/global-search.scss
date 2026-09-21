@@ -1,0 +1,106 @@
+// 全局搜索样式
+$global-search: (
+  color: getCssVar(color, primary, light-active),     // 搜索框图标/文本色
+  bg-color-hover: getCssVar(color, fill, 1),         // 悬浮背景色
+  height: 34px,                                      // 输入框高度
+);
+
+// 全局搜索弹出层样式
+$global-search-popup: (
+  max-height: 300px,   // 弹出层最大高度
+  min-width: 320px,    // 弹出层最小宽度
+);
+
+// 全局搜索历史项样式
+$global-search-item: (
+  height: getCssVar(global-search, height),         // 历史项高度
+  color: getCssVar(color, text, 0),                  // 历史项文本色
+  bg-color-hover: getCssVar(color, fill, 0),          // 历史项悬浮背景色
+  font-size: getCssVar(font-size, regular),           // 历史项字体大小
+  padding: 0 getCssVar(spacing, base, loose),         // 历史项左右内边距
+);
+
+@include b(global-search) {
+  @include set-component-css-var('global-search', $global-search);
+  @include set-component-css-var('global-search-popup', $global-search-popup);
+  @include set-component-css-var('global-search-item', $global-search-item);
+
+  width: 100%;
+  @include e(footer) {
+    width: 100%;
+    line-height: getCssVar(global-search, height);
+    color: getCssVar(global-search, color);
+    text-align: center;
+    @include when(load-more) {
+      cursor: pointer;
+
+      &:hover {
+        background-color: getCssVar(global-search, bg-color-hover);
+      }
+    }
+  }
+  @include e(search) {
+    .el-input__wrapper {
+      width: 240px;
+    }
+
+    .el-input__wrapper.is-focus {
+      width: 320px;
+    }
+    @include m(enter-icon) {
+      cursor: pointer;
+    }
+    @include when(search) {
+      .el-input__wrapper {
+        width: 320px;
+      }
+    }
+  }
+  @include e(content) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    @include m(action-item) {
+      width: 100%;
+
+      .el-button {
+        width: 100%;
+        height: getCssVar(global-search, height);
+      }
+    }
+  }
+  @include e(list) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-height: getCssVar(global-search-popup, max-height);
+    overflow-y: auto;
+    @include m(item) {
+      width: 100%;
+      min-height: getCssVar(global-search-item, height);
+      padding: getCssVar(global-search-item, padding);
+      margin: 0;
+      overflow: hidden;
+      font-size: getCssVar(global-search-item, font-size);
+      line-height: getCssVar(global-search-item, height);
+      color: getCssVar(global-search-item, color);
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: pointer;
+
+      &:hover {
+        background-color: getCssVar(global-search-item, bg-color-hover);
+      }
+    }
+  }
+  @include e(popper) {
+    @include set-component-css-var('global-search', $global-search);
+    @include set-component-css-var('global-search-popup', $global-search-popup);
+    @include set-component-css-var('global-search-item', $global-search-item);
+
+    min-width: getCssVar(global-search-popup, min-width) !important;
+    padding: 0 !important;
+  }
+}

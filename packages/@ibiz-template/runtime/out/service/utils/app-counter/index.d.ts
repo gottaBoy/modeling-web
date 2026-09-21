@@ -1,0 +1,13 @@
+import { AppCounter } from './app-counter';
+import { AppDECounter } from './app-de-counter';
+import { AppDECounterProvider } from './app-de-counter.provider';
+/**
+ * 预置默认的应用计数器适配器
+ *
+ * @author lxm
+ * @date 2022-09-19 22:09:50
+ * @export
+ */
+export declare function presetAppCounterProvider(): void;
+export { AppCounter, AppDECounter, AppDECounterProvider };
+//# sourceMappingURL=index.d.ts.map

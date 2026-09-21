@@ -1,0 +1,20 @@
+{
+  "name": "@ibiz-template/theme",
+  "version": "0.7.39",
+  "description": "样式功能库",
+  "files": [
+    "style",
+    "README.md"
+  ],
+  "author": "iBiz",
+  "license": "MIT",
+  "scripts": {
+    "publish:next": "npm publish --access public --tag=next --registry=https://registry.npmjs.org/",
+    "publish:dev": "npm publish --access public --tag=dev --registry=https://registry.npmjs.org/",
+    "publish:alpha": "npm run build && npm publish --access public --tag=alpha --registry=https://registry.npmjs.org/",
+    "publish:beta": "npm publish --access public --tag=beta --registry=https://registry.npmjs.org/",
+    "publish:npm": "npm publish --access public --registry=https://registry.npmjs.org/",
+    "publish:local": "npm run build && npm publish --access public --registry=http://172.16.240.221:8081/repository/local/"
+  },
+  "gitHead": "763fadf3223009ad5ac7bbb63fc03b6c7b0d6905"
+}

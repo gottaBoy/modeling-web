@@ -1,0 +1,271 @@
+// 关系分页根元素
+$control-drtab: (
+  bg-color: transparent,                                          // 关系分页背景色
+  padding: getCssVar('spacing', 'none'),                          // 关系分页内边距
+);
+
+// 关系分页内容
+$control-drtab-content: (
+  gap: getCssVar('spacing', 'none'),                              // 内容间隔
+);
+
+// 关系分页项
+$control-drtab-item: (
+  hover-bg-color: transparent,                                    // 分页项悬浮背景色
+  gap: getCssVar('spacing', 'tight'),                             // 分页项内容间隔
+  active-color: getCssVar('color', 'primary'),                    // 分页项激活色
+  font-size: getCssVar('font-size', 'regular'),                   // 分页项字体大小
+  text-color: getCssVar('color', 'text', '2'),                    // 分页项字体色
+  hover-color: getCssVar('color', 'text', '0'),                   // 分页项悬浮色
+);
+
+// 关系分页更多
+$control-drtab-more: (
+  gap: getCssVar('spacing', 'extra', 'tight'),                    // 更多内容间隔
+  font-size: getCssVar('font-size', 'regular'),                   // 更多字体大小
+  text-color: getCssVar('color', 'text', '2'),                    // 更多字体色
+  hover-color: getCssVar('color', 'text', '0'),                   // 更多悬浮色
+);
+
+// 关系分页更多项
+$control-drtab-more-item: (
+  gap: getCssVar('spacing', 'tight'),                             // 更多项内容间隔
+  active-bg-color: getCssVar('color', 'primary', 'active'),       // 更多项激活背景色
+);
+
+// 关系分页更多项计数器
+$control-drtab-more-item-counter: (
+  min-width: 20px,                                                // 更多项计数器最小宽度
+);
+
+// 关系分页下拉
+$control-drtab-dropdown: (
+  gap: getCssVar('spacing', 'tight'),                             // 下拉内容间隔
+  padding: getCssVar('spacing', 'tight'),                         // 下拉内边距
+  text-color: getCssVar('color', 'text', '0'),                    // 下拉字体色
+  font-size: getCssVar('font-size', 'header', '5'),               // 下拉字体大小
+);
+
+// 关系分页下拉项
+$control-drtab-dropdown-item: (
+  bg-color: transparent,                                          // 下拉项背景色
+  gap: getCssVar('spacing', 'tight'),                             // 下拉项内容间隔
+  text-color: getCssVar('color', 'text', '0'),                    // 下拉项字体色
+  hover-bg-color: getCssVar('color', 'fill', '0'),                // 下拉项悬浮背景色
+  active-bg-color: getCssVar('color', 'fill', '0'),               // 下拉项激活背景色
+  icon-size: getCssVar('width', 'icon-medium'),                   // 下拉项图标大小
+  icon-color: getCssVar('color', 'primary'),                      // 下拉项图标颜色
+);
+
+// 关系分页下拉项计数器
+$control-drtab-dropdown-item-counter: (
+  size: getCssVar('width', 'icon-medium'),                        // 下拉项计数器大小
+  font-size: getCssVar('font-size', 'small'),                     // 下拉项计数器字体大小
+);
+
+@include b('control-drtab') {
+  @include set-component-css-var('control-drtab', $control-drtab);
+  @include set-component-css-var('control-drtab-content', $control-drtab-content);
+  @include set-component-css-var('control-drtab-item', $control-drtab-item);
+  @include set-component-css-var('control-drtab-more', $control-drtab-more);
+  @include set-component-css-var('control-drtab-dropdown', $control-drtab-dropdown);
+
+  padding: getCssVar('control-drtab', 'padding');
+  background-color: getCssVar('control-drtab', 'bg-color');
+
+  @include e('counter') {
+    margin-left: getCssVar('control-drtab-item', 'gap');
+  }
+
+  // 标签栏
+  .el-tabs {
+    .el-tabs__header {
+      margin: getCssVar('control-drtab-content', 'gap');
+
+      .el-tabs__nav-wrap {
+        margin: getCssVar('control-drtab-content', 'gap');
+
+        .el-tabs__nav {
+          .el-tabs__active-bar {
+            background-color: getCssVar('control-drtab-item', 'active-color');
+          }
+
+          .el-tabs__item {
+            font-size: getCssVar('control-drtab-item', 'font-size');
+            color: getCssVar('control-drtab-item', 'text-color');
+
+            &:hover {
+              color: getCssVar('control-drtab-item', 'hover-color');
+              background-color: getCssVar('control-drtab-item', 'hover-bg-color');
+            }
+
+            &.is-active {
+              color: getCssVar('control-drtab-item', 'active-color');
+            }
+
+            &.is-top {
+              &:last-child {
+                padding-right: getCssVar('spacing', 'none');
+              }
+            }
+          }
+        }
+      }
+    }
+
+    &.el-tabs--top .el-tabs__nav-scroll,
+    &.el-tabs--bottom .el-tabs__nav-scroll {
+      padding: 0 getCssVar('spacing', 'base');
+    }
+  }
+
+  .el-tabs__item {
+    padding: 0 getCssVar('spacing', 'base');
+  }
+
+  .el-tabs__nav-prev,
+  .el-tabs__nav-next {
+    line-height: var(--el-tabs-header-height);
+  }
+
+  .#{bem('badge')} {
+    text-align: center;
+  }
+}
+
+@include b('control-drtab-label') {
+  @include e('icon') {
+    margin-right: getCssVar('control-drtab-item', 'gap');
+  }
+}
+
+// 更多样式
+@include b('control-drtab-more') {
+  .el-tabs.el-tabs.el-tabs--top {
+    .el-tabs__header {
+      .el-tabs__nav-prev,
+      .el-tabs__nav-next {
+        display: none;
+      }
+    }
+
+    .el-tabs__nav-wrap.is-scrollable {
+      padding: getCssVar('spacing', 'none');
+    }
+  }
+}
+
+@include b('control-drtab-more-dropdown') {
+  height: 100%;
+
+  @include e('link') {
+    position: relative;
+    display: flex;
+    gap: getCssVar('control-drtab-more', 'gap');
+    align-items: center;
+    font-size: getCssVar('control-drtab-more', 'font-size');
+    color: getCssVar('control-drtab-more', 'text-color');
+
+    &:hover {
+      color: getCssVar('control-drtab-more', 'hover-color');
+    }
+
+    &::after {
+      position: absolute;
+      left: -16px;
+      display: inline-block;
+      width: 100%;
+      height: 100%;
+      content: '';
+    }
+  }
+}
+
+@include b('control-drtab-more-dropdown-popper') {
+  width: 240px;
+  @include set-component-css-var('control-drtab-more-item', $control-drtab-more-item);
+  @include set-component-css-var('control-drtab-more-item-counter', $control-drtab-more-item-counter);
+  @include e('active') {
+    background-color: getCssVar('control-drtab-more-item', 'active-bg-color');
+  }
+
+  @include e('label') {
+    display: flex;
+    gap: getCssVar('control-drtab-more-item', 'gap');
+    align-items: center;
+    width: 100%;
+    overflow: hidden;
+
+    @include m('text') {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    @include m('counter') {
+      min-width: getCssVar('control-drtab-more-item-counter', 'min-width');
+    }
+  }
+
+  &.el-popper.el-dropdown__popper .el-scrollbar .el-dropdown__list {
+    .#{bem('control-drtab-more-dropdown-popper', 'active')}.el-dropdown-menu__item {
+      background-color: getCssVar('control-drtab-more-item', 'active-bg-color');
+    }
+  }
+}
+
+@include b('control-drtab-dropdown-list') {
+  @include e('trigger') {
+    display: flex;
+    gap: getCssVar('control-drtab-dropdown', 'gap');
+    align-items: center;
+    padding: getCssVar('control-drtab-dropdown', 'padding');
+    font-size: getCssVar('control-drtab-dropdown', 'font-size');
+    color: getCssVar('control-drtab-dropdown', 'text-color');
+    cursor: pointer;
+  }
+
+  @include e('popper') {
+    min-width: 150px;
+    max-width: 220px;
+    @include set-component-css-var('control-drtab-dropdown-item', $control-drtab-dropdown-item);
+    @include set-component-css-var('control-drtab-dropdown-item-counter', $control-drtab-dropdown-item-counter);
+    @include m('content') {
+      max-height: 26vh;
+      overflow: auto;
+    }
+
+    @include m('item') {
+      display: flex;
+      gap: getCssVar('control-drtab-dropdown-item', 'gap');
+      align-items: center;
+
+      .caption {
+        @include utils-ellipsis;
+      }
+
+      ion-icon {
+        font-size: getCssVar('control-drtab-dropdown-item', 'icon-size');
+        color: getCssVar('control-drtab-dropdown-item', 'icon-color');
+      }
+
+      @include when('active') {
+        background-color: getCssVar('control-drtab-dropdown-item', 'active-bg-color') !important;
+      }
+    }
+
+    &.el-popper.el-dropdown__popper .el-scrollbar .el-dropdown__list {
+      background-color: getCssVar('control-drtab-dropdown-item', 'bg-color');
+
+      .el-dropdown-menu__item {
+        min-height: 38px;
+        color: getCssVar('control-drtab-dropdown-item', 'text-color');
+        background-color: getCssVar('control-drtab-dropdown-item', 'bg-color');
+
+        &:hover {
+          background-color: getCssVar('control-drtab-dropdown-item', 'hover-bg-color');
+        }
+      }
+    }
+  }
+}

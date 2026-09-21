@@ -1,0 +1,50 @@
+/* stylelint-disable selector-class-pattern */
+@include b(devtool-collapse-panel) {
+  width: 100%;
+  height: auto;
+  border-bottom: 1px solid getCssVar(color, border);
+
+  &:last-child .foldItemHeader {
+    border-bottom: none !important;
+  }
+
+  &:last-child .transitionHeight .foldItemBody {
+    border-top: 1px solid getCssVar(color, border);
+    border-bottom: none !important;
+  }
+  @include e(header) {
+    box-sizing: border-box;
+    display: flex;
+    flex-flow: row nowrap;
+    place-content: center space-between;
+    align-items: center;
+    min-height: 50px;
+    padding: 0 12px;
+    padding-left: 8px;
+    cursor: pointer;
+
+    // 展开折叠项时，小图标旋转效果
+
+    @include e(icon) {
+      transition: all 0.24s;
+      transform: rotate(0deg);
+
+      > svg {
+        width: 13px;
+        height: 13px;
+      }
+
+      &.rotate90deg {
+        transition: all 0.24s;
+        transform: rotate(90deg);
+      }
+    }
+  }
+
+  @include e(body) {
+    box-sizing: border-box;
+    width: 100%;
+    height: auto;
+    padding: 0 12px 12px 8px;
+  }
+}

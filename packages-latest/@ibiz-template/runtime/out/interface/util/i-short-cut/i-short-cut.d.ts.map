@@ -1,0 +1,1 @@
+{"version":3,"file":"i-short-cut.d.ts","sourceRoot":"","sources":["../../../../src/interface/util/i-short-cut/i-short-cut.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,gBAAgB,EAAE,MAAM,WAAW,CAAC;AAE7C;;;;;GAKG;AACH,MAAM,WAAW,aAAc,SAAQ,gBAAgB;CAAG;AAE1D;;;;;GAKG;AACH,MAAM,WAAW,SAAS;IACxB;;;;;OAKG;IACH,KAAK,EAAE,aAAa,EAAE,CAAC;IAEvB;;;;;OAKG;IACH,IAAI,EAAE,YAAY,GAAG,UAAU,CAAC;CACjC"}

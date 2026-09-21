@@ -1,0 +1,6 @@
+@include b(user-report-panel) {
+  @include e(container) {
+    width: 100%;
+    height: 100%;
+  }
+}

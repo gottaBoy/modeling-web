@@ -1,0 +1,171 @@
+// 表情下拉选择（扩展）根元素
+$emoji-picker: (
+  icon-color: getCssVar(color, primary, text),                              // 图标颜色
+  min-height: getCssVar('height-control', 'default'),                       // 最小高
+  font-size: getCssVar(form-item, font-size),                               // 字体大小
+  line-height: getCssVar(form-item, line-height),                           // 行高
+  readonly-color: getCssVar(form-item, readonly-color),                     // 只读字体色
+  text-color: getCssVar(form-item, text-color),                             // 字体颜色
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+  clear-text-color: getCssVar(color, text, 0),                              // 清除文本色
+  clear-icon-color: getCssVar(color, text, 3),                              // 清除图标色
+  hover-bg-color: getCssVar(color, primary),                                // 悬浮背景色
+);
+
+@include b('emoji-picker') {
+  @include set-component-css-var('emoji-picker', $emoji-picker);
+
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+
+  @include e('button-content') {
+    display: flex;
+    align-items: center;
+    min-height: getCssVar('emoji-picker', 'min-height');
+
+    @include m('icon') {
+      margin-right: getCssVar('spacing', 'extra-tight');
+      fill: getCssVar(emoji-picker, icon-color);
+    }
+  }
+
+  @include e('button') {
+    &.is-clear {
+      position: relative;
+      padding: getCssVar('spacing', 'none');
+      padding-right: getCssVar('spacing', 'base-tight');
+      color: getCssVar(emoji-picker, clear-text-color);
+      background-color: transparent;
+
+      &:hover {
+        .#{bem(emoji-picker__button-content--icon)} {
+          display: block;
+        }
+      }
+
+      .#{bem(emoji-picker__button-content--icon)} {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: none;
+        margin-right: 0;
+        font-size: getCssVar(emoji-picker, font-size);
+        fill: getCssVar(emoji-picker, clear-icon-color);
+
+        &:hover {
+          fill: getCssVar(emoji-picker, hover-bg-color);
+        }
+      }
+    }
+  }
+
+  @include m('readonly') {
+    display: flex;
+    align-items: center;
+    line-height: 32px;
+
+    .#{bem(emoji-picker__button)} {
+      padding: 0;
+      color: getCssVar(emoji-picker, readonly-color);
+      pointer-events: none;
+      cursor: default;
+
+      .#{bem(emoji-picker__button-content)} {
+        display: none;
+      }
+    }
+
+    .is-clear {
+      &.#{bem(emoji-picker__button)} {
+        .#{bem(emoji-picker__button-content)} {
+          display: flex;
+        }
+
+        .#{bem(emoji-picker__button-content--icon)} {
+          display: none;
+        }
+      }
+    }
+  }
+}
+
+@include b('emoji-picker-popper') {
+  &.el-popper.el-popper {
+    width: auto;
+    padding: 0;
+  }
+}
+
+
+@include b(form-item) {
+
+  @include b(emoji-picker) {
+    @include when(show-default) {
+      padding: getCssVar(emoji-picker, hover-edit-padding);
+
+      // 悬浮显示编辑器
+      &.is-active,
+      &:hover {
+        @include b(emoji-picker-form-default-content) {
+          display: none;
+        }
+
+        @include b(emoji-picker__button) {
+          padding: 8px 15px;
+          pointer-events: auto;
+          background-color: getCssVar(emoji-picker, hover-bg-color);
+
+          &.is-clear {
+            padding: getCssVar('spacing', 'none');
+            padding-right: getCssVar('spacing', 'base-tight');
+            background-color: transparent;
+          }
+        }
+
+        @include b(emoji-picker__button-content) {
+          display: flex;
+        }
+      }
+
+      // 不悬浮时显示信息态
+      @include b(emoji-picker__button) {
+        padding: getCssVar('spacing', 'none');
+        pointer-events: none;
+        background: transparent;
+      }
+
+      @include b(emoji-picker-form-default-content) {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        font-family: Arial, sans-serif;
+        font-size: getCssVar(emoji-picker, font-size);
+        line-height: getCssVar(emoji-picker, line-height);
+        color: getCssVar(emoji-picker, text-color);
+
+        &.is-clear {
+          padding: getCssVar('spacing', 'none');
+          padding-right: getCssVar('spacing', 'base-tight');
+          background-color: transparent;
+        }
+      }
+
+      @include b(emoji-picker__button-content) {
+        display: none;
+      }
+
+      // 输入态
+      @include when(editable) {
+        @include b(emoji-picker-form-default-content) {
+          display: none;
+        }
+
+        @include b(emoji-picker__button-content) {
+          display: flex;
+        }
+      }
+    }
+  }
+}

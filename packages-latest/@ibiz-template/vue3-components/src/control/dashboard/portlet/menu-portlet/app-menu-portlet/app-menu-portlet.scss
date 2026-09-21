@@ -1,0 +1,87 @@
+// 门户菜单样式
+$control-appmenu-portlet: (
+  'padding': getCssVar(spacing, tight) getCssVar(spacing, base),      // 门户菜单内间距
+);
+
+// 门户菜单分组样式
+$control-appmenu-portlet-group: (
+  icon-gap: getCssVar(spacing, extra-tight),                          // 菜单分组图标与标题间隔 
+  icon-size: getCssVar(font-size, regular),                           // 菜单分组图标大小 
+);
+
+// 门户菜单项样式
+$control-appmenu-portlet-item: (
+  'padding': getCssVar(spacing, base-tight),                          // 菜单项内间距
+  'margin': getCssVar(spacing, base-tight),                           // 菜单项外间距 
+  'bg-color': getCssVar('color', 'bg', 0),                            // 菜单项背景色
+  'border-color': getCssVar(color, primary),                          // 菜单项边框色
+);
+
+// 门户菜单计数器样式
+$control-appmenu-portlet-counter: (
+  'gap': getCssVar(spacing, tight),                                   // 菜单计数器间隔
+);
+
+@include b(control-appmenu-portlet) {
+  @include set-component-css-var('control-appmenu-portlet', $control-appmenu-portlet);
+  @include set-component-css-var('control-appmenu-portlet-group', $control-appmenu-portlet-group);
+  @include set-component-css-var('control-appmenu-portlet-item', $control-appmenu-portlet-item);
+  @include set-component-css-var('control-appmenu-portlet-counter', $control-appmenu-portlet-counter);
+
+  padding: getCssVar('control-appmenu-portlet', 'padding');
+
+  @include e(content) {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+}
+
+@include b(control-appmenu-portlet-item) {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  align-items: flex-start;
+  justify-content: center;
+  width: calc(25% - getCssVar('control-appmenu-portlet-item', 'margin') * 2);
+  padding: getCssVar('control-appmenu-portlet-item', 'padding');
+  margin: getCssVar('control-appmenu-portlet-item', 'margin');
+  cursor: pointer;
+  background-color: getCssVar('control-appmenu-portlet-item', 'bg-color');
+
+  &::before {
+    position: absolute;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    content: '';
+    background-color: getCssVar('control-appmenu-portlet-item', 'border-color');
+  }
+  .#{bem(control-appmenu-portlet, counter)} {
+    position: absolute;
+    top: getCssVar('control-appmenu-portlet-counter', 'gap');
+    right: getCssVar('control-appmenu-portlet-counter', 'gap');
+  }
+}
+
+@include b(control-appmenu-portlet-group) {
+  width: 100%;
+
+  .el-collapse-item__header {
+    .#{bem(control-appmenu-portlet, counter)} {
+      margin-left: getCssVar('control-appmenu-portlet-counter', 'gap');
+    }
+  }
+
+  .el-collapse-item__content {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  @include e(icon) {
+    display: flex;
+    margin-right: getCssVar('control-appmenu-portlet-group', 'icon-gap');
+    font-size: getCssVar('control-appmenu-portlet-group', 'icon-size');
+  }
+}

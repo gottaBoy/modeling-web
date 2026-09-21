@@ -1,0 +1,42 @@
+// 标签根元素
+$span: (
+  font-size: getCssVar(form-item, font-size),                               // 字体大小
+  text-color: getCssVar(form-item, text-color),                             // 字体颜色
+  line-height: getCssVar(form-item, line-height),                           // 行高
+  readonly-color: getCssVar(form-item, readonly-color),                     // 只读字体色
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+@include b('span') {
+  @include set-component-css-var('span', $span);
+
+  display: inline-block;
+  font-size: getCssVar(span, font-size);
+  line-height: getCssVar(span, line-height);
+  color: getCssVar(span, text-color);
+  white-space: pre-line;
+  vertical-align: bottom;
+
+  @include m(readonly) {
+    color: getCssVar(span, readonly-color);
+  }
+
+  @include e(code-list) {
+    height: 100%;
+  }
+
+  @include when(is-ellipsis) {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@include b(form-item) {
+  @include b(span) {
+    @include when(show-default) {
+      padding: getCssVar(span, hover-edit-padding);
+    }
+  }
+}

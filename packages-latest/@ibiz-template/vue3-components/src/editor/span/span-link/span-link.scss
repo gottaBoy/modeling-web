@@ -1,0 +1,37 @@
+// 标签链接根元素
+$span-link: (
+  text-color: getCssVar(color, link),                                       // 字体颜色
+  hover-color: getCssVar(color, link-hover),                                // 悬浮色
+  line-height: getCssVar(form-item, line-height),                           // 行高
+  readonly-color: getCssVar(form-item, readonly-color),                     // 只读字体色
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+@include b(span-link) {
+  @include set-component-css-var('span-link', $span-link);
+
+  line-height: getCssVar(span-link, line-height);
+  color: getCssVar(span-link, text-color);
+  cursor: pointer;
+
+  &:hover{
+    color: getCssVar(span-link, hover-color);
+  }
+
+  @include m(disabled) {
+    cursor: not-allowed;
+  }
+  @include m(readonly) {
+    color: getCssVar(span-link, readonly-color);
+  }
+}
+
+
+@include b(form-item){
+
+  @include b(span-link) {
+    @include when(show-default){
+      padding: getCssVar(span-link, hover-edit-padding);
+    }
+  }
+}

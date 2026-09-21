@@ -1,0 +1,49 @@
+$badge: (
+  bg-color: getCssVar(color, danger),
+  height: 18px,
+  border-radius: 10px,
+);
+
+
+@include b(badge) {
+  @include set-component-css-var('badge', $badge);
+  
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: getCssVar(badge, height);
+  padding: getCssVar(spacing, extra-tight);
+  font-size: getCssVar(font-size, small);
+  line-height: normal;
+  color: getCssVar(color, danger, text);
+  white-space: nowrap;
+  background-color: getCssVar(badge, bg-color);
+  border: 1px solid transparent;
+  border-radius: getCssVar(badge, border-radius);
+
+  @include m(danger){
+    #{getCssVarName(badge, bg-color)}: getCssVar(color,danger);
+  }
+  @include m(success){
+    #{getCssVarName(badge, bg-color)}: getCssVar(color,success);
+  }
+  @include m(warning){
+    #{getCssVarName(badge, bg-color)}: getCssVar(color,warning);
+  }
+  @include m(info){
+    #{getCssVarName(badge, bg-color)}: getCssVar(color,info);
+  }
+  @include m(primary){
+    #{getCssVarName(badge, bg-color)}: getCssVar(color,primary);
+  }
+
+  @include when(mob) {
+    #{getCssVarName('panel-badge', 'text-color')}: getCssVar(color, white);
+    #{getCssVarName('panel-badge', 'font-weight')}: 600;
+    #{getCssVarName('panel-badge', 'height')}: rem(18px);
+    #{getCssVarName('panel-badge', 'border-radius')}: rem(10px);
+    font-weight: getCssVar('panel-badge', 'font-weight');
+    color: getCssVar('panel-badge', 'text-color');
+  }
+}

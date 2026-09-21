@@ -1,0 +1,61 @@
+// 应用切换器样式
+$app-switch: (
+    color-active: getCssVar(color, primary, active, text),  // 激活态文本色
+    bg-color-active: getCssVar(color, primary, active),     // 激活态背景色
+    font-size: getCssVar(font-size, regular),                // 基础字体大小
+    'dropdown-min-width': 250px,                              // 下拉列表最小宽度
+    'dropdown-item-height': 40px,                             // 下拉列表项高度
+);
+
+// 应用切换器图标样式
+$app-switch-icon: (
+    'width': 36px,                                  // 图标宽度
+    'height': 36px,                                 // 图标高度
+    'padding': 0 getCssVar('spacing', 'tight'),     // 图标内边距
+    'font-size': getCssVar(font-size, header-2),    // 图标字体大小
+    'color': getCssVar(color, text, 0),             // 图标颜色
+);
+
+@include b('app-switch') {
+    @include set-component-css-var('app-switch', $app-switch);
+    @include set-component-css-var('app-switch-icon', $app-switch-icon);
+
+    @include e('icon') {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: getCssVar('app-switch', icon, 'width');
+        height: getCssVar('app-switch', icon, 'height');
+        padding: getCssVar('app-switch', icon, 'padding');
+        font-size: getCssVar('app-switch', icon, 'font-size');
+        color: getCssVar('app-switch', icon, 'color');
+        cursor: pointer;
+    }
+
+    @include e('dropdown') {
+        @include set-component-css-var('app-switch', $app-switch);
+
+        min-width: getCssVar('app-switch', 'dropdown-min-width');
+
+        .el-empty__description p {
+            color: getCssVar(color, primary, text);
+        }
+    }
+
+    @include e('item') {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        width: 100%;
+        height: getCssVar('app-switch', 'dropdown-item-height');
+        font-size: getCssVar(app-switch, font-size);
+        white-space: nowrap;
+
+        @include when('active') {
+            color: getCssVar(app-switch, color-active) !important;
+            background-color: getCssVar(app-switch, bg-color-active) !important;
+        }
+    }
+
+
+}

@@ -1,0 +1,96 @@
+// 工具栏项样式
+@mixin toolbar-item-style {
+  font-size: getCssVar(font-size, regular);
+
+  .#{bem(toolbar-item-icon)}{
+    @include flex(row, center, center); 
+
+    width: getCssVar(control-toolbar, icon-max-width);
+    height: getCssVar(control-toolbar, icon-max-height);
+
+    .#{bem(icon)}{
+      @include flex(row, center, center);  
+    }
+
+    i{
+      font-size: getCssVar(font-size, regular);      
+    }
+
+    img{
+      display: inline-block;
+      width: 100%;
+      height: 100%;
+    }
+
+    & + .#{bem(toolbar-item-text)}{
+      margin: getCssVar(control-toolbar, text-margin);
+    }
+  }
+}
+
+@include b(export-excel) {
+  width: 270px;
+  @include e(custom){
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    & > * + *{
+      margin-left: getCssVar(spacing, tight);
+    }
+
+    // 自定义项 不添加悬浮样式
+    &.el-dropdown-menu__item:focus{
+      color: var(--el-text-color-regular);
+      background-color: transparent;
+    }
+
+    .el-input{
+      --el-input-text-color: #{getCssVar(color, primary, text)};
+    }
+  }    
+
+  @include e(button) {
+    @include flex(row, center, center);
+
+    padding: getCssVar(spacing, tight) getCssVar(spacing, base);
+
+    > span {
+      @include flex(row, center, center);
+
+      @include toolbar-item-style;   
+    }
+  }
+}
+
+@include b(export-excel-submenu-button){
+  justify-content: flex-start;
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 0;
+
+  >span{
+    @include toolbar-item-style;       
+  }
+}
+
+@include b(control-toolbar-submenu-popper){
+  @include b(export-excel-submenu){
+    .el-sub-menu__title{
+      padding: 0;
+
+    }
+
+    &.hover{
+      color: getCssVar(color, primary, hover, text);
+      background-color: getCssVar(color, primary, hover);   
+    }
+
+    @include b(export-excel-submenu-popper){
+      width: 270px;
+      color: getCssVar(color, primary, text);
+      background-color: getCssVar(color, primary);    
+    }
+  }
+}

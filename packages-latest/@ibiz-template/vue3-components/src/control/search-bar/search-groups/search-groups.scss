@@ -1,0 +1,229 @@
+// 取消菜单通用样式
+@mixin cancel-btn-style {
+  color: getCssVar(color, text, 3);
+  background-color: transparent;
+
+  &:hover{
+    color: getCssVar(color, primary);
+    background-color: transparent;
+  }
+}
+
+@include b(search-groups){
+  @include flex(row, flex-start, center);
+
+  height: 100%;
+
+  @include e(counter) {
+    margin-left: getCssVar(control-searchbar-counter, gap);
+  }
+
+  @include b(search-groups-quick-group-item){
+    position: relative;
+    display: inline-block;
+    height: 100%;
+    padding: getCssVar(control-searchbar-group-item, padding);
+    margin-right: getCssVar(control-searchbar-group-item, gap);
+    font-size: getCssVar(control-searchbar-group-item, font-size);
+    cursor: pointer;
+    @include when(selected){
+      &::after{
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        content: "";
+        background-color: getCssVar(control-searchbar-group-item, active-color);
+      }
+    }
+
+    &:hover{
+      color: getCssVar(control-searchbar-group-item, active-color);
+    }
+  }      
+}
+
+// 更多下拉框
+@include b(search-groups-dropdown){  
+  .el-dropdown-menu__item{
+    width: getCssVar(control-searchbar-more-dropdown, width);
+    @include flex(row, space-b, center);
+    
+    @include b(search-groups-item-caption){
+      display: inline-block;
+      flex: 1;
+      margin-left: getCssVar(control-searchbar-more-dropdown, icon-gap);
+
+      @include utils-ellipsis;
+    }
+  }
+}
+
+// 更多按钮
+@include b(search-groups-more){
+  @include flex(row, flex-start, center);  
+
+  padding: getCssVar(control-searchbar-more, padding);
+  font-size: getCssVar(control-searchbar-more, font-size);
+  cursor: pointer;
+
+  &:hover{
+    color: getCssVar(control-searchbar-more, active-color);
+  }  
+
+  >ion-icon{
+    margin-left: getCssVar(control-searchbar-more, gap);
+  }
+
+  @include when(selected){
+    &::after{
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      content: "";
+      background-color: getCssVar(control-searchbar-more, active-color);
+    }
+  }
+
+}
+
+// 管理分组
+@include b(search-groups-manage-dialog){
+  @include b(search-groups-manage-dialog-content){
+    @include b(search-groups-content-top){
+      @include flex(row, space-between, center);
+
+      @include b(search-groups-content-top-left){
+        @include flex(row, flex-start, center);
+
+        >ion-icon{
+          margin-right: getCssVar(control-searchbar-more-manage, icon-gap);
+        }
+      }
+      @include b(search-groups-content-top-right){
+        ion-icon{
+          margin-right: getCssVar(control-searchbar-more-manage, icon-gap);
+        }
+      }
+    }
+
+    @include b(search-groups-content-bottom){
+      width: 100%;
+      margin-top: getCssVar(control-searchbar-more-manage, gap);
+      border: 1px solid getCssVar(control-searchbar-more-manage, border-color);
+      @include b(search-groups-table-header){
+        @include flex(row, flex-start, center);
+
+        width: 100%;
+        background-color: getCssVar(control-searchbar-more-manage, bg-color);
+
+        @include b(search-groups-name){
+          width: 40%;
+          padding: getCssVar(control-searchbar-more-manage, cell-padding);
+        }
+        @include b(search-groups-show){
+          width: 30%;
+          padding: getCssVar(control-searchbar-more-manage, cell-padding);          
+        }
+        @include b(search-groups-action){
+          width: 30%;
+          padding: getCssVar(control-searchbar-more-manage, cell-padding);          
+        }
+      }
+
+      @include b(search-groups-table-body){
+        @include b(search-groups-table-row){
+          position: relative;
+          cursor: pointer;
+          border-bottom: 1px solid getCssVar(control-searchbar-more-manage, border-color);
+
+          &:nth-last-child(1){
+            border-bottom: none;
+          }
+
+          @include flex(row, flex-start, center);
+
+          @include b(search-groups-name){
+            width: 40%;
+            padding: getCssVar(control-searchbar-more-manage, cell-padding);
+            @include utils-ellipsis;            
+          }
+          @include b(search-groups-show){
+            width: 30%;
+            padding: getCssVar(control-searchbar-more-manage, cell-padding);          
+          }
+          @include b(search-groups-action){
+            width: 30%;
+            padding: getCssVar(control-searchbar-more-manage, cell-padding);    
+            
+            .el-link{
+              margin-right: getCssVar(control-searchbar-more-manage, button-gap); 
+            }
+          }      
+          
+          &:hover{
+            background-color: getCssVar(control-searchbar-more-manage, hover-bg-color); 
+          }
+        }
+
+        @include b(search-groups-table-row-ghost){
+          background-color: getCssVar(control-searchbar-more-manage, hover-bg-color); 
+          opacity: 0.5;          
+        }
+      }
+    }
+
+  }
+}
+
+// 新建分组
+@include b(search-groups-new-dialog){
+  @include b(search-groups-new-dialog-footer){
+    @include b(search-groups-cancel-btn){
+      @include cancel-btn-style;
+    }
+  }
+}
+
+// 编辑分组
+@include b(search-groups-edit-dialog){
+  @include b(search-groups-edit-dialog-footer){
+    @include b(search-groups-cancel-btn){
+      @include cancel-btn-style;
+    }
+  }
+}
+
+// 删除分组
+@include b(search-groups-remove-dialog){
+  @include b(search-groups-remove-dialog-content){
+    margin-bottom: getCssVar(spacing, base);
+
+    > span{
+      padding: getCssVar(spacing, super-tight) getCssVar(spacing, tight);
+      margin: 0 getCssVar(spacing, tight);
+      color: getCssVar(color, danger, text);
+      background-color: getCssVar(color, danger);
+      border-radius: getCssVar(border, radius, small);
+    }
+  }
+
+  @include b(search-groups-remove-dialog-tip){
+    color: getCssVar(color, text, 3);
+  }
+}
+@include b(search-groups-remove-confirm-btn){
+  &.el-button{
+    background-color: getCssVar(color, danger);
+  }
+
+  &:hover{
+    background-color: getCssVar(color, danger, hover);
+  }
+}
+@include b(search-groups-remove-cancel-btn){
+  @include cancel-btn-style;
+}

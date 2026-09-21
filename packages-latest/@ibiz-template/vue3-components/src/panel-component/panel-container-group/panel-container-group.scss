@@ -1,0 +1,111 @@
+// 分组容器样式
+$panel-container-group: (
+  'bg-color': transparent,  // 容器背景色
+);
+
+// 分组容器头部样式
+$panel-container-group-header: (
+  'bg-color': transparent,                              // 头部背景色
+  'padding': getCssVar(spacing, base, tight),           // 头部内边距
+  'border-color': getCssVar('color', 'border'),         // 头部边框色
+  'height': 49px,                                       // 头部高度
+);
+
+// 分组容器标题样式
+$panel-container-group-caption: (
+  'text-color': getCssVar(color, text, 0),       // 标题文本色
+  'font-size': getCssVar('font-size', 'header-5'), // 标题字体大小
+  'font-weight': getCssVar(font-weight, bold),    // 标题字体粗细
+  'icon-gap':  getCssVar(spacing,tight),           // 标题图标间距
+);
+
+// 分组容器内容区样式
+$panel-container-group-content: (
+  'bg-color': transparent,               // 内容区域背景色
+  'padding': getCssVar(spacing, tight),  // 内容区域内边距
+);
+
+// 分组容器计数器样式
+$panel-container-group-counter: (
+  gap: getCssVar(spacing, tight),  // 计数器与标题间距
+);
+
+@include b(panel-container-group) {
+  @include set-component-css-var('panel-container-group', $panel-container-group);
+  @include set-component-css-var('panel-container-group-header', $panel-container-group-header);
+  @include set-component-css-var('panel-container-group-caption', $panel-container-group-caption);
+  @include set-component-css-var('panel-container-group-content', $panel-container-group-content);
+  @include set-component-css-var('panel-container-group-counter', $panel-container-group-counter);
+}
+
+@include b(panel-container-group) {
+  height: 100%;
+  background-color: getCssVar('panel-container-group', 'bg-color');
+
+  @include e(caption) {
+    @include utils-ellipsis;
+
+    display: flex;
+    align-items: center;
+    font-size: getCssVar('panel-container-group-caption', 'font-size');
+    font-weight: getCssVar('panel-container-group-caption', 'font-weight');
+    color: getCssVar('panel-container-group-caption', 'text-color');
+
+    @include m('icon'){
+      margin-right: getCssVar('panel-container-group-caption','icon-gap');
+    }
+  }
+
+  @include e(counter) {
+    margin-left: getCssVar('panel-container-group','counter', gap);
+  }
+}
+
+// 折叠相关样式
+@include b(panel-container-group-collapse) {
+  > .#{bem(panel-container-group-content)} {
+    display: block;
+  }
+
+  @include when(collapse) {
+    > .#{bem(panel-container-group-content)} {
+      display: none;
+    }
+  }
+}
+
+@include b(panel-container-group-header) {
+  @include flex;
+
+  height: getCssVar('panel-container-group-header', 'height');
+  padding: getCssVar('panel-container-group-header', 'padding');
+  margin: getCssVar('panel-container-group-header', 'margin');
+  border-bottom: 1px solid getCssVar('panel-container-group-header', 'border-color');
+
+  @include e((left, right)) {
+    display: inline-block;
+    width: 50%;
+  }
+
+  @include e(right) {
+    text-align: right;
+    @include flex(row, flex-end, center);
+  }
+}
+
+@include b(panel-container-group-content) {
+  width: 100%;
+  height: 100%;
+  > .#{bem('row')}{
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.#{bem('panel-container-group', '', 'show-header')} {
+  > .#{bem('panel-container-group-content')} {
+    height: calc(100% - getCssVar('panel-container-group-header', 'height'));
+    padding: getCssVar('panel-container-group-content', 'padding');
+    background-color: getCssVar('panel-container-group-content', 'bg-color');
+  }
+}

@@ -1,0 +1,1 @@
+{"version":3,"file":"i-ui-logic.d.ts","sourceRoot":"","sources":["../../../src/interface/ui-logic/i-ui-logic.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,cAAc,EAAE,UAAU,EAAE,MAAM,kBAAkB,CAAC;AAC9D,OAAO,EAAE,gBAAgB,EAAE,MAAM,aAAa,CAAC;AAE/C;;;;;GAKG;AACH,MAAM,WAAW,QAAS,SAAQ,gBAAgB;IAChD;;;;OAIG;IACH,KAAK,EAAE,UAAU,CAAC;IAClB;;;;OAIG;IACH,MAAM,EAAE,cAAc,CAAC;CACxB"}

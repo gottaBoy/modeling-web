@@ -1,0 +1,175 @@
+// 地址框选择根元素
+$mpicker: (
+  font-size: getCssVar(form-item, font-size),                               // 字体大小
+  text-color: getCssVar(form-item, text-color),                             // 字体颜色
+  empty-bg-color: getCssVar(color, bg, 3),                                  // 空值背景色
+  placeholder-color: getCssVar(form-item, placeholder-color),               // 占位文本色
+  disabled-color: getCssVar('form-item', 'disabled-color'),                 // 禁用色
+  line-height: getCssVar(form-item, line-height),                           // 行高
+  readonly-color: getCssVar(form-item, readonly-color),                     // 只读字体色
+  disabled-border-color: getCssVar('form-item', 'disabled-border-color'),   // 禁用边框色
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+// 地址框选择项元素
+$mpicker-item: (
+  margin: 2px 6px 2px 0,                                                    // 项外边距
+  padding: 0 getCssVar('spacing', 'tight'),                                 // 项内边距
+  font-size: getCssVar(font-size, small),                                   // 项字体大小
+  bg-color:  getCssVar(color, fill-0),                                      // 项背景色
+  border-color: transparent,                                                // 项边框色
+  border-radius: getCssVar(border-radius, small)                            // 项倒角
+);
+
+@include b('mpicker') {
+  @include set-component-css-var('mpicker', $mpicker);
+  @include set-component-css-var('mpicker-item', $mpicker-item);
+  @include flex;
+
+  position: relative;
+
+  input::placeholder {
+    color: getCssVar('mpicker', 'placeholder-color');
+  }
+
+  .el-input.is-disabled .el-input__inner {
+    color: getCssVar('mpicker', 'disabled-color');
+    border-color: getCssVar('mpicker', 'disabled-border-color');
+  }
+
+  .el-select {
+    width: 100%;
+  }
+
+  ion-icon {
+    font-size: getCssVar(mpicker, font-size);
+    cursor: pointer;
+  }
+
+  @include e('buns-position') {
+    position: absolute;
+    right: 26px;
+    z-index: 1;
+    display: inline-block;
+    width: 30px;
+    height: 100%;
+    cursor: pointer;
+  }
+
+  @include e('btns') {
+    position: absolute;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    color: getCssVar(mpicker, 'placeholder-color');
+    cursor: pointer;
+    @include flex(row, center, center);
+  }
+
+  @include m(disabled) {
+    ion-icon {
+      pointer-events: none;
+    }
+  }
+
+  @include m(readonly) {
+    font-size: getCssVar(mpicker, font-size);
+    line-height: getCssVar(mpicker, line-height);
+    color: getCssVar(mpicker, readonly-color);
+  }
+
+  @include e(action-item) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: getCssVar(color, link);
+    @include m(icon) {
+      margin-right: getCssVar(spacing, extra-tight);
+    }
+    @include when(disabled) {
+      color: getCssVar(mpicker, disabled-color);
+      cursor: not-allowed;
+    }
+  }
+
+  @include e(empty) {
+    padding: 0;
+    #{getCssVarName(no-data, min-height)}: 100px;
+
+    --el-empty-image-width: 100px;
+  }
+
+  @include e(transfer) {
+    @include set-component-css-var('mpicker', $mpicker);
+    @include when(empty) {
+      .el-select-dropdown__item {
+        height: auto;
+        padding: 0;
+      }
+      .#{bem(no-data)} {
+        background-color: getCssVar(mpicker, empty-bg-color);
+      }
+    }
+  }
+}
+
+
+// 表单下的编辑器默认显示，悬浮上去显示编辑器
+@include b(mpicker-form-default-content){
+  display: none;
+}
+
+@include b(form-item){
+
+  @include b(mpicker) {
+    @include when(show-default){
+      // 悬浮显示编辑器
+      &:hover{
+        @include b(mpicker-form-default-content){
+          display: none;
+        }     
+        @include b(mpicker-select){
+          display: block;    
+        }       
+      }    
+      
+      // 不悬浮时显示信息态
+      @include b(mpicker-form-default-content){      
+        display: flex;
+        align-items: center;
+        width: 100%;     
+        height: getCssVar(mpicker, line-height);
+        padding: getCssVar(mpicker, hover-edit-padding);        
+        font-family: Arial, sans-serif;      
+        font-size: getCssVar(mpicker, font-size);
+        line-height: getCssVar(mpicker, line-height);
+        color: getCssVar(mpicker, text-color);
+        @include b(mpicker-content-item){
+          height: calc(getCssVar(mpicker, line-height) - getCssVar('spacing', 'tight'));
+          padding: getCssVar(mpicker-item, padding);
+          margin: getCssVar(mpicker-item, margin);
+          font-size: getCssVar(mpicker-item, font-size);
+          line-height: calc(getCssVar(mpicker, line-height) - getCssVar('spacing', 'tight'));
+          color: getCssVar(mpicker, text-color);
+          background-color: getCssVar(mpicker-item, bg-color);
+          border: 1px solid getCssVar(mpicker-item, border-color);
+          border-radius: getCssVar(mpicker-item, border-radius);
+        }
+      }
+      @include b(mpicker-select){
+        display: none;  
+      }
+      
+      // 输入态
+      @include when(editable){
+        @include b(mpicker-form-default-content){
+          display: none;
+        }     
+        @include b(mpicker-select){
+          display: block;    
+        }  
+      }
+    }
+
+  }
+}

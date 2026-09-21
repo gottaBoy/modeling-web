@@ -1,0 +1,92 @@
+// 表单分页样式
+$form-page: (
+  'font-size': getCssVar(font-size, header-4),               // 页签字体大小
+  'header-border-color': getCssVar(color, border),           // 页签头部底部边框色
+  'text-color': getCssVar(color, text, 2),                   // 页签文本色
+  'bg-color': transparent,                                   // 页签背景色
+  'hover-text-color': getCssVar(color, primary),             // 页签悬浮文本色
+  'hover-bg-color': transparent,                             // 页签悬浮背景色
+  'active-text-color': getCssVar(color, primary),            // 页签激活文本色
+  'active-bg-color': transparent,                            // 页签激活背景色
+  'active-border-color': getCssVar(color, primary),          // 页签激活下划线色
+);
+
+@include b(form-page) {
+  @include set-component-css-var('form-page', $form-page);
+
+  @include e('left'){
+    height: 100%;
+
+    >.el-tabs__header{
+      height: 100%;
+    }
+
+    >.el-tabs__content{
+      height: 100%;
+      overflow: auto;
+    }
+  }
+
+  @include e('right'){
+    height: 100%;
+
+    >.el-tabs__header{
+      height: 100%;
+    }
+
+    >.el-tabs__content{
+      height: 100%;
+      overflow: auto;
+    }
+  }
+
+  // 无分页时，分页内容区最上不需要间隔
+  @include m(no-tab-header) {
+    @include b(form-page-item) {
+      padding-top: getCssVar(spacing,none);;
+    }
+  }
+}
+
+// 表单分页，tabs头样式
+@include b(form-page-tab) {
+  > .el-tabs__header.is-top {
+    margin-bottom: getCssVar(spacing, tight);
+
+    .el-tabs__item.is-top {
+      font-size: getCssVar('form-page', 'font-size');
+      color: getCssVar('form-page', 'text-color');
+      background-color: getCssVar('form-page', 'bg-color');
+    }
+
+    .el-tabs__item.is-top:hover {
+      color: getCssVar('form-page', 'hover-text-color');
+      background-color: getCssVar('form-page', 'hover-bg-color');
+    }
+
+    .el-tabs__item.is-top.is-active {
+      color: getCssVar('form-page', 'active-text-color');
+      background-color: getCssVar('form-page', 'active-bg-color');
+    }
+  }
+
+  // 分页头部底边
+  .el-tabs__nav-wrap::after {
+    height: 1px;
+    background-color: getCssVar('form-page', 'header-border-color');
+  }
+
+  // 标示线颜色
+  .el-tabs__active-bar{
+    background-color: getCssVar('form-page','active-border-color');
+  }
+}
+
+// 有分页时内容离分页有间隔
+@include b(form-page-item) {
+  padding-top: getCssVar('padding', 'top');
+}
+
+@include b(form-page-item-child) {
+  margin-bottom: getCssVar('margin', 'bottom');
+}

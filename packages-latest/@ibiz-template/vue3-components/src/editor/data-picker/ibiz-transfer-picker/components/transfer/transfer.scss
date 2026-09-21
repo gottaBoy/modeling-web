@@ -1,0 +1,31 @@
+// 穿梭框根元素
+$transfer: (
+    font-size: getCssVar('font-size', 'header-6'),                              // 字体大小
+    icon-size: getCssVar('font-size', 'regular'),                               // 图标大小
+);
+
+@include b('transfer') {
+    @include set-component-css-var('transfer', $transfer);
+    @include e(buttons) {
+        display: inline-block;
+        padding: 0 rem(30px);
+        vertical-align: middle;
+    }
+
+    @include e(button) {
+        vertical-align: top;
+
+        &:nth-child(2) {
+            margin: 0 0 0 10px;
+        }
+
+        i,
+        span {
+            font-size: getCssVar(transfer, font-size);
+        }
+
+        .el-icon {
+            font-size: getCssVar(transfer, icon-size);
+        }
+    }
+}

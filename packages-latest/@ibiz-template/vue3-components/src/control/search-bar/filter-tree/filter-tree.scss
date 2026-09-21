@@ -1,0 +1,114 @@
+// 过滤树组件样式
+$filter-tree: (
+  padding: getCssVar('spacing','base'),                 // 容器内边距
+  gap: getCssVar('spacing','tight'),                    // 输入框间隔 
+);
+
+// 过滤树分组样式
+$filter-tree-group: (
+  color: getCssVar('color','text', 2),                    // 过滤项字体颜色
+  font-size: getCssVar('font-size','regular'),            // 过滤项字体大小
+  padding: getCssVar('spacing','tight'),                  // 分组容器内边距
+  border-color: getCssVar('color','border'),              // 分组边框颜色
+  gap: getCssVar('spacing','base'),                       // 分组头与分组内容区间隔
+  tab-gap: getCssVar('spacing','tight'),                  // 分页标签间隔
+  footer-gap: getCssVar('spacing','tight'),               // 底部按钮与内容区间隔
+  remove-color: getCssVar('color','danger'),              // 删除按钮颜色 
+  remove-hover-color: getCssVar('color','danger'),        // 删除按钮hover颜色
+  item-margin: getCssVar('spacing','extra-tight') getCssVar('spacing','tight') getCssVar('spacing','none'),       // 过滤项标题外边距
+);
+
+@include b(filter-tree) {
+  @include set-component-css-var('filter-tree', $filter-tree);
+  @include set-component-css-var('filter-tree-group', $filter-tree-group);
+
+  padding: getCssVar(filter-tree, padding);
+
+  // 编辑器样式
+  @include e(editor){
+    display: inline-block;
+    width: 180px;
+    margin-right: getCssVar(filter-tree, gap);
+  }
+
+  // 属性下拉样式
+  @include e(field-select){
+    width: 185px;
+    margin-right:  getCssVar(filter-tree, gap);
+  }
+
+  // 过滤模式下拉样式
+  @include e(mode-select){
+    width: 185px;
+    margin-right:  getCssVar(filter-tree, gap);
+  }
+
+}
+
+
+@include b(filter-tree-group) {
+  padding: getCssVar(filter-tree-group, padding);
+  border: 1px solid getCssVar(filter-tree-group, border-color);
+
+  @include e(editor) {
+    width: 600px;
+    height: 270px;
+  }
+
+  @include e(actions){
+    padding-bottom: getCssVar(filter-tree-group, gap);
+  }
+
+  @include e(logic-type){
+    width: 80px;
+    margin-left: getCssVar(filter-tree-group, tab-gap);
+  }
+  @include e(list-item){
+    position: relative;
+    @include flex(row,flex-start, center);
+
+    padding-right: getCssVar(filter-tree-group, gap);
+    padding-bottom: getCssVar(filter-tree-group, gap);
+  }
+
+  @include e(list-item-left){
+    align-self: flex-start;
+    width: 32px;
+    margin: getCssVar(filter-tree-group, item-margin);
+    font-size: getCssVar(filter-tree-group, font-size);
+    color: getCssVar(filter-tree-group, color);
+  }
+
+  @include e(list-item-right){
+    position: absolute;
+    top: 8px;
+    right: 0;
+    color: getCssVar(filter-tree-group, remove-color);
+    cursor: pointer;
+
+    &:hover{
+      color: getCssVar(filter-tree-group, remove-hover-color);
+    }
+  }
+
+  // Exists和not exists样式
+  @include m(items){
+    > .#{bem(filter-tree-group, actions)}{
+      display: flex;
+      > .#{bem(filter-tree-item)}{
+        width: auto;
+      }
+    }
+  }
+}
+
+@include b(filter-tree-item){
+  @include flex(row,flex-start, center);
+
+  width: 574px;
+}
+
+@include b(filter-tree-footer) {
+  margin-top: getCssVar(filter-tree-group, footer-gap);
+  text-align: right;
+}

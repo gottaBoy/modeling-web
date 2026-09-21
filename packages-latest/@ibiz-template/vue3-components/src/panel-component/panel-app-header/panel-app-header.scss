@@ -1,0 +1,112 @@
+// 应用头样式
+$panel-app-header: (
+  'color': getCssVar(color, primary, text),                                   // 字体颜色
+  'color-1': getCssVar(color, text, 5),                                       // 应用搜索框文本色
+  'bg-color': getCssVar(color, primary),                                      // 背景色
+  'bg-color-1':getCssVar(color, bg, 5),                                       // 应用搜索框背景色
+  'menu-color': getCssVar(color, text, menu),                                 // 菜单颜色
+  'hover-color': getCssVar(color, primary, hover, text),                      // 菜单项悬浮色
+  'hover-bg-color': getCssVar(color, primary, hover),                         // 菜单项悬浮背景色
+  'active-color': getCssVar(color, primary, active, text),                    // 菜单项选中色 
+  'active-bg-color': getCssVar(color, primary, active),                       // 菜单项选中背景色
+  'border-color': getCssVar(color, border),                                   // 边框颜色 
+  'color-icon-0': getCssVar(color, icon, 0),                                  // 主要图标颜色
+  'color-icon-1': getCssVar(color, icon, 1),                                  // 次要图标颜色
+  'horizontal-color': getCssVar(color, primary, text),                        // 水平字体颜色
+  'horizontal-color-1':getCssVar(color, text, 5),                             // 水平应用搜索框文本色
+  'horizontal-bg-color': getCssVar(color, primary),                           // 水平背景色
+  'horizontal-bg-color-1': getCssVar(color, bg, 5),                           // 水平应用搜索框背景色
+  'horizontal-hover-color': getCssVar(color, primary, hover, text),           // 水平菜单项悬浮色
+  'horizontal-hover-bg-color': getCssVar(color, primary, hover),              // 水平菜单项悬浮背景色
+  'horizontal-active-color': getCssVar(color, primary, active, text),         // 水平菜单项选中色
+  'horizontal-active-bg-color': getCssVar(color, primary, active),            // 水平菜单项选中背景色
+  'horizontal-menu-color': getCssVar(color, text, menu),                      // 水平菜单颜色
+  'horizontal-color-icon-0': getCssVar(color, icon, 0),                       // 水平主要图标颜色
+  'horizontal-color-icon-1': getCssVar(color, icon, 1),                       // 水平次图标颜色
+);
+
+@include b(panel-app-header) {
+  @include set-component-css-var('panel-app-header', $panel-app-header);
+
+  #{getCssVarName(color, text, 0)}: getCssVar(panel-app-header, color);
+  #{getCssVarName(color, text, 1)}: getCssVar(panel-app-header, color);
+  #{getCssVarName(color, text, 2)}: getCssVar(panel-app-header, color);
+  #{getCssVarName(color, text, 3)}: getCssVar(panel-app-header, color);
+  width: 100%;
+  height: 100%;
+  color: getCssVar(panel-app-header, color);
+  background-color: getCssVar(panel-app-header, bg, color);
+
+  * {
+    // 主要色
+    #{getCssVarName(color, text, menu)}: getCssVar(panel-app-header, menu, color);
+    #{getCssVarName(color, primary)}: getCssVar(panel-app-header, bg, color);
+    #{getCssVarName(color, primary, text)}: getCssVar(panel-app-header, color);
+    #{getCssVarName(color, primary, hover)}: getCssVar(panel-app-header, hover, bg, color);
+    #{getCssVarName(color, primary, hover, text)}: getCssVar(panel-app-header, hover, color);
+    #{getCssVarName(color, primary, active)}: getCssVar(panel-app-header, active, bg, color);
+    #{getCssVarName(color, primary, active, text)}: getCssVar(panel-app-header, active, color);
+
+    // 图标颜色
+    #{getCssVarName(color, icon, 0)}: getCssVar(panel-app-header, color, icon, 0);
+    #{getCssVarName(color, icon, 1)}: getCssVar(panel-app-header, color, icon, 1);
+
+    // 次要色
+    #{getCssVarName(color, text, 5)}: getCssVar(panel-app-header, color, 1);
+    #{getCssVarName(color, bg, 5)}: getCssVar(panel-app-header, bg, color, 1);
+
+    // TODO 特殊需求 在导航栏中菜单激活色和悬浮色相反
+    @include b(control-appmenu) {
+      >.el-menu {
+        #{getCssVarName(color, primary, hover)}: getCssVar(panel-app-header, active, bg, color);
+        #{getCssVarName(color, primary, hover, text)}: getCssVar(panel-app-header, active, color);
+        #{getCssVarName(color, primary, active)}: getCssVar(panel-app-header, hover, bg, color);
+        #{getCssVarName(color, primary, active, text)}: getCssVar(panel-app-header, hover, color);
+      }
+    }
+  }
+
+  >.#{bem(row)} {
+    height: 100%;
+  }
+}
+
+@include b(panel-app-header) {
+  @include m(horizontal) {
+    #{getCssVarName(color, text, 0)}: getCssVar(panel-app-header, horizontal, color);
+    #{getCssVarName(color, text, 1)}: getCssVar(panel-app-header, horizontal, color);
+    #{getCssVarName(color, text, 2)}: getCssVar(panel-app-header, horizontal, color);
+    #{getCssVarName(color, text, 3)}: getCssVar(panel-app-header, horizontal, color);
+    color: getCssVar(panel-app-header, horizontal, color);
+    background-color: getCssVar(panel-app-header, horizontal, bg, color);
+
+    * {
+      // 主要色
+      #{getCssVarName(color, text, menu)}: getCssVar(panel-app-header, horizontal, menu, color);
+      #{getCssVarName(color, primary)}: getCssVar(panel-app-header, horizontal, bg, color);
+      #{getCssVarName(color, primary, text)}: getCssVar(panel-app-header, horizontal, color);
+      #{getCssVarName(color, primary, hover)}: getCssVar(panel-app-header, horizontal, hover, bg, color);
+      #{getCssVarName(color, primary, hover, text)}: getCssVar(panel-app-header, horizontal, hover, color);
+      #{getCssVarName(color, primary, active)}: getCssVar(panel-app-header, horizontal, active, bg, color);
+      #{getCssVarName(color, primary, active, text)}: getCssVar(panel-app-header, horizontal, active, color);
+
+      // 图标颜色
+      #{getCssVarName(color, icon, 0)}: getCssVar(panel-app-header, horizontal, color, icon, 0);
+      #{getCssVarName(color, icon, 1)}: getCssVar(panel-app-header, horizontal, color, icon, 1);
+
+      // 次要色
+      #{getCssVarName(color, text, 5)}: getCssVar(panel-app-header, horizontal, color, 1);
+      #{getCssVarName(color, bg, 5)}: getCssVar(panel-app-header, horizontal, bg, color, 1);
+
+      // TODO 特殊需求 在导航栏中菜单激活色和悬浮色相反
+      @include b(control-appmenu) {
+        >.el-menu {
+          #{getCssVarName(color, primary, hover)}: getCssVar(panel-app-header, horizontal, active, bg, color);
+          #{getCssVarName(color, primary, hover, text)}: getCssVar(panel-app-header, horizontal, active, color);
+          #{getCssVarName(color, primary, active)}: getCssVar(panel-app-header, hover, horizontal, bg, color);
+          #{getCssVarName(color, primary, active, text)}: getCssVar(panel-app-header, horizontal, hover, color);
+        }
+      }
+    }
+  }
+}

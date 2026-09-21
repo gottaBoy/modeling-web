@@ -1,0 +1,72 @@
+// 开关根元素
+$switch-tristate: (
+    bg-color: getCssVar(color,white),                                       // 背景色
+    disabled-bg-color: getCssVar(color,bg,4),                                 // 禁用背景色
+    left-bg-color: getCssVar(color,danger),                                   // 左侧状态背景色
+    right-bg-color: getCssVar(color,primary),                                 // 右侧状态背景色
+    center-bg-color: getCssVar(color,fill,1),                                 // 中间状态背景色
+);
+
+@include b('switch-tristate'){
+    @include set-component-css-var('switch-tristate', $switch-tristate);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    height: 32px;
+    @include e('switch-wrapper'){
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 20px;
+        cursor: pointer;
+        border-radius: 10px;
+
+        &::after{
+            position: absolute;
+            top: 2px;
+            width: 16px;
+            height: 16px;
+            content: '';
+            background-color: getCssVar(switch-tristate,bg-color);
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        @include when('left'){
+            background-color: getCssVar(switch-tristate,left-bg-color);
+
+            &::after{
+                left: 2px;
+            }
+        }
+        @include when('right'){
+            background-color: getCssVar(switch-tristate,right-bg-color);
+
+            &::after{
+                left: 26px;
+            }
+        }
+        @include when('center'){
+            background-color: getCssVar(switch-tristate,center-bg-color);
+
+            &::after{
+                left: 14px;                  
+            }
+        }
+        @include when('disabled'){
+            cursor: not-allowed;
+            
+            &::before{
+                position: absolute;
+                top: 0;
+                left: 0;
+                width:100%;
+                height: 100%;
+                content: '';
+                background-color: getCssVar(switch-tristate,disabled-bg-color);
+                opacity: 0.3;
+            }
+        }
+    }
+}

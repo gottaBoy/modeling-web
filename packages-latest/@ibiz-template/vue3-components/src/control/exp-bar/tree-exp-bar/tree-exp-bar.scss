@@ -1,0 +1,16 @@
+// 树导航栏根元素
+$control-treeexpbar: (
+  min-width: 300px,                                                                 // 导航栏最小宽
+  bg-color: transparent,                                                            // 导航栏背景色
+  padding: getCssVar('spacing', 'none'),                                            // 导航栏内边距
+);
+
+@include b('control-treeexpbar') {
+  @include set-component-css-var('control-treeexpbar', $control-treeexpbar);
+
+  min-width: getCssVar('control-treeexpbar', 'min-width');
+  height: 100%;
+  padding: getCssVar('control-treeexpbar', 'padding');
+  overflow-y: auto;
+  background-color: getCssVar('control-treeexpbar', 'bg-color');
+}

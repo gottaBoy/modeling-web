@@ -1,0 +1,18 @@
+/* stylelint-disable-next-line selector-max-id */
+#app {
+  width: 100vw;
+  height: 100vh;
+  background-color: getCssVar(color, bg, 0);
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  border: 0;
+
+  // 缓解 zoom 非整数缩放导致的字体发虚
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricprecision;
+}

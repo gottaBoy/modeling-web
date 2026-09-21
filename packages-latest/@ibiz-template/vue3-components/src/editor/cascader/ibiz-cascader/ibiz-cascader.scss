@@ -1,0 +1,70 @@
+// 级联选择器根元素
+$cascader: (
+  font-size: getCssVar(form-item, font-size),                               // 字体大小
+  text-color: getCssVar(form-item, text-color),                             // 字体颜色
+  line-height: getCssVar(form-item, line-height),                           // 行高
+  readonly-color: getCssVar(form-item, readonly-color),                     // 只读字体色
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+@include b(cascader) {
+  @include set-component-css-var(cascader, $cascader);
+
+  .el-cascader {
+    width: 100%;
+  }
+
+  @include m(readonly) {
+    font-size: getCssVar(cascader, font-size);
+    line-height: getCssVar(cascader, line-height);
+    color: getCssVar(cascader, 'readonly-color');
+  }
+}
+
+// 表单下的时间选择器默认显示，悬浮上去显示编辑器
+@include b(cascader-form-default-content){
+  display: none;
+}
+
+@include b(form-item){
+
+  @include b(cascader) {
+    @include when(show-default){
+      // 悬浮显示编辑器
+      &:hover{
+        @include b(cascader-form-default-content){
+          display: none;
+        }     
+        @include b(cascader-input){
+          display: block;    
+        }       
+      }    
+      
+      // 不悬浮时显示信息态
+      @include b(cascader-form-default-content){      
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: getCssVar(cascader, hover-edit-padding);        
+        font-family: Arial, sans-serif;      
+        font-size: getCssVar(cascader, font-size);
+        line-height: getCssVar(cascader, line-height);
+        color: getCssVar(cascader, text-color);      
+      }
+      @include b(cascader-input){
+        display: none;  
+      }
+      
+      // 输入态
+      @include when(editable){
+        @include b(cascader-form-default-content){
+          display: none;
+        }     
+        @include b(cascader-input){
+          display: block;    
+        }  
+      }
+    }
+
+  }
+}

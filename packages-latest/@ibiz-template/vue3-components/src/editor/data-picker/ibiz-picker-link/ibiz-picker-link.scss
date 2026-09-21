@@ -1,0 +1,65 @@
+// 数据链接根元素
+$picker-link: (
+  font-size: getCssVar(form-item, font-size),                               // 字体大小
+  line-height: getCssVar(form-item, line-height),                           // 行高
+  text-color: getCssVar(color, link),                                       // 字体颜色
+  hover-color: getCssVar(color, link-hover),                                // 悬浮色
+  readonly-color: getCssVar(form-item, readonly-color),                     // 只读字体色
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+@include b(picker-link) {
+  @include set-component-css-var(picker-link, $picker-link);
+
+  height: 100%;
+  font-size: getCssVar('picker-link', 'font-size');
+  line-height: getCssVar(picker-link, line-height);
+  color: getCssVar(picker-link, text-color);
+  cursor: pointer;
+
+
+  &:hover {
+    color: getCssVar(picker-link, hover-color);
+  }
+
+  @include m(disabled) {
+    cursor: not-allowed;
+  }
+
+  @include when(empty) {
+    color: inherit;
+    cursor: auto;
+  }
+
+  @include m(readonly) {
+    color: getCssVar(picker-link, readonly-color);
+
+    @include when(empty) {
+      color: getCssVar(picker-link, readonly-color);
+    }
+  }
+
+  @include when(ellipsis) {
+    a {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  a {
+    display: inline-block;
+    height: 100%;
+  }
+}
+
+
+@include b(form-item){
+
+  @include b(picker-link) {
+    @include when(show-default){
+      padding: getCssVar(picker-link, hover-edit-padding);
+    }
+  }
+}

@@ -1,0 +1,103 @@
+// 分页器样式
+$pagination: (
+  font-size: getCssVar(font-size, regular),           // 分页器字体大小
+  font-weight: getCssVar(font-weight, regular),       // 分页器字体粗细
+  color: getCssVar(color, text, 2),                   // 分页器基础文本色
+  height: 50px,                                       // 分页器高度
+  padding: 0 getCssVar(spacing, base-tight),          // 分页器左右内边距
+);
+
+// 分页器页码项样式
+$pagination-item: (
+  color: getCssVar(pagination, color),                // 页码文本色
+  active-color: getCssVar(color, primary, text),      // 当前页码文本色
+  active-bg-color: getCssVar(color, primary),         // 当前页码背景色
+  gap: getCssVar(spacing, tight),                     // 页码项间距
+  border: 1px solid getCssVar(color, border),         // 页码项边框
+  icon-size: getCssVar(width-icon, medium),           // 翻页图标尺寸
+);
+
+@include b(pagination) {
+  @include set-component-css-var(pagination, $pagination);
+  @include set-component-css-var(pagination-item, $pagination-item);
+  @include flex(row, flex-end);
+
+  height: getCssVar(pagination, height);
+  padding: getCssVar(pagination, padding);
+
+  .el-pagination{   
+    overflow: auto;
+    font-size: getCssVar(pagination, font-size);
+    font-weight: getCssVar(pagination, font-weight);
+    color: getCssVar(pagination, color);
+    
+    @include b(pagination-btn){
+      margin-right: getCssVar(pagination-item, gap);
+
+      .el-button {
+        color: getCssVar(pagination-item, color);
+        border: getCssVar(pagination-item, border);
+
+        ion-icon {
+          width: getCssVar(pagination-item, icon-size);
+          height: getCssVar(pagination-item, icon-size);
+        }
+      }
+    }
+
+    .btn-prev,.btn-next{
+      border: getCssVar(pagination-item, border);
+    }
+
+    .el-pager li{
+      color: getCssVar(pagination-item,color);
+      border: getCssVar(pagination-item, border);
+
+      &.is-active {
+        color: getCssVar(pagination-item, active-color);
+        background-color: getCssVar(pagination-item, active-bg-color);
+      }
+    }
+
+    .el-pagination__sizes{
+      margin-left: getCssVar(pagination-item, gap);
+      border: getCssVar(pagination-item, border);
+
+      .el-select .el-input__wrapper{
+        background-color: transparent;
+      }
+
+      .el-input__inner{
+        color: getCssVar(pagination-item, color);
+      }
+    }
+
+    .el-pagination__jump{
+      color: getCssVar(pagination-item,color);
+
+      .el-pagination__editor{
+        border: getCssVar(pagination-item, border);
+
+        .el-input__wrapper{
+          background-color: transparent;
+        }
+      }
+    }
+  }
+}
+@include b(pagination-simple){
+  .el-pager{
+    .number{
+      display: none;
+
+      &.is-active{
+        display: block;
+      }
+    }
+
+    .more{
+      display: none;
+    }
+
+  }
+}

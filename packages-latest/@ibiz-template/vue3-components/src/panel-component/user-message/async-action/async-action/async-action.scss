@@ -1,0 +1,115 @@
+$async-action: (
+  loading-warp-bg-color: linear-gradient(90deg,getCssVar(color, primary, light, hover),getCssVar(color, primary)),
+);
+
+@include b(async-action) {
+  @include set-component-css-var('async-action', $async-action);
+  @include flex(row, space-between, center);
+
+  position: relative;
+
+  @include m(clickable){
+    cursor: pointer;
+  }
+
+  &:hover{
+    background-color: getCssVar(color, fill, 1);
+  }
+
+  @include e(caption){
+    margin-bottom: getCssVar('spacing', 'tight');
+    font-weight: getCssVar(font-weight, bold);
+  }
+
+  @include e(error-info){
+    margin-bottom: getCssVar('spacing', 'tight');
+    color: getCssVar(color, danger);
+    @include utils-ellipsis;
+
+  }
+
+}
+
+@include b(async-action-left) {
+  flex-grow: 0;
+  flex-shrink: 0;
+  width: 50px;
+  font-size: getCssVar(font-size,header-3);
+  text-align: center;
+}
+
+@include b(async-action-right) {
+  flex-grow: 0;
+  flex-shrink: 0;
+  width: 80px;
+  text-align: center;
+
+}
+
+@include b(async-action-center) {
+  flex-grow: 1;
+
+  // flex-shrink: 1;
+  width: 342px;
+}
+
+@keyframes breath {
+  0% {
+    opacity: .5
+  }
+
+  10% {
+    opacity: .6
+  }
+
+  20% {
+    opacity: .7
+  }
+
+  30% {
+    opacity: .8
+  }
+
+  40% {
+    opacity: .9
+  }
+
+  50% {
+    opacity: 1
+  }
+
+  60% {
+    opacity: .9
+  }
+
+  70% {
+    opacity: .8
+  }
+
+  80% {
+    opacity: .7
+  }
+
+  90% {
+    opacity: .6
+  }
+
+  100% {
+    opacity: .5
+  }
+}
+
+@include b(async-action-loading-warp) {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+
+  @include e(inner){
+    width: 0;
+    height: 100%;
+    text-align: right;
+    background: getCssVar(async-action,loading-warp-bg-color) !important;
+    transition: width .5s;
+    animation: breath 2s ease-in-out infinite;
+  }
+}

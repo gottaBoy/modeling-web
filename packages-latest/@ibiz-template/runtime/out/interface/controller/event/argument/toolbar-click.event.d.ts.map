@@ -1,0 +1,1 @@
+{"version":3,"file":"toolbar-click.event.d.ts","sourceRoot":"","sources":["../../../../../src/interface/controller/event/argument/toolbar-click.event.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,SAAS,EAAE,MAAM,cAAc,CAAC;AAEzC;;;;;;;GAOG;AACH,MAAM,WAAW,iBAAkB,SAAQ,SAAS;IAClD,QAAQ,EAAE,MAAM,CAAC;IACjB,KAAK,EAAE,UAAU,CAAC;IAClB,UAAU,EAAE,YAAY,GAAG,OAAO,CAAC;CACpC"}

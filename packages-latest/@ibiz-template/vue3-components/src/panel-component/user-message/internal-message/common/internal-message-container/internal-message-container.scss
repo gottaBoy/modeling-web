@@ -1,0 +1,66 @@
+@include b(internal-message-container) {
+  position: relative;
+
+  @include m(clickable) {
+    cursor: pointer;
+  }
+
+  &:hover {
+    .#{bem(internal-message-container-toolbar)} {
+      display: block;
+    }
+  }
+
+  @include e(unread-tag) {
+    position: absolute;
+    top: getCssVar('spacing', 'tight');
+    right: getCssVar('spacing', 'tight');
+    display: none;
+    align-self: flex-start;
+    width: getCssVar('width-icon', 'extra-small');
+    height: getCssVar('width-icon', 'extra-small');
+    background-color: getCssVar(color, danger);
+    border-radius: getCssVar(border, radius, circle);
+  }
+
+  @include e(click-tag) {
+    position: absolute;
+    top: 50%;
+    right: getCssVar('spacing', 'tight');
+    font-size: getCssVar('font-size', 'header-6');
+    transform: translateY(-50%);
+
+    &:hover {
+      color: getCssVar(color, primary);
+    }
+  }
+
+  @include m(unread) {
+    @include e(unread-tag) {
+      display: block;
+    }
+
+    &:hover {
+      @include e(unread-tag) {
+        display: none;
+      }
+    }
+  }
+}
+
+@include b(internal-message-container-toolbar) {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: none;
+  padding: getCssVar('spacing', 'tight');
+
+  @include e(button) {
+    margin-left: getCssVar('spacing', 'tight');
+    cursor: pointer;
+
+    &:hover {
+      color: getCssVar(color, primary);
+    }
+  }
+}

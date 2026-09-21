@@ -1,0 +1,9 @@
+@include b(control-panel) {
+  width: 100%;
+  height: 100%;
+}
+
+@include b(control-panel-content) {
+  width: 100%;
+  height: 100%;
+}

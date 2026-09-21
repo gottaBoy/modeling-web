@@ -1,0 +1,1 @@
+{"version":3,"file":"i-api-screen-shot-util.d.ts","sourceRoot":"","sources":["../../../../src/interface/api/util/i-api-screen-shot-util.ts"],"names":[],"mappings":"AAAA;;;;GAIG;AACH,MAAM,WAAW,kBAAkB;IACjC;;;;;;OAMG;IACH,YAAY,CACV,OAAO,EAAE,WAAW,EACpB,IAAI,EAAE;QAAE,SAAS,CAAC,EAAE,WAAW,CAAC;QAAC,aAAa,CAAC,EAAE,MAAM,CAAA;KAAE,GACxD,OAAO,CAAC,MAAM,GAAG,SAAS,CAAC,CAAC;CAChC"}

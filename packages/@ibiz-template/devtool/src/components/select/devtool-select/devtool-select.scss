@@ -1,0 +1,52 @@
+@include b(devtool-select) {
+  position: relative;
+  display: inline-block;
+  color: getCssVar(color, text, 2);
+
+  @include e(option) {
+    position: absolute;
+    top: 36px;
+    z-index: 2000;
+    padding: 6px 0;
+    background: getCssVar(color, bg, 3);
+    border-radius: 4px;
+    box-shadow: 0 0 12px getCssVar(color, border);
+  }
+
+  @include e(title) {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 6px;
+    color: #666;
+    cursor: pointer;
+    border: 1px solid getCssVar(color, border);
+    border-radius: 4px;
+
+    &:hover {
+      border-color: getCssVar(color,primary);
+    }
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      /* 一行显示，超长省略号 */
+      white-space: nowrap;
+    }
+  }
+
+  @include e(placeholder) {
+    color: getCssVar(color, text, 2);
+  }
+
+  @include e(icon) {
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    transition: transform 0.3s;
+
+    &.reverse {
+      transform: rotateZ(-180deg);
+    }
+  }
+}

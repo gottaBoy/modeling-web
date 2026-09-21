@@ -1,0 +1,34 @@
+#devtool{
+  display: none;
+}
+
+.devtool-enable{
+  // 选中的视图的样式
+  .devtool-selected-view{
+    outline:3px solid red !important;
+  }
+
+  // 悬浮视图的样式
+  .devtool-hover-view{
+    position: relative;
+
+    &::before{
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 9999;
+      width: 100%;
+      height: 100%;
+      content: '';
+      background-color: rgb(93 206 149 / 50%); /* 半透明遮罩 */
+    }
+  }
+
+  #app{
+    width: calc(100vw - 410px);
+  }
+
+  #devtool{
+    display: block;
+  }
+}

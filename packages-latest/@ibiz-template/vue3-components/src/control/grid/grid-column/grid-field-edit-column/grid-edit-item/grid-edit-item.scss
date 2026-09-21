@@ -1,0 +1,66 @@
+// 表格内容编辑单元格样式
+$grid-edit-item: (
+  cell-hover-bg-color: getCssVar(control-grid, body-cell, hover-bg-color), // 编辑项单元格悬浮背景色（继承自内容单元格）
+  cell-padding: getCssVar(control-grid, body-cell, padding),               // 编辑项单元格内边距（继承自内容单元格）
+);
+
+// 三块定义该变量的地方，要改的话一起改！ 
+// form-item, panel-field, grid-edit-item
+$form-item: (
+  'label-color': getCssVar(color, text, 1),
+  'text-color': getCssVar(color, text, 2),
+  'hover-color': getCssVar(color, text, 0),
+  'hover-bg-color': getCssVar(color, fill, 1),
+  // 只读编辑器字体颜色在表格里恢复成正常
+  'readonly-color': getCssVar(color, text, 0),
+  'border-color': transparent,
+  'font-size': getCssVar(font-size, regular),
+  'placeholder-color': getCssVar(color, text, 3),
+  'disabled-color': getCssVar(color, disabled, text),
+  'disabled-bg-color': getCssVar(color, disabled, fill),
+  'disabled-border-color': getCssVar(color, disabled, border),
+  'active-bg': getCssVar(color, fill, 2),
+  'active-border': getCssVar(active, bg),
+  'focus-bg': getCssVar(color, fill, 0),
+  'focus-border': getCssVar(color, focus, border),
+  'line-height': getCssVar(editor,default,line-height),
+  'font-weight': getCssVar(font-weight, regular),
+  'hover-edit-padding': getCssVar('spacing','none') 11px,  
+);
+
+@include b(grid-edit-item) {
+  @include set-component-css-var(grid-edit-item, $grid-edit-item);
+  @include set-component-css-var(form-item, $form-item);
+
+  width: 100%;
+  height: 100%;
+
+  &.is-error {
+    @include e(tooltip) {
+      border: 1px solid getCssVar('color','danger');
+    }
+  }
+
+  @include e(tooltip) {
+    display: flex;
+    align-items: center;
+    justify-content: getCssVar('grid-column', 'justify-content');
+    width: 100%;
+    height: 100%;
+    padding: getCssVar(grid-edit-item, cell-padding);
+    text-align: getCssVar('grid-column','text-align');
+  }
+
+  @include m(show-mask) {
+    &:hover {
+      cursor: pointer;
+      background-color: getCssVar(grid-edit-item, cell-hover-bg-color);
+    }
+  }
+
+  // 表格编辑时输入框不需要撑满高度100%
+  .#{bem('input')} {
+    height: auto;
+  }
+
+}

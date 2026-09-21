@@ -1,0 +1,1 @@
+.ibiz-control-edit-form{--ibiz-control-edit-form-padding-bottom:var(--ibiz-spacing-tight);--ibiz-control-edit-form-filter-height:calc(100% - 32px);width:100%;height:100%;padding-bottom:var(--ibiz-control-edit-form-padding-bottom)}.ibiz-control-edit-form.is-item-filter .ibiz-control-form{height:var(--ibiz-control-edit-form-filter-height);overflow-y:auto}

@@ -1,0 +1,16 @@
+// 列表导航栏根元素
+$control-listexpbar: (
+  min-width: 300px,                                                                 // 导航栏最小宽
+  bg-color: transparent,                                                            // 导航栏背景色
+  padding: getCssVar('spacing', 'none'),                                            // 导航栏内边距
+);
+
+@include b('control-listexpbar') {
+  @include set-component-css-var('control-listexpbar', $control-listexpbar);
+
+  min-width: getCssVar('control-listexpbar', 'min-width');
+  height: 100%;
+  padding: getCssVar('control-listexpbar', 'padding');
+  overflow-y: auto;
+  background-color: getCssVar('control-listexpbar', 'bg-color');
+}

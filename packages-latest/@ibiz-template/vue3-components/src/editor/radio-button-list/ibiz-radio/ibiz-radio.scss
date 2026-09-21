@@ -1,0 +1,194 @@
+// 单选框列表根元素
+$radio: (
+  row-number: 0,                                                            // 每行项数量(为0时自适应)
+  font-size: getCssVar(form-item, font-size),                               // 字体大小
+  text-color: getCssVar(form-item, text-color),                             // 字体颜色
+  line-height: getCssVar(form-item, line-height),                           // 行高
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+  readonly-color: getCssVar(form-item, readonly-color),                     // 只读字体色
+);
+
+// 单选框列表项元素-按钮样式
+$radio-item-button: (
+  bg-color: getCssVar(color, tertiary, light, hover),                       // 圆角按钮背景色
+  border-color: getCssVar(color, tertiary, light, hover),                   // 圆角按钮边框色
+  border-radius: getCssVar(height-control, default),                        // 圆角按钮倒角
+  active-color: getCssVar(color, primary),                                  // 圆角按钮激活字体色
+  active-bg-color: getCssVar(color, secondary, light, default),             // 圆角按钮激活背景色
+  active-border-color: getCssVar(color, secondary, light, default),         // 圆角按钮激活边框色
+  disabled-color: getCssVar(color, disabled, text),                         // 圆角按钮禁用色
+  disabled-bg-color: getCssVar(color, disabled, bg),                        // 圆角按钮禁用背景色
+  disabled-border-color: getCssVar(color, disabled, border),                // 圆角按钮禁用边框色
+);
+
+// 单选框列表项元素-分页样式
+$radio-item-tab: (
+  font-size: getCssVar(font-size, regular),                                 // 字体大小
+  hover-color: getCssVar(color, primary),                                   // 悬浮色
+  active-color: getCssVar(color, primary),                                  // 激活色
+  disabled-color: getCssVar(color, disabled, text),                         // 禁用色
+);
+
+/* stylelint-disable no-descending-specificity */
+@include b(radio) {
+  @include set-component-css-var(radio, $radio);
+  @include set-component-css-var(radio-item-button, $radio-item-button);
+  @include set-component-css-var(radio-item-tab, $radio-item-tab);
+
+  .el-radio__label {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    .#{bem(icon)}{
+      display: flex;
+      margin-right: getCssVar(spacing, extra-tight);
+      color: getCssVar(radio, text-color);
+    }
+  }
+  @include e(text) {
+    overflow: hidden;
+    font-size: getCssVar(radio, font-size);
+    color: getCssVar(radio, text-color);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @include m(readonly) {
+    font-size: getCssVar(radio, font-size);
+    line-height: getCssVar(radio, line-height);
+    color: getCssVar(radio, readonly-color);
+  }
+
+  @include e(button) {
+    @include m(round-corner){
+      margin-right: getCssVar(spacing, base-loose);
+
+      &.el-radio-button.is-active {
+        .el-radio-button__inner {
+          color: getCssVar(radio-item-button, active-color);
+          background-color: getCssVar(radio-item-button, active-bg-color);
+          border-color: getCssVar(radio-item-button, active-border-color);
+        }
+
+        .el-radio-button__original-radio:checked+.el-radio-button__inner {
+          box-shadow: none;
+        }
+      }
+
+      &.el-radio-button .el-radio-button__inner {
+        padding: getCssVar('spacing', 'tight') getCssVar('spacing', 'base');
+        background-color: getCssVar(radio-item-button, bg-color);
+        border-color: getCssVar(radio-item-button, border-color);
+        border-radius: getCssVar(radio-item-button, border-radius);
+
+        &:nth-last-child(1) {
+          margin: 0;
+        }
+      }
+
+      &.el-radio-button.is-disabled {
+        &.is-active .el-radio-button__inner {
+          border: getCssVar('border-thickness', 'control') solid getCssVar(radio-item-button, disabled-color);
+        }
+
+        .el-radio-button__inner {
+          color: getCssVar(radio-item-button, disabled-color);
+          background: getCssVar(radio-item-button, disabled-bg-color);
+          border-color: getCssVar(radio-item-button, disabled-border-color);
+        }
+      }
+    }
+
+    .el-radio-button__inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+  
+      .#{bem(icon)}{
+        display: flex;
+        margin-right: getCssVar(spacing, extra-tight);
+      }
+    }
+
+    @include m(text) {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  
+  @include when(grid-layout){
+    .el-radio-group{
+      display: grid;
+      grid-template-columns: repeat(getCssVar(radio, row-number), 1fr);
+    }
+  }
+}
+
+
+@include b(form-item){
+
+  @include b(radio) {
+    @include when(show-default){
+      padding: getCssVar(radio, hover-edit-padding);
+    }
+  }
+}
+
+@include b(radio-tab) {
+  display: flex;
+  height: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+@include b(radio-tab-item){
+  position: relative;
+  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: 100%;
+  padding: getCssVar(spacing, base, tight);
+  font-size: getCssVar(radio-item-tab, font-size);
+  cursor: pointer;
+
+  &:hover{
+    color: getCssVar(radio-item-tab, hover-color);
+  }
+
+  .#{bem(icon)}{
+    display: flex;
+    margin-right: getCssVar(spacing, extra-tight);
+  }
+
+  @include when(selected){
+    color: getCssVar(radio-item-tab, active-color);
+
+    &::after{
+      position: absolute;
+      bottom: 2px;
+      left: getCssVar(spacing, base, tight);
+      width: calc(100% - 2 * getCssVar(spacing, base, tight));
+      height: 2px;
+      content: "";
+      background-color: getCssVar(radio-item-tab, active-color);
+    }
+  }
+  
+  @include when(disabled){
+    color: getCssVar(radio-item-tab, disabled-color);
+    cursor: not-allowed;
+
+    &::after{
+      background-color: getCssVar(radio-item-tab, disabled-color);
+    }
+  }
+
+  @include e(text) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

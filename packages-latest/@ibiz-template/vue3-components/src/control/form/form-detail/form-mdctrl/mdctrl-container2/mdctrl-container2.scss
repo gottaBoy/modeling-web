@@ -1,0 +1,144 @@
+@include b(mdctrl-container2-header) {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+}
+
+@include b(mdctrl-container2-header-content) {
+  display: flex;
+  flex: 1;
+  height: getCssVar('height-control', 'large');
+  overflow: auto hidden;
+  background: getCssVar(color, bg, 0);
+  border: 1px solid getCssVar(color, border);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
+
+@include b(mdctrl-container2-header-left-arrow) {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: getCssVar('spacing', 'base-loose');
+  cursor: pointer;
+  background: getCssVar(color, disabled, border);
+
+  > svg {
+    fill: getCssVar(color, text, 3);
+  }
+}
+
+@include b(mdctrl-container2-header-right-arrow) {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: getCssVar('spacing', 'base-loose');
+  cursor: pointer;
+  background: getCssVar(color, disabled, border);
+
+  > svg {
+    fill: getCssVar(color, text, 3);
+  }
+}
+
+
+@include b(mdctrl-container2-header-item) {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: calc((100% - #{getCssVar('height-control', 'large')}) / 5);
+  height: getCssVar('height-control', 'large');
+  padding: 0 getCssVar('spacing', 'base-loose');
+  line-height: getCssVar('height-control', 'large');
+  text-align: center;
+  cursor: pointer;
+  border-right: 1px solid getCssVar(color, border);
+
+  @include e(drag-icon) {
+    position: absolute;
+    left: 0;
+    display: none;
+
+    > svg {
+      fill: getCssVar(color, text, 3);
+    }
+  }
+
+  @include e(icon) {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    margin-right: getCssVar('spacing', 'extra-tight');
+  }
+
+  @include e(text) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @include e(btn) {
+    position: absolute;
+    top: 0;
+    right: getCssVar('spacing', 'extra-tight');
+    display: none;
+
+    > svg {
+      fill: getCssVar(color, text, 3);
+    }
+
+    &:hover {
+      > svg {
+        fill: getCssVar(color, danger);
+      }
+    }
+  }
+
+  @include m(hidden-border) {
+    border-right: none;
+  }
+
+  @include m(active) {
+    background: getCssVar(color, bg, 1);
+  }
+
+  @include m(drag) {
+    background: getCssVar(color, bg, 1);
+    border: 1px solid getCssVar(color, border);
+  }
+
+  @include m(ghost) {
+    background: getCssVar(color, border);
+    border: none;
+    
+    @include e(text) {
+      opacity: 0;
+    }
+  }
+
+  &:hover:not(.#{bem('mdctrl-container2-header-item', '', 'dragging')}):not(.#{bem('mdctrl-container2-header-item', '', 'drag')}):not(.#{bem('mdctrl-container2-header-item', '', 'ghost')}) {
+    background: getCssVar(color, bg, 1);
+    
+    .#{bem('mdctrl-container2-header-item', 'drag-icon')},
+    .#{bem('mdctrl-container2-header-item', 'btn')}{
+      display: block;
+    }
+  }
+}

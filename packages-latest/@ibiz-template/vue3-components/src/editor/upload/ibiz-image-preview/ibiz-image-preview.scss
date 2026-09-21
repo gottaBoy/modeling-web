@@ -1,0 +1,26 @@
+// 图片预览根元素
+$image-preview: (
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+@include b('image-preview') {
+  @include set-component-css-var('image-preview', $image-preview);
+
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  >.el-image {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+
+@include b(form-item){
+
+  @include b(image-preview) {
+    @include when(show-default){
+      padding: getCssVar(image-preview, hover-edit-padding);
+    }
+  }
+}

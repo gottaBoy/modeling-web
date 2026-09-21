@@ -1,0 +1,28 @@
+// 用户操作样式
+$user-action: (
+  width: calc(getCssVar('width-icon', 'extra-large') + 4px),   // 图标按钮宽度
+  height: calc(getCssVar('width-icon', 'extra-large') + 4px),  // 图标按钮高度
+  margin-bottom: getCssVar('spacing', 'extra-tight'),          // 图标按钮底部外边距
+);
+
+@include b('user-action'){
+  @include set-component-css-var('user-action', $user-action);
+
+  width: 100%;
+  height: 100%;
+  @include flex(row, center, center);
+
+  @include e("image"){
+    display: flex;
+    place-items: center center;
+    justify-content: center;
+    width: getCssVar(user-action, width);
+    height: getCssVar(user-action, height);
+    margin-bottom: getCssVar(user-action, margin-bottom);
+    cursor: pointer;
+
+    svg {
+      pointer-events: none;
+    }
+  }
+}

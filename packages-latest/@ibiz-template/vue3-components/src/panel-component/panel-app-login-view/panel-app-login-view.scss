@@ -1,0 +1,141 @@
+// 登录视图容器样式
+$panel-app-login-view: (
+  header-height: 150px,                                                                                          // 头部区域高度
+  bg-color: linear-gradient(120deg, getCssVar(color, primary, light, active) 0%, getCssVar(color, primary, light, default) 100%), // 容器渐变背景色
+  width: 430px,                                                                                                   // 容器宽度
+  margin-bottom: 80px,                                                                                            // 容器底部外边距
+);
+
+// 登录视图头部样式
+$panel-app-login-view-header: (
+  height: 150px,                                            // 头部高度
+  url: url('/assets/images/login-header.png'),              // 头部背景图
+  font-size: getCssVar(font-size, header-2),                // 头部标题字体大小
+  font-weight: getCssVar(font-weight, bold),                 // 头部标题字体粗细
+  color: getCssVar(color, primary, text),                     // 头部标题文本色
+  text-shadow: getCssVar(color, shadow),                      // 头部标题文字阴影
+);
+
+// 登录视图内容区域样式
+$panel-app-login-view-content: (
+  height: 380px,                                       // 内容区域高度
+  padding: 100px 40px 40px,                            // 内容区域内边距（顶部留出头像/头部空间）
+  color: getCssVar(editor, default, text-color),       // 内容区域文本色
+  bg-color: getCssVar(color, bg, 1),                    // 内容区域背景色
+  font-size: getCssVar(width-icon, medium),             // 内容区域图标字体大小
+);
+
+// 登录视图头像样式
+$panel-app-login-view-avatar: (
+  url: url('/assets/images/login-avatar.png'),        // 头像默认图
+  border: 4px solid getCssVar(color, bg, 1),            // 头像边框
+  border-radius: getCssVar(border, radius, circle),    // 头像圆角（圆形）
+);
+
+// 登录视图按钮区域样式
+$panel-app-login-view-button: (
+  gap: 10px,                                            // 按钮间距
+  letter-spacing: getCssVar(spacing, super-tight),      // 按钮文字字间距
+);
+
+@include b(panel-app-login-view){
+  @include set-component-css-var(panel-app-login-view, $panel-app-login-view);
+  @include set-component-css-var(panel-app-login-view-header, $panel-app-login-view-header);
+  @include set-component-css-var(panel-app-login-view-content, $panel-app-login-view-content);
+  @include set-component-css-var(panel-app-login-view-avatar, $panel-app-login-view-avatar);
+  @include set-component-css-var(panel-app-login-view-button, $panel-app-login-view-button);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  background: getCssVar(panel-app-login-view, bg-color);
+
+  // 整体
+  .#{bem(panel-container,'',container1)} {
+    width: getCssVar(panel-app-login-view, width);
+    margin-bottom: getCssVar(panel-app-login-view, margin-bottom);
+  }
+
+  // 头部
+  .#{bem(panel-container,'',container4)} {
+    position: relative;
+    height: getCssVar(panel-app-login-view, header, height);
+    background:  getCssVar(panel-app-login-view, header, url);
+    background-size: 100% 100%;
+
+    .#{bem(rawitem)} {
+      position: absolute;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 80%;
+      font-size: getCssVar(panel-app-login-view, header, font-size);
+      font-weight: getCssVar(panel-app-login-view, header, font-weight);
+      color: getCssVar(panel-app-login-view, header, color);
+      text-shadow: getCssVar(panel-app-login-view, header, text-shadow);
+    }
+  }
+
+  // 内容区
+  .#{bem(panel-container,'',container5)} {   
+    position: relative;
+    height: getCssVar(panel-app-login-view, content, height);
+    padding: getCssVar(panel-app-login-view, content, padding);
+    background: getCssVar(panel-app-login-view, content, bg-color);
+
+    // 浏览器自动填写之后的输入框的背景色和文字颜色
+    .el-input__inner:-webkit-autofill{
+      box-shadow:0 0 0 1000px getCssVar(panel-app-login-view, content, bg-color) inset;
+      -webkit-text-fill-color: getCssVar(panel-app-login-view, content, color);
+    }
+  
+    ion-icon {
+      font-size: getCssVar(panel-app-login-view, content, font-size);
+    }    
+  }
+
+  // 头像
+  .#{bem(panel-container,'',container6)} {
+    position: absolute;
+    top: -50px;
+    right: calc(50% - 50px);
+    z-index: 2;
+    display: block;
+    width: 100px;
+    height: 100px;
+    user-select: none;
+    background: getCssVar(panel-app-login-view, avatar, url);
+    background-size: 100% 100%;
+    border: getCssVar(panel-app-login-view, avatar, border);
+    border-radius: getCssVar(panel-app-login-view, avatar, border-radius); 
+  }  
+
+  // 按钮
+  .#{bem(panel-container,'',container3)}{
+    >.#{bem(row)}{
+      & > * + *{
+        margin-left: getCssVar(panel-app-login-view, button, gap);
+      }
+
+
+      >.#{bem(col)}{
+        flex: 1;
+      }
+    }
+
+    .#{bem(panel-button)}{
+      width: 100%;
+      padding: 0;
+
+      .el-button {
+        width:100%;
+        letter-spacing: getCssVar(panel-app-login-view, button, letter-spacing);
+      }
+    }
+  }
+
+}

@@ -1,0 +1,279 @@
+/* stylelint-disable no-descending-specificity */
+$control-virtualized-table: (
+  text-color: getCssVar(color, text, 0),
+  bg-color: transparent,
+  padding: getCssVar('spacing', 'none'),
+  cell-padding: getCssVar(spacing, tight),
+  selection-padding: getCssVar(spacing, base-loose),
+  row-edit-bg-color: getCssVar(color, fill, 2),
+  row-bg-color: getCssVar(color, bg, 1),
+  row-bg-color-2: getCssVar(color, bg, 0),
+  row-hover-color: rgba(#{getCssVar(grey, 1)}, 1),
+  row-select-color: getCssVar(color, primary, light, default),
+  row-expand-icon-margin: getCssVar('spacing', 'none')
+    getCssVar('spacing', 'none') getCssVar('spacing', 'none')
+    getCssVar(spacing, tight),
+  now-header-height: 54px,
+  scrollbar-width: 4px,
+  scrollbar-bg-color: #{getCssVar(color, fill, 2)},
+  scrollbar-bg-hover-opacity: 0.5,
+  scrollbar-bg-hover-color: #{getCssVar(color, fill, 2)},
+);
+
+$control-virtualized-table-header: (
+  text-color: getCssVar(color, text, 2),
+  cell-padding: calc(getCssVar('spacing', 'base', 'tight') / 2)
+    getCssVar('spacing', 'base', 'tight'),
+  height: auto,
+  min-height: 54px,
+  bg-color: rgba(#{getCssVar(grey, 1)}, 1),
+  font-size: getCssVar(font-size, regular),
+  font-weight: getCssVar(font-weight, regular),
+);
+
+$control-virtualized-table-content: (
+  text-color: getCssVar(control-virtualized-table, text-color),
+  row-height: 48px,
+);
+
+$control-virtualized-table-page: (
+  text-color: getCssVar(color, text, 2),
+  height: 50px,
+  padding: getCssVar('spacing', 'none') getCssVar(spacing, base-tight),
+);
+
+$control-virtualized-table-footer: (
+  text-color: getCssVar(color, text, 2),
+  bg-color: rgba(#{getCssVar(grey, 1)}, 1),
+  font-size: getCssVar(font-size, regular),
+  font-weight: getCssVar(font-weight, bold),
+);
+
+@include b('control-virtualized-table') {
+  @include set-component-css-var(
+    control-virtualized-table,
+    $control-virtualized-table
+  );
+  @include set-component-css-var(
+    control-virtualized-table-header,
+    $control-virtualized-table-header
+  );
+  @include set-component-css-var(
+    control-virtualized-table-content,
+    $control-virtualized-table-content
+  );
+  @include set-component-css-var(
+    control-virtualized-table-page,
+    $control-virtualized-table-page
+  );
+  @include set-component-css-var(
+    control-virtualized-table-footer,
+    $control-virtualized-table-footer
+  );
+
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: getCssVar(control-virtualized-table, padding);
+  background-color: getCssVar(control-virtualized-table, bg-color);
+
+  // 支持分页时高度调整
+  @include when('enable-page') {
+    .el-auto-resizer {
+      height: calc(
+        100% - getCssVar(control-virtualized-table, page-height)
+      ) !important;
+    }
+
+    .el-table-v2__empty {
+      height: calc(100% - getCssVar(control-virtualized-table, page-height));
+    }
+  }
+
+  @include e('table') {
+    width: 100%;
+    height: 100%;
+
+    &.el-table-v2 {
+      --el-table-header-bg-color: #{getCssVar(
+          control-virtualized-table,
+          header,
+          bg-color
+        )};
+      --el-table-border-color: transparent;
+    }
+
+    .el-table-v2__empty {
+      height: 100%;
+    }
+
+    .el-virtual-scrollbar {
+      &.el-vl__horizontal {
+        height: getCssVar(control-virtualized-table, scrollbar-width) !important;
+      }
+
+      &.el-vl__vertical {
+        width: getCssVar(control-virtualized-table, scrollbar-width) !important;
+      }
+    }
+
+    // 清除边框线
+    .el-table-v2__header-row,
+    .el-table-v2__row {
+      border: none;
+    }
+
+    // 清除element单元格的padding
+    &.el-table-v2 {
+      .el-table-v2__header-cell,
+      .el-table-v2__row-cell {
+        padding: getCssVar(control-virtualized-table, cell-padding);
+
+        &:not(.is-selection) {
+          cursor: pointer;
+        }
+      }
+    }
+
+    // 行和列的背景色
+    .el-table-v2__main {
+      background-color: transparent;
+    }
+
+    &.el-table-v2 .el-table-v2__body .el-table-v2__row {
+      // 普通行列背景色
+      .el-table-v2__row-cell {
+        background: getCssVar(control-grid, row-bg-color);
+      }
+
+      // 偶数行列的背景色
+      &:nth-child(2n) {
+        .el-table-v2__row-cell {
+          background-color: getCssVar(control-grid, row-bg-color-2);
+        }
+      }
+
+      // 悬浮行列激活色
+      &:hover .el-table-v2__row-cell {
+        background-color: getCssVar(control-grid, row-hover-color);
+      }
+
+      &.is-selected .el-table-v2__row-cell {
+        background-color: getCssVar(
+          control-virtualized-table,
+          row,
+          select-color
+        );
+      }
+    }
+
+    // 表格body样式
+    .el-table-v2__body {
+      color: getCssVar(control-grid, content, text-color);
+      #{getCssVarName(color, text, 0)}: getCssVar(
+        control-grid,
+        content,
+        text-color
+      );
+      #{getCssVarName(color, text, 1)}: getCssVar(
+        control-grid,
+        content,
+        text-color
+      );
+      #{getCssVarName(color, text, 2)}: getCssVar(
+        control-grid,
+        content,
+        text-color
+      );
+      #{getCssVarName(color, text, 3)}: getCssVar(
+        control-grid,
+        content,
+        text-color
+      );
+      border-bottom: 0.1px solid getCssVar(color, border);
+    }
+
+    // 表格头样式
+    @include e('header-cell') {
+      font-size: getCssVar(control-grid, header, font-size);
+      font-weight: getCssVar(control-grid, header, font-weight);
+      color: getCssVar(control-grid, header, text-color);
+      @include overflow-wrap;
+    }
+  }
+
+  @include e('caret-wrapper') {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 14px;
+    overflow: initial;
+    line-height: 23px;
+    vertical-align: middle;
+    cursor: pointer;
+    @include m('sort-caret') {
+      width: 0;
+      height: 0;
+      border: solid 5px transparent;
+      opacity: 0.6;
+    }
+    @include m('asc') {
+      border-bottom-color: getCssVar(color, text, 2);
+      @include when(active) {
+        border-bottom-color: getCssVar(color, primary);
+      }
+    }
+    @include m('desc') {
+      border-top-color: getCssVar(color, text, 2);
+      @include when(active) {
+        border-top-color: getCssVar(color, primary);
+      }
+    }
+  }
+
+  @include e('quick-toolbar') {
+    justify-content: center;
+  }
+
+  @include e('batch-toolbar') {
+    position: absolute;
+    top: 0;
+    left: 54px;
+    z-index: 99;
+    display: none;
+    width: calc(100% - 54px);
+    height: getCssVar(control-virtualized-table, now-header-height);
+    font-size: getCssVar(font-size, regular);
+    font-weight: getCssVar(font-weight, regular);
+    background-color: getCssVar(control-virtualized-table, header, bg-color);
+
+    @include when('show') {
+      @include flex(row, flex-start, center);
+    }
+
+    @include m('separator') {
+      padding: 0 getCssVar(spacing, base-tight);
+    }
+    @include m('content') {
+      height: 100%;
+      @include flex(row, flex-start, center);
+    }
+  }
+
+  @include when('enable-customized') {
+    @include e('setting-box') {
+      @include flex(row, flex-start, center);
+
+      position: absolute;
+      top: 0;
+      right: 2px;
+      z-index: 1;
+      height: getCssVar(control-virtualized-table, now-header-height);
+      padding-right: getCssVar(spacing, extra-tight);
+      background-color: getCssVar(control-virtualized-table, header, bg-color);
+    }
+  }
+}

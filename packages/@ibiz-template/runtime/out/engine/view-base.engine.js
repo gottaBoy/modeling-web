@@ -1,0 +1,519 @@
+/* eslint-disable prefer-destructuring */
+import { RuntimeError, findRecursiveChild, IBizContext, } from '@ibiz-template/core';
+import qs from 'qs';
+import { SysUIActionTag, ViewCallTag } from '../constant';
+import { getControl } from '../model';
+import { fieldValueToBoolean } from '../service';
+/**
+ * 视图引擎基类
+ * @author lxm
+ * @date 2023-04-26 07:29:27
+ * @export
+ * @class ViewEngineBase
+ */
+export class ViewEngineBase {
+    /**
+     * 获取工具栏控制器
+     * @author lxm
+     * @date 2023-05-22 03:47:43
+     * @readonly
+     * @protected
+     * @type {(IToolbarController | undefined)}
+     */
+    get toolbar() {
+        return this.view.getController('toolbar');
+    }
+    /**
+     * 左工具栏
+     * @author lxm
+     * @date 2023-06-20 02:36:45
+     * @readonly
+     * @protected
+     * @type {(IToolbarController | undefined)}
+     */
+    get leftToolbar() {
+        return this.view.getController('lefttoolbar');
+    }
+    /**
+     * 右工具栏
+     * @author lxm
+     * @date 2023-06-20 02:36:45
+     * @readonly
+     * @protected
+     * @type {(IToolbarController | undefined)}
+     */
+    get rightToolbar() {
+        return this.view.getController('righttoolbar');
+    }
+    /**
+     * 右工具栏
+     * @author lxm
+     * @date 2023-06-20 02:36:45
+     * @readonly
+     * @protected
+     * @type {(IToolbarController | undefined)}
+     */
+    get footerToolbar() {
+        return this.view.getController('footertoolbar');
+    }
+    /**
+     * 搜索表单控制器
+     * @author lxm
+     * @date 2023-05-22 01:56:25
+     * @readonly
+     */
+    get searchForm() {
+        return this.view.getController('searchform');
+    }
+    /**
+     * 搜索栏控制器
+     * @author lxm
+     * @date 2023-05-22 01:56:25
+     * @readonly
+     */
+    get searchBar() {
+        return this.view.getController('searchbar');
+    }
+    /**
+     * 获取分页搜索视图上移的搜索表单控制器
+     * @author lxm
+     * @date 2023-05-22 01:56:25
+     * @readonly
+     */
+    get tabSearchForm() {
+        return this.view.getController('tabsearchform');
+    }
+    /**
+     * 获取视图布局面板控制器
+     * @author lxm
+     * @date 2023-05-22 03:47:43
+     * @readonly
+     * @protected
+     * @type {(IToolbarController | undefined)}
+     */
+    get viewLayoutPanel() {
+        return this.view.layoutPanel;
+    }
+    /**
+     * 构造函数在视图控制器的构造函数逻辑内部执行
+     * @author lxm
+     * @date 2023-05-06 08:18:28
+     * @param {IViewController} view 视图控制器
+     */
+    constructor(view) {
+        this.view = view;
+        /**
+         *是否允许请求数据权限
+         *
+         * @protected
+         * @type {boolean}
+         * @memberof ViewEngineBase
+         */
+        this.enabledDataAccAction = false;
+        this.init();
+        this.initViewState();
+    }
+    /**
+     * 引擎内部初始化
+     *
+     * @author chitanda
+     * @date 2024-02-05 22:02:12
+     * @protected
+     */
+    init() {
+        // 引擎初始化
+    }
+    /**
+     * 重新计算上下文，主要用于视图控制器再算上下文后，每个视图控制器可自身根据变动重新计算
+     * @author zpc
+     * @date 2024-03-12 13:50:07
+     * @return {*}  {Promise<void>}
+     */
+    handleContextParams() {
+        // 若视图参数配置了srfdataaccaction，则加载实体数据时请求权限，同时删除srfdataaccaction
+        if (this.view.params.srfdataaccaction) {
+            this.enabledDataAccAction = fieldValueToBoolean(this.view.params.srfdataaccaction);
+            delete this.view.params.srfdataaccaction;
+        }
+    }
+    async onCreated() {
+        const { childNames, modal } = this.view;
+        modal.hooks.shouldDismiss.tapPromise(async (context) => {
+            if (this.view.state.isLoading) {
+                context.allowClose = false;
+            }
+        });
+        childNames.push('captionbar', 'toolbar', 'lefttoolbar', 'righttoolbar', 'footertoolbar');
+        this.calcDynamicLayout();
+        // 监听实体数据变更
+        this.onDEDataChange = this.onDEDataChange.bind(this);
+        ibiz.mc.command.change.on(this.onDEDataChange);
+    }
+    /**
+     * 计算动态布局模型
+     *
+     * @author zk
+     * @date 2024-01-29 02:01:47
+     * @memberof ViewEngineBase
+     */
+    calcDynamicLayout() {
+        const names = this.calcRemoveLayoutModel();
+        ibiz.log.debug(ibiz.i18n.t('runtime.engine.deleteModel', {
+            codeName: this.view.model.codeName,
+            name: names.join(';'),
+        }));
+        this.removeLayoutModel(names);
+    }
+    /**
+     * 计算移除的模型名称
+     *
+     * @author zk
+     * @date 2024-01-29 02:01:21
+     * @return {*}  {string[]}
+     * @memberof ViewEngineBase
+     */
+    calcRemoveLayoutModel() {
+        const { model } = this.view;
+        const names = [];
+        if (model.showCaptionBar === false) {
+            names.push('view_captionbar');
+        }
+        const toolBarList = ['lefttoolbar', 'righttoolbar', 'footertoolbar'];
+        toolBarList.forEach(name => {
+            if (!getControl(model, name)) {
+                names.push(name);
+            }
+        });
+        if (!this.calcViewHeaderVisible()) {
+            names.push('view_header');
+        }
+        if (ibiz.env.isMob) {
+            if (!this.calcViewFooterVisible()) {
+                names.push('view_footer');
+            }
+            if (!this.isExistAndInLayout('lefttoolbar') &&
+                !this.isExistAndInLayout('righttoolbar') &&
+                model.showCaptionBar === false) {
+                names.push('view_toolbar');
+            }
+        }
+        else if (!getControl(model, 'toolbar')) {
+            names.push('view_toolbar', 'toolbar');
+        }
+        return names;
+    }
+    /**
+     * 删除布局模型
+     *
+     * @author zk
+     * @date 2024-01-29 02:01:29
+     * @param {string[]} names
+     * @param {(IPanelContainer | undefined)} [container=this.view.model.viewLayoutPanel]
+     * @return {*}  {void}
+     * @memberof ViewEngineBase
+     */
+    removeLayoutModel(names, container = this.view.model.viewLayoutPanel) {
+        if (!container) {
+            return;
+        }
+        const items = container.rootPanelItems || container.panelItems || [];
+        const index = items.findIndex(item => names.includes(item.id));
+        if (index !== -1) {
+            items.splice(index, 1);
+        }
+        // 过滤深层的子成员
+        items.forEach(item => {
+            if (item.itemType === 'CONTAINER') {
+                this.removeLayoutModel(names, item);
+            }
+        });
+    }
+    async onMounted() {
+        // 子类重写
+        const { model, childNames } = this.view;
+        ibiz.log.debug(ibiz.i18n.t('runtime.engine.childComponentsMounted', {
+            id: model.id,
+            childName: childNames.join(';'),
+        }));
+    }
+    async onDestroyed() {
+        ibiz.mc.command.change.off(this.onDEDataChange);
+    }
+    async call(key, _args) {
+        if (key === ViewCallTag.GET_DATA) {
+            return this.getData();
+        }
+        if (key === ViewCallTag.COPY_PATH) {
+            return this.onCopyPath();
+        }
+        if (key === SysUIActionTag.SHOTR_CUT) {
+            return this.onShortCut(_args);
+        }
+        if (key === SysUIActionTag.TOGGLE_FILTER) {
+            this.toggleFilter();
+            return null;
+        }
+        if (key === SysUIActionTag.SEARCH) {
+            const searchForm = this.searchForm || this.tabSearchForm;
+            await searchForm.search();
+            return null;
+        }
+        if (key === SysUIActionTag.RESET) {
+            const searchForm = this.searchForm || this.tabSearchForm;
+            await searchForm.reset();
+            return null;
+        }
+        return undefined;
+    }
+    /**
+     * 拷贝路径
+     *
+     * @protected
+     * @return {*}  {IData}
+     * @memberof ViewEngineBase
+     */
+    onCopyPath() {
+        const hash = window.location.hash;
+        const items = hash.split('/');
+        const viewCodeName = this.view.model.codeName.toLowerCase();
+        // 获取当前视图所在的路由位置
+        const findIndex = items.findIndex(item => item === viewCodeName);
+        // 计算当前视图路由参数
+        if (findIndex !== -1) {
+            const oldRouteParams = qs.parse(items[findIndex + 1], {
+                strictNullHandling: true,
+                delimiter: ';',
+                depth: 8,
+            });
+            const newRouteParams = Object.assign({}, oldRouteParams);
+            if (oldRouteParams === null || oldRouteParams === void 0 ? void 0 : oldRouteParams.srfnavctx) {
+                const srfnavctx = JSON.parse(decodeURIComponent(oldRouteParams.srfnavctx));
+                Object.keys(srfnavctx).forEach(key => {
+                    srfnavctx[key] = this.view.context[key];
+                });
+                newRouteParams.srfnavctx = encodeURIComponent(JSON.stringify(srfnavctx));
+            }
+            items[findIndex + 1] = qs.stringify(newRouteParams, {
+                delimiter: ';',
+                strictNullHandling: true,
+                skipNulls: true,
+            });
+        }
+        const path = `${window.location.origin}${window.location.pathname}${items.join('/')}`;
+        const result = ibiz.util.text.copy(path);
+        return { ok: result };
+    }
+    /**
+     * 快捷方式
+     *
+     * @param {*} args
+     * @return {*}  {(Promise<any>)}
+     * @memberof ViewEngineBase
+     */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
+    async onShortCut(args) {
+        const { data } = args;
+        const { context, model, params, modal } = this.view;
+        if (['EMBED', 'POPOVER'].includes(modal.mode)) {
+            throw new Error(ibiz.i18n.t('runtime.engine.minimization', { mode: modal.mode }));
+        }
+        const key = await ibiz.util.shortCut.calcShortCutKey({
+            context,
+            appViewId: model.id,
+        });
+        const isExist = ibiz.util.shortCut.isExist(key);
+        if (!isExist) {
+            const caption = (data && data[0].srfmajortext) || model.caption;
+            ibiz.util.shortCut.addShortCut({
+                key,
+                caption,
+                icon: model.sysImage,
+                appViewId: model.id,
+                context: IBizContext.create(context),
+                params: Object.assign({}, params),
+                openMode: modal.mode,
+                fullPath: window.location.hash,
+            });
+            this.view.state.isShortCut = true;
+            this.view.closeView();
+            return null;
+        }
+        ibiz.util.shortCut.removeShortCut(key);
+        this.view.state.isShortCut = false;
+        return null;
+    }
+    /**
+     * 初始化视图state
+     * @author lxm
+     * @date 2023-05-15 06:42:25
+     * @protected
+     */
+    initViewState() {
+        // 子类重写初始化状态默认值
+    }
+    /**
+     * 获取视图数据部件的数据
+     * @author lxm
+     * @date 2023-05-08 12:46:19
+     * @return {*}  {IData[]}
+     */
+    getData() {
+        return [];
+    }
+    /**
+     * 计算视图头部元素的显示与否
+     * 所有部件容器名称均为：view_部件名称
+     *
+     * @author lxm
+     * @date 2023-06-06 07:16:26
+     * @protected
+     */
+    calcViewHeaderVisible() {
+        let showHeader = false;
+        const { model } = this.view;
+        // 标题栏
+        if (model.showCaptionBar) {
+            showHeader = true;
+        }
+        if (ibiz.env.isMob) {
+            if (this.isExistAndInLayout('lefttoolbar')) {
+                showHeader = true;
+            }
+            if (this.isExistAndInLayout('righttoolbar')) {
+                showHeader = true;
+            }
+        }
+        else if (this.isExistAndInLayout('toolbar')) {
+            showHeader = true;
+        }
+        return showHeader;
+    }
+    /**
+     * 是否存在模型 并且 布局中有占位
+     * - 工具栏模型还需判断是否有工具栏项
+     * @author zk
+     * @date 2024-01-30 11:01:33
+     * @param {string} name
+     * @return {*}  {(IData | undefined)}
+     * @memberof ViewEngineBase
+     */
+    isExistAndInLayout(name) {
+        const layout = this.view.model.viewLayoutPanel;
+        if (!layout) {
+            return false;
+        }
+        const ins = findRecursiveChild(layout, name, {
+            compareField: 'id',
+            childrenFields: ['panelItems', 'rootPanelItems'],
+        });
+        const { model } = this.view;
+        const has = getControl(model, name);
+        let visible = !!(ins && has);
+        if ((has === null || has === void 0 ? void 0 : has.controlType) === 'TOOLBAR') {
+            const items = has.detoolbarItems;
+            visible = !!(visible && items && items.length > 0);
+        }
+        return visible;
+    }
+    /**
+     * 计算底部的显示与否
+     * @author lxm
+     * @date 2023-06-20 02:45:17
+     * @protected
+     * @return {*}  {boolean}
+     */
+    calcViewFooterVisible() {
+        let showFooter = false;
+        // 工具栏
+        if (this.isExistAndInLayout('footertoolbar')) {
+            showFooter = true;
+        }
+        return showFooter;
+    }
+    /**
+     * 监听实体数据变更
+     *
+     * @author zzq
+     * @date 2024-10-29 18:03:33
+     * @protected
+     * @param {IPortalMessage} msg
+     */
+    onDEDataChange(msg) {
+        ibiz.log.debug('onDEDataChange', msg);
+    }
+    /**
+     * 加载实体数据
+     *
+     * @return {*}  {(Promise<void>)}
+     * @memberof ViewEngineBase
+     */
+    async loadEntityData() {
+        const { appDataEntityId } = this.view.model;
+        const { evt, context, params } = this.view;
+        if (!appDataEntityId) {
+            throw new RuntimeError(ibiz.i18n.t('runtime.engine.loadEntityData'));
+        }
+        const app = ibiz.hub.getApp(context.srfappid);
+        const res = await app.deService.exec(appDataEntityId, 'get', context, params, undefined, { srfdataaccaction: this.enabledDataAccAction });
+        const { data } = res;
+        if (data) {
+            if (this.enabledDataAccAction) {
+                await this.handleEntityPrivilege(data, this.view.context);
+            }
+            // 更新视图作用域数据和srfreadonly数据
+            this.view.state.srfactiveviewdata = data;
+            if (Object.prototype.hasOwnProperty.call(data, 'srfreadonly')) {
+                this.view.context.srfreadonly = data.srfreadonly;
+            }
+            evt.emit('onDataChange', { actionType: 'LOAD', data: [data] });
+            if (data.srfkey) {
+                evt.emit('onViewInfoChange', { dataInfo: data.srfmajortext || '' });
+            }
+            this.calcToolbarState(data, appDataEntityId);
+        }
+    }
+    /**
+     * 计算工具栏状态
+     *
+     * @protected
+     * @param {IData} [data]
+     * @param {string} [appDeId]
+     * @memberof ViewEngineBase
+     */
+    calcToolbarState(data, appDeId) {
+        var _a, _b, _c, _d;
+        (_a = this.toolbar) === null || _a === void 0 ? void 0 : _a.calcButtonState(data, appDeId);
+        (_b = this.leftToolbar) === null || _b === void 0 ? void 0 : _b.calcButtonState(data, appDeId);
+        (_c = this.rightToolbar) === null || _c === void 0 ? void 0 : _c.calcButtonState(data, appDeId);
+        (_d = this.footerToolbar) === null || _d === void 0 ? void 0 : _d.calcButtonState(data, appDeId);
+    }
+    /**
+     * 处理实体权限
+     * @author zzq
+     * @date 2024-06-03 15:59:08
+     * @return {*}  {Promise<void>}
+     */
+    async handleEntityPrivilege(data, context) {
+        const { appDataEntityId } = this.view.model;
+        if (!data.srfdataaccaction) {
+            return;
+        }
+        const app = ibiz.hub.getApp(context.srfappid);
+        const deAuthority = await app.authority.getService(appDataEntityId);
+        deAuthority.setDataAccAction({ srfkey: data.srfkey, srfsessionid: context.srfsessionid }, data.srfdataaccaction);
+    }
+    /**
+     * 切换搜索表单的显示与否
+     * @author lxm
+     * @date 2023-06-06 09:20:35
+     * @protected
+     */
+    toggleFilter() {
+        if (this.searchForm) {
+            const searchformContainer = this.viewLayoutPanel.panelItems.view_searchform;
+            if (searchformContainer) {
+                searchformContainer.state.visible = !searchformContainer.state.visible;
+            }
+        }
+    }
+}

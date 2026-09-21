@@ -1,0 +1,179 @@
+// 范围月日历
+$control-calendar-user2: (
+  gap: getCssVar('spacing', 'tight'),                                           // 内容间隔
+  padding: getCssVar('spacing', 'tight'),                                       // 内边距
+  border-color: getCssVar('control-calendar', 'border-color'),                  // 边框色（继承自日历根元素）
+);
+
+// 范围月日历日历单元格
+$control-calendar-user2-cell: (
+  size: 50px,                                                                   // 单元格大小
+  padding: getCssVar('spacing', 'none'),                                        // 单元格内边距
+);
+
+// 范围月日历标记
+$control-calendar-user2-mark: (
+  size: 4px,                                                                    // 标记大小
+  border-radius: 50%,                                                           // 标记倒角
+);
+
+// 范围月日历图例
+$control-calendar-user2-legend: (
+  gap: getCssVar('spacing', 'tight'),                                           // 图例间隔
+);
+
+// 范围月日历图例项
+$control-calendar-user2-legend-item: (
+  width: 1.5em,                                                                 // 图例项色块宽
+  height: 0.9em,                                                                // 图例项色块高
+  line-height: 1em,                                                             // 图例项行高
+  max-width: 100px,                                                             // 图例项标题最大宽
+  gap: getCssVar('spacing', 'extra-tight'),                                     // 图例项间隔
+  border-radius: getCssVar('border', 'radius', 'extra', 'small'),               // 图例项色块倒角
+);
+
+// 范围月日历项
+$control-calendar-user2-item: (
+  active-color: getCssVar('color', 'primary', 'text'),                          // 项激活色
+  active-bg-color: getCssVar('color', 'primary'),                               // 项激活背景色
+);
+
+@include b('calendar-user2') {
+  @include set-component-css-var('control-calendar-user2', $control-calendar-user2);
+  @include set-component-css-var('control-calendar-user2-mark', $control-calendar-user2-mark);
+  @include set-component-css-var('control-calendar-user2-cell', $control-calendar-user2-cell);
+  @include set-component-css-var('control-calendar-user2-legend', $control-calendar-user2-legend);
+  @include set-component-css-var('control-calendar-user2-legend-item', $control-calendar-user2-legend-item);
+
+  display: flex;
+  flex-direction: column;
+  gap: getCssVar('control-calendar-user2', 'gap');
+  width: 100%;
+  height: 100%;
+
+  @include e('header') {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    padding: getCssVar('spacing', 'tight') getCssVar('spacing', 'base-loose');
+    border-bottom: 1px solid getCssVar('control-calendar-user2', 'border-color');
+    @include m('left') {
+      flex-shrink: 0;
+      min-width: 300px;
+    }
+    @include m('legend') {
+      display: flex;
+      flex-grow: 1;
+      gap: getCssVar('control-calendar-user2', 'gap');
+      align-items: center;
+      justify-content: center;
+    }
+    @include m('right') {
+      flex-shrink: 0;
+    }
+  }
+
+  @include e('body') {
+    display: flex;
+    flex-grow: 1;
+    flex-wrap: wrap;
+    gap: getCssVar('control-calendar-user2', 'gap');
+    overflow: auto;
+  }
+
+  @include e('month-calendar') {
+    width: 366px;
+    border: 1px solid getCssVar('control-calendar-user2', 'border-color');
+
+    .el-calendar__header {
+      display: flex;
+      justify-content: center;
+    }
+
+    .el-calendar__body {
+      padding: getCssVar('control-calendar-user2', 'padding');
+    }
+
+    .el-calendar-table {
+      .el-calendar-day {
+        width: getCssVar('control-calendar-user2-cell', 'size');
+        height: getCssVar('control-calendar-user2-cell', 'size');
+        padding: getCssVar('control-calendar-user2-cell', 'none');
+      }
+
+      td.is-selected {
+        background-color: transparent;
+      }
+    }
+  }
+
+  @include e('date') {
+    display: flex;
+    flex-direction: column;
+    gap: getCssVar('spacing', 'extra-tight');
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 4px;
+
+    @include m('day') {
+      flex-shrink: 0;
+    }
+
+    @include m('event') {
+      display: flex;
+      flex-grow: 1;
+      flex-wrap: wrap;
+      gap: getCssVar('spacing', 'extra-tight');
+      justify-content: center;
+      overflow: hidden;
+    }
+  }
+
+  @include e('mark') {
+    width: getCssVar('control-calendar-user2-mark', 'size');
+    height: getCssVar('control-calendar-user2-mark', 'size');
+    border-radius: getCssVar('control-calendar-user2-mark', 'border-radius');
+  }
+
+  @include e('legend-item') {
+    display: flex;
+    gap: getCssVar('control-calendar-user2-legend', 'gap');
+    align-items: center;
+    line-height: getCssVar('control-calendar-user2-legend-item', 'line-height');
+    cursor: pointer;
+    @include m('tip') {
+      display: inline-block;
+      width: getCssVar('control-calendar-user2-legend-item', 'width');
+      height: getCssVar('control-calendar-user2-legend-item', 'height');
+      border-radius: getCssVar('control-calendar-user2-legend-item', 'border-radius');
+    }
+    @include m('text') {
+      display: inline-block;
+      width: auto;
+      max-width: getCssVar('control-calendar-user2-legend-item', 'max-width');
+      overflow: hidden;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  @include e('popover') {
+    max-height: 300px;
+    overflow: auto;
+    @include set-component-css-var('control-calendar-user2-item', $control-calendar-user2-item);
+  }
+
+  @include e('event') {
+    .#{bem('control-calendar-item')} {
+      width: 126px;
+      height: auto;
+      @include when('active') {
+        color: getCssVar('control-calendar-user2-item', 'active-color');
+        background-color:getCssVar('control-calendar-user2-item', 'active-bg-color');
+      }
+    }
+  }
+}

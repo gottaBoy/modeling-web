@@ -1,0 +1,1 @@
+{"version":3,"file":"timer-trigger.d.ts","sourceRoot":"","sources":["../../../src/logic-scheduler/trigger/timer-trigger.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,YAAY,EAAE,MAAM,iBAAiB,CAAC;AAE/C;;;;;;;GAOG;AACH,qBAAa,YAAa,SAAQ,YAAY;IACpC,IAAI,EAAE,OAAO,CAAC;IAEtB,SAAS,CAAC,KAAK,EAAE,MAAM,GAAG,IAAI,CAAQ;IAEtC,KAAK,IAAI,IAAI;IAkBb,OAAO,IAAI,IAAI;CAMhB"}

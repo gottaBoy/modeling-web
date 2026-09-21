@@ -1,0 +1,69 @@
+// 重复表格样式
+$repeater-grid: (
+  remove-color: getCssVar(color, danger),       // 删除按钮图标色
+  cell-padding: getCssVar(spacing, extra-tight), // 单元格内边距
+  row-height: 57px,                             // 行高度
+);
+
+
+@include b(repeater-grid){
+  @include set-component-css-var('repeater-grid', $repeater-grid);
+
+  position: relative;
+  width: 100%;
+  #{getCssVarName('grid-column', 'justify-content')}: center;
+
+  @include e(add-btn){
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 2;
+  }
+
+  @include e(drag-icon) {
+    cursor: move;
+  }
+
+  @include e(sortable-ghost) {
+    opacity: 0.5;
+  }
+
+  .el-table__row {
+    height: getCssVar(repeater-grid, row-height);
+  }
+
+  // 适配单元格内的元素存在fixed定位时，该定位元素的z-index设置无效。存在fixed定位元素时，当前单元格的层级需要高于其它单元格
+  .el-table__cell:has(.is-editor-content-fixed) {
+    z-index: calc(var(--el-table-index) + 1);
+  }
+
+  .el-table__row:hover {
+    .#{bem(repeater-grid-index, text)}{
+      &:last-child{
+        display: none;
+      }
+    }
+    .#{bem(repeater-grid-index, remove)}{
+      display: inline;
+    }
+  }
+
+  .#{bem('repeater-grid-index', 'remove')}{
+    &.el-button.el-button--danger{
+      --el-button-text-color: #{getCssVar(repeater-grid, remove-color)};
+    }
+  }
+
+}
+
+
+@include b(repeater-grid-index){
+  .cell{
+    padding: getCssVar(repeater-grid, cell-padding);
+  }
+
+  @include e(remove){
+    display: none;
+  }
+
+}

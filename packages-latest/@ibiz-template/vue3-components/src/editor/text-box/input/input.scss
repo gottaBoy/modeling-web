@@ -1,0 +1,178 @@
+// 输入框根元素
+$input: (
+  font-size: getCssVar(form-item, font-size),                               // 字体大小
+  font-weight: getCssVar(form-item, font-weight),                           // 字体粗细
+  placeholder-color: getCssVar(form-item, placeholder-color),               // 占位文本色
+  min-height: getCssVar(form-item, line-height),                            // 最小高
+  readonly-color: getCssVar(form-item, readonly-color),                     // 只读字体色
+  text-color: getCssVar(form-item, text-color),                             // 字体颜色
+  line-height: getCssVar(form-item, line-height),                           // 行高
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+// 输入框AI按钮
+$input-ai: (
+  size: getCssVar('width-icon', 'medium'),                                  // 大小
+  text-color: getCssVar(color, primary, text),                              // 字体色
+  bg-color: getCssVar(color, primary),                                      // 背景色
+  border-radius: getCssVar(border, radius, circle),                         // 倒角
+  hover-color: getCssVar(color, primary, hover, text),                      // 悬浮色
+  hover-bg-color: getCssVar(color, primary, hover),                         // 悬浮背景色
+  padding: getCssVar('spacing', 'tight'),                                   // 内边距
+);
+
+@include b('input') {
+  @include set-component-css-var(input, $input);
+  @include set-component-css-var(input-ai, $input-ai);
+
+  width: 100%;
+  height: 100%;
+  font-size: getCssVar(input, font-size);
+  font-weight: getCssVar(input, font-weight);
+
+  @include e(ai-chat) {
+    @include flex(row, center, center);
+
+    position: absolute;
+    right: getCssVar('spacing', 'base-tight');
+    bottom: 10px;
+    width: calc(getCssVar('input-ai', 'size') + 2 * getCssVar('spacing', 'tight'));
+    height: calc(getCssVar('input-ai', 'size') + 2 * getCssVar('spacing', 'tight'));
+    padding: getCssVar('input-ai', 'padding');
+    font-size: getCssVar('input-ai', 'size');
+    color: getCssVar('input-ai', 'text-color');
+    cursor: pointer;
+    background-color: getCssVar(input-ai, bg-color);
+    border-radius: getCssVar(input-ai, border-radius);
+
+    &:hover {
+      color: getCssVar(input-ai, hover-color);
+      background-color: getCssVar(input-ai, hover-bg-color);
+    }
+  }
+
+  .el-input .el-input__inner {
+    height: 100%;
+  }
+
+  .el-input .el-input__inner::placeholder {
+    color: getCssVar(input, placeholder-color);
+  }
+
+  .el-textarea .el-textarea__inner {
+    height: 100%;
+  }
+
+  .el-textarea .el-textarea__inner::placeholder {
+    color: getCssVar(input, placeholder-color);
+    @include overflow-wrap;
+  }
+
+  .el-input__count{
+    bottom: 0;
+  }
+
+  @include b(input-input) {
+    height: 100%;
+
+    .el-input__wrapper {
+      width: 100%;
+
+      // 避免自适应高度后，没配高度么有默认行高
+      min-height: getCssVar(input, min-height);
+    }
+  }
+
+  @include m(readonly) {
+    height: auto;
+    overflow: auto;
+    line-height: getCssVar(input, min-height);
+    color: getCssVar(input, readonly-color);
+    word-break: break-word;
+    white-space: pre-wrap;
+  }
+
+  // 单位后缀样式
+  .el-input__suffix {
+    .#{bem(input,unit)} {
+      // font-size: getCssVar('form-item', 'font-size');
+      font-style: normal;
+    }
+  }
+
+  // 文本域最小高度32px,与输入框对齐,此处必须使用important
+  .el-textarea__inner {
+    min-height: 32px !important;
+  }
+}
+
+// 表单下的时间选择器默认显示，悬浮上去显示编辑器
+@include b(input-form-default-content) {
+  display: none;
+}
+
+@include b(form-item) {
+
+  @include b(input) {
+    @include when(show-default) {
+
+      @include when(textarea) {
+        overflow: hidden;
+
+        @include b(input-form-default-content) {
+          display: block;
+        }
+
+        @include b(input-input) {
+          display: none;
+        }
+      }
+
+      // 悬浮显示编辑器
+      &:hover {
+        @include b(input-form-default-content) {
+          display: none;
+        }
+
+        @include b(input-input) {
+          display: inline-flex;
+        }
+      }
+
+      // 不悬浮时显示信息态
+      @include b(input-form-default-content) {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: getCssVar(input, hover-edit-padding);
+        font-family: Arial, sans-serif;
+        font-size: getCssVar(input, font-size);
+        line-height: getCssVar(input, line-height);
+        color: getCssVar(input, text-color);
+        word-wrap: break-word;
+        white-space: pre-wrap;
+      }
+
+      @include b(input-input) {
+        display: none;
+        font-family: Arial, sans-serif;
+
+        &.el-textarea .el-textarea__inner{
+          word-wrap: break-word;
+          white-space: pre-wrap;
+        }
+      }
+
+      // 输入态
+      @include when(editable) {
+        @include b(input-form-default-content) {
+          display: none;
+        }
+
+        @include b(input-input) {
+          display: inline-flex;
+        }
+      }
+    }
+  }
+}

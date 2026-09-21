@@ -1,0 +1,13 @@
+@include b('left-side-menu') {
+    width: 100%;
+    height: 100%;
+}
+
+@include b('col') {
+    @include m('self-align') {
+        &>.#{bem('left-side-menu')} {
+            width: 100%;
+            height: 100%;
+        }
+    }
+}

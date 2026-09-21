@@ -1,0 +1,44 @@
+/**
+ * 请求异常
+ *
+ * @author chitanda
+ * @date 2022-09-18 17:09:10
+ * @export
+ * @class HttpError
+ * @implements {Error}
+ */
+export class HttpError extends Error {
+    constructor(err) {
+        super('HttpError');
+        this.name = 'HttpError';
+        const res = err.response;
+        this.response = err.response;
+        this.tag = '';
+        if (res) {
+            if (res.data) {
+                const data = res.data;
+                this.message = data.message;
+                if (!this.message && data.status === 404) {
+                    this.message = ibiz.i18n.t('core.error.serviceResNotExist');
+                }
+                if (!this.message && data.status === 403) {
+                    this.message = ibiz.i18n.t('core.error.serviceResNotPermission');
+                }
+                if (!this.message) {
+                    this.message = ibiz.i18n.t('core.error.serviceException');
+                }
+            }
+            else {
+                this.message = res.statusText;
+            }
+            if (!this.message) {
+                this.message = ibiz.i18n.t('core.error.networkAbnormality');
+            }
+            this.status = res.status;
+        }
+        else {
+            this.message = err.message || '';
+            this.status = 500;
+        }
+    }
+}

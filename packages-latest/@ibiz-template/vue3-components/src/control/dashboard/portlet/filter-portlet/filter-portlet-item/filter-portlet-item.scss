@@ -1,0 +1,22 @@
+@include b('filter-portlet-item') {
+  padding: getCssVar('spacing', 'base') getCssVar('spacing', 'extra-loose');
+  @include e('header') {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  @include e('content') {
+    @include m(option) {
+      width: 100%;
+      padding: getCssVar('spacing', 'tight') 0;
+
+      .el-select {
+        width: 100%;
+      }
+    }
+    @include m(editor) {
+      width: 100%;
+      padding: getCssVar('spacing', 'tight') 0;
+    }
+  }
+}

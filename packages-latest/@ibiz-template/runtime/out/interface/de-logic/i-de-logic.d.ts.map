@@ -1,0 +1,1 @@
+{"version":3,"file":"i-de-logic.d.ts","sourceRoot":"","sources":["../../../src/interface/de-logic/i-de-logic.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,WAAW,EAAE,cAAc,EAAE,MAAM,kBAAkB,CAAC;AAC/D,OAAO,EAAE,gBAAgB,EAAE,MAAM,aAAa,CAAC;AAE/C;;;;;GAKG;AACH,MAAM,WAAW,QAAS,SAAQ,gBAAgB;IAChD;;;;OAIG;IACH,KAAK,EAAE,WAAW,CAAC;IACnB;;;;OAIG;IACH,MAAM,EAAE,cAAc,CAAC;CACxB"}

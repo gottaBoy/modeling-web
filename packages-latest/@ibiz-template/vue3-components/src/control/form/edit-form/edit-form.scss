@@ -1,0 +1,20 @@
+// 编辑表单部件样式
+$control-edit-form: (
+  padding-bottom:getCssVar(spacing, tight),  // 表单容器底部内边距
+  filter-height: calc(100% - 32px),          // 表单启用项过滤时高度
+);
+
+@include b(control-edit-form) {
+  @include set-component-css-var(control-edit-form, $control-edit-form);
+
+  width: 100%;
+  height: 100%;
+  padding-bottom: getCssVar(control-edit-form, padding-bottom);
+
+  @include when(item-filter) {
+    .#{bem(control-form)} {
+      height: getCssVar(control-edit-form, filter-height);
+      overflow-y: auto;
+    }
+  }
+}

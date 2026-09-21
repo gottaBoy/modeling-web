@@ -1,0 +1,25 @@
+// 导航栏头部
+$control-expbar-header: (
+  width: auto,                                                                      // 导航栏头部宽
+  height: 64px,                                                                     // 导航栏头部高
+  bg-color: transparent,                                                            // 导航栏背景色
+  border-color: getCssVar('color', 'border'),                                       // 导航栏边框色
+  padding: getCssVar('spacing', 'none') getCssVar('spacing', 'base'),               // 导航栏内边距
+);
+
+@include b('panel-exp-header') {
+  @include set-component-css-var('control-expbar-header', $control-expbar-header);
+
+  width: getCssVar('control-expbar-header', 'width');
+  height: getCssVar('control-expbar-header', 'height');
+  padding: getCssVar('control-expbar-header', 'padding');
+  border-bottom: 1px solid getCssVar('control-expbar-header', 'border-color');
+
+  .#{bem('row')} {
+    height: 100%;
+  }
+
+  .#{bem('panel-container', '', 'view_header_right')} {
+    padding: 0 getCssVar('spacing', 'base');
+  }
+}

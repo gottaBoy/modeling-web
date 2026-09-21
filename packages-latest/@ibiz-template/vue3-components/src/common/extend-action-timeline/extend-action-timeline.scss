@@ -1,0 +1,154 @@
+@include b(extend-action-timeline) {
+  padding-top: getCssVar('spacing', 'extra-loose');
+  background-color: getCssVar('bg-color', 'overlay');
+
+  @include b(extend-action-timeline-task) {
+    position: relative;
+    width: calc(100% - 52px);
+    margin-left: 52px;
+    @include e(top) {
+      @include flex;
+
+      padding-left: 35px;
+      margin-bottom: getCssVar('spacing', 'base');
+    }
+    @include e(bottom) {
+      min-height: 50px;
+      padding-bottom: getCssVar('spacing', 'base-loose');
+      padding-left: getCssVar('spacing', 'extra-loose');
+    }
+    @include e(trigger) {
+      position: absolute;
+      top: -3px;
+      left: 13px;
+      font-size: getCssVar('font-size', 'header-4');
+      cursor: pointer;
+    }
+    @include e(last-time) {
+      flex: 1;
+      padding-right: getCssVar('spacing', 'base');
+      text-align: right;
+      @include e(last-time-text) {
+        display: inline-block;
+        margin-left: getCssVar('spacing', 'base-tight');
+        font-size: getCssVar('font-size', 'regular');
+        color: getCssVar('color', 'text', 1);
+      }
+    }
+
+    @include e(user-task-name) {
+      width: 190px;
+      margin-right: getCssVar('spacing', 'extra-loose');
+      font-size: getCssVar('font-size', 'header-5');
+      font-weight: getCssVar('font-weight', 'bold');
+      color:  getCssVar('color', 'secondary');
+    }
+
+    @include e(head) {
+      position: absolute;
+      top: 3px;
+      left: -9px;
+      width: 22px;
+      height: 22px;
+      border: 2px solid getCssVar('color', 'secondary');
+      border-radius: getCssVar('border', 'radius','circle');
+    }
+
+    @include e(tail) {
+      position: absolute;
+      top: 22px;
+      width: 4px;
+      height: calc(100% - 16px);
+      background: getCssVar('color', 'fill',1);
+    }
+
+    @include e(author-name) {
+      width: 300px;
+      overflow: hidden;
+      font-size: getCssVar('font-size', 'header-5');
+      color: getCssVar('color', 'tertiary');
+      text-overflow: ellipsis;
+      white-space:nowrap;
+
+      &.is-has-type{
+        width: 140px;
+      } 
+    }
+
+    @include e(type) {
+      width: 200px;
+      margin-left: getCssVar('spacing', 'extra-loose');
+      font-size: getCssVar('font-size', 'header-5');
+      color: getCssVar('color', 'secondary');
+    }
+
+    @include e(full-message) {
+      font-size: getCssVar('font-size', 'header-5');
+      color: getCssVar('color', 'tertiary');
+    }
+
+    @include when(wrong) {
+      @include e(head) {
+        border: 2px solid getCssVar('color', 'danger');
+      }
+      @include e(user-task-name) {
+        color: getCssVar('color', 'danger');
+      }
+      @include e(type) {
+        color: getCssVar('color', 'danger');
+      }
+    }
+
+    @include when(link) {
+      @include e(head) {
+        background-color: getCssVar('color', 'bg',1);
+        border: 2px solid getCssVar('color', 'border');
+      }
+      @include e(user-task-name) {
+        color: getCssVar('color', 'link');
+      }
+    }
+    @include when(linkname) {
+      .is-link-head{
+        background-color: getCssVar('color', 'bg',1);
+        border: 2px solid getCssVar('color', 'border');;
+      }
+
+      @include e(user-task-name) {
+        &.is-task-link {
+          width: 190px;
+          margin-right: getCssVar('spacing', 'extra-loose');;
+          font-size: getCssVar('font-size', 'header-5');;
+          font-weight: getCssVar('font-weight', 'bold');;
+          color: getCssVar('color', 'link');
+        }
+      }
+      @include e(link-name) {
+        width: 300px;
+        overflow: hidden;
+        font-size: getCssVar('font-size', 'header-5');
+        color: getCssVar('color', 'tertiary');
+        text-overflow: ellipsis;
+        white-space:nowrap;
+      }
+    }
+  }
+  .#{bem('extend-action-timeline-task')} {
+    &:nth-last-child(1) {
+      .#{bem('extend-action-timeline-task','tail')} {
+        background-color: transparent;
+      }
+      .#{bem('extend-action-timeline-task','moreTask')} {
+        &:nth-last-child(1) {
+          .#{bem('extend-action-timeline-task')} {
+            &:not(:last-child) {
+              .#{bem('extend-action-timeline-task','tail')} {
+                background-color: getCssVar('color', 'fill',1);;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

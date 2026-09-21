@@ -1,0 +1,606 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-this-alias */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { HttpError, HttpResponse, RuntimeError, RuntimeModelError, } from '@ibiz-template/core';
+import { isArray, isNil } from 'lodash-es';
+import { ascSort } from 'qx-util';
+import { clone } from 'ramda';
+import { Method } from './method';
+import { calcDeCodeNameById, findDELogic } from '../../../../model';
+import { execDELogicAction, execFieldLogics } from '../../../../de-logic';
+import { ScriptFactory } from '../../../../utils';
+/**
+ * 实体行为方法
+ *
+ * @author chitanda
+ * @date 2022-10-10 12:10:37
+ * @export
+ * @class DEActionMethod
+ * @extends {Method}
+ */
+export class DEActionMethod extends Method {
+    /**
+     * 处理请求发送参数
+     * @author lxm
+     * @date 2023-10-19 02:50:36
+     * @param {IContext} context 上下文
+     * @param {(IData | IData[])} data 数据对象
+     * @return {*}  {(Promise<IData | IData[]>)}
+     */
+    async inputHandle(context, data) {
+        if (isArray(data)) {
+            // 多项数据不做dto转换
+            return data;
+        }
+        return this.input.handle(context, data);
+    }
+    /**
+     * 格式化输入参数
+     *
+     * @author tony001
+     * @date 2024-05-21 23:05:26
+     * @param {IContext} context
+     * @param {(IData | IData[])} data
+     * @return {*}  {(Promise<IData | IData[]>)}
+     */
+    async inputFormat(context, data) {
+        const handleListMap = async (arg) => {
+            return this.input.format(context, arg);
+        };
+        if (Array.isArray(data)) {
+            const result = [];
+            for (let i = 0; i < data.length; i++) {
+                result.push(await handleListMap(data[i]));
+            }
+            return result;
+        }
+        return handleListMap(data);
+    }
+    async exec(context, data, params, header) {
+        let result;
+        // 执行变更属性逻辑
+        if (data && !['READ', 'GETDRAFT'].includes(this.method.actionMode)) {
+            await execFieldLogics(this.entity, 'change', context, data, params);
+        }
+        // 实体逻辑处理
+        if (this.method.actionType === 'DELOGIC') {
+            const deLogic = findDELogic(this.method.appDELogicId, this.entity);
+            if (!deLogic) {
+                throw new RuntimeModelError(this.method, ibiz.i18n.t('runtime.service.lackEntityLogic'));
+            }
+            result = await execDELogicAction(deLogic, context, data, params);
+        }
+        else {
+            if (data) {
+                if (!this.isLocalMode) {
+                    data = await this.inputHandle(context, data);
+                }
+                else {
+                    data = await this.inputFormat(context, data);
+                }
+            }
+            const methodTag = this.method.actionTag
+                ? this.method.actionTag.toUpperCase()
+                : this.method.codeName.toUpperCase();
+            if (this.method.beforeCode) {
+                await ScriptFactory.asyncExecScriptFn({
+                    context,
+                    data,
+                    viewParam: params,
+                    activeData: header,
+                }, this.method.beforeCode);
+            }
+            switch (methodTag) {
+                case 'CREATE':
+                    result = await this.create(context, data, params || {}, header);
+                    break;
+                case 'GET':
+                    result = await this.get(context, params, header);
+                    break;
+                case 'GETDRAFT':
+                    result = await this.getDraft(context, params, header);
+                    break;
+                case 'REMOVE':
+                    result = await this.remove(context, params);
+                    break;
+                case 'UPDATE':
+                    result = await this.update(context, data, params, header);
+                    break;
+                case 'CREATETEMP':
+                    result = await this.createTemp(context, data);
+                    break;
+                case 'GETTEMP':
+                    result = await this.getTemp(context, data);
+                    break;
+                case 'GETDRAFTTEMP':
+                    result = await this.getDraftTemp(context, params);
+                    break;
+                case 'REMOVETEMP':
+                    result = await this.removeTemp(context, data);
+                    break;
+                case 'UPDATETEMP':
+                    result = await this.updateTemp(context, data);
+                    break;
+                default: {
+                    let path = this.calcPath(context);
+                    if (this.method.needResourceKey) {
+                        let srfkey = context[this.entity.codeName.toLowerCase()];
+                        if (isNil(srfkey)) {
+                            srfkey = isArray(data)
+                                ? null
+                                : data === null || data === void 0 ? void 0 : data[this.entity.keyAppDEFieldId];
+                        }
+                        path = `${path}/${srfkey}`;
+                    }
+                    const res = await this.request(path, context, data, params, header);
+                    if (!res.data) {
+                        ibiz.log.error(ibiz.i18n.t('runtime.deAction.responseDataError'), res);
+                    }
+                    if (!(params && params.srfupdateitem)) {
+                        res.data = await this.result.handle(context, res.data);
+                    }
+                    result = res;
+                }
+            }
+        }
+        if (this.method.afterCode) {
+            await ScriptFactory.asyncExecScriptFn({
+                context,
+                data: result.data,
+                viewParam: params,
+                activeData: header,
+            }, this.method.afterCode);
+        }
+        // 计算属性逻辑
+        if (result.data) {
+            await execFieldLogics(this.entity, 'compute', context, result.data, params);
+        }
+        return result;
+    }
+    /**
+     * 执行本地方法
+     *
+     * @author tony001
+     * @date 2024-08-16 08:08:32
+     * @param {string} methodTag
+     * @param {IContext} context
+     * @param {(IData | IData[])} [data]
+     * @return {*}  {Promise<IHttpResponse<IDataEntity>>}
+     */
+    async executeLocalMethod(methodTag, context, data) {
+        var _a;
+        const self = this;
+        const find = (_a = this.entity.appDEMethods) === null || _a === void 0 ? void 0 : _a.find((appDEMethod) => {
+            return appDEMethod.codeName === methodTag;
+        });
+        if (find) {
+            const res = await this.service.exec(methodTag, context, data);
+            return res;
+        }
+        const localMethodTag = methodTag.charAt(0).toLowerCase() + methodTag.slice(1);
+        return self[localMethodTag](context, data);
+    }
+    /**
+     * 创建数据
+     *
+     * @author chitanda
+     * @date 2022-08-24 20:08:01
+     * @param {IContext} context
+     * @param {IData} data
+     * @return {*}  {Promise<IHttpResponse<IData>>}
+     */
+    async create(context, data, params, header) {
+        if (!data) {
+            throw new RuntimeError(ibiz.i18n.t('runtime.service.createBehavior'));
+        }
+        if (this.isLocalMode) {
+            const res = await this.executeLocalMethod('CreateTemp', context, this.createEntity(data));
+            return res;
+        }
+        const path = this.calcPath(context);
+        const res = await this.app.net.post(path, data, params, header);
+        res.data = await this.result.handle(context, res.data);
+        return res;
+    }
+    /**
+     * 删除数据
+     *
+     * @author chitanda
+     * @date 2022-08-24 20:08:56
+     * @param {IContext} context
+     * @param {IParams} [params]
+     * @return {*}  {Promise<IHttpResponse<IDataEntity>>}
+     */
+    async remove(context, params, header) {
+        if (this.isLocalMode) {
+            const srfKeys = this.calcMultiData(context, params);
+            if (srfKeys.length > 1) {
+                return this.removeBatchTemp(context, srfKeys);
+            }
+            const res = await this.executeLocalMethod('RemoveTemp', context, params);
+            return res;
+        }
+        const path = this.calcPath(context);
+        const res = await this.app.net.delete(`${path}/${context[this.entity.codeName.toLowerCase()]}`, params, header);
+        return res;
+    }
+    /**
+     * 更新数据
+     *
+     * @author chitanda
+     * @date 2022-09-13 19:09:39
+     * @param {IContext} context
+     * @param {(IData | IDataEntity)} data
+     * @param {IParams} [params={}]
+     * @return {*}  {Promise<IHttpResponse<IDataEntity>>}
+     */
+    async update(context, data, params, header) {
+        if (!data) {
+            throw new RuntimeError(ibiz.i18n.t('runtime.service.updateBehavior'));
+        }
+        if (this.isLocalMode) {
+            const res = await this.executeLocalMethod('UpdateTemp', context, this.createEntity(data));
+            return res;
+        }
+        const path = this.calcPath(context);
+        const res = await this.app.net.put(`${path}/${context[this.entity.codeName.toLowerCase()]}`, data, params, header);
+        res.data = await this.result.handle(context, res.data);
+        return res;
+    }
+    /**
+     * 获取数据
+     *
+     * @author chitanda
+     * @date 2022-08-24 20:08:07
+     * @param {IContext} context
+     * @param {IParams} [params]
+     * @return {*}  {Promise<IHttpResponse<IDataEntity>>}
+     */
+    async get(context, params = {}, header = {}) {
+        if (this.isLocalMode) {
+            const res = await this.executeLocalMethod('GetTemp', context, params);
+            return res;
+        }
+        const path = this.calcPath(context);
+        const res = await this.app.net.get(`${path}/${context[this.entity.codeName.toLowerCase()]}`, params, header);
+        res.data = await this.result.handle(context, res.data);
+        return res;
+    }
+    /**
+     * 获取默认数据
+     *
+     * @author chitanda
+     * @date 2022-08-24 20:08:26
+     * @param {IContext} context
+     * @param {IParams} [params]
+     * @return {*}  {Promise<IHttpResponse<IData>>}
+     */
+    async getDraft(context, params, header) {
+        if (this.isLocalMode) {
+            const res = await this.executeLocalMethod('GetDraftTemp', context, params);
+            return res;
+        }
+        const path = this.calcPath(context);
+        // const res = await this.app.net.get(`${path}/getdraft`, params, header);
+        // 讲固定请求方法调整为指定的请求路径
+        const res = await this.app.net.get(this.mergeRequestPath(path, this.method.requestPath), params, header);
+        res.data = await this.result.handle(context, res.data);
+        return res;
+    }
+    /**
+     * 新建临时数据
+     *
+     * @author chitanda
+     * @date 2022-08-21 17:08:45
+     * @param {IContext} context
+     * @param {IData} entity
+     * @return {*}  {Promise<IHttpResponse<IDataEntity>>}
+     */
+    async createTemp(context, entity) {
+        try {
+            const addData = this.createEntity(entity);
+            let resultData;
+            if (isArray(addData)) {
+                const result = await Promise.all(addData.map(item => this.service.local.add(context, this.attach(context, item))));
+                resultData = result.filter(item => item !== null);
+            }
+            else {
+                resultData = await this.service.local.add(context, this.attach(context, addData));
+            }
+            // 当前执行界面域
+            const uiDomain = ibiz.uiDomainManager.get(context.srfsessionid);
+            if (uiDomain) {
+                uiDomain.dataChange();
+            }
+            return new HttpResponse(resultData);
+        }
+        catch (err) {
+            throw new HttpError(err);
+        }
+    }
+    /**
+     * 获取临时数据默认值
+     *
+     * @author chitanda
+     * @date 2022-08-21 17:08:56
+     * @param {IContext} context
+     * @param {IParams} [params]
+     * @return {*}  {Promise<IHttpResponse<IDataEntity>>}
+     */
+    async getDraftTemp(_context, _params) {
+        try {
+            const data = this.createEntity({});
+            // await this.executeDEFelidLogic(context, data);
+            if (data) {
+                return new HttpResponse(data);
+            }
+            return new HttpResponse(data, 500);
+        }
+        catch (err) {
+            return new HttpResponse(err, 500);
+        }
+    }
+    /**
+     * 删除临时数据
+     *
+     * @author chitanda
+     * @date 2022-08-21 17:08:11
+     * @param {IContext} context
+     * @param {IParams} [params]
+     * @return {*}  {Promise<IHttpResponse<IDataEntity>>}
+     */
+    async removeTemp(context, params) {
+        try {
+            let key = null;
+            if (params) {
+                key = params[this.entity.keyAppDEFieldId.toLowerCase()];
+            }
+            if (!key && context) {
+                key = context[this.entity.codeName.toLowerCase()];
+            }
+            try {
+                await this.associationDeletion(key, context, params);
+            }
+            catch (error) {
+                throw new HttpError({
+                    response: new HttpResponse(null, 500, error.message),
+                });
+            }
+            const data = this.service.local.delete(context, key);
+            if (data) {
+                // 当前执行界面域
+                const uiDomain = ibiz.uiDomainManager.get(context.srfsessionid);
+                if (uiDomain) {
+                    uiDomain.dataChange();
+                }
+                return new HttpResponse(data);
+            }
+            return new HttpResponse(data, 500);
+        }
+        catch (err) {
+            throw new HttpError(err);
+        }
+    }
+    /**
+     * 关联删除
+     *
+     * @author chitanda
+     * @date 2024-01-17 16:01:47
+     * @protected
+     * @param {string} key
+     * @param {IContext} context
+     * @param {IParams} [params]
+     * @return {*}  {Promise<void>}
+     */
+    async associationDeletion(key, context, _params) {
+        // 当前执行界面域
+        const uiDomain = ibiz.uiDomainManager.get(context.srfsessionid);
+        // 当前事务
+        const t = uiDomain === null || uiDomain === void 0 ? void 0 : uiDomain.transaction;
+        let selfOpenTransaction = false;
+        // 由第一层触发关联删除的位置来打开事务，后续子的关联删除不需要再次打开事务
+        if (t && t.state.isOpen === false) {
+            t.open();
+            selfOpenTransaction = true;
+        }
+        try {
+            let configs = (uiDomain === null || uiDomain === void 0 ? void 0 : uiDomain.getDERConfigByMajor(this.entity.id)) || [];
+            if (configs.length > 0) {
+                // 当前主数据
+                const data = this.service.local.get(context, key);
+                // 根据删除顺序排序
+                configs = ascSort(configs, 'removeOrder');
+                // 根据关系进行关联删除
+                for (const config of configs) {
+                    if (config.rstype !== 'DER1N') {
+                        throw new RuntimeModelError(config, ibiz.i18n.t('runtime.service.deletionDeletion'));
+                    }
+                    const { removeActionType, removeRejectMsg, minorAppDataEntityId, parentAppDEFieldId, nestedAppDEDataSetId = 'FetchDefault', } = config;
+                    // 获取当前应用域下的子实体服务
+                    const app = ibiz.hub.getApp(this.entity.appId);
+                    const minorService = await app.deService.getService(context, minorAppDataEntityId);
+                    // 克隆上下文，防止污染。并设置当前实体的主键上下文
+                    const _context = clone(context);
+                    _context[this.entity.codeName.toLowerCase()] = key;
+                    // 传入默认条件
+                    const _tempParams = {};
+                    _tempParams.srfdefaultcond = {
+                        [parentAppDEFieldId]: key,
+                    };
+                    // 查询出关联的子实体数据
+                    const res = await minorService.exec(nestedAppDEDataSetId, _context, _tempParams);
+                    const items = (res.data || []);
+                    switch (removeActionType) {
+                        // 同时删除
+                        case 1: {
+                            for (let i = 0; i < items.length; i++) {
+                                const item = items[i];
+                                _context[minorService.model.codeName.toLowerCase()] =
+                                    item.srfkey;
+                                const res2 = await minorService.remove(_context, item);
+                                if (res2.ok === false) {
+                                    throw new Error(res2.statusText);
+                                }
+                            }
+                            break;
+                        }
+                        // 置空
+                        case 2:
+                            for (let i = 0; i < items.length; i++) {
+                                const item = items[i];
+                                _context[minorService.model.codeName.toLowerCase()] =
+                                    item.srfkey;
+                                item[config.parentAppDEFieldId.toLowerCase()] = undefined;
+                                const res2 = await minorService.updateTemp(_context, item);
+                                if (res2.ok === false) {
+                                    throw new Error(res2.statusText);
+                                }
+                            }
+                            break;
+                        // 限制删除
+                        case 3:
+                            if (items.length > 0) {
+                                const msg = items.map(item => item.srfmajortext).join('、');
+                                const message = ibiz.i18n.t('runtime.service.unableDelete', {
+                                    logicName: this.entity.logicName,
+                                    srfmajortext: data.srfmajortext,
+                                    modelLogicName: minorService.model.logicName,
+                                    msg,
+                                });
+                                throw new Error(removeRejectMsg || message);
+                            }
+                            break;
+                        default:
+                    }
+                }
+            }
+            // 谁打开的事务，由谁来提交和关闭
+            if (selfOpenTransaction && t && t.state.isOpen) {
+                t.commit();
+            }
+        }
+        catch (error) {
+            if (selfOpenTransaction && t && t.state.isOpen) {
+                t.rollback();
+            }
+            throw error;
+        }
+        finally {
+            if (selfOpenTransaction && t && t.state.isOpen) {
+                t.close();
+            }
+        }
+    }
+    /**
+     * 更新临时数据
+     *
+     * @author chitanda
+     * @date 2022-08-21 17:08:17
+     * @param {IContext} context
+     * @param {IData} entity
+     * @return {*}  {Promise<IHttpResponse<IDataEntity>>}
+     */
+    async updateTemp(context, entity) {
+        try {
+            const updateData = this.createEntity(entity);
+            let resultData;
+            if (isArray(updateData)) {
+                const result = await Promise.all(updateData.map(item => this.service.local.update(context, this.attach(context, item))));
+                resultData = result.filter(item => item !== null);
+            }
+            else {
+                resultData = await this.service.local.update(context, this.attach(context, updateData));
+            }
+            if (resultData) {
+                // 当前执行界面域
+                const uiDomain = ibiz.uiDomainManager.get(context.srfsessionid);
+                if (uiDomain) {
+                    uiDomain.dataChange();
+                }
+                return new HttpResponse(resultData);
+            }
+            return new HttpResponse(resultData, 500);
+        }
+        catch (err) {
+            throw new HttpError(err);
+        }
+    }
+    /**
+     * 获取临时数据
+     *
+     * @author chitanda
+     * @date 2022-08-21 17:08:23
+     * @param {IContext} context
+     * @param {IParams} [params]
+     * @return {*}  {Promise<IHttpResponse<IDataEntity>>}
+     */
+    async getTemp(context, params) {
+        try {
+            let key = null;
+            if (params) {
+                key = params[this.entity.keyAppDEFieldId.toLowerCase()];
+            }
+            if (!key && context) {
+                key = context[this.entity.codeName.toLowerCase()];
+            }
+            const data = this.service.local.get(context, key);
+            if (data) {
+                return new HttpResponse(data);
+            }
+            return new HttpResponse(data, 500);
+        }
+        catch (err) {
+            throw new HttpError(err);
+        }
+    }
+    /**
+     * 批量删除本地数据
+     *
+     * @param {IContext} context
+     * @param {IParams} [params]
+     * @return {*}  {Promise<IHttpResponse>}
+     */
+    async removeBatchTemp(context, srfKeys) {
+        try {
+            const items = this.service.local.deleteBatch(context, srfKeys);
+            if (items) {
+                return new HttpResponse(items);
+            }
+            return new HttpResponse(items, 500);
+        }
+        catch (err) {
+            throw new HttpError(err);
+        }
+    }
+    /**
+     * 在新建、更新时，根据界面域下的关系，自动填充相关父属性
+     *
+     * @author chitanda
+     * @date 2024-01-02 15:01:30
+     * @protected
+     * @param {IContext} context
+     * @param {IDataEntity} data
+     * @return {*}  {IDataEntity}
+     */
+    attach(context, data) {
+        const sandboxId = context.srfsessionid;
+        const uiDomain = ibiz.uiDomainManager.get(sandboxId);
+        const configs = (uiDomain === null || uiDomain === void 0 ? void 0 : uiDomain.getDERConfig(this.entity.id)) || [];
+        if (configs.length > 0) {
+            configs.forEach(config => {
+                if (config.parentAppDEFieldId) {
+                    const { majorAppDataEntityId, parentAppDEFieldId } = config;
+                    const majorDECodeName = calcDeCodeNameById(majorAppDataEntityId);
+                    const majorLowerCodeName = majorDECodeName;
+                    const pickupLowerDEFName = parentAppDEFieldId.toLowerCase();
+                    const majorkey = context[majorLowerCodeName];
+                    // 父主键不能是自身，否则自关系的时候就改错了
+                    if (majorkey && majorkey !== data.srfkey) {
+                        data[pickupLowerDEFName] = majorkey;
+                    }
+                }
+            });
+        }
+        return data;
+    }
+}

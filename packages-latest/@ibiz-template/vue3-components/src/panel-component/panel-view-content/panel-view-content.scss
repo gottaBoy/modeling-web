@@ -1,0 +1,19 @@
+// 视图内容区样式
+$panel-view-content: (
+  'padding': getCssVar(spacing, tight) getCssVar(spacing, base) 0 getCssVar(spacing, base), // 内边距
+  'margin': getCssVar('spacing', 'none'),           // 外边距
+);
+
+@include b(panel-view-content) {
+  @include set-component-css-var(panel-view-content, $panel-view-content);
+
+  width: 100%;
+  height: 100%;
+  padding: getCssVar('panel-view-content', 'padding');
+  overflow: auto;
+
+  >.#{bem(row)} {
+    height: 100%;
+  }
+
+}

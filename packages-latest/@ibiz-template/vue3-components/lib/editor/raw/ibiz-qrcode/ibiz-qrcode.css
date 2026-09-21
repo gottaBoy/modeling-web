@@ -1,0 +1,1 @@
+.ibiz-qrcode{--ibiz-qrcode-width:300px;--ibiz-qrcode-text-color:var(--ibiz-color-disabled-text);display:flex;align-items:center;justify-content:center;width:100%;height:100%}.ibiz-qrcode__img{width:var(--ibiz-qrcode-width);max-width:100%}.ibiz-qrcode__no-img{color:var(--ibiz-qrcode-text-color)}

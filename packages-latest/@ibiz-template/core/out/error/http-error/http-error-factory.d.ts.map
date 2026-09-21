@@ -1,0 +1,1 @@
+{"version":3,"file":"http-error-factory.d.ts","sourceRoot":"","sources":["../../../src/error/http-error/http-error-factory.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,UAAU,EAAE,MAAM,OAAO,CAAC;AACnC,OAAO,EAAE,SAAS,EAAE,MAAM,cAAc,CAAC;AAGzC;;;;GAIG;AACH,qBAAa,gBAAgB;WACP,WAAW,CAAC,KAAK,EAAE,UAAU,GAAG,OAAO,CAAC,SAAS,CAAC;CAsBvE"}

@@ -1,0 +1,35 @@
+/* 抽屉 start */
+$drawer: (
+  'z-index': getCssVar('z-index', 'drawer'),
+  'background-color': #{getCssVar(color, bg, 1)},
+);
+
+/* 抽屉 end */
+
+@include b(drawer) {
+  @include set-component-css-var('drawer', $drawer);
+  background-color: getCssVar(drawer, 'background-color');
+
+  .el-drawer__header{
+    position: absolute;
+    right: 0;
+    z-index: 999;
+    padding: 0;
+    margin: 0;
+
+    .el-drawer__close-btn{
+      position: absolute;
+      top: getCssVar(spacing, base-loose);
+      right: getCssVar(spacing, base);
+    }
+  }
+
+
+  .el-drawer__body{
+    >.#{bem(view)}{
+      .#{bem(panel-view-header)}{
+        padding-right: getCssVar(spacing, super-loose);
+      } 
+    }
+  }
+}

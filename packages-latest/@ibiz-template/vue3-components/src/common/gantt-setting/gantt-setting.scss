@@ -1,0 +1,183 @@
+$gantt-setting: (
+  width: 85vw,
+  max-width: 980px,
+  max-height: 85vh,
+  header-height: 56px,
+  list-height: 360px,
+  disabled-opacity: .5,
+);
+
+@include b('gantt-setting') {
+  @include set-component-css-var(gantt-setting, $gantt-setting);
+
+  display: flex;
+  flex-direction: column;
+  width: getCssVar(gantt-setting, width);
+  max-width: getCssVar(gantt-setting, width);
+  max-height: getCssVar(gantt-setting, max-height);
+
+  @include e('header') {
+    width: 100%;
+    height: getCssVar(gantt-setting, header-height);
+    padding: 0 getCssVar('spacing', 'extra-loose');
+    font-size: getCssVar('font-size', 'header-5');
+    line-height: getCssVar(gantt-setting, header-height);
+  }
+
+  @include e('content') {
+    display: flex;
+    flex: 1;
+    justify-content: space-between;
+    width: 100%;
+    padding: getCssVar('spacing', 'tight') getCssVar('spacing', 'extra-loose') getCssVar('spacing', 'base');
+
+    @include m('optional') {
+      flex: 0 0 calc(50% - var(--ibiz-spacing-base));
+      width: 0;
+    }
+
+    @include m('selected') {
+      flex: 0 0 calc(50% - var(--ibiz-spacing-base));
+      width: 0;
+    }
+  }
+
+  @include e('bottom') {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: getCssVar('spacing', 'base') getCssVar('spacing', 'extra-loose');
+
+    @include m('btn-right') {
+      display: flex;
+      align-items: center;
+    }
+  }
+}
+
+@include b('gantt-setting-search-list') {
+  width: 100%;
+  user-select: none;
+
+  @include e('caption') {
+    margin-bottom: getCssVar('spacing', 'tight');
+  }
+
+  @include e('content') {
+    border: 1px solid getCssVar(color, border);
+    border-radius: getCssVar('border-radius', 'small');
+  }
+
+  @include e('search') {
+    padding: 0 getCssVar('spacing', 'base-loose');
+    margin: getCssVar('spacing', 'tight') 0;
+
+    svg {
+      fill: getCssVar(color, disabled, text);
+    }
+  }
+
+  @include e('list') {
+    @include set-component-css-var(gantt-setting, $gantt-setting);
+
+    height: getCssVar(gantt-setting, list-height);
+    padding-bottom: getCssVar('spacing', 'tight');
+    overflow-y: auto;
+  }
+}
+
+@include b('gantt-setting-list-item') {
+  @include set-component-css-var(gantt-setting, $gantt-setting);
+
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: getCssVar('spacing', 'extra-loose');
+  padding: 0 getCssVar('spacing', 'base-loose');
+  overflow: hidden;
+  cursor: pointer;
+
+  &:hover {
+    background-color: getCssVar('color', 'fill', 2);
+  }
+
+  @include e('caption') {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @include e('end-icon') {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointers;
+
+    svg {
+      fill: getCssVar(color, primary);
+    }
+
+    @include m('close') {
+      width: 100%;
+      height: 100%;
+
+      svg {
+        fill: getCssVar(color, text, 3);
+
+        &:hover {
+          fill: getCssVar(color, primary);
+        }
+      }
+    }
+  }
+
+  @include when('optional') {
+    @include e('end-icon') {
+      cursor: pointers;
+
+      svg {
+        fill: getCssVar(color, primary);
+      }
+    }
+  }
+
+  @include when('disabled') {
+    cursor: not-allowed;
+    background: none;
+    opacity: getCssVar('gantt-setting', disabled-opacity);
+  }
+
+  @include when('filter-item'){
+    display: none
+  }
+}
+
+@media (width >=992px) {
+  @include b('gantt-setting') {
+    @include set-component-css-var(gantt-setting, $gantt-setting);
+
+    max-width: getCssVar(gantt-setting, max-width);
+  }
+}
+
+@media (height <=768px) {
+  @include b('gantt-setting-search-list') {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    @include e('content') {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      height: 100%;
+    }
+    @include e('list') {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      height: 100%;
+    }
+  }
+}

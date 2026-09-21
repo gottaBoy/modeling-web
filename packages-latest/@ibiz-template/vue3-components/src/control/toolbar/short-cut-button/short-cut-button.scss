@@ -1,0 +1,9 @@
+@include b('short-cut-button') {
+    @include e('icon'){
+        svg{
+            width: getCssVar(font-size,regular);
+            height: getCssVar(font-size,regular);;
+            font-size: getCssVar(font-size,regular);;
+        }
+    }
+}

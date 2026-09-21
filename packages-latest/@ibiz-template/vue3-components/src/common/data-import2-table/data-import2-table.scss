@@ -1,0 +1,42 @@
+@include b(data-import2-table) {
+
+    @include e('template-container') {
+        height: 100%;
+    }
+
+    @include e('empty') {
+        width: 100%;
+        height: 100%;
+        @include flex(row, center, center);
+    }
+
+    @include e('dataimport-select') {
+        margin-top: -5px;
+    }
+
+    @include e('select') {
+        width: 100%;
+    }
+
+    @include e('dataimport-table') {
+        border-spacing: getCssVar(spacing, none);
+        border-collapse: collapse;
+    }
+
+    @include e('dataimpoer2-table-select') {
+        border: 1px solid getCssVar(color, border);
+        min-width: 132px;
+    }
+
+    @include e('dataimport2-table-th') {
+        border: 1px solid getCssVar(color, border);
+        padding: getCssVar(spacing, 'extra-tight');
+        min-width: 132px;
+    }
+
+    @include e('dataimport2-table-td') {
+        border: 1px solid getCssVar(color, border);
+        padding: getCssVar(spacing, 'extra-tight');
+        min-width: 132px;
+    }
+}

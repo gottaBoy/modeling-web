@@ -1,0 +1,17 @@
+*.log
+.DS_Store
+.idea
+
+# Build and install artifacts
+app/dist/
+app/dist-ssr/
+app/dist-modeling-plugins/
+app/node_modules/
+app/test-results/
+app/.tmp-*.mjs
+packages/node_modules/
+packages-latest/node_modules/
+source-build-deps/node_modules/
+
+# Preserve original upstream repository metadata locally without committing it.
+.app-upstream.git/

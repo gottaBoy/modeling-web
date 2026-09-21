@@ -1,0 +1,439 @@
+'use strict';
+
+var core = require('@ibiz-template/core');
+var runtime = require('@ibiz-template/runtime');
+var singleDataContainer_state = require('./single-data-container.state.cjs');
+
+"use strict";
+class SingleDataContainerController extends runtime.PanelContainerController {
+  constructor() {
+    super(...arguments);
+    /**
+     * @description 是否是数据父容器
+     * @exposedoc
+     * @memberof SingleDataContainerController
+     */
+    this.isDataContainer = true;
+    /**
+     * @description 所有面板成员的控制器
+     * @exposedoc
+     * @type {{ [key: string]: IPanelItemController }}
+     * @memberof SingleDataContainerController
+     */
+    this.panelItems = {};
+    /**
+     * @description 所有面板成员的适配器
+     * @type {{ [key: string]: IPanelItemProvider }}
+     * @memberof SingleDataContainerController
+     */
+    this.providers = {};
+  }
+  /**
+   * @description 单项数据容器数据，根据配置的数据模式计算后返回的数据
+   * @exposedoc
+   * @readonly
+   * @type {IData}
+   * @memberof SingleDataContainerController
+   */
+  get data() {
+    return this.state.data;
+  }
+  createState() {
+    var _a;
+    return new singleDataContainer_state.SingleDataContainerState((_a = this.parent) == null ? void 0 : _a.state);
+  }
+  async onInit() {
+    await super.onInit();
+    await this.initPanelItemControllers();
+  }
+  /**
+   * 面板状态变更通知
+   *
+   * @param {PanelNotifyState} _state
+   * @return {*}  {Promise<void>}
+   * @memberof SingleDataContainerController
+   */
+  async panelStateNotify(_state) {
+    super.panelStateNotify(_state);
+    if (_state === runtime.PanelNotifyState.LOAD) {
+      this.initContainerData();
+    }
+  }
+  /**
+   * 初始化面板成员控制器
+   *
+   * @author lxm
+   * @date 2022-08-24 21:08:48
+   * @protected
+   */
+  async initPanelItemControllers(panelItems = this.model.panelItems, panel = this.panel, parent = this) {
+    if (!panelItems) {
+      return;
+    }
+    await Promise.all(
+      panelItems.map(async (panelItem) => {
+        var _a, _b;
+        const panelItemProvider = await runtime.getPanelItemProvider(
+          panelItem,
+          panel.model,
+          panel.view.model
+        );
+        if (!panelItemProvider) {
+          return;
+        }
+        this.providers[panelItem.id] = panelItemProvider;
+        const panelItemController = await panelItemProvider.createController(
+          panelItem,
+          panel,
+          parent
+        );
+        this.panelItems[panelItem.id] = panelItemController;
+        if (((_a = panelItem.panelItems) == null ? void 0 : _a.length) && !runtime.isDataContainer(panelItem)) {
+          await this.initPanelItemControllers(
+            panelItem.panelItems,
+            panel,
+            panelItemController
+          );
+        }
+        if ((_b = panelItem.panelTabPages) == null ? void 0 : _b.length) {
+          await this.initPanelItemControllers(
+            panelItem.panelTabPages,
+            panel,
+            panelItemController
+          );
+        }
+      })
+    );
+  }
+  /**
+   * 计算导航参数
+   *
+   * @author tony001
+   * @date 2024-07-30 18:07:52
+   * @protected
+   * @return {*}  {IData}
+   */
+  computeNavParams() {
+    const parentData = this.dataParent.data || {};
+    const { navigateContexts, navigateParams } = this.model;
+    const context = this.panel.context.clone();
+    Object.assign(
+      context,
+      runtime.convertNavData(
+        navigateContexts,
+        parentData,
+        this.panel.context,
+        this.panel.params
+      )
+    );
+    const params = runtime.convertNavData(
+      navigateParams,
+      parentData,
+      this.panel.context,
+      this.panel.params
+    );
+    Object.assign(params, this.panel.params);
+    return { context, params };
+  }
+  /**
+   * 根据来源类型初始化容器数据
+   * @author lxm
+   * @date 2023-08-04 03:05:59
+   * @protected
+   */
+  async initContainerData() {
+    const {
+      dataName,
+      scriptCode,
+      dataSourceType,
+      dataRegionType,
+      showBusyIndicator
+    } = this.model;
+    try {
+      if (showBusyIndicator)
+        this.startLoading();
+      if (dataRegionType === "LOGINFORM") {
+        this.setLoginForm();
+        return;
+      }
+      switch (dataSourceType) {
+        case "DEACTION":
+        case "DEDATASET":
+          await this.setDataByDeMethod();
+          break;
+        case "APPGLOBALPARAM":
+          this.setDataByAppGlobalParam();
+          break;
+        case "DELOGIC":
+          await this.setDataByDeLogic();
+          break;
+        case "TOPVIEWSESSIONPARAM": {
+          if (!dataName) {
+            throw new core.RuntimeModelError(
+              this.model,
+              ibiz.i18n.t("vue3Util.panelComponent.noConfiguardDataObject")
+            );
+          }
+          this.bindViewData(this.panel.getTopView(), dataName);
+          break;
+        }
+        case "VIEWSESSIONPARAM": {
+          if (!dataName) {
+            throw new core.RuntimeModelError(
+              this.model,
+              ibiz.i18n.t("vue3Util.panelComponent.noConfiguardDataObject")
+            );
+          }
+          this.bindViewData(this.panel.view, dataName);
+          break;
+        }
+        case "ACTIVEDATAPARAM": {
+          if (!dataName) {
+            throw new core.RuntimeModelError(
+              this.model,
+              ibiz.i18n.t("vue3Util.panelComponent.noConfiguardDataObject")
+            );
+          }
+          await this.setData(this.dataParent.data[dataName]);
+          break;
+        }
+        case "CUSTOM": {
+          if (!scriptCode) {
+            throw new core.RuntimeModelError(
+              this.model,
+              ibiz.i18n.t("vue3Util.panelComponent.noConfiguredScript")
+            );
+          }
+          const computeData = runtime.ScriptFactory.execScriptFn(
+            {
+              ...this.panel.getEventArgs(),
+              data: this.dataParent.data
+            },
+            scriptCode,
+            {
+              isAsync: false,
+              singleRowReturn: true
+            }
+          );
+          await this.setData(computeData);
+          break;
+        }
+        default:
+          throw new core.ModelError(
+            this.model,
+            ibiz.i18n.t("vue3Util.panelComponent.noSupportedDataSourceType", {
+              dataSourceType
+            })
+          );
+      }
+    } finally {
+      if (showBusyIndicator)
+        this.endLoading();
+    }
+  }
+  /**
+   * 面板状态变更通知
+   *
+   * @author lxm
+   * @date 2022-09-20 18:09:07
+   */
+  childrenStateNotify(state) {
+    Object.values(this.panelItems).forEach((panelItem) => {
+      panelItem.panelStateNotify(state);
+    });
+  }
+  /**
+   * @description 设置单项数据容器数据
+   * @exposedoc
+   * @param {IData} data 单项数据容器数据
+   * @returns {*}  {Promise<void>}
+   * @memberof SingleDataContainerController
+   */
+  async setData(data) {
+    var _a, _b;
+    const fields = runtime.getAllPanelField(this.model);
+    const fieldKeys = fields.map((item) => item.id);
+    const panelData = new runtime.PanelData(fields, data);
+    panelData._evt.on("change", (key) => {
+      if (fieldKeys.includes(key)) {
+        this.childDataChangeNotify([key]);
+      }
+    });
+    (_b = (_a = this.data).destroy) == null ? void 0 : _b.call(_a);
+    this.state.data = panelData;
+    this.childrenStateNotify(runtime.PanelNotifyState.LOAD);
+    this.panel.evt.emit("onPanelDataContainerEvent", {
+      panelDataContainerName: this.model.id,
+      panelDataContainerEventName: runtime.PanelDataContainerEventName.onLoadSuccess,
+      data: [this.data]
+    });
+  }
+  /**
+   * 设置登录表单数据
+   *
+   * @protected
+   * @memberof SingleDataContainerController
+   */
+  setLoginForm() {
+    this.setData({});
+  }
+  /**
+   * 通过实体设置视图逻辑
+   * @author lxm
+   * @date 2023-08-04 03:00:31
+   * @protected
+   * @return {*}  {Promise<void>}
+   */
+  async setDataByDeLogic() {
+    const { appDataEntityId, appDELogicId } = this.model;
+    if (!appDELogicId) {
+      throw new core.RuntimeModelError(
+        this.model,
+        ibiz.i18n.t("vue3Util.panelComponent.noConfiguredEntityLogic")
+      );
+    }
+    if (!appDataEntityId) {
+      throw new core.RuntimeModelError(
+        this.model,
+        ibiz.i18n.t("vue3Util.panelComponent.noConfiguredEntity")
+      );
+    }
+    const { context, params } = this.computeNavParams();
+    const data = await runtime.execDELogicById(
+      appDELogicId,
+      appDataEntityId,
+      context,
+      this.panel.data,
+      params
+    );
+    if (!data) {
+      throw new core.RuntimeError(
+        ibiz.i18n.t("vue3Util.panelComponent.noReturnValue", { appDELogicId })
+      );
+    }
+    this.setData(data);
+  }
+  /**
+   * 设置全局变量为当前容器数据
+   * @author lxm
+   * @date 2023-08-04 01:55:07
+   * @protected
+   */
+  setDataByAppGlobalParam() {
+    const { dataName } = this.model;
+    const originData = dataName ? ibiz.appData[dataName] : ibiz.appData;
+    if (originData) {
+      this.setData(originData);
+    } else {
+      ibiz.log.error(
+        ibiz.i18n.t("vue3Util.panelComponent.noAttribute", { dataName })
+      );
+    }
+  }
+  /**
+   * 请求实体行为并把返回值设置为当前容器的数据
+   * @author lxm
+   * @date 2023-08-04 11:47:17
+   * @protected
+   * @return {*}  {Promise<void>}
+   */
+  async setDataByDeMethod() {
+    const { appDEMethodId, appDataEntityId } = this.model;
+    if (!appDEMethodId) {
+      throw new core.RuntimeModelError(
+        this.model,
+        ibiz.i18n.t("vue3Util.panelComponent.noConfiguerdEntityBehanior")
+      );
+    }
+    if (!appDataEntityId) {
+      throw new core.RuntimeModelError(
+        this.model,
+        ibiz.i18n.t("vue3Util.panelComponent.noConfiguredEntity")
+      );
+    }
+    const app = ibiz.hub.getApp(this.panel.context.srfappid);
+    const { context, params } = this.computeNavParams();
+    const res = await app.deService.exec(
+      appDataEntityId,
+      appDEMethodId,
+      context,
+      void 0,
+      params
+    );
+    if (res.ok && res.data) {
+      this.setData(res.data);
+    }
+  }
+  /**
+   * 绑定指定视图会话的变量
+   * @author lxm
+   * @date 2023-07-14 02:03:56
+   * @protected
+   * @param {IViewController} view 绑定视图控制器
+   * @param {string} dataName 变量名称
+   */
+  bindViewData(view, dataName) {
+    if (!Object.prototype.hasOwnProperty.call(view.state, dataName)) {
+      ibiz.log.error(
+        ibiz.i18n.t("vue3Util.panelComponent.sessionView", { dataName })
+      );
+      return;
+    }
+    const updateData = () => {
+      const originData = view.state[dataName];
+      if (originData) {
+        this.setData(originData);
+      } else {
+        ibiz.log.error(
+          ibiz.i18n.t("vue3Util.panelComponent.viewStateAttribute", {
+            dataName
+          })
+        );
+      }
+    };
+    updateData();
+    view.evt.on("onDataChange", () => {
+      updateData();
+    });
+  }
+  /**
+   * 通知所有子面板成员面板操作过程中的数据变更
+   *
+   * @author lxm
+   * @date 2022-09-20 18:09:40
+   * @param {string[]} names
+   */
+  childDataChangeNotify(names) {
+    Object.values(this.panelItems).forEach((panelItem) => {
+      panelItem.dataChangeNotify(names);
+    });
+  }
+  /**
+   * @description 设置面板数据的值
+   * @exposedoc
+   * @param {string} name 要设置的数据的属性名称
+   * @param {unknown} value 要设置的值
+   * @returns {*}  {Promise<void>}
+   * @memberof SingleDataContainerController
+   */
+  async setDataValue(name, value) {
+    if (Object.prototype.hasOwnProperty.call(this.state.data, name) && this.state.data[name] === value) {
+      return;
+    }
+    this.state.data[name] = value;
+  }
+  /**
+   * @description 销毁
+   * @memberof SingleDataContainerController
+   */
+  destroy() {
+    var _a, _b;
+    super.destroy();
+    (_b = (_a = this.data).destroy) == null ? void 0 : _b.call(_a);
+    Object.values(this.panelItems).forEach((item) => {
+      item.destroy();
+    });
+  }
+}
+
+exports.SingleDataContainerController = SingleDataContainerController;

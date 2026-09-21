@@ -1,0 +1,1 @@
+export { EmojiElem } from './emoji';

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "packages": {
+    "js-md5": {
+      "version": "0.8.3",
+      "registry": "https://registry.npmjs.org/js-md5/0.8.3",
+      "tarball": "https://registry.npmjs.org/js-md5/-/js-md5-0.8.3.tgz",
+      "archive": "archives/js-md5-0.8.3.tgz",
+      "metadata": "archives/js-md5-0.8.3.registry.json",
+      "integrity": "sha512-qR0HB5uP6wCuRMrWPTrkMaev7MJZwJuuw4fnwAzRgP4J4/F8RwtodOKpGp4XpqsLBFzzgqIO42efFAyz2Et6KQ==",
+      "shasum": "921bab7efa95bfc9d62b87ee08a57f8fe4305b69",
+      "license": "MIT",
+      "gitHead": "698290b4bc5ae43a17caf1234845c7576b412d1d"
+    },
+    "interactjs": {
+      "version": "1.10.26",
+      "registry": "https://registry.npmjs.org/interactjs/1.10.26",
+      "tarball": "https://registry.npmjs.org/interactjs/-/interactjs-1.10.26.tgz",
+      "archive": "archives/interactjs-1.10.26.tgz",
+      "metadata": "archives/interactjs-1.10.26.registry.json",
+      "integrity": "sha512-5gNTNDTfEHp2EifqtWGi5VkD3CMZVJSTGmtK/IsVRd+rkOk3E63iVs5Z+IeD5K1Lr0qZpU2754VHAwf5i+Z9xg==",
+      "license": "MIT",
+      "gitHead": "6e7a136f"
+    },
+    "@interactjs/types": {
+      "version": "1.10.26",
+      "registry": "https://registry.npmjs.org/@interactjs%2Ftypes/1.10.26",
+      "tarball": "https://registry.npmjs.org/@interactjs/types/-/types-1.10.26.tgz",
+      "archive": "archives/interactjs-types-1.10.26.tgz",
+      "metadata": "archives/interactjs-types-1.10.26.registry.json",
+      "integrity": "sha512-DekYpdkMV3XJVd/0k3f4pJluZAsCiG86yEtVXvGLK0lS/Fj0+OzYEv7HoMpcBZSkQ8s7//yaeEBgnxy2tV81lA==",
+      "license": "MIT",
+      "gitHead": "6e7a136f"
+    },
+    "xlsx-js-style": {
+      "version": "1.2.0",
+      "usage": "types-reference",
+      "registry": "https://registry.npmjs.org/xlsx-js-style/1.2.0",
+      "tarball": "https://registry.npmjs.org/xlsx-js-style/-/xlsx-js-style-1.2.0.tgz",
+      "archive": "archives/xlsx-js-style-1.2.0.tgz",
+      "metadata": "archives/xlsx-js-style-1.2.0.registry.json",
+      "integrity": "sha512-DDT4FXFSWfT4DXMSok/m3TvmP1gvO3dn0Eu/c+eXHW5Kzmp7IczNkxg/iEPnImbG9X0Vb8QhROda5eatSR/97Q==",
+      "license": "Apache-2.0",
+      "gitHead": "48ad46f7d349fed24ba4313ff1d9e53db52875bc"
+    }
+  }
+}

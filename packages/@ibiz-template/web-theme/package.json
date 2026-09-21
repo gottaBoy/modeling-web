@@ -1,0 +1,42 @@
+{
+  "name": "@ibiz-template/web-theme",
+  "version": "1.1.28-alpha.2",
+  "type": "module",
+  "main": "lib/index.cjs",
+  "types": "es/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./es/index.mjs",
+      "require": "./lib/index.cjs"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitee.com/iBizModeling/ibiz-template-vue-theme.git"
+  },
+  "files": [
+    "dist",
+    "es",
+    "lib",
+    "src",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "dev": "ibiz-temp build -w",
+    "build": "npm run pub && ibiz-temp build -c && vue-tsc --declaration --emitDeclarationOnly",
+    "pub": "ibizlab pub -m /root/workspace/template/FrontPresetModel/frontmodelbackend-core/src/main/resources/model/front/model/ibiz -t ./template -o ./src/publish --app FrontModel --clean",
+    "publish:next": "npm run build && npm publish --access public --tag=next --registry=https://registry.npmjs.org/",
+    "publish:dev": "npm run build && npm publish --access public --tag=dev --registry=https://registry.npmjs.org/",
+    "publish:alpha": "npm run build && npm publish --access public --tag=alpha --registry=https://registry.npmjs.org/",
+    "publish:beta": "npm run build && npm publish --access public --tag=beta --registry=https://registry.npmjs.org/",
+    "publish:npm": "npm run build && npm publish --access public --registry=https://registry.npmjs.org/"
+  },
+  "author": "chitanda",
+  "license": "MIT",
+  "devDependencies": {
+    "@ibiz-template/theme": "^0.6.0"
+  },
+  "dependencies": {
+    "@ibiz-template/runtime": "^0.6.0"
+  }
+}

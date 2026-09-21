@@ -1,0 +1,49 @@
+@media (max-width: 720px) {
+  html body .pc_login_style .ibiz-panel-container--container1 {
+    right: 16px;
+    left: 16px;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    height: auto;
+    min-height: 440px;
+    margin-top: 24px;
+    border-radius: 8px;
+  }
+
+  html body .pc_login_style .ibiz-panel-container--container5 {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 24px !important;
+  }
+
+  html body .pc_login_style .ibiz-panel-container--container9 {
+    margin: 16px;
+    width: calc(100% - 32px);
+    max-width: calc(100% - 32px);
+    box-sizing: border-box;
+  }
+
+  html
+    body
+    .pc_login_style
+    .ibiz-panel-container--container9
+    .ibiz-panel-rawitem--static_text1
+    span {
+    font-size: 18px;
+    line-height: 1.4;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  html
+    body
+    .pc_login_style
+    .ibiz-panel-container--container_4
+    .ibiz-panel-app-title__title {
+    font-size: 20px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}

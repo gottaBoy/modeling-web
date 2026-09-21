@@ -1,0 +1,6 @@
+@include b('editor-empty-text') {
+    @include when('placeholder') {
+        color: getCssVar(color, text, 3);
+        white-space: nowrap;
+    }
+}

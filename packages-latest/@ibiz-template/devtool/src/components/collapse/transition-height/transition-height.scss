@@ -1,0 +1,4 @@
+@include b('transition-height') {
+  overflow: hidden;
+  transition: height 0.2s linear;
+}

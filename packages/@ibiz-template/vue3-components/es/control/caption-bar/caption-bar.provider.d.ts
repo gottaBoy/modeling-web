@@ -1,0 +1,13 @@
+import { IControlProvider } from '@ibiz-template/runtime';
+/**
+ * 标题栏适配器
+ *
+ * @author lxm
+ * @date 2022-10-25 18:10:57
+ * @export
+ * @class CaptionBarProvider
+ * @implements {IControlProvider}
+ */
+export declare class CaptionBarProvider implements IControlProvider {
+    component: string;
+}

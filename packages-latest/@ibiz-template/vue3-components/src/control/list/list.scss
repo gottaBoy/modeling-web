@@ -1,0 +1,276 @@
+// 列表根元素
+$control-list: (
+  bg-color: transparent,                                                            // 列表背景色
+  padding: getCssVar('spacing', 'none'),                                            // 列表内边距
+  text-color: getCssVar('color', 'text', '0'),                                      // 列表字体色
+  icon-color: getCssVar('color', 'text', '2'),                                      // 列表图标色
+  hover-color: getCssVar('color', 'primary', 'hover'),                              // 列表悬浮色
+  icon-size: getCssVar('font-size', 'header', '3'),                                 // 列表图标大小
+  gap: getCssVar('spacing', 'tight'),                                               // 列表成员间距
+  font-size: getCssVar('font-size', 'regular'),                                     // 列表字体大小
+  font-weight: getCssVar('font-weight', 'regular'),                                 // 列表字体粗细
+  border-color: getCssVar('color', 'border'),                                       // 列表边框色
+);
+
+// 列表内容
+$control-list-content: (
+  bg-color: getCssVar('control-list', 'bg-color'),                                  // 内容背景色（继承自列表根元素）
+);
+
+// 列表分组样式2
+$control-list-group-style2: (
+  text-color: getCssVar('color', 'disabled', 'text'),                               // 分组字体色
+  padding: 0 getCssVar('spacing', 'tight'),                                         // 分组内边距
+  font-size: getCssVar('font-size', 'regular'),                                     // 分组字体大小
+);
+
+// 列表项
+$control-list-item: (
+  gap: getCssVar('spacing', 'extra', 'tight'),                                      // 列表项内容间隔
+  bg-color: getCssVar('control-list', 'bg-color'),                                  // 列表项背景色（继承自列表根元素）
+  text-color: getCssVar('control-list', 'text-color'),                              // 列表项字体色（继承自列表根元素）
+  hover-bg-color: getCssVar('color', 'fill', '1'),                                  // 列表项悬浮背景色
+  active-bg-color: getCssVar('color', 'fill', '2'),                                 // 列表项激活背景色    
+  border-color: getCssVar('control-list', 'border-color'),                          // 列表项边框色（继承自列表根元素）
+  padding: getCssVar('spacing', 'tight') getCssVar('spacing', 'base', 'tight'),     // 列表项内边距
+);
+
+@include b('control-list') {
+  @include set-component-css-var('control-list', $control-list);
+  @include set-component-css-var('control-list-content', $control-list-content);
+  @include set-component-css-var('control-list-group-style2', $control-list-group-style2);
+  @include set-component-css-var('control-list-item', $control-list-item);
+  @include flex(column, flex-start, stretch);
+
+  position: relative;
+  height: 100%;
+  padding: getCssVar('control-list', 'padding');
+  background-color: getCssVar('control-list', 'bg-color');
+  @include e('drag-icon') {
+    cursor: move;
+    visibility: hidden;
+  }
+
+  @include e('nav-icon') {
+    position: absolute;
+    top: 18px;
+    right: 10px;
+    color: getCssVar('control-list', 'icon-color');
+    cursor: pointer;
+
+    &:hover {
+      color: getCssVar('control-list', 'hover-color');
+    }
+  }
+
+  @include e('load-more-button') {
+    padding: getCssVar('spacing', 'tight') getCssVar('spacing', 'base', 'tight');
+    text-align: center;
+  }
+
+  @include e('quicktoolbar') {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  @include e('batchtoolbar') {
+    display: none;
+    flex-shrink: 0;
+    margin: getCssVar('spacing', 'tight') 0;
+
+    @include when('show') {
+      display: block;
+    }
+  }
+
+  @include e('pagination') {
+    flex-shrink: 0;
+  }
+
+  @include b('control-list-content') {
+    flex-grow: 1;
+    background-color: getCssVar('control-list-content', 'bg-color');
+    @include e('icon') {
+      text-align: center;
+
+      i {
+        font-size: getCssVar('control-list', 'icon-size');
+        color: getCssVar('control-list', 'icon-color');
+        cursor: pointer;
+
+        &:hover {
+          color: getCssVar('control-list', 'hover-color');
+        }
+      }
+    }
+  }
+}
+
+@include b('control-list-content') {
+  @include when('show-underLine') {
+    .#{bem('control-list-scroll-item')} {
+      border-bottom: 1px solid getCssVar('control-list', 'border-color');
+    }
+  }
+  .#{bem('row-detail')}:last-of-type .#{bem('control-list-scroll-item')} {
+    border-bottom: none;
+  }
+}
+
+@include b('control-list-scroll') {
+  height: 100%;
+  overflow: auto;
+  @include when('reverse-scroll') {
+    .#{bem('control-list', 'layout-flex')} {
+      display: flex;
+      flex-direction: column-reverse;
+    }
+  }
+}
+
+@include b('control-list-item') {
+  flex-grow: 1;
+  padding: getCssVar('control-list-item', 'padding');
+  color: getCssVar('control-list-item', 'text-color');
+  cursor: pointer;
+  background-color: getCssVar('control-list-item', 'bg-color');
+
+  @include e('right') {
+    padding: 0 getCssVar('control-list-item', 'gap');
+    @include m('actions') {
+      display: flex;
+      column-gap: getCssVar('control-list-item', 'gap');
+      justify-content: center;
+      .#{bem('action-toolbar', 'item')} {
+        margin: 0;
+      }
+      .#{bem('action-toolbar', 'item', 'label')} {
+        &.is-has-caption {
+          margin: 0;
+        }
+      }
+    }
+  }
+
+  &:has(.#{bem('control-list-item__right')}) {
+    display: flex;
+    justify-content: space-between;
+
+    .#{bem('control-list-item__caption')} {
+      flex: 1;
+    }
+  }
+
+  @include e('new') {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: getCssVar('control-list', 'gap');
+    color: getCssVar('color', 'text', '3');
+    border: 2px dashed getCssVar('control-list-item', 'border-color');
+  }
+}
+
+@include b('control-list-group-content') {
+  @include e('item-header') {
+    @include flex(row, space-between, center);
+
+    width: 100%;
+  }
+}
+
+@include b('control-list-scroll-item') {
+  display: flex;
+  align-items: center;
+
+  @include e('checkbox') {
+    flex-shrink: 0;
+    margin-left: getCssVar('control-list', 'gap');
+  }
+
+  @include e('icon') {
+    flex-shrink: 0;
+    margin-left: getCssVar('control-list', 'gap');
+    color: getCssVar('control-list', 'icon-color');
+    cursor: pointer;
+  }
+
+  &:hover {
+    background-color: getCssVar('control-list-item', 'hover-bg-color');
+    .#{bem('control-list', 'drag-icon')} {
+      visibility: visible;
+    }
+  }
+
+  @include when('active') {
+    background-color: getCssVar('control-list-item', 'active-bg-color');
+  }
+}
+
+@include b('control-list-group-style2') {
+  @include e('header') {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    @include m('title') {
+      padding: getCssVar('control-list-group-style2', 'padding');
+      font-size: getCssVar('control-list-group-style2', 'font-size');
+      color: getCssVar('control-list-group-style2', 'text-color');
+    }
+
+    &::before,
+    &::after {
+      display: block;
+      flex: 1;
+      height: 1px;
+      margin-top: 1px;
+      content: '';
+      border-top: 1px solid getCssVar('control-list', 'border-color');
+      transform: translateY(-50%);
+    }
+  }
+}
+
+@include b('control-list-skeleton') {
+  padding: getCssVar('spacing', 'tight') 0;
+}
+
+@include b('control-list-skeleton-item') {
+  display: flex;
+  padding-bottom: getCssVar('control-list', 'gap');
+
+  @include e('avatar') {
+    flex: none;
+
+    // 内边距+3行骨架+间隔
+    width: calc(
+      getCssVar(spacing, base) * 2 + getCssVar(spacing, base, loose) * 3 +
+        getCssVar(spacing, base, tight) * 2
+    );
+    padding: 0 getCssVar(spacing, base);
+
+    --el-skeleton-circle-size: #{calc(
+        getCssVar(spacing, base, loose) * 3 + getCssVar(spacing, base, tight) *
+          2
+      )};
+
+    .el-skeleton__circle {
+      height: var(--el-skeleton-circle-size);
+    }
+  }
+}
+
+@include b('control-list-skeleton-group') {
+  @include e('header') {
+    margin-bottom: getCssVar('control-list', 'gap');
+  }
+}
+
+@include b('control-list-skeleton-group-style2') {
+  @include e('header') {
+    display: flex;
+    justify-content: center;
+  }
+}

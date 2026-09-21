@@ -1,0 +1,13 @@
+$icon: (
+emoji-space: -3px,
+);
+
+@include b(icon) {
+  @include set-component-css-var(icon, $icon);
+
+  @include e(emoji) {
+    // 修复UTF8表情默认未左对齐
+    position: relative;
+    left: getCssVar(icon, emoji-space);
+  }
+}

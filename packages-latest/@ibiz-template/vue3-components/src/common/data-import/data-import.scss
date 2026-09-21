@@ -1,0 +1,90 @@
+@include b(data-import) {
+  @include flex(column);
+
+  width: 544px;
+  height: 368px;
+  padding: getCssVar(spacing,base-loose);
+  background: getCssVar(color, bg, 1);
+
+  @include e(caption) {
+    margin-bottom:  getCssVar('spaceing', 'base');
+    font-size: getCssVar('font-size', 'large');
+    font-weight: getCssVar('font-weight', 'bold');
+    color: getCssVar('text-color');
+  }
+
+  @include e(template-container) {
+    padding: getCssVar('spacing','base') getCssVar('spacing','base-tight') getCssVar('spacing','none');
+    margin-bottom: getCssVar('spacing','base');
+  }
+
+  @include e(file-link) {
+    display: flex;
+    align-items: center;
+    color:  getCssVar('color','secondary');
+    cursor: pointer;
+
+    @include e(link-icon) {
+      margin-right: getCssVar('spacing','super-tight');
+      font-size: getCssVar('width-icon','large');
+    }
+  }
+  
+  @include e(button-bar) {
+    margin-right: getCssVar('spacing','base-loose');
+    text-align: right;
+
+    .ivu-btn {
+      margin-left: getCssVar('spacing','tight');
+    }
+  }
+}
+
+
+@include b(data-import-upload) {
+  @include flex(column, center, center);
+
+  flex-grow: 1;
+  cursor: pointer;
+  background: getCssVar(color, bg, 1);
+  border: 1px dashed getCssVar(color, border);
+  border-radius: getCssVar(border, radius,small);
+
+  @include e(img) {
+    width: 50px;
+    height: 50px;
+    margin-bottom: getCssVar('spacing','base-loose');
+  }
+}
+
+@include b(data-import-message) {
+  @include flex(column);
+
+  flex-grow: 1;
+  padding:  getCssVar('spacing','tight') getCssVar('spacing','base');
+  overflow: auto;
+  cursor: pointer;
+  background: getCssVar(color, bg, 1);
+  border: 1px dashed getCssVar(color, border);
+  border-radius: getCssVar(border, radius,small);
+
+  @include e(title) {
+    display: flex;
+    gap: getCssVar('spacing','tight');
+    font-size: getCssVar('font-size', 'medium');
+    font-weight: getCssVar('font-weight', 'bold');
+  }
+
+  @include e(content) {
+    padding-left: getCssVar('spacing','base');
+    white-space: pre-line;
+  }
+}
+
+@include b(data-import-content) {
+
+  @include e(error){
+    color: getCssVar(color ,danger);
+  }
+  
+}

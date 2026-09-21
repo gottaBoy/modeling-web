@@ -1,0 +1,17 @@
+export { BIReportDesignController } from './bi-report-design.controller';
+export { BIReportChartController } from './bi-report-chart.controller';
+export { BIPieChartController } from './bi-pie-chart.controller';
+export { BIScatterController } from './bi-scatter-chart.controller';
+export { BIStackColChartController } from './bi-stackcol-chart.controller';
+export { BIGaugeChartController } from './bi-gauge-chart.controller';
+export { BIMultiSeriesLineChartController } from './bi-multi-series-line-chart.controller';
+export { BIMultiSeriesBarChartController } from './bi-multi-series-bar-chart.controller';
+export { BIMultiSeriesColChartController } from './bi-multi-series-col-chart.controller';
+export { BIZoneColChartController } from './bi-zonecol-chart.controller';
+export { BIStackBarController } from './bi-stackbar-chart.controller';
+export { BIAreaController } from './bi-area-chart.controller';
+export { BIZoneLineChartController } from './bi-zoneline-chart.controller';
+export { BIRadarController } from './bi-radar-chart.controller';
+export { BINumberChartController } from './bi-number-chart.controller';
+export { BICrossTableController } from './bi-report-cross-table.controller';
+export { BITableController } from './bi-report-table.controller';

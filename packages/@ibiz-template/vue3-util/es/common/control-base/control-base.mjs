@@ -1,0 +1,171 @@
+import { defineComponent, reactive, createVNode, resolveComponent, computed, h } from 'vue';
+import { ScriptFactory } from '@ibiz-template/runtime';
+import { fixJsonString } from '@ibiz-template/core';
+import { isNil } from 'ramda';
+import '../../use/index.mjs';
+import { useNamespace } from '../../use/namespace/namespace.mjs';
+
+"use strict";
+const IBizControlBase = /* @__PURE__ */ defineComponent({
+  name: "IBizControlBase",
+  props: {
+    controller: {
+      type: Object,
+      required: true
+    }
+  },
+  setup(props) {
+    const ns = useNamespace("control");
+    const {
+      controlType,
+      sysCss,
+      codeName
+    } = props.controller.model;
+    const typeClass = controlType.toLowerCase();
+    const sysCssName = sysCss == null ? void 0 : sysCss.cssName;
+    const model = props.controller.model;
+    const controls = props.controller.model.controls;
+    const onLayoutPanelCreated = (controller) => {
+      props.controller.setLayoutPanel(controller);
+    };
+    const inlineStyle = reactive({});
+    if (model.controlType.endsWith("EXPBAR") === false) {
+      if (!isNil(model.width)) {
+        if (model.width > 0 && model.width <= 1) {
+          inlineStyle.width = "".concat(model.width * 100, "%");
+        } else {
+          inlineStyle.width = "".concat(model.width, "px");
+        }
+      }
+      if (!isNil(model.height)) {
+        if (model.height > 0 && model.height <= 1) {
+          inlineStyle.width = "".concat(model.height * 100, "%");
+        } else {
+          inlineStyle.height = "".concat(model.height, "px");
+        }
+      }
+    }
+    const handleHtmlEvent = async (e, eventName) => {
+      e.stopPropagation();
+      const scriptCode = e.target.getAttribute(eventName);
+      const data = e.target.getAttribute("data");
+      const context = props.controller.context.clone();
+      const _context = e.target.getAttribute("context");
+      if (_context) {
+        Object.assign(context, fixJsonString(_context));
+      }
+      const params = {
+        ...props.controller.params
+      };
+      const _params = e.target.getAttribute("params");
+      if (_params) {
+        Object.assign(params, fixJsonString(_params));
+      }
+      if (scriptCode) {
+        await ScriptFactory.asyncExecScriptFn({
+          ...props.controller.getEventArgs(),
+          context,
+          params,
+          data: data ? fixJsonString(data) : null
+        }, scriptCode);
+      }
+    };
+    const getControlRender = (data) => {
+      var _a, _b;
+      const controlRenders = model.controlRenders ? model.controlRenders.filter((item) => item.id !== "emptypanel") : void 0;
+      if (!controlRenders || controlRenders.length === 0) {
+        return void 0;
+      }
+      const controlRender = controlRenders[0];
+      if (controlRender.renderType === "LAYOUTPANEL_MODEL" && controlRender.layoutPanelModel) {
+        const htmlCode = ScriptFactory.execScriptFn({
+          ...props.controller.getEventArgs(),
+          data
+        }, controlRender.layoutPanelModel, {
+          isAsync: false
+        });
+        return createVNode("div", {
+          "innerHTML": htmlCode,
+          "onClick": (e) => handleHtmlEvent(e, "click"),
+          "onDblclick": (e) => handleHtmlEvent(e, "dbclick"),
+          "class": [ns.e("control-render"), ns.e((_a = controlRender.renderName) == null ? void 0 : _a.toLowerCase())]
+        }, null);
+      }
+      if (controlRender.renderType === "LAYOUTPANEL" && controlRender.layoutPanel) {
+        return createVNode(resolveComponent("iBizControlShell"), {
+          "class": [ns.e("control-render"), ns.e((_b = controlRender.renderName) == null ? void 0 : _b.toLowerCase())],
+          "data": data,
+          "params": props.controller.params,
+          "context": props.controller.context,
+          "modelData": controlRender.layoutPanel
+        }, null);
+      }
+    };
+    const customRender = computed(() => {
+      const data = props.controller.data || props.controller.items;
+      return getControlRender(data);
+    });
+    return {
+      ns,
+      typeClass,
+      sysCssName,
+      inlineStyle,
+      codeName,
+      controls,
+      customRender,
+      onLayoutPanelCreated
+    };
+  },
+  render() {
+    var _a, _b, _c;
+    const {
+      state,
+      controlPanel,
+      providers
+    } = this.controller;
+    let layoutPanel = null;
+    if (state.isCreated && controlPanel) {
+      const slots = {
+        ...this.$slots
+      };
+      if ((_a = this.controls) == null ? void 0 : _a.length) {
+        this.controls.forEach((ctrl) => {
+          const slotKey = ctrl.name;
+          const ctrlProps = {
+            context: this.controller.context,
+            params: this.controller.params
+          };
+          const outCtrlSlot = slots[slotKey];
+          if (outCtrlSlot) {
+            slots[slotKey] = () => {
+              return outCtrlSlot(ctrlProps);
+            };
+          } else {
+            slots[slotKey] = () => {
+              const comp = resolveComponent("IBizControlShell");
+              return h(comp, {
+                modelData: ctrl,
+                ...ctrlProps
+              });
+            };
+          }
+        });
+      }
+      const provider = providers[controlPanel.name];
+      layoutPanel = h(resolveComponent(provider.component), {
+        modelData: controlPanel,
+        context: this.controller.context,
+        params: this.controller.params,
+        provider,
+        container: this.controller,
+        onControllerAppear: this.onLayoutPanelCreated
+      }, slots);
+    }
+    return createVNode("div", {
+      "class": [this.ns.b(), this.ns.b(this.typeClass), this.ns.m(this.codeName), this.sysCssName],
+      "style": this.inlineStyle
+    }, [layoutPanel || this.customRender || ((_c = (_b = this.$slots).default) == null ? void 0 : _c.call(_b))]);
+  }
+});
+
+export { IBizControlBase };

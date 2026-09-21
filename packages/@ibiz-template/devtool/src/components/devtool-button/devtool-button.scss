@@ -1,0 +1,23 @@
+@include b(devtool-button) {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  color: getCssVar(color, primary, text);
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  appearance: none;
+  cursor: pointer;
+  user-select: none;
+  background-color: getCssVar(color, primary);
+  border: 1px solid getCssVar(color, border);
+  border-radius: 4px  ;
+  outline: 0;
+  transition: 0.1s;
+}

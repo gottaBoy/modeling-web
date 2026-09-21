@@ -1,0 +1,1 @@
+.ibiz-panel-container-tabs{position:relative}.ibiz-panel-container-tabs .el-tabs{--el-tabs-header-height:52px}.ibiz-panel-container-tabs .el-tabs__nav-wrap::after{display:none}.ibiz-panel-container-tabs::after{position:absolute;bottom:0;left:0;z-index:var(--el-index-normal);width:100%;height:"--ibiz-spacing-super-tight";content:"";background-color:var(--el-border-color-light)}

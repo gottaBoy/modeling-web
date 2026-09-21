@@ -1,0 +1,109 @@
+
+// 图标菜单分组样式
+$control-appmenu-iconview-group: (
+  padding: 0 getCssVar(spacing, base),                    // 图标菜单分组内间距
+  gap: getCssVar(spacing, tight),                         // 图标菜单分组标题与分组图标、分组计数器间隔
+  font-size: getCssVar(font-size, header, 6),             // 图标菜单分组标题字体大小 
+);
+
+// 图标菜单项样式
+$control-appmenu-iconview-item: (
+  width: 135px,                                             // 图标菜单项宽度
+  height: 135px,                                            // 图标菜单项高度
+  margin: getCssVar(spacing, base),                         // 图标菜单项外间距
+  'color': getCssVar('color', text, 0),                    // 图标菜单项文字颜色
+  'bg-color': getCssVar('color', 'bg', 1),                 // 图标菜单项背景颜色
+  'border-color': getCssVar('color', 'border'),            // 图标菜单项边框颜色  
+  'hover-color': getCssVar('color', 'primary'),             // 图标菜单项鼠标悬停文字颜色
+  'hover-bg-color': getCssVar('color', 'bg', 2),            // 图标菜单项鼠标悬停背景颜色
+  'hover-border-color': getCssVar('color', 'primary'),      // 图标菜单项鼠标悬停边框颜色
+  'disabled-color': getCssVar(color, disabled, text),       // 图标菜单项禁用文字颜色
+  'disabled-bg-color': getCssVar(color, disabled, bg),      // 图标菜单项禁用背景颜色
+  'disabled-border-color': getCssVar('disabled', 'border-color'),     // 图标菜单项禁用边框颜色
+  border-radius: getCssVar(border-radius, medium),          // 图标菜单项边框圆角
+  icon-size: 50px,                                            // 图标菜单项图标大小
+  'font-size': getCssVar('font-size', 'regular'),           // 图标菜单项文字大小
+  gap: getCssVar(spacing, tight),                             // 图标菜单项图标与文字间隔
+  counter-gap: getCssVar(spacing, tight),                     // 图标菜单项计数器与边框间隔
+);
+
+@include b(control-appmenu-iconview) {
+  @include set-component-css-var('control-appmenu-iconview-group', $control-appmenu-iconview-group);
+  @include set-component-css-var('control-appmenu-iconview-item', $control-appmenu-iconview-item);
+  @include e(content){
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+  }
+}
+
+@include b(control-appmenu-iconview-item){
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: getCssVar('control-appmenu-iconview-item','width');
+  height: getCssVar('control-appmenu-iconview-item','height');
+  margin: getCssVar('control-appmenu-iconview-item','margin');
+  font-size: getCssVar('control-appmenu-iconview-item','font-size');
+  color: getCssVar('control-appmenu-iconview-item','color');
+  cursor: pointer;
+  border: 1px solid getCssVar('control-appmenu-iconview-item','border-color');
+  border-radius: getCssVar('control-appmenu-iconview-item','border-radius');
+
+  @include e(icon){
+    width: getCssVar('control-appmenu-iconview-item','icon-size');
+    height: getCssVar('control-appmenu-iconview-item','icon-size');
+    margin-bottom: getCssVar('control-appmenu-iconview-item','gap');
+    font-size: getCssVar('control-appmenu-iconview-item','icon-size');
+  }
+
+  @include e(counter){
+    position: absolute;
+    top: getCssVar('control-appmenu-iconview-item','counter-gap');
+    right: getCssVar('control-appmenu-iconview-item','counter-gap');
+  }
+
+  &:hover {
+    color: getCssVar('control-appmenu-iconview-item','hover-color');
+    background-color: getCssVar('control-appmenu-iconview-item','hover-bg-color');
+    border-color: getCssVar('control-appmenu-iconview-item','hover-border-color');
+  }
+
+  @include when(disabled) {
+    color: getCssVar('control-appmenu-iconview-item','disabled-color');
+    cursor: not-allowed;
+    background-color: getCssVar('control-appmenu-iconview-item','disabled-bg-color');
+    border-color: getCssVar('control-appmenu-iconview-item','disabled-border-color');
+  }
+
+  &+.#{bem(control-appmenu-iconview-group)} {
+    border-top: 1px solid getCssVar('color', 'border');
+  }
+}
+
+@include b(control-appmenu-iconview-group){
+  width: 100%;
+
+  .el-collapse-item__header {
+    padding: getCssVar(control-appmenu-iconview-group, padding);
+    font-size: getCssVar('control-appmenu-iconview-group','font-size');
+  }
+
+  .el-collapse-item__content{
+    display: flex;
+    flex-wrap: wrap;
+  }
+  @include e(icon) {
+    display: flex;
+    margin-right: getCssVar(control-appmenu-iconview-group, gap);
+  }
+  @include e(counter) {
+    margin-left: getCssVar(control-appmenu-iconview-group, gap);
+  }
+}
+

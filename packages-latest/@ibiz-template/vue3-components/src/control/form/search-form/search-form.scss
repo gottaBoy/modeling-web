@@ -1,0 +1,17 @@
+// 搜索表单部件样式
+$control-searchform: (
+  'bg-color': transparent,                                                    // 搜索表单背景色
+  'padding': getCssVar('spacing', 'tight') getCssVar('spacing', 'base'),     // 搜索表单内边距
+);
+
+@include b(control-searchform) {
+  @include set-component-css-var('control-searchform', $control-searchform);
+
+  display: flex;
+  padding: getCssVar('control-searchform', 'padding');
+  background-color: getCssVar('control-searchform', 'bg-color');
+
+  >.#{bem(form-page)} {
+    flex-grow: 1;
+  }
+}

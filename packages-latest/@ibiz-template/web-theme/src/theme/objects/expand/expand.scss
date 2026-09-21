@@ -1,0 +1,68 @@
+// 默认组件的样式扩展
+
+@include b(view-detabexpview) {
+  position: relative;
+
+  .#{bem(control-tabexppanel)},
+  .#{bem(control-drtab)} {
+    .el-tabs__nav-wrap::after {
+      background-color: transparent;
+    }
+  }
+}
+
+@include b(panel-container) {
+
+  @include m(indexactions) {
+    .el-button {
+      font-size: 28px;
+    }
+
+    .el-button:hover {
+      background-color: transparent;
+    }
+  }
+
+  @include m(indextopactions) {
+    .el-button {
+      padding: 0 getCssVar(spacing, tight);
+      font-size: 20px;
+    }
+
+    .el-button:hover {
+      background-color: transparent;
+    }
+  }
+}
+
+.#{bem(panel-container)}.#{bem(panel-container, '', view_footer)} {
+  height: 54px;
+  padding: 0 getCssVar(spacing, base);
+  border-top: 1px solid getCssVar(color, border);
+}
+
+.#{bem(view-appindexview)} {
+  .#{bem(scroll-container-content,left)}:first-child {
+    overflow: visible;
+
+    &>.#{bem(scroll-container-item)} {
+      overflow: visible;
+    }
+  }
+}
+
+.#{bem(panel-rawitem--select_list_title)} {
+  height: 64px;
+  padding: 0 getCssVar(spacing-tight);
+  border-bottom: 1px solid getCssVar(color, border);
+  width: 100%;
+  font-size: getCssVar(font-size-header-5);
+  font-weight: getCssVar(font-weight-regular);
+
+  >.#{bem(rawitem)} {
+    font-size: getCssVar(font-size-header-5);
+    font-weight: getCssVar(font-weight-regular);
+    display: flex;
+    align-items: center;
+  }
+}

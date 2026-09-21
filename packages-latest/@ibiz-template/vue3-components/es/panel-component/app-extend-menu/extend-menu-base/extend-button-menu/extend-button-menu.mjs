@@ -1,0 +1,273 @@
+import { createVNode, resolveComponent, defineComponent, ref, computed } from 'vue';
+import { useNamespace } from '@ibiz-template/vue3-util';
+import { showTitle } from '@ibiz-template/core';
+import { getMenuLayout, getMenus, useCascaderPopover, useBorderLayout, findMenuItem } from '../extend-menu-base.util.mjs';
+import './extend-button-menu.css';
+
+"use strict";
+const rightArrow = () => createVNode("svg", {
+  "xmlns": "http://www.w3.org/2000/svg",
+  "viewBox": "0 0 1024 1024",
+  "width": "1em",
+  "height": "1em",
+  "fill": "currentColor"
+}, [createVNode("path", {
+  "fill": "currentColor",
+  "d": "M340.864 149.312a30.592 30.592 0 0 0 0 42.752L652.736 512 340.864 831.872a30.592 30.592 0 0 0 0 42.752 29.12 29.12 0 0 0 41.728 0L714.24 534.336a32 32 0 0 0 0-44.672L382.592 149.376a29.12 29.12 0 0 0-41.728 0z"
+}, null)]);
+function renderMenuItem(params) {
+  var _a, _b, _c;
+  const {
+    ns,
+    menu,
+    menuAlign,
+    menuItemsState,
+    semantic
+  } = params;
+  if (!menu.id || !((_a = menuItemsState[menu.id]) == null ? void 0 : _a.visible))
+    return;
+  if (menu.itemType === "MENUITEM") {
+    return createVNode(resolveComponent("el-button"), {
+      "class": [ns.e("menuitem"), "".concat(((_b = menu.sysCss) == null ? void 0 : _b.cssName) || ""), semantic.semanticClass("item", {
+        item: menu
+      })],
+      "style": semantic.semanticStyle("item", {
+        item: menu
+      }),
+      "index": menu.id
+    }, {
+      default: () => [menu.sysImage && createVNode(resolveComponent("iBizIcon"), {
+        "class": [ns.e("icon"), semantic.semanticClass("item.icon", {
+          item: menu
+        })],
+        "style": semantic.semanticStyle("item.icon", {
+          item: menu
+        }),
+        "icon": menu.sysImage
+      }, null), menu.caption && createVNode("span", {
+        "class": [ns.e("caption"), semantic.semanticClass("item.caption", {
+          item: menu
+        })],
+        "style": semantic.semanticStyle("item.caption", {
+          item: menu
+        }),
+        "title": showTitle(menu.tooltip)
+      }, [menu.caption])]
+    });
+  }
+  if (menu.itemType === "SEPERATOR") {
+    const direction = menuAlign === "horizontal" ? "vertical" : "horizontal";
+    return createVNode(resolveComponent("el-divider"), {
+      "direction": direction,
+      "class": [ns.em("separator"), ns.em("separator", direction), semantic.semanticClass("divider", {
+        item: menu
+      })],
+      "style": semantic.semanticStyle("divider", {
+        item: menu
+      }),
+      "id": menu.id
+    }, null);
+  }
+  if (menu.itemType === "RAWITEM") {
+    return createVNode(resolveComponent("el-button"), {
+      "index": menu.id,
+      "title": showTitle(menu.tooltip),
+      "class": [ns.e("rawitem"), "".concat(((_c = menu.sysCss) == null ? void 0 : _c.cssName) || ""), semantic.semanticClass("rawitem", {
+        item: menu
+      })],
+      "style": semantic.semanticStyle("rawitem", {
+        item: menu
+      })
+    }, {
+      default: () => [createVNode(resolveComponent("iBizRawItem"), {
+        "rawItem": menu
+      }, null)]
+    });
+  }
+}
+function renderMenuContent(_params) {
+  const {
+    ns,
+    isLayout,
+    menuLayout,
+    position,
+    menuAlign,
+    menus,
+    menuItemsState,
+    showCascaderArrow,
+    semantic,
+    handleMenuItemClick,
+    handleMenuItemMouseEnter,
+    handleMenuItemMouseLeave
+  } = _params;
+  const layoutStyle = isLayout ? getMenuLayout(menuLayout) : {};
+  return createVNode(resolveComponent("el-row"), {
+    "class": [ns.e("content"), ns.is(menuAlign, !!menuAlign), ns.is(position == null ? void 0 : position.toLowerCase(), !!position), semantic.semanticClass("content")],
+    "style": [layoutStyle, semantic.semanticStyle("content")]
+  }, {
+    default: () => menus.map((menu) => {
+      var _a, _b;
+      const menuItem = renderMenuItem({
+        menu,
+        ns,
+        menuAlign,
+        menuItemsState,
+        semantic
+      });
+      if (!menuItem)
+        return;
+      const style = {};
+      if (isLayout && ((_a = menu.layoutPos) == null ? void 0 : _a.layout) === "FLEX") {
+        const pos = menu.layoutPos;
+        Object.assign(style, {
+          flexGrow: pos.grow,
+          flexShrink: pos.shrink === 1 ? void 0 : pos.shrink,
+          flexBasis: pos.basis
+        });
+      }
+      const isShowArrow = !!(showCascaderArrow && menu.children);
+      return createVNode("div", {
+        "class": [ns.em("content", "item"), ns.em("content", (_b = menu.itemType) == null ? void 0 : _b.toLowerCase()), ns.is("show-arrow", isShowArrow)],
+        "style": style
+      }, [createVNode("div", {
+        "class": ns.em("content", "item-container"),
+        "onMouseenter": (_e) => handleMenuItemMouseEnter(menu, _e),
+        "onMouseleave": (_e) => handleMenuItemMouseLeave(menu, _e),
+        "onClick": (_e) => handleMenuItemClick(menu, _e)
+      }, [menuItem]), isShowArrow && createVNode("span", {
+        "class": ns.em("content", "item-arrow")
+      }, [rightArrow()])]);
+    })
+  });
+}
+const ExtendButtonMenu = /* @__PURE__ */ defineComponent({
+  name: "IBizExtendButtonMenu",
+  props: {
+    items: {
+      type: Object,
+      required: true
+    },
+    menuItemsState: {
+      type: Object,
+      required: true
+    },
+    providers: {
+      type: Object,
+      required: true
+    },
+    position: {
+      type: String,
+      required: true
+    },
+    layoutMode: {
+      type: String,
+      required: true
+    },
+    layout: {
+      type: Object
+    },
+    semantic: {
+      type: Object,
+      default: () => ({
+        semanticClass: () => "",
+        semanticStyle: () => ""
+      })
+    }
+  },
+  emits: {
+    menuItemClick: (item, event) => true
+  },
+  setup(props, {
+    emit
+  }) {
+    const ns = useNamespace("extend-menu-button");
+    const buttonMenuRef = ref();
+    const menuAlign = computed(() => ["TOP", "BOTTOM"].includes(props.position) ? "horizontal" : "vertical");
+    const isLayout = computed(() => props.layoutMode !== "BORDER");
+    const menus = ref(getMenus(props.items));
+    const renderCascaderContent = (_menu) => {
+      return renderMenuContent({
+        ns,
+        menuAlign: "vertical",
+        position: props.position,
+        menus: _menu.children,
+        menuItemsState: props.menuItemsState,
+        handleMenuItemClick,
+        handleMenuItemMouseEnter,
+        handleMenuItemMouseLeave,
+        showCascaderArrow: true,
+        isLayout: false,
+        semantic: props.semantic
+      });
+    };
+    const renderBorderContent = () => {
+      return renderMenuContent({
+        ns,
+        menuAlign: menuAlign.value,
+        position: props.position,
+        menus: menus.value,
+        menuItemsState: props.menuItemsState,
+        handleMenuItemClick,
+        handleMenuItemMouseEnter,
+        handleMenuItemMouseLeave,
+        showCascaderArrow: true,
+        isLayout: false,
+        semantic: props.semantic
+      });
+    };
+    const {
+      getOverlayNum,
+      clearAllCascader,
+      handleMenuItemMouseEnter,
+      handleMenuItemMouseLeave
+    } = useCascaderPopover(props, ns, menuAlign, renderCascaderContent);
+    let closeBorderPopover;
+    if (props.layoutMode === "BORDER") {
+      const borderLayout = useBorderLayout(buttonMenuRef, ns, props.position, menuAlign, getOverlayNum, renderBorderContent);
+      closeBorderPopover = borderLayout.closeBorderPopover;
+    }
+    const handleMenuItemClick = async (_menu, _event) => {
+      if (_menu.children)
+        return;
+      clearAllCascader();
+      if (closeBorderPopover)
+        closeBorderPopover();
+      if (!_menu.appFuncId) {
+        ibiz.log.warn(ibiz.i18n.t("runtime.controller.control.menu.noConfigured"));
+        return;
+      }
+      const menuItem = findMenuItem(_menu.id, props.items);
+      emit("menuItemClick", menuItem, _event);
+    };
+    return {
+      ns,
+      menus,
+      menuAlign,
+      isLayout,
+      buttonMenuRef,
+      handleMenuItemClick,
+      handleMenuItemMouseEnter,
+      handleMenuItemMouseLeave
+    };
+  },
+  render() {
+    return createVNode("div", {
+      "ref": "buttonMenuRef",
+      "class": [this.ns.b(), this.ns.is(this.layoutMode.toLowerCase(), !!this.layoutMode), this.ns.is(this.position.toLowerCase(), !!this.position), this.ns.is(this.menuAlign, !!this.menuAlign)]
+    }, [this.layoutMode !== "BORDER" && renderMenuContent({
+      ns: this.ns,
+      menuAlign: this.menuAlign,
+      isLayout: this.isLayout,
+      menuLayout: this.layout,
+      position: this.position,
+      menus: this.menus,
+      menuItemsState: this.menuItemsState,
+      handleMenuItemClick: this.handleMenuItemClick,
+      handleMenuItemMouseEnter: this.handleMenuItemMouseEnter,
+      handleMenuItemMouseLeave: this.handleMenuItemMouseLeave,
+      semantic: this.semantic
+    })]);
+  }
+});
+
+export { ExtendButtonMenu };

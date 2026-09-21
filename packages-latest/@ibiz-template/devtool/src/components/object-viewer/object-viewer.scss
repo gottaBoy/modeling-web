@@ -1,0 +1,24 @@
+@include b(object-viewer-item) {
+  font-size: 13px;
+  line-height: 1.7692;
+  color: getCssVar(color, text, 0);
+
+  @include flex(row);
+
+  @include e(separator) {
+    margin-right: 10px;
+    margin-left: 5px;
+  }
+
+  .#{bem('object-viewer-item','key')},
+  .#{bem('object-viewer-item','value')} {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover {
+      color: getCssVar(color, primary);
+    }
+  }
+}

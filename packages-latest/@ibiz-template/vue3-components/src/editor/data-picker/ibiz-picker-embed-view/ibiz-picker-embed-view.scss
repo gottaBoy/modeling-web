@@ -1,0 +1,40 @@
+// 数据选择（嵌入视图）根元素
+$picker-embed-view: (
+  line-height: getCssVar(form-item, line-height),                           // 行高
+);
+
+@include b(picker-embed-view) {
+  @include set-component-css-var('picker-embed-view', $picker-embed-view);
+
+  width: 100%;
+  height: 100%;
+  #{getCssVarName(form-item, error-color)}: none;
+  @include m(disabled) {
+    cursor: not-allowed;
+
+    * {
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
+    .el-tree-node__expand-icon {
+      pointer-events: all;
+      cursor: pointer;
+    }
+  }
+
+  @include m(show-value) {
+    @include b(picker-embed-view-view) {
+      height: calc(100% - getCssVar(picker-embed-view, line-height)) !important;
+    }
+  }
+
+  @include b(picker-embed-view-view) {
+    height: 100%;
+  }
+
+  @include b(picker-embed-view-value) {
+    height: getCssVar(picker-embed-view, line-height);
+    line-height: getCssVar(picker-embed-view, line-height);
+  }
+}

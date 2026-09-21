@@ -1,0 +1,24 @@
+'use strict';
+
+var markdownEditor_controller = require('./markdown-editor.controller.cjs');
+
+"use strict";
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => {
+  __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+  return value;
+};
+class MarkDownEditorProvider {
+  constructor() {
+    __publicField(this, "formEditor", "IBizMarkDown");
+    __publicField(this, "gridEditor", "IBizMarkDown");
+  }
+  async createController(editorModel, parentController) {
+    const c = new markdownEditor_controller.MarkDownEditorController(editorModel, parentController);
+    await c.init();
+    return c;
+  }
+}
+
+exports.MarkDownEditorProvider = MarkDownEditorProvider;

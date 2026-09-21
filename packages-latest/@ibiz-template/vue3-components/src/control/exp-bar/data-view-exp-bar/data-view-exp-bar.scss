@@ -1,0 +1,14 @@
+// 卡片导航栏根元素
+$control-dataviewexpbar: (
+  bg-color: transparent,                                                            // 导航栏背景色
+  padding: getCssVar('spacing', 'none'),                                            // 导航栏内边距
+);
+
+@include b('control-dataviewexpbar') {
+  @include set-component-css-var('control-dataviewexpbar', $control-dataviewexpbar);
+
+  height: 100%;
+  padding: getCssVar('control-dataviewexpbar', 'padding');
+  overflow-y: auto;
+  background-color: getCssVar('control-dataviewexpbar', 'bg-color');
+}

@@ -1,0 +1,104 @@
+// 自定义颜色选择器（多选）根元素
+$color-mpicker-custom: (
+  select-color: getCssVar(color, primary, light-active),                    // 选中色
+  line-height: getCssVar(form-item, line-height),                           // 行高
+  border-color: getCssVar(color, border),                                   // 边框色
+  border-radius: getCssVar(border, radius, small),                          // 倒角
+  hover-border-color: getCssVar(color, primary),                            // 悬浮边框色
+);
+
+@include b('color-mpicker-custom') {
+  @include set-component-css-var('color-mpicker-custom', $color-mpicker-custom);
+
+  display: flex;
+  gap: getCssVar(spacing, base);
+  @include e('tabs') {
+    flex-shrink: 0;
+    @include m('tab') {
+      height: getCssVar(color-mpicker-custom, line-height);
+      line-height: getCssVar(color-mpicker-custom, line-height);
+      cursor: pointer;
+
+      @include when('selected') {
+        color: getCssVar(color-mpicker-custom, select-color);
+      }
+    }
+  }
+  @include e('anchor') {
+    position: relative;
+    height: max-content;
+
+    &::before {
+      position: absolute;
+      top: 0;
+      right: -10px;
+      z-index: 10;
+      width: 3px;
+      height: 50%;
+      content: '';
+      background-color: getCssVar(color-mpicker-custom, select-color);
+      transition: all ease 0.3s;
+    }
+
+    &::after {
+      position: absolute;
+      top: 0;
+      right: -10px;
+      width: 3px;
+      height: 100%;
+      content: '';
+      background-color: getCssVar(color-mpicker-custom, border-color);
+    }
+
+    @include when('select-text') {
+      &::before {
+        top: 50%;
+      }
+    }
+  }
+  @include e('content') {
+    flex: 1;
+    padding: 0 getCssVar(spacing, base);
+
+    .el-textarea,.el-textarea__inner {
+      height: 100%;
+    }
+  }
+  @include e('color-list') {
+    display: flex;
+    flex-wrap: wrap;
+    gap: getCssVar(spacing, extra-tight);
+    @include m('add') {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      border: 1px solid getCssVar(color-mpicker-custom, border-color);
+      border-radius: getCssVar(color-mpicker-custom, border-radius);
+
+      &:hover{
+        border-color: getCssVar(color-mpicker-custom, hover-border-color);
+      }
+    }
+    @include m(item) {
+      position: relative;
+
+      &:hover {
+        ion-icon {
+          display: block;
+        }
+      }
+
+      ion-icon {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: none;
+        cursor: pointer;
+        transform: translate(50%, -50%);
+      }
+    }
+  }
+}

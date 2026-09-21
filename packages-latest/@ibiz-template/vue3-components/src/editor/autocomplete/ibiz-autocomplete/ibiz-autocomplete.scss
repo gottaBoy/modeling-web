@@ -1,0 +1,138 @@
+// 自动填充根元素
+$autocomplete: (
+  font-size: getCssVar(form-item, font-size),                               // 字体大小
+  text-color: getCssVar(form-item, text-color),                             // 字体颜色
+  line-height: getCssVar(form-item, line-height),                           // 行高
+  empty-bg-color: getCssVar(color, bg, 3),                                  // 空值背景色
+  readonly-color: getCssVar(form-item, readonly-color),                     // 只读字体色
+  disabled-color: getCssVar(form-item, disabled-color),                     // 禁用色
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+// 自动填充行为项元素
+$autocomplete-action: (
+  text-color: getCssVar(color, link),                                       // 字体颜色      
+);
+
+@include b(autocomplete) {
+  @include set-component-css-var('autocomplete', $autocomplete);
+  @include set-component-css-var('autocomplete-action', $autocomplete-action);
+
+  width: 100%;
+
+  @include e(transfer-item) {
+    @include when(ellipsis) {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  // 界面行为项
+  @include e(action-item) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: getCssVar(autocomplete-action, text-color);
+    @include m(icon) {
+      margin-right: getCssVar(spacing, extra-tight);
+    }
+    @include when(disabled) {
+      color: getCssVar(autocomplete, disabled-color);
+      cursor: not-allowed;
+    }
+  }
+
+  @include e(empty) {
+    padding: 0;
+    #{getCssVarName(no-data, min-height)}: 100px;
+
+    --el-empty-image-width: 100px;
+  }
+
+  @include e(suffix) {
+    cursor: pointer;
+    visibility: inherit;
+    transition: var(--el-transition-duration);
+    transform: rotate(0);
+    @include when(reverse) {
+      transform: rotate(-180deg);
+    }
+  }
+
+  @include e(transfer) {
+    @include set-component-css-var('autocomplete', $autocomplete);
+    @include set-component-css-var('autocomplete-action', $autocomplete-action);
+    @include when(empty) {
+      .el-autocomplete-suggestion li {
+        padding: 0;
+      }
+      .#{bem(no-data)} {
+        background-color: getCssVar(autocomplete, empty-bg-color);
+      }
+    }
+  }
+
+  @include b(autocomplete-input) {
+    width: 100%;
+  }
+
+  @include m(readonly) {
+    font-size: getCssVar(autocomplete, font-size);
+    line-height: getCssVar(autocomplete, line-height);
+    color: getCssVar(autocomplete, 'readonly-color');
+  }
+
+  // 适配在表格行内自动填充样式无法居中对齐
+  .el-autocomplete {
+    vertical-align: middle;
+  }
+}
+
+// 表单下的时间选择器默认显示，悬浮上去显示编辑器
+@include b(autocomplete-form-default-content){
+  display: none;
+}
+
+@include b(form-item){
+
+  @include b(autocomplete) {
+    @include when(show-default){
+      // 悬浮显示编辑器
+      &:hover{
+        @include b(autocomplete-form-default-content){
+          display: none;
+        }     
+        @include b(autocomplete-input){
+          display: block;    
+        }       
+      }    
+      
+      // 不悬浮时显示信息态
+      @include b(autocomplete-form-default-content){      
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: getCssVar(autocomplete, hover-edit-padding);        
+        font-family: Arial, sans-serif;      
+        font-size: getCssVar(autocomplete, font-size);
+        line-height: getCssVar(autocomplete, line-height);
+        color: getCssVar(autocomplete, text-color);      
+      }
+      @include b(autocomplete-input){
+        display: none;  
+      }
+      
+      // 输入态
+      @include when(editable){
+        @include b(autocomplete-form-default-content){
+          display: none;
+        }     
+        @include b(autocomplete-input){
+          display: block;    
+        }  
+      }
+    }
+
+  }
+}

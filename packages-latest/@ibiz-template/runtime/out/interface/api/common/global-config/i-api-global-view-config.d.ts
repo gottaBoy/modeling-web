@@ -1,0 +1,84 @@
+/**
+ * @description 全局视图配置
+ * @export
+ * @interface IApiGlobalViewConfig
+ */
+export interface IApiGlobalViewConfig {
+    /**
+     * @description 是否启用信息栏，只有该参数为 true 后才会识别模型的 isShowDataInfoBar 来控制是否显示信息栏，为 false 则一律不显示信息栏。
+     * @default true
+     * @type {boolean}
+     * @platform web
+     * @platform mob
+     * @memberof IApiGlobalViewConfig
+     */
+    enableDataInfoBar: boolean;
+    /**
+     * @description 导航部件缓存控制配置；使用 : 分隔（如：TABEXPPANEL:GRIDEXPBAR:），需以 : 结尾
+     * @default TABEXPPANEL:
+     * @type {string}
+     * @platform web
+     * @platform mob
+     * @memberof IApiGlobalViewConfig
+     */
+    expCacheMode: string;
+    /**
+     * @description 是否禁用首页分页导航栏
+     * @default false
+     * @type {boolean}
+     * @platform web
+     * @memberof IApiGlobalViewConfig
+     */
+    disableHomeTabs: boolean;
+    /**
+     * @description 移动端是否显示系统返回按钮
+     * @default true
+     * @type {boolean}
+     * @platform mob
+     * @memberof IApiGlobalViewConfig
+     */
+    mobShowPresetBack: boolean;
+    /**
+     * @description 移动端是否显示视图头部
+     * @default true
+     * @type {boolean}
+     * @platform mob
+     * @memberof IApiGlobalViewConfig
+     */
+    mobShowViewHeader: boolean;
+    /**
+     * @description 用户操作超时周期（单位：毫秒），超出该时间将刷新用户访问状态，用于协同编辑场景
+     * @default 300000
+     * @type {number}
+     * @platform web
+     * @memberof IApiGlobalViewConfig
+     */
+    timeoutDuration: number;
+    /**
+     * @description 是否只显示信息栏，为true时，存在主数据信息则只显示信息栏，无主数据信息时显示标题
+     * @type {boolean}
+     * @default false
+     * @platform web
+     * @platform mob
+     * @memberof IApiGlobalViewConfig
+     */
+    onlyShowDataInfo: boolean;
+    /**
+     * @description 全局视图访问权限定义，1：未登录用户、 2：登录用户、 3：未登录用户及登录用户、 4：登录用户且拥有指定资源能力
+     * @type {1 | 2 | 3 | 4}
+     * @default 3
+     * @platform web
+     * @platform mob
+     * @memberof IApiGlobalViewConfig
+     */
+    viewAccUserMode: 1 | 2 | 3 | 4;
+    /**
+     * @description 视图加载过程中的提示文本
+     * @type {string}
+     * @platform web
+     * @platform mob
+     * @memberof IApiGlobalViewConfig
+     */
+    loadingText: string;
+}
+//# sourceMappingURL=i-api-global-view-config.d.ts.map

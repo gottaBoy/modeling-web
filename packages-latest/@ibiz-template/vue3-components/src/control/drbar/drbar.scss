@@ -1,0 +1,105 @@
+// 关系栏根元素
+$control-drbar: (
+  bg-color: transparent,                                                          // 关系栏背景色
+  padding: getCssVar('spacing', 'none'),                                          // 关系栏内边距
+);
+
+// 关系栏内容区
+$control-drbar-content: (
+  bg-color: getCssVar('control-drbar', 'bg-color'),                               // 内容区背景色（继承自关系栏根元素）
+);
+
+// 关系栏分组
+$control-drbar-group: (
+  height: 40px,                                                                   // 分组项高
+  gap: getCssVar('spacing', 'tight'),                                             // 分组项内容间隔
+  text-color: getCssVar('color', 'text', '0'),                                    // 分组项字体色
+  font-size: getCssVar('font-size', 'regular'),                                   // 分组项字体大小
+  font-weight: getCssVar('font-weight', 'regular'),                               // 分组项字体粗细
+  bg-color: getCssVar('control-drbar', 'bg-color'),                               // 分组项背景色（继承自关系栏根元素）
+  padding: getCssVar('spacing', 'none') getCssVar('spacing', 'base'),             // 分组项内边距
+  margin: getCssVar('spacing', 'none') getCssVar('spacing', 'base'),              // 分组项外边距
+);               
+
+// 关系栏项
+$control-drbar-item: (
+  height: 40px,                                                                   // 项高
+  gap: getCssVar('spacing', 'tight'),                                             // 项内容间隔
+  text-color: getCssVar('color', 'text', '0'),                                    // 项字体色
+  active-color: getCssVar('color', 'primary'),                                    // 项激活色
+  level-padding: getCssVar('spacing', 'base'),                                    // 项缩进
+  font-size: getCssVar('font-size', 'regular'),                                   // 项字体大小
+  font-weight: getCssVar('font-weight', 'regular'),                               // 项字体粗细
+  bg-color: getCssVar('control-drbar', 'bg-color'),                               // 项背景色（继承自关系栏根元素）
+  padding: getCssVar('spacing', 'none') getCssVar('spacing', 'base'),             // 项内边距
+  margin: getCssVar('spacing', 'none') getCssVar('spacing', 'base'),              // 项外边距
+);
+
+@include b('control-drbar') {
+  @include set-component-css-var('control-drbar', $control-drbar);
+  @include set-component-css-var('control-drbar-content', $control-drbar-content);
+  @include set-component-css-var('control-drbar-group', $control-drbar-group);
+  @include set-component-css-var('control-drbar-item', $control-drbar-item);
+
+  height: 100%;
+  background-color: getCssVar('control-drbar', 'bg-color');
+
+  --el-menu-base-level-padding: #{getCssVar('control-drbar-item', 'level-padding')};
+  
+
+  // 横向不要底边线
+  .el-menu--horizontal.el-menu {
+    border-bottom: none;
+  }
+
+  .el-menu-item {
+    position: relative;
+    gap: getCssVar('control-drbar-item', 'gap');
+    height: getCssVar('control-drbar-item', 'height');
+    padding: getCssVar('control-drbar-item', 'padding');
+    margin: getCssVar('control-drbar-item', 'margin');
+    font-size: getCssVar('control-drbar-item', 'font-size');
+    font-weight: getCssVar('control-drbar-item', 'font-weight');
+    line-height: unset;
+    background-color: getCssVar('control-drbar-item', 'bg-color');
+
+    &.is-active {
+      color: getCssVar('control-drbar-item', 'active-color');
+    }
+  }
+  
+  // 垂直模式
+  .el-menu--vertical .el-sub-menu .el-sub-menu__title { 
+    gap: getCssVar('control-drbar-group', 'gap');
+    height: getCssVar('control-drbar-group', 'height');
+    padding: getCssVar('control-drbar-group', 'padding');
+    margin: getCssVar('control-drbar-group', 'margin');
+    font-size: getCssVar('control-drbar-group', 'font-size');
+    font-weight: getCssVar('control-drbar-group', 'font-weight');
+    line-height: unset;
+    background-color: getCssVar('control-drbar-group', 'bg-color');
+  }
+
+  // 水平模式时
+  .el-menu--horizontal .el-sub-menu .el-sub-menu__title {
+    gap: getCssVar('control-drbar-group', 'gap');
+    height: getCssVar('control-drbar-group', 'height');
+    font-size: getCssVar('control-drbar-group', 'font-size');
+    font-weight: getCssVar('control-drbar-group', 'font-weight');
+    line-height: unset;
+    background-color: getCssVar('control-drbar-group', 'bg-color');
+  }
+
+  @include e('menu') {
+    height: 100%;
+    overflow: hidden auto;
+  }
+
+  @include e('counter') {
+    position: absolute;
+    top: 50%;
+    right: 16px;
+    margin-top: -6px;
+    text-align: center;
+  }
+}

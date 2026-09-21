@@ -1,0 +1,149 @@
+// 表单分组样式
+$form-group: (
+  'bg-color': transparent,                                              // 分组背景色
+  'footer-padding': getCssVar(spacing, tight) getCssVar(spacing, base), // 分组底部内边距
+  'show-more-color': getCssVar('color-primary'),                        // 分组底部展开更多按钮文本色
+  'footer-height': 35px,                                                // 分组底部区域高度
+);
+
+// 表单分组头部样式
+$form-group-header: (
+  'bg-color': transparent,                                               // 分组头部背景色
+  'padding': getCssVar(spacing, base, tight) 0,                         // 分组头部内边距
+  'margin': 0 getCssVar(spacing, base, tight),                          // 分组头部外边距
+  'border-color': getCssVar('color', 'border'),                         // 分组头部边框色
+  'height': 49px,                                                        // 分组头部高度
+);
+
+// 表单分组标题样式
+$form-group-caption: (
+  'text-color': getCssVar(color, text, 0),             // 分组标题字体色
+  'font-size': getCssVar('font-size', 'header-5'),     // 分组标题字体大小
+  'font-weight': getCssVar(font-weight, bold),         // 分组标题字体粗细
+);
+
+// 表单分组图标样式
+$form-group-icon: (
+  gap: getCssVar(spacing,tight),              // 分组图标与分组标题间隔
+);
+
+// 表单分组内容样式
+$form-group-content: (
+  'bg-color': transparent,                   // 分组内容区域背景色
+  'padding': getCssVar(spacing, tight),      // 分组内容区域内边距
+);
+
+@include b(form-group) {
+  @include set-component-css-var('form-group', $form-group);
+  @include set-component-css-var('form-group-header', $form-group-header);
+  @include set-component-css-var('form-group-caption', $form-group-caption);
+  @include set-component-css-var('form-group-icon', $form-group-icon);
+  @include set-component-css-var('form-group-content', $form-group-content);
+}
+
+@include b(form-group) {
+  height: 100%;
+  background-color: getCssVar('form-group', 'bg-color');
+
+  @include e(caption) {
+    @include utils-ellipsis;
+
+    font-size: getCssVar('form-group-caption', 'font-size');
+    font-weight: getCssVar('form-group-caption', 'font-weight');
+    color: getCssVar('form-group-caption', 'text-color');
+
+    @include m('icon'){
+      margin-right: getCssVar('form-group-icon', 'gap');
+    }
+  }
+
+  @include e(toolbar) {
+    text-align: right;
+  }
+}
+
+// 折叠相关样式
+@include b(form-group-collapse) {
+  > .#{bem(form-group-content)} {
+    display: block;
+  }
+
+  @include when(collapse) {
+    > .#{bem(form-group-content)} {
+      display: none;
+    }
+  }
+}
+
+@include b(form-group-header) {
+  @include flex;
+
+  justify-content: space-between;
+  height: getCssVar('form-group-header', 'height');
+  padding: getCssVar('form-group-header', 'padding');
+  margin: getCssVar('form-group-header', 'margin');
+  border-bottom: 1px solid getCssVar('form-group-header', 'border-color');
+
+  @include e(left) {
+    overflow: hidden;
+  }
+
+  @include e((left, right)) {
+    display: inline-block;
+  }
+
+  @include e(right) {
+    flex-shrink: 0;
+    max-width: 100%;
+    text-align: right;
+    @include flex(row, flex-end, center);
+  }
+
+  @include e(icon) {
+    cursor: pointer;
+  }
+}
+
+@include b(form-group-content) {
+  width: 100%;
+  height: 100%;
+
+  // 修复表单项出现错误信息整个表单出现滚动条、错误信息展示不全问题
+  padding-bottom: getCssVar('form-group-content', 'padding');
+  @include e(row){
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.#{bem('form-group', '', 'show-header')} {
+  > .#{bem('form-group-content')} {
+    height: calc(100% - getCssVar('form-group-header', 'height'));
+    padding: getCssVar('form-group-content', 'padding');
+    background-color: getCssVar('form-group-content', 'bg-color');
+  }
+}
+
+.#{bem('form-group', '', 'show-more')} {
+  > .#{bem('form-group-content')} {
+    height: calc(100% - getCssVar('form-group', 'footer-height'));
+  }
+}
+
+.#{bem('form-group', '', 'show-header')}.#{bem('form-group', '', 'show-more')} {
+  > .#{bem('form-group-content')} {
+    height: calc(100% - getCssVar('form-group-header', 'height') - getCssVar('form-group', 'footer-height'));
+  }
+}
+
+
+@include b(form-group-footer) {
+  height: getCssVar('form-group', 'footer-height');
+  padding: getCssVar('form-group', 'footer-padding');
+
+  @include e(show-more-button) {
+    display: inline-block;
+    color: getCssVar('form-group', 'show-more-color');
+    cursor: pointer;
+  }
+}

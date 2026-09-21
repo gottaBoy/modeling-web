@@ -1,0 +1,320 @@
+// 天日历头
+$control-calendar-day-header: (
+  height: 58px,                                                                         // 头部高度
+  text-color: getCssVar('color', 'text', '3'),                                          // 头部文本色
+);
+
+// 天日历头部项
+$control-calendar-day-header-item: (
+  line-height: 22px,                                                                    // 项行高
+  border-radius: 4px,                                                                   // 项倒角
+  gap: getCssVar('spacing', 'extra', 'tight'),                                          // 项间隔
+  active-border-color: getCssVar('color', 'primary'),                                   // 项激活边框色
+  bg-color: getCssVar('color', 'tertiary', 'light', 'hover'),                           // 项背景色
+  padding: getCssVar('spacing', 'none') getCssVar('spacing', 'tight'),                  // 项内边距
+);
+
+// 天日历主体区项
+$control-calendar-day-body-item: (
+  min-height: 22px,                                                                     // 项最小高
+  padding: getCssVar('spacing', 'tight'),                                               // 项内边距
+  gap: getCssVar('spacing', 'extra', 'tight'),                                          // 项间隔
+  active-border-color: getCssVar('color', 'primary'),                                   // 项激活边框色
+);
+
+// 天日历当前时间
+$control-calendar-day-current: (
+  width: 48px,                                                                          // 当前时间宽
+  height: 24px,                                                                         // 当前时间高
+  border-radius: 4px,                                                                   // 当前时间倒角
+  bg-color: getCssVar('color', 'primary'),                                              // 当前时间背景色
+  text-color: getCssVar('color', 'primary', 'text'),                                    // 当前时间字体色
+);
+
+@include b('calendar-daily') {
+  @include set-component-css-var('control-calendar-day-header', $control-calendar-day-header);
+  @include set-component-css-var('control-calendar-day-header-item', $control-calendar-day-header-item);
+  @include set-component-css-var('control-calendar-day-body-item', $control-calendar-day-body-item);
+  @include set-component-css-var('control-calendar-day-current', $control-calendar-day-current);
+
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  @include e('calendar-daily__head') {
+    position: relative;
+    z-index: 100;
+    display: flex;
+    width: 100%;
+    height: getCssVar('control-calendar-day-header', 'height');
+    min-height: getCssVar('control-calendar-day-header', 'height');
+    padding-bottom: 0;
+  }
+
+  @include e('allday-info') {
+    display: flex;
+    align-items: center;
+    min-width: 90px;
+    height: 100%;
+    padding-left: 40px;
+    overflow: hidden;
+    color: getCssVar('control-calendar-day-header', 'text-color');
+    @include m('work-items') {
+      width: 100%;
+      height: 100%;
+      padding-top: 5px;
+      overflow: hidden;
+    }
+    @include m('work-items-scroll') {
+      height: 100%;
+      overflow: hidden scroll;
+    }
+    @include m('work-items-body') {
+      height: auto;
+      &:has(.#{bem('no-data')}) {
+        height: 100%;
+        .#{bem('no-data')} {
+          min-width: 100%;
+          min-height: 100%;
+
+          .el-empty__description {
+            margin: 0;
+          }
+        }
+      }
+    }
+    @include m('event-box') {
+      width: 100%;
+      height: getCssVar('control-calendar-day-header-item', 'height');
+      padding: getCssVar('control-calendar-day-header-item', 'padding');
+      margin-top: getCssVar('control-calendar-day-header-item', 'gap');
+      line-height: getCssVar('control-calendar-day-header-item', 'line-height');
+
+      &:nth-child(1) {
+        margin-top: 0;
+      }
+    }
+    @include m('event-content') {
+      position: relative;
+      display: block;
+      width: 100%;
+      height: 100%;
+      text-align: left;
+      cursor: pointer;
+      background-color: getCssVar('control-calendar-day-header-item', 'bg-color');
+      border: none;
+      border-radius: getCssVar('control-calendar-day-header-item', 'border-radius');
+      outline: none;
+
+      &.is-selected-event {
+        padding-right: 20px;
+      }
+    }
+    @include m('event-summary') {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    @include m('event-icon') {
+      margin-right: 6px;
+    }
+    @include m('event-name') {
+      margin-right: 6px;
+    }
+    @include m('time-range') {
+      margin-right: 6px;
+    }
+    @include m('check') {
+      position: absolute;
+      top: 50%;
+      right: 6px;
+      color: getCssVar('control-calendar-day', 'active-color');
+      transform: translate(0, -50%);
+    }
+  }
+
+  @include e('allday-resize-line') {
+    width: 100%;
+    height: 3px;
+    background-color: getCssVar('control-calendar-day', 'border-color');
+  }
+
+  @include e('resizable-handle') {
+    position: absolute;
+    bottom: -4px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 10px;
+    cursor: row-resize;
+  }
+
+  @include e('scroll-area') {
+    flex: 1;
+    overflow: hidden scroll;
+  }
+
+  @include e('time-pane') {
+    position: relative;
+    display: flex;
+    flex: 1 1 0%;
+    width: calc(100% - 5px);
+    height: auto;
+    @include m('time-labels') {
+      position: sticky;
+      left: 0;
+      width: 90px;
+      min-width: 90px;
+      padding: 27px 0 27px 40px;
+      border-right: 1px solid getCssVar('control-calendar-day', 'border-color');
+    }
+    @include m('time-label') {
+      height: 22px;
+      margin-top: 38px;
+      text-align: left;
+
+      &:nth-child(1) {
+        height: 22px;
+        margin-top: 22px;
+      }
+    }
+    @include m('time-columns') {
+      position: relative;
+      flex: 1;
+      padding-bottom: 59px;
+    }
+    @include m('time-column') {
+      height: 60px;
+      border-top: 1px dashed getCssVar('control-calendar-day', 'border-color');
+
+      &:first-child {
+        border-top: none;
+      }
+    }
+    @include m('time-column-last') {
+      border-bottom: 1px dashed getCssVar('control-calendar-day', 'border-color');
+    }
+    @include m('event-timed-container') {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    @include m('container-scroll') {
+      position: relative;
+      top: 0;
+      width: auto;
+      height: 100%;
+      overflow: auto;
+      overflow: auto hidden;
+    }
+    @include m('event-box') {
+      position: absolute;
+      width: auto;
+      height: auto;
+      padding-left: getCssVar('control-calendar-day-body-item', 'gap')
+    }
+    @include m('event-content') {
+      position: relative;
+      z-index: 3;
+      width: 100%;
+      height: 100%;
+      min-height: getCssVar('control-calendar-day-body-item', 'min-height');
+      padding: getCssVar('control-calendar-day-body-item', 'padding');
+      overflow: hidden;
+      line-height: 100%;
+      text-align: left;
+      cursor: pointer;
+      border: none;
+      outline: none;
+
+      &.is-selected-event {
+        border: 1px solid getCssVar('control-calendar-day-body-item', 'active-border-color');
+      }
+    }
+    @include m('event-summary') {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      & > span {
+        margin-right: 4px;
+      }
+    }
+    @include m('current-time') {
+      position: absolute;
+      top: 38px;
+      left: -3px;
+      display: flex;
+      align-items: center;
+      width: calc(100% - 36px);
+      height: 2px;
+      margin-left: 40px;
+      background-color: getCssVar('control-calendar-day-current', 'bg-color');
+    }
+
+    @include m('current-time-label') {
+      width: getCssVar('control-calendar-day-current', 'width');
+      height: getCssVar('control-calendar-day-current', 'height');
+      line-height: getCssVar('control-calendar-day-current', 'height');
+      color: getCssVar('control-calendar-day-current', 'text-color');
+      text-align: center;
+      background-color: getCssVar('control-calendar-day-current', 'bg-color');
+      border: none;
+      border-radius: getCssVar('control-calendar-day-current', 'border-radius');
+    }
+  }
+
+  // 面板项popper
+  @include e('event-popover') {
+    width: auto;
+    height: auto;
+    padding: 0;
+
+    &.#{bem('popover')} {
+      position: absolute;
+      z-index: 110;
+      padding: getCssVar('spacing', 'tight');
+      background: getCssVar('color', 'bg', '1');
+      border: none;
+      box-shadow: getCssVar('shadow', 'elevated');
+    }
+
+    // 当配置了 showdetail 参数，只有配置了布局面板时才会显示气泡
+    &:has(.#{bem('control-calendar-item-default')}) {
+      display: none !important;
+    }
+
+    @include m('body') {
+      width: auto;
+      height: auto;
+      overflow: hidden;
+    }
+    @include m('scroll') {
+      width: auto;
+      min-width: 200px;
+      height: auto;
+      max-height: 80%;
+      overflow: auto;
+      pointer-events: none;
+
+      .#{bem('control-calendar-item')} {
+        &:last-child {
+          margin-bottom: 0;
+        }
+        @include when('active') {
+          background-color: transparent;
+          border-color: transparent;
+        }
+      }
+    }
+  }
+}

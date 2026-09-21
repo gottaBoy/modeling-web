@@ -1,0 +1,38 @@
+// 表格内容操作单元格样式
+$grid-ua-column: (
+  cell-padding: getCssVar(control-grid, body-cell, padding),       // 操作列单元格内边距（继承自内容单元格）
+  btn-bg-color: getCssVar(control-grid, body-cell, btn-bg-color),  // 操作列按钮背景色（继承自内容单元格）
+  btn-hover-color: getCssVar(control-grid, body-cell, btn-hover-color), // 操作列按钮悬浮色（继承自内容单元格）
+  btn-color: getCssVar(control-grid, body-cell, btn-color),        // 操作列按钮色（继承自内容单元格）
+  font-size: getCssVar(control-grid, body-cell, font-size),        // 操作列字体大小（继承自内容单元格）
+  font-weight: getCssVar(control-grid, body-cell, font-weight),    // 操作列字体粗细（继承自内容单元格）
+);
+
+@include b(grid-ua-column) {
+  @include set-component-css-var(grid-ua-column, $grid-ua-column);
+
+  display: flex;
+  align-items: center;
+  justify-content: getCssVar('grid-column', 'text-align');
+  width: 100%;
+  height: 100%;
+  padding: getCssVar(grid-ua-column, cell-padding);
+
+  .el-button {
+    font-size: getCssVar(grid-ua-column, font-size);
+    font-weight: getCssVar(grid-ua-column, font-weight);
+    color: getCssVar(grid-ua-column, btn-color);
+    background-color: getCssVar(grid-ua-column, btn-bg-color);
+    box-shadow: none;
+
+    &:hover {
+      color: getCssVar(grid-ua-column, btn-hover-color);
+    }
+
+    &.is-text:not(.is-disabled):hover {
+      background-color: getCssVar(grid-ua-column, btn-bg-color);
+    }
+  }
+
+
+}

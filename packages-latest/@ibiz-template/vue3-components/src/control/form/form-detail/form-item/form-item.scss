@@ -1,0 +1,73 @@
+// 三块定义该变量的地方，要改的话一起改！ 
+// form-item, panel-field, grid-edit-item
+// 表单项输入控件样式
+$form-item: (
+  'label-color': getCssVar(color, text, 1),             // 标签字体色
+  'text-color': getCssVar(color, text, 2),              // 输入文本色
+  'hover-color': getCssVar(color, text, 0),             // 悬浮文本色
+  'hover-bg-color': getCssVar(color, fill, 1),          // 悬浮背景色
+  'readonly-color': getCssVar(color, disabled, text),   // 只读状态文本色
+  'border-color': transparent,                          // 边框色
+  'font-size': getCssVar(font-size, regular),           // 字体大小
+  'placeholder-color': getCssVar(color, text, 3),       // 占位符文本色
+  'disabled-color': getCssVar(color, disabled, text),   // 禁用状态文本色
+  'disabled-bg-color': getCssVar(color, disabled, fill), // 禁用状态背景色
+  'disabled-border-color': getCssVar(color, disabled, border), // 禁用状态边框色
+  'active-bg': getCssVar(color, fill, 2),               // 激活态背景色
+  'active-border': getCssVar(active, bg),               // 激活态边框色
+  'focus-bg': getCssVar(color, fill, 0),                // 聚焦态背景色
+  'focus-border': getCssVar(color, focus, border),      // 聚焦态边框色
+  'line-height': getCssVar(editor,default,line-height), // 行高
+  'font-weight': getCssVar(font-weight, regular),       // 字体粗细
+  'hover-edit-padding': getCssVar('spacing','none') 11px, // 悬浮编辑态内边距
+);
+
+// 表单项标签样式
+$form-item-label: (
+  font-size: getCssVar(font-size, regular),                                   // 表单项标签字体大小
+  'line-height': getCssVar(height-control, default),                          // 表单项标签字体行高
+  color: getCssVar(color, text, 1),                                           // 表单项标签字体色
+  width: 130px,                                                               // 表单项标签宽度
+  'left-padding': 0 getCssVar(spacing, base-tight) 0 0,                       // 标签左对齐时内边距
+  'right-padding': 0 0 0 getCssVar(spacing, base-tight),                      // 标签右对齐时内边距
+  gap: getCssVar(spacing, extra-tight),                                       // 表单项标签于表单项内容间隔
+  require-color: getCssVar(color, danger),                                      // 必填图标颜色
+  require-gap: getCssVar(spacing, extra-tight),                               // 必填图标与文字间隔
+);
+
+// 表单项图标样式
+$form-item-icon: (
+  gap: getCssVar(spacing, extra-tight),                                       // 图标与文本间隔
+);
+
+// 表单项错误样式
+$form-item-error: (
+  font-size: getCssVar(font-size, small),                                       // 错误信息字体大小
+  color: getCssVar(color, danger),                                              // 错误信息颜色
+);
+
+// 表单复合项样式
+$form-compositeItem: (
+  gap: getCssVar(spacing, tight),                                               // 编辑项与编辑项间隔
+);
+
+@include b(form-item) {
+  border-color: getCssVar(color, border);
+
+  @include set-component-css-var('form-item', $form-item);
+  @include set-component-css-var('form-item-label', $form-item-label);
+  @include set-component-css-var('form-item-icon', $form-item-icon);
+  @include set-component-css-var('form-item-error', $form-item-error);
+
+
+  @include when(compositeItem) {
+    @include set-component-css-var('form-compositeItem', $form-compositeItem);
+    @include e('composite-separator'){
+      line-height: getCssVar(form-item, line-height);
+    }
+    .#{bem(form-item-container, editor)} {
+      display: flex;
+      gap: getCssVar('form-compositeItem', 'gap');
+    }
+  }
+}

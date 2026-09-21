@@ -1,0 +1,20 @@
+// 数组编辑器根元素
+$array: (
+  line-height: getCssVar(form-item, line-height),                           // 行高
+);
+@include b(array) {
+  @include set-component-css-var('array', $array);
+
+  height: 100%;
+  line-height: getCssVar(array, line-height);  
+
+  ion-icon {
+    cursor: pointer;
+  }
+}
+
+@include b(array-tooltip) {
+  .el-link {
+    --el-link-text-color: inherit;
+  }
+}

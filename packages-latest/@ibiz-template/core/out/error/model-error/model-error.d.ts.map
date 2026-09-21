@@ -1,0 +1,1 @@
+{"version":3,"file":"model-error.d.ts","sourceRoot":"","sources":["../../../src/error/model-error/model-error.ts"],"names":[],"mappings":"AAAA;;;;;GAKG;AACH,qBAAa,UAAW,SAAQ,KAAK;IAU1B,KAAK,EAAE,KAAK;IATrB,IAAI,EAAE,MAAM,CAA+C;IAE3D;;;;;OAKG;gBAEM,KAAK,EAAE,KAAK,EACnB,GAAG,CAAC,EAAE,MAAM;CASf"}

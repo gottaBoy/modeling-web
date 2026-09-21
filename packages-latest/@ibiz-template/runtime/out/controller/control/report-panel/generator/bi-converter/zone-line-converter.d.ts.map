@@ -1,0 +1,1 @@
+{"version":3,"file":"zone-line-converter.d.ts","sourceRoot":"","sources":["../../../../../../src/controller/control/report-panel/generator/bi-converter/zone-line-converter.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,iBAAiB,EAAE,MAAM,QAAQ,CAAC;AAE3C;;;;;GAKG;AACH,qBAAa,iBAAkB,SAAQ,iBAAiB;IACtD;;;;OAIG;IACH,SAAS,EAAE,MAAM,CA+Cf;IAEF;;;;OAIG;IACH,cAAc,EAAE,MAAM,CAgBpB;CACH"}

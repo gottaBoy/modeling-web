@@ -1,0 +1,37 @@
+import { PropType } from 'vue';
+
+export declare const CustomDecoration2: import('vue').DefineComponent<{
+    color: {
+        type: PropType<string[]>;
+        default: () => never[];
+    };
+    reverse: {
+        type: BooleanConstructor;
+        default: boolean;
+    };
+    dur: {
+        type: NumberConstructor;
+        default: number;
+    };
+}, {
+    ns: Namespace;
+    customDecoration2: import('vue').Ref<any, any>;
+    renderBorder: () => import("vue/jsx-runtime").JSX.Element;
+}, unknown, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {}, string, import('vue').PublicProps, Readonly<import('vue').ExtractPropTypes<{
+    color: {
+        type: PropType<string[]>;
+        default: () => never[];
+    };
+    reverse: {
+        type: BooleanConstructor;
+        default: boolean;
+    };
+    dur: {
+        type: NumberConstructor;
+        default: number;
+    };
+}>>, {
+    reverse: boolean;
+    color: string[];
+    dur: number;
+}, {}>;

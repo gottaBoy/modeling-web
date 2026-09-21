@@ -1,0 +1,1 @@
+{"version":3,"file":"tab-change.event.d.ts","sourceRoot":"","sources":["../../../../../src/interface/controller/event/argument/tab-change.event.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,eAAe,EAAE,MAAM,kBAAkB,CAAC;AACnD,OAAO,EAAE,SAAS,EAAE,MAAM,cAAc,CAAC;AAEzC,MAAM,WAAW,cAAe,SAAQ,SAAS;IAC/C;;;;;;OAMG;IACH,GAAG,EAAE,eAAe,CAAC;CACtB"}

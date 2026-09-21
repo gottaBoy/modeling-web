@@ -1,0 +1,1 @@
+{"version":3,"file":"i-chat-message.d.ts","sourceRoot":"","sources":["../../../src/interface/i-chat-message/i-chat-message.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,kBAAkB,EAAE,MAAM,QAAQ,CAAC;AAC5C,OAAO,EAAE,eAAe,EAAE,MAAM,qBAAqB,CAAC;AAEtD;;;;GAIG;AACH,MAAM,WAAW,YAAa,SAAQ,eAAe;IACnD;;;;OAIG;IACH,IAAI,CAAC,EAAE,kBAAkB,GAAG,KAAK,GAAG,MAAM,GAAG,OAAO,CAAC;CACtD"}

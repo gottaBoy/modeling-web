@@ -1,0 +1,540 @@
+/* stylelint-disable no-descending-specificity */
+// 表格部件样式
+$control-grid: (
+  text-color: getCssVar(color, text, 0),         // 表格字体色
+  bg-color: transparent,                          // 表格背景色
+  border-color: getCssVar(color, border),         // 表格边框色
+  font-size: getCssVar(font-size, regular),       // 表格字体大小
+  font-weight: getCssVar(font-weight, regular),   // 表格字体粗细
+  scrollbar-width: 4px,                           // 表格滚动条宽度
+  scrollbar-bg-color: #{getCssVar(color, fill, 2)},           // 表格滚动条背景色
+  scrollbar-bg-hover-opacity: 0.5,                            // 表格滚动条悬浮透明度
+  scrollbar-bg-hover-color: #{getCssVar(color, fill, 2)},     // 表格滚动条悬浮背景色
+);
+ 
+// 表格表头行样式
+$control-grid-header-row: (
+  bg-color: rgba(#{getCssVar(grey, 1)}, 1),      // 表头行背景色
+  height: auto,                                   // 表头行高度
+  min-height: 54px,                               // 表头行最小高度
+);
+ 
+// 表格表头单元格样式
+$control-grid-header-cell: (
+  padding: calc(getCssVar('spacing', 'base', 'tight') / 2)
+  getCssVar('spacing', 'base', 'tight'),          // 表头单元格内边距
+  text-color: getCssVar(color, text, 2),          // 表头单元格字体色
+  font-size: getCssVar(control-grid, font-size),  // 表头单元格字体大小
+  font-weight: getCssVar(control-grid, font-weight), // 表头单元格字体粗细
+);
+ 
+// 表格内容行样式
+$control-grid-body-row: (
+  height: 48px,                                             // 内容行高度
+  edit-bg-color: getCssVar(color, fill, 2),                 // 内容行编辑态背景色
+  bg-color: getCssVar(color, bg, 1),                        // 内容行奇数行背景色
+  bg-color-2: getCssVar(color, bg, 0),                      // 内容行偶数行背景色
+  hover-bg-color: rgba(#{getCssVar(grey, 1)}, 1),         // 内容行悬浮背景色
+  select-bg-color: getCssVar(color, primary, light, default),  // 内容行选中背景色
+  expand-icon-gap: getCssVar(spacing, tight),                // 内容行展开图标间隔
+);
+ 
+// 表格内容单元格样式
+$control-grid-body-cell: (
+  text-color: getCssVar(control-grid, text-color),          // 单元格字体色
+  padding: getCssVar(spacing, tight),                       // 单元格内边距
+  link-color: getCssVar(color, link),                       // 链接列单元格文本色
+  link-hover-color: getCssVar(color, link-hover),           // 链接列单元格悬浮文本色
+  hover-bg-color: #{getCssVar(color, fill, 0)},             // 操作列单元格悬浮背景色
+  btn-bg-color: transparent,                                // 操作列单元格按钮背景色
+  btn-hover-color: getCssVar(color, primary, hover),        // 操作列单元格按钮悬浮文本色
+  btn-color: getCssVar(color, primary),                     // 操作列单元格按钮文本色
+  font-size: getCssVar(control-grid, font-size),            // 单元格字体大小
+  font-weight: getCssVar(control-grid, font-weight),        // 单元格字体粗细
+);
+
+ 
+// 表格页脚样式(数据聚合)
+$control-grid-footer: (
+  height: auto,                                            // 页脚高度
+  text-color: getCssVar(color, text, 2),              // 页脚字体色
+  bg-color: rgba(#{getCssVar(grey, 1)}, 1),           // 页脚背景色
+  font-size: getCssVar(control-grid, font-size),      // 页脚字体大小
+  font-weight: getCssVar(control-grid, font-weight),  // 页脚字体粗细
+  vertical-align: getCssVar(spacing, extra, tight),   // 页脚垂直对齐间距
+);
+ 
+// 表格选择列样式
+$control-grid-selection: (
+  padding: getCssVar(spacing, base-loose),            // 选择列内边距
+  active-bg-color: getCssVar(color, primary),          // 选择列选中背景色
+  active-border-color: getCssVar(color, primary),      // 选择列选中边框色
+  active-icon-color: var(--el-color-white),            // 选择列选中图标色
+  border-color: getCssVar(control-grid, border-color), // 选择列边框色
+);
+ 
+// 表格列设置按钮样式
+$control-grid-setting: (
+  height: auto,                                                       // 设置按钮高度
+  padding-right: getCssVar(spacing, extra-tight),                     // 设置按钮右侧间隔
+  bg-color: getCssVar(control-grid, header-row, bg-color),            // 设置按钮背景色
+);
+ 
+// 表格列过滤图标样式
+$control-grid-filter: (
+  color: getCssVar(color, text, 3),                   // 过滤图标默认色
+  active-color: getCssVar(color, primary),            // 过滤图标激活色
+);
+
+// 表格列排序图标样式
+$control-grid-sort: (
+  color: getCssVar(color, text, 3),                   // 排序图标默认色
+  active-color: getCssVar(color, primary),            // 排序图标激活色
+  gap: getCssVar(spacing, super-tight),                // 排序图标间距
+);
+
+@include b(control-grid) {
+  @include set-component-css-var(control-grid, $control-grid);
+  @include set-component-css-var(control-grid-header-row, $control-grid-header-row);
+  @include set-component-css-var(control-grid-header-cell, $control-grid-header-cell);
+  @include set-component-css-var(control-grid-body-row, $control-grid-body-row);
+  @include set-component-css-var(control-grid-body-cell, $control-grid-body-cell);
+  @include set-component-css-var(control-grid-footer, $control-grid-footer);
+  @include set-component-css-var(control-grid-selection, $control-grid-selection);
+  @include set-component-css-var(control-grid-setting, $control-grid-setting);
+  @include set-component-css-var(control-grid-filter, $control-grid-filter);
+  @include set-component-css-var(control-grid-sort, $control-grid-sort);
+
+  position: relative;
+
+  // element-plus 组件压制
+  .el-table {
+    --el-table-header-bg-color: #{getCssVar(control-grid, header-row, bg-color)};
+    --el-table-current-row-bg-color: #{getCssVar(
+        control-grid,
+        body-row,
+        select-bg-color
+      )};
+    --el-table-border-color: transparent;
+  }
+
+  .el-table__body-wrapper
+    tr
+    td.el-table-fixed-column--left.is-first-column::before,
+  .el-table__body-wrapper
+    tr
+    td.el-table-fixed-column--left.is-last-column::before,
+  .el-table__body-wrapper
+    tr
+    td.el-table-fixed-column--right.is-first-column::before,
+  .el-table__body-wrapper
+    tr
+    td.el-table-fixed-column--right.is-last-column::before {
+    bottom: 0;
+  }
+
+  &.is-empty {
+    .el-scrollbar {
+      .el-scrollbar__view {
+        height: 100%;
+      }
+    }
+
+    .el-table__empty-text {
+      display: inline-block;
+      height: 100%;
+    }
+  }
+
+  .el-table--border {
+    .el-table__cell {
+      border-right: none;
+    }
+  }
+
+  .el-table-fixed-column--right,
+  .el-table-fixed-column--left {
+    --el-bg-color: transparent;
+  }
+
+  // 分组头
+  .el-table thead.is-group th.el-table__cell {
+    background: getCssVar(control-grid, header-row, bg-color);
+  }
+
+  width: 100%;
+  height: 100%;
+  background-color: getCssVar(control-grid, bg-color);
+
+  // 支持分页时高度调整
+  @include when(enable-page) {
+    @include e(table) {
+      height: calc(100% - 50px);
+    }
+  }
+
+  // 分组的时候取消树表格的缩进
+  @include when(enable-group) {
+    .el-table__indent {
+      display: none;
+    }
+  }
+
+  @include when(dynamic-grid) {
+    .el-table__empty-block {
+      height: calc(100% - 48px) !important;
+      min-height: 248px;
+    }
+  }
+
+  @include when(group-row-mode) {
+    .el-table .el-table__body-wrapper .el-table__row .el-table__expand-icon {
+      margin: 0 0 0 20px;
+    }
+  }
+
+  // 自动表格添加按钮
+  @include e(add) {
+    width: calc(100% - getCssVar(spacing, extra-tight));
+    margin: getCssVar(spacing, tight) getCssVar(spacing, extra-tight);
+    color: getCssVar(color, primary);
+    background-color: transparent;
+    border: 1px dashed getCssVar(color, border);
+
+    ion-icon {
+      margin-right: getCssVar(spacing, extra-tight);
+    }
+
+    &:focus {
+      color: getCssVar(color, primary, hover);
+      background-color: transparent;
+      border: 1px dashed getCssVar(color, primary, hover);
+    }
+
+    &:hover {
+      color: getCssVar(color, primary, hover);
+      background-color: transparent;
+      border: 1px dashed getCssVar(color, primary, hover);
+    }
+  }
+  
+  @include e(table) {
+    width: 100%;
+    height: 100%;
+
+    // 排序图标居中
+    .caret-wrapper {
+      justify-content: center;
+
+      --el-text-color-placeholder: #{getCssVar(control-grid, sort, color)};
+      --el-color-primary: #{getCssVar(control-grid, sort, active-color)};
+
+      & > * + * {
+        margin-top: getCssVar(control-grid, sort, gap);
+      }
+    }
+
+    .sort-caret {
+      --el-text-color-placeholder: #{getCssVarName(
+          control-grid,
+          header,
+          text-color
+        )};
+
+      position: initial;
+      opacity: 0.6;
+    }
+
+    // 清除element单元格的padding
+    &.el-table .el-table__cell {
+      padding: getCssVar('spacing', 'none');
+    }
+
+    // 行和列的背景色
+    &.el-table .el-table__body-wrapper tr {
+      // 普通行列背景色
+      td {
+        background: getCssVar(control-grid, body-row, bg-color);
+      }
+
+      // 偶数行列的背景色
+      &:nth-child(2n) {
+        td {
+          background-color: getCssVar(control-grid, body-row, bg-color-2);
+        }
+      }
+
+      // 悬浮行列激活色
+      &:hover td {
+        background-color: getCssVar(control-grid, body-row, hover-bg-color);
+      }
+
+      // 激活行列背景色
+      &.current-row td {
+        background-color: var(--el-table-current-row-bg-color);
+      }
+
+      // 编辑行背景色
+      &.editing-row td {
+        &.uagridcolumn {
+          background-color: getCssVar(control-grid, body-row, hover-bg-color);
+        }
+
+        &:not(.uagridcolumn) {
+          background-color: getCssVar(control-grid, body-row, edit-bg-color);
+        }
+
+        .el-input__wrapper, .el-textarea__inner, .el-date-editor {
+          --el-input-bg-color: #{getCssVar(color, bg, 1)};
+        }
+      }
+    }
+
+    // 表格列头样式
+    .el-table__header-wrapper {
+      .cell {
+        height: getCssVar(control-grid, header-row, height);
+        min-height: getCssVar(control-grid, header-row, min-height);
+        padding: getCssVar(control-grid, header-cell, padding);
+        font-size: getCssVar(control-grid, header-cell, font-size);
+        font-weight: getCssVar(control-grid, header-cell, font-weight);
+        color: getCssVar(control-grid, header-cell, text-color);
+        @include overflow-wrap;
+      }
+
+      .el-table-column--selection .cell {
+        padding: getCssVar(control-grid, selection, padding);
+
+        .el-checkbox {
+          --el-border-color: #{getCssVar(control-grid, selection, border-color)};
+          --el-checkbox-checked-bg-color: #{getCssVar(control-grid, selection, active-bg-color)};
+          --el-checkbox-checked-input-border-color: #{getCssVar(control-grid, selection, active-border-color)};
+          --el-checkbox-checked-icon-color: #{getCssVar(control-grid, selection, active-icon-color)};
+        }
+      }
+
+      // 修复表头换行排序图标错位问题
+      .el-table__cell {
+        .cell {
+          display: flex;
+          align-items: center;
+          justify-content: getCssVar('grid-column', 'justify-content');
+        }
+      }
+
+      .el-table-fixed-column--right,
+      .el-table-fixed-column--left {
+        .cell {
+          @include flex(row, getCssVar('grid-column', 'justify-content'), center);
+        }
+      }
+    }
+
+    // 表格body样式
+    .el-table__body-wrapper {
+      color: getCssVar(control-grid, body-cell, text-color);
+      border-bottom: 0.1px solid getCssVar(color, border);
+
+      // 设置最小行高，内容多了换行要把行高撑开。
+      // 谷歌行高样式
+      .el-table__row {
+        height: getCssVar(control-grid, body-row, height);
+        cursor: pointer;
+
+        > td {
+          height: 0;
+          padding: getCssVar('spacing', 'none');
+        }
+
+        .el-table__expand-icon {
+          margin-left: getCssVar(control-grid, body-row, expand-icon-gap);
+        }
+      }
+
+      // 火狐行高兼容性处理
+      @-moz-document url-prefix() {
+        .el-table__row > td {
+          height: 100%;
+        }
+      }
+
+      // 单元格通用样式
+      .cell {
+        display: flex;
+        align-items: center;
+        height: 100%;
+        padding: getCssVar('spacing', 'none');
+      }
+
+      .el-table-column--selection .cell {
+        padding: getCssVar(control-grid, selection-padding);
+
+        .el-checkbox {
+          --el-border-color: #{getCssVar(control-grid, selection, border-color)};
+          --el-checkbox-checked-bg-color: #{getCssVar(control-grid, selection, active-bg-color)};
+          --el-checkbox-checked-input-border-color: #{getCssVar(control-grid, selection, active-border-color)};
+          --el-checkbox-checked-icon-color: #{getCssVar(control-grid, selection, active-icon-color)};
+        }
+      }
+    }
+
+    // 表格列对齐样式
+    .el-table__cell.is-center {
+      #{getCssVarName('grid-column', 'text-align')}: center;
+      #{getCssVarName('grid-column', 'justify-content')}: center;
+    }
+
+    .el-table__cell.is-left {
+      #{getCssVarName('grid-column', 'text-align')}: left;
+      #{getCssVarName('grid-column', 'justify-content')}: flex-start;
+    }
+
+    .el-table__cell.is-right {
+      #{getCssVarName('grid-column', 'text-align')}: right;
+      #{getCssVarName('grid-column', 'justify-content')}: flex-end;
+    }
+
+    // 行编辑popover定位需要
+    .el-scrollbar__wrap {
+      position: relative;
+    }
+
+    // 底部聚合样式
+    .el-table__footer-wrapper {
+      tfoot td.el-table__cell {
+        height: getCssVar(control-grid, footer, height);
+        font-size: getCssVar(control-grid, footer, font-size);
+        font-weight: getCssVar(control-grid, footer, font-weight);
+        color: getCssVar(control-grid, footer, text-color);
+        background-color: getCssVar(control-grid, footer, bg-color);
+
+        &:first-child {
+          > div {
+            padding: 0;
+            vertical-align: getCssVar(control-grid, footer, vertical-align);
+          }
+        }
+      }
+    }
+
+    // 排序样式
+    .enable-order {
+      position: relative;
+      padding-left: getCssVar('spacing', 'base-tight');
+      transition: transform 0.25s cubic-bezier(0, 0, 0.2, 1);
+
+      .#{bem(control-grid__drag-icon)} {
+        padding: getCssVar('spacing', 'none') !important;
+
+        .cell {
+          display: none;
+        }
+      }
+
+      // 图标显示
+      &:hover {
+        .#{bem(control-grid__drag-icon)} {
+          .cell {
+            display: flex;
+          }
+        }
+      }
+    }
+
+    .el-scrollbar__bar.is-horizontal {
+      height: getCssVar(control-grid, scrollbar-width);
+    }
+
+    .el-scrollbar__bar.is-vertical {
+      width: getCssVar(control-grid, scrollbar-width);
+    }
+
+    .el-scrollbar__thumb {
+      background-color: getCssVar(control-grid, scrollbar-bg-color);
+
+      &:hover {
+        background-color: getCssVar(control-grid, scrollbar-bg-hover-color);
+        opacity: getCssVar(control-grid, scrollbar-bg-hover-opacity);
+      }
+    }
+  }
+
+  @include e(load-more-button) {
+    padding: getCssVar(control-grid, header-cell, padding);
+    text-align: center;
+  }
+
+  // 去除底部border
+  .el-table td.el-table__cell,
+  .el-table th.el-table__cell.is-leaf {
+    border-bottom: none;
+  }
+
+  @include when(single-select) {
+    // 表格列头样式
+    .el-table__header-wrapper {
+      .el-table__header thead > tr th:nth-child(1) {
+        padding-left: getCssVar(spacing, tight);
+      }
+    }
+
+    // 表格body样式
+    .el-table__body-wrapper {
+      .el-table__body tbody > tr td:nth-child(1) {
+        padding-left: getCssVar(spacing, tight);
+      }
+    }
+  }
+
+  // 支持定制
+  @include when(enable-customized) {
+    .el-table__header-wrapper {
+      .el-table__header thead>tr:first-child th:last-child {
+        padding-right: getCssVar(spacing, base-loose);
+      }
+    }
+    @include b(control-grid-setting-box){
+      @include flex(row, flex-start, center);
+
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 10;
+      height: getCssVar(control-grid, setting, height);
+      padding-right: getCssVar(control-grid, setting, padding-right);
+      background-color: getCssVar(control-grid, setting, bg-color);
+    }
+  }
+}
+
+@include b(control-grid-quick-toolbar) {
+  justify-content: center;
+}
+
+@include b(control-grid-batch-toolbar) {
+  position: absolute;
+  top: 0;
+  left: 54px;
+  z-index: 99;
+  display: none;
+  width: calc(100% - 54px);
+  height: getCssVar(control-grid, setting, height);
+  font-size: getCssVar(font-size, regular);
+  font-weight: getCssVar(font-weight, regular);
+  background-color: getCssVar(control-grid, header-row, bg-color);
+
+  @include when(show) {
+    @include flex(row, flex-start, center);
+  }
+
+  @include b(control-grid-batch-toolbar-separator) {
+    padding: 0 getCssVar(spacing, base-tight);
+  }
+  @include b(control-grid-batch-toolbar-content) {
+    height: 100%;
+    @include flex(row, flex-start, center);
+  }
+  @include b(control-grid-batch-toolbar-text) {
+    flex: none; 
+  }
+}

@@ -1,0 +1,51 @@
+// 微信扫码登录二维码样式
+$auth-wxmp-qrcode: (
+  caption-font-size: getCssVar(font-size, small),             // 提示文字字体大小
+  bg-color: rgb(255 255 255 / 90%),                            // 二维码区域背景色
+  mask-color: getCssVar(color, primary),                        // 失效遮罩背景色
+  mask-icon-font-size: getCssVar(font-size, header-1),          // 遮罩刷新图标字体大小
+  mask-icon-hover-color: getCssVar(color, primary, hover),     // 遮罩刷新图标悬浮色
+);
+
+@include b(auth-wxmp-qrcode) {
+  @include set-component-css-var('auth-wxmp-qrcode',$auth-wxmp-qrcode);
+
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  @include e(content) {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  @include e(qrcode) {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  @include e(caption) {
+    font-size: getCssVar(auth-wxmp-qrcode, caption-font-size);
+    text-align: center;
+  }
+  @include e(mask) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: getCssVar(auth-wxmp-qrcode, mask-color);
+    background-color: getCssVar(auth-wxmp-qrcode, bg-color);
+    @include m(icon) {
+      font-size: getCssVar(auth-wxmp-qrcode, mask-icon-font-size);
+      cursor: pointer;
+
+      &:hover {
+        color: getCssVar(auth-wxmp-qrcode, mask-icon-hover-color);
+      }
+    }
+  }
+}

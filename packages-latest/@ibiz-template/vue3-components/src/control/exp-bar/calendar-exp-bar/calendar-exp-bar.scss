@@ -1,0 +1,12 @@
+// 日历导航栏根元素
+$control-calendarexpbar: (
+  bg-color: transparent,                                                            // 导航栏背景色
+  padding: getCssVar('spacing', 'none'),                                            // 导航栏内边距
+);
+
+@include b('control-calendarexpbar') {
+  @include set-component-css-var('control-calendarexpbar', $control-calendarexpbar);
+
+  padding: getCssVar('control-calendarexpbar', 'padding');
+  background-color: getCssVar('control-calendarexpbar', 'bg-color');
+}

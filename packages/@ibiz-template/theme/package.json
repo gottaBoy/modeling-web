@@ -1,0 +1,21 @@
+{
+  "name": "@ibiz-template/theme",
+  "version": "0.7.0",
+  "description": "vue 工具包",
+  "repository": {
+    "type": "git",
+    "url": "https://gitee.com/iBizModeling/ibiz-template.git"
+  },
+  "files": [
+    "style"
+  ],
+  "author": "chitanda",
+  "license": "MIT",
+  "scripts": {
+    "publish:next": "npm publish --access public --tag=next --registry=https://registry.npmjs.org/",
+    "publish:dev": "npm publish --access public --tag=dev --registry=https://registry.npmjs.org/",
+    "publish:alpha": "npm run build && npm publish --access public --tag=alpha --registry=https://registry.npmjs.org/",
+    "publish:beta": "npm publish --access public --tag=beta --registry=https://registry.npmjs.org/",
+    "publish:npm": "npm publish --access public --registry=https://registry.npmjs.org/"
+  }
+}

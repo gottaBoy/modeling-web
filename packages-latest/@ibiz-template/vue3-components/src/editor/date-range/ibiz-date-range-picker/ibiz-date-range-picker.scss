@@ -1,0 +1,87 @@
+// 时间范围选择器根元素
+$date-range-picker: (
+  font-size: getCssVar(form-item, font-size),                               // 字体大小
+  text-color: getCssVar(form-item, text-color),                             // 字体颜色
+  line-height: getCssVar(form-item, line-height),                           // 行高
+  readonly-color: getCssVar(form-item, readonly-color),                     // 只读字体色
+  hover-edit-padding: getCssVar(form-item, hover-edit-padding),             // 悬浮编辑态内边距
+);
+
+@include b(date-range-picker) {
+  width: 100%;
+  @include set-component-css-var(date-range-picker, $date-range-picker);
+
+  .el-date-editor {
+    width: 100%;
+    line-height: getCssVar(date-range-picker, line-height);        
+
+    @include flex(row, flex-start, center);
+
+    .el-range-input{
+      color: getCssVar(date-range-picker, text-color);
+      background-color: transparent;
+    }
+  }
+
+  @include m(readonly) {
+    font-size: getCssVar(date-range-picker, font-size);
+    line-height: getCssVar(date-range-picker, line-height);
+    color: getCssVar(date-range-picker, readonly-color);
+  }
+}
+
+// 表单下的时间选择器默认显示，悬浮上去显示编辑器
+@include b(date-range-picker-form-default-content){
+  display: none;
+}
+
+@include b(form-item){
+
+  @include b(date-range-picker) {
+    @include when(show-default){
+      // 悬浮显示编辑器
+      &:hover{
+        @include b(date-range-picker-form-default-content){
+          display: none;
+        }     
+        @include b(date-range-picker-input){
+          display: flex;    
+        }       
+      }    
+      
+      // 不悬浮时显示信息态
+      @include b(date-range-picker-form-default-content){      
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: getCssVar(date-range-picker, hover-edit-padding);        
+        font-family: Arial, sans-serif;      
+        font-size: getCssVar(date-range-picker, font-size);
+        line-height: getCssVar(date-range-picker, line-height);
+        color: getCssVar(date-range-picker, text-color);      
+
+        @include b(date-range-picker-default-input){
+          box-shadow: none;
+        }
+
+        @include when(has-val){
+          padding: 0;
+        }
+      }
+      @include b(date-range-picker-input){
+        display: none;  
+      }
+      
+      // 输入态
+      @include when(editable){
+        @include b(date-range-picker-form-default-content){
+          display: none;
+        }     
+        @include b(date-range-picker-input){
+          display: flex;    
+        }  
+      }
+    }
+
+  }
+}

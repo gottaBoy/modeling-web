@@ -1,0 +1,226 @@
+// 季度范围选择器头部
+$quarter-range-select-header: (
+  height: 40px,                                             // 高度
+  border-color: getCssVar('color', border),                 // 边框色
+  padding: 0 getCssVar(spacing, base-loose),                // 内边距
+  text-color: getCssVar(color, primary, light, active),     // 文本颜色
+  icon-color: getCssVar(color, black),                    // 图标颜色
+  icon-hover-color: getCssVar(color, primary),              // 图标悬浮色
+);
+
+// 季度范围选择器内容
+$quarter-range-select-content: (
+  range-bg-color: getCssVar(color, secondary, light-default),// 范围背景色
+  selected-color: getCssVar(color, primary, text),           // 选中字体色
+  selected-bg-color: getCssVar(color, primary),              // 选中背景色
+  hover-color: getCssVar(color, primary),                    // 悬浮色
+  current-color: getCssVar(color, primary),                  // 当前季度字体色
+);
+
+@include b('bi-quarter-range-select') {
+  @include e('date-panel') {
+      display: flex;
+      height: 80px;
+      @include set-component-css-var(quarter-range-select-header, $quarter-range-select-header);
+      @include set-component-css-var(quarter-range-select-content, $quarter-range-select-content);
+
+      @include m('left') {
+        flex: 1;
+      }
+
+      @include m('left-header') {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: getCssVar(quarter-range-select-header, height);
+        padding: getCssVar(quarter-range-select-header, padding);
+        color: getCssVar(quarter-range-select-header, text-color);
+        border-bottom: 1px solid getCssVar(quarter-range-select-header, border-color);
+
+        svg {
+          color: getCssVar(quarter-range-select-header, icon-color);
+          cursor: pointer;
+
+          &:hover {
+            color: getCssVar(quarter-range-select-header, icon-hover-color);
+          }
+        }
+      }
+
+      @include m('left-content') {
+        padding: getCssVar(spacing, tight) getCssVar(spacing, base-loose);
+      }
+
+      @include m('left-item') {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: getCssVar('height-control', 'default');
+        height: getCssVar('height-control', 'default');
+        margin-left: 0;
+        margin-left: getCssVar(spacing, loose);
+        cursor: pointer;
+        border-radius: getCssVar(border-radius, small);
+
+        &::before {
+          position: absolute;
+          right: getCssVar('height-control', 'default');
+          display: inline-block;
+          width: getCssVar(spacing, loose);
+          height: 100%;
+          content: '';
+        }
+
+        @include when('include') {
+          background: getCssVar(quarter-range-select-content, range-bg-color);
+        }
+
+        @include when('selected') {
+          color: getCssVar(quarter-range-select-content, selected-color);
+          background-color: getCssVar(quarter-range-select-content, selected-bg-color);
+
+          @include when('curquarter') {
+            color: getCssVar(quarter-range-select-content, selected-color);
+          }
+        }
+
+        @include when('hoverinclude') {
+          background: getCssVar(quarter-range-select-content, range-bg-color);
+
+          @include when('include') {
+            color: getCssVar(quarter-range-select-content, selected-color);
+            background-color: getCssVar(quarter-range-select-content, selected-bg-color);
+          }
+
+          @include when('selected') {
+            color: getCssVar(quarter-range-select-content, selected-color);
+            background-color: getCssVar(quarter-range-select-content, selected-bg-color);
+          }
+
+          @include when('hover') {
+            color: getCssVar(quarter-range-select-content, selected-color);
+            background-color: getCssVar(quarter-range-select-content, selected-bg-color);
+          }
+
+          @include when('selected') {
+            color: getCssVar(quarter-range-select-content, selected-color);
+            background-color: getCssVar(quarter-range-select-content, selected-bg-color);
+          }
+        }
+
+        @include when('hover') {
+          color: getCssVar(quarter-range-select-content, hover-color);
+
+          @include when('selected') {
+            color: getCssVar(quarter-range-select-content, selected-color);
+            background-color: getCssVar(quarter-range-select-content, hover-color);
+          }
+        }
+
+        @include when('curquarter') {
+          font-weight: bold;
+          color: getCssVar(quarter-range-select-content, current-color);
+        }
+      }
+
+      @include m('right') {
+        flex: 1;
+      }
+
+      @include m('right-header') {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: getCssVar(quarter-range-select-header, height);
+        padding: getCssVar(quarter-range-select-header, padding);
+        color: getCssVar(quarter-range-select-header, text-color);
+        border-bottom: 1px solid getCssVar(quarter-range-select-header, border-color);
+
+        svg {
+          color: getCssVar(quarter-range-select-header, icon-color);
+          cursor: pointer;
+
+          &:hover {
+            color: getCssVar(quarter-range-select-header, icon-hover-color);
+          }
+        }
+      }
+
+      @include m('right-content') {
+        padding: getCssVar(spacing, tight) getCssVar(spacing, base-loose);
+      }
+
+      @include m('right-item') {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: getCssVar('height-control', 'default');
+        height: getCssVar('height-control', 'default');
+        margin-left: getCssVar(spacing, loose);
+        cursor: pointer;
+        border-radius: getCssVar(border-radius, small);
+
+        &::before {
+          position: absolute;
+          right: getCssVar('height-control', 'default');
+          display: inline-block;
+          width: getCssVar(spacing, loose);
+          height: 100%;
+          content: '';
+        }
+
+        @include when('include') {
+          background: getCssVar(quarter-range-select-content, range-bg-color);
+        }
+
+        @include when('selected') {
+          color: getCssVar(quarter-range-select-content, selected-color);
+          background-color: getCssVar(quarter-range-select-content, selected-bg-color);
+
+          @include when('curquarter') {
+            color: getCssVar(quarter-range-select-content, selected-color);
+          }
+        }
+
+        @include when('hoverinclude') {
+          background: getCssVar(quarter-range-select-content, range-bg-color);
+
+          @include when('include') {
+            color: getCssVar(quarter-range-select-content, selected-color);
+            background-color: getCssVar(quarter-range-select-content, selected-bg-color);
+          }
+
+          @include when('selected') {
+            color: getCssVar(quarter-range-select-content, selected-color);
+            background-color: getCssVar(quarter-range-select-content, selected-bg-color);
+          }
+
+          @include when('hover') {
+            color: getCssVar(quarter-range-select-content, selected-color);
+            background-color: getCssVar(quarter-range-select-content, selected-bg-color);
+          }
+
+          @include when('selected') {
+            color: getCssVar(quarter-range-select-content, selected-color);
+            background-color: getCssVar(quarter-range-select-content, selected-bg-color);
+          }
+        }
+
+        @include when('hover') {
+          color: getCssVar(quarter-range-select-content, hover-color);
+
+          @include when('selected') {
+            color: getCssVar(quarter-range-select-content, selected-color);
+            background-color: getCssVar(quarter-range-select-content, hover-color);
+          }
+        }
+
+        @include when('curquarter') {
+          font-weight: bold;
+          color: getCssVar(quarter-range-select-content, current-color);
+        }
+      }
+    }
+}

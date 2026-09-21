@@ -1,0 +1,46 @@
+// 面板按钮
+$panel-button: (
+  icon-margin: getCssVar(spacing, extra-tight),     // 图标与文字之间的间距
+  icon-max-width: getCssVar(width-icon, medium),    // 图标最大宽度
+  icon-max-height: getCssVar(width-icon, medium),   // 图标最大高度
+  padding: getCssVar(spacing, tight),               // 按钮内边距
+);
+
+@include b(panel-button) {
+  @include set-component-css-var(panel-button, $panel-button);
+
+  width: 100%;
+  padding: getCssVar(panel-button, padding);
+  overflow: hidden;
+
+  .el-button{
+    width: 100%;
+
+    > span {
+      // 禁用点击事件，保证event.target是button元素
+      pointer-events: none;
+    }
+    @include b(panel-button-content){
+      @include flex(row, flex-start, center);
+
+      img,i{
+        display: inline-block;
+        max-width: getCssVar(panel-button, icon-max-width);
+        max-height: getCssVar(panel-button, icon-max-height);
+      }
+
+      // 同时存在图标和文本时，给文本加左margin
+      .#{bem(icon)} + .#{bem(panel-button-content, '', caption)}{
+        margin-left: getCssVar(panel-button, icon-margin);
+      }
+    } 
+  }
+
+  @include when(loading){
+    .el-button{
+      .#{bem(icon)}{
+        display: none;
+      }
+    }
+  }  
+}

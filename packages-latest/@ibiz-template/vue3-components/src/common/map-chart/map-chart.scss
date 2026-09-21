@@ -1,0 +1,21 @@
+@include b('map-chart') {
+  position: relative;
+  min-width: 300px;
+  min-height: 300px;
+  
+  @include e('chart'){
+    width: 100%;
+    height: 100%;
+  }
+
+  @include e('goback'){
+    position: absolute;
+    top: 60px;
+    right: 50px;
+    font-size: getCssVar('control-map-goback', 'font-size');
+    color: getCssVar('control-map-goback', 'text-color');
+    text-decoration: underline;
+    letter-spacing: getCssVar('control-map-goback', 'gap');
+    cursor: pointer;
+  }
+}

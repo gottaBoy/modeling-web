@@ -1,0 +1,44 @@
+@include b(view-list) {
+  width: 100%;
+}
+
+@include b(view-list-item) {
+  margin: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid getCssVar('color', border);
+  border-radius: 6px;
+
+  @include e(caption) {
+    flex-grow: 1;
+    width: 195px;
+    @include utils-ellipsis;
+  }
+
+  @include m(selected) {
+    border-color: getCssVar(color, primary);
+    box-shadow: 0 2px 12px 0 getCssVar(color, primary);
+
+    @include e(content) {
+      display: block;
+    }
+  }
+
+  @include e(toolbar) {
+    .ibiz-devtool-button + .ibiz-devtool-button {
+      margin-left: 6px;
+    }
+  }
+
+  @include e(header) {
+    @include flex(row, space-between, center);
+
+    height: 26px;
+    margin: 8px;
+  }
+
+  @include e(content) {
+    display: none;
+    margin: 8px;
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "name": "@ibiz-template/web-theme",
+  "version": "3.16.0",
+  "description": "web端主题样式库",
+  "type": "module",
+  "main": "lib/index.cjs",
+  "types": "es/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./es/index.mjs",
+      "require": "./lib/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "es",
+    "lib",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "ibiz-temp build -w",
+    "build": "npm run pub && ibiz-temp build -c && vue-tsc --declaration --emitDeclarationOnly",
+    "pub": "ibizlab pub -m /home/zpc/workspace/template/FrontPresetModel/frontmodelbackend-core/src/main/resources/model/front/model/ibiz -t ./template -o ./src/publish --app FrontModel --clean",
+    "publish:next": "npm run build && npm publish --access public --tag=next --registry=https://registry.npmjs.org/",
+    "publish:dev": "npm run build && npm publish --access public --tag=dev --registry=https://registry.npmjs.org/",
+    "publish:alpha": "npm run build && npm publish --access public --tag=alpha --registry=https://registry.npmjs.org/",
+    "publish:beta": "npm run build && npm publish --access public --tag=beta --registry=https://registry.npmjs.org/",
+    "publish:npm": "npm run build && npm publish --access public --registry=https://registry.npmjs.org/"
+  },
+  "author": "iBiz",
+  "license": "MIT",
+  "devDependencies": {
+    "@ibiz-template/theme": "^0.7.0"
+  },
+  "dependencies": {
+    "@ibiz-template/runtime": "^0.7.41-alpha.127"
+  }
+}

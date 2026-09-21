@@ -1,0 +1,127 @@
+@include b(col) {
+  @include m(flex) {
+    min-width: 0;
+
+    // 修复flex时flex-grow和flex-shrink时高度被内容撑开，没法压缩
+    min-height: 0;
+  }
+
+  @include when(hidden) {
+    display: none;
+  }
+
+  @include m(self-align) {
+    >div{
+      width: auto;
+      height: auto;
+    }
+  }
+}
+
+@include b(spacing-top) {
+  @include m(outersmall) {
+    margin-top: getCssVar(spacing, tight);
+  }
+  @include m(outermedium) {
+    margin-top: getCssVar(spacing, base);
+  }
+  @include m(outerlarge) {
+    margin-top: getCssVar(spacing, loose);
+  }
+  @include m(outernone) {
+    margin-top: getCssVar(spacing, none);
+  }
+  @include m(innersmall) {
+    padding-top: getCssVar(spacing, tight);
+  }
+  @include m(innermedium) {
+    padding-top: getCssVar(spacing, base);
+  }
+  @include m(innerlarge) {
+    padding-top: getCssVar(spacing, loose);
+  }
+  @include m(innernone) {
+    padding-top: getCssVar(spacing, none);
+  }
+}
+
+@include b(spacing-bottom) {
+  @include m(outersmall) {
+    margin-bottom: getCssVar(spacing, tight);
+  }
+  @include m(outermedium) {
+    margin-bottom: getCssVar(spacing, base);
+  }
+  @include m(outerlarge) {
+    margin-bottom: getCssVar(spacing, loose);
+  }
+  @include m(outernone) {
+    margin-bottom: getCssVar(spacing, none);
+  }
+  @include m(innersmall) {
+    padding-bottom: getCssVar(spacing, tight);
+  }
+  @include m(innermedium) {
+    padding-bottom: getCssVar(spacing, base);
+  }
+  @include m(innerlarge) {
+    padding-bottom: getCssVar(spacing, loose);
+  }
+  @include m(innernone) {
+    padding-bottom: getCssVar(spacing, none);
+  }
+}
+
+@include b(spacing-left) {
+  @include m(outersmall) {
+    margin-left: getCssVar(spacing, tight);
+  }
+  @include m(outermedium) {
+    margin-left: getCssVar(spacing, base);
+  }
+  @include m(outerlarge) {
+    margin-left: getCssVar(spacing, loose);
+  }
+  @include m(outernone) {
+    margin-left: getCssVar(spacing, none);
+  }
+  @include m(innersmall) {
+    padding-left: getCssVar(spacing, tight);
+  }
+  @include m(innermedium) {
+    padding-left: getCssVar(spacing, base);
+  }
+  @include m(innerlarge) {
+    padding-left: getCssVar(spacing, loose);
+  }
+  @include m(innernone) {
+    padding-left: getCssVar(spacing, none);
+  }
+}
+
+@include b(spacing-right) {
+  @include m(outersmall) {
+    margin-right: getCssVar(spacing, tight);
+  }
+  @include m(outermedium) {
+    margin-right: getCssVar(spacing, base);
+  }
+  @include m(outerlarge) {
+    margin-right: getCssVar(spacing, loose);
+  }
+  @include m(outernone) {
+    margin-right: getCssVar(spacing, none);
+  }
+  @include m(innersmall) {
+    padding-right: getCssVar(spacing, tight);
+  }
+  @include m(innermedium) {
+    padding-right: getCssVar(spacing, base);
+  }
+  @include m(innerlarge) {
+    padding-right: getCssVar(spacing, loose);
+  }
+  @include m(innernone) {
+    padding-right: getCssVar(spacing, none);
+  }
+}

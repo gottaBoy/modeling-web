@@ -1,0 +1,1 @@
+{"version":3,"file":"entity-error.d.ts","sourceRoot":"","sources":["../../../src/error/http-error/entity-error.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,SAAS,EAAE,MAAM,0BAA0B,CAAC;AACrD,OAAO,EAAE,aAAa,EAAE,UAAU,EAAE,MAAM,iBAAiB,CAAC;AAE5D;;;;;GAKG;AACH,qBAAa,WAAY,SAAQ,SAAS;IACxC,IAAI,EAAE,MAAM,CAAiB;IAE7B,OAAO,EAAE,aAAa,EAAE,CAAM;gBAElB,GAAG,EAAE,UAAU;CAc5B"}

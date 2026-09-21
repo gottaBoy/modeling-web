@@ -1,0 +1,39 @@
+@include b(attachment-column) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: getCssVar('spacing', 'extra-tight');
+  width: 100%;
+  @include e(file) {
+    display: flex;
+    align-items: center;
+    max-width: 100%;
+    min-height: getCssVar('height-control', 'default');
+    max-height: getCssVar('height-control', 'default');
+    color: getCssVar('color', 'primary');
+    @include m(img) {
+      width: auto;
+      max-width: getCssVar('height-control', 'default');
+      max-height: getCssVar('height-control', 'default');
+      cursor: zoom-in;
+    }
+  }
+  @include e(image-preview) {
+    width: 100%;
+    height: 100%;
+    padding: getCssVar('spacing', 'base');
+    @include m(container) {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+
+      img {
+        width: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        padding: getCssVar('spacing', 'loose');
+      }
+    }
+  }
+}
