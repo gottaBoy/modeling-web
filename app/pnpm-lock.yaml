@@ -9,7 +9,7 @@ patchedDependencies:
     hash: ovs2sndrp3ufmpi3jlaqmocmfm
     path: patches/@ibiz-template__runtime@0.7.41-alpha.86.patch
   '@ibiz-template/vue3-components@0.7.41-alpha.78':
-    hash: xeivskgwoij6g47n6ani2m7dpq
+    hash: 6kznktqrdazogfsmnbpdcn74xi
     path: patches/@ibiz-template__vue3-components@0.7.41-alpha.78.patch
   '@ibiz-template/vue3-util@0.7.41-alpha.86':
     hash: vmgdsrmqnuqtydt65bqzbd6mku
