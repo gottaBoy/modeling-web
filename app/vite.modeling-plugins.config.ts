@@ -49,5 +49,6 @@ export default defineConfig({
     include: ['tests/modeling-plugins-*.test.ts'],
     pool: 'forks',
     poolOptions: { forks: { singleFork: true } },
+    setupFiles: ['./tests/setup-node-runtime.ts'],
   },
 });
