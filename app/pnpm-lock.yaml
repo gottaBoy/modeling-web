@@ -42,7 +42,7 @@ dependencies:
     version: 0.0.14(@ibiz-template/core@0.7.41-alpha.78)(@ibiz-template/model-helper@0.7.41-alpha.86)(@ibiz-template/runtime@0.7.41-alpha.86)(@ibiz-template/theme@0.7.39)(@ibiz-template/vue3-util@0.7.41-alpha.86)(@ibiz/model-core@0.1.84)(@monaco-editor/loader@1.4.0)(async-validator@4.2.5)(axios@1.13.2)(dayjs@1.11.10)(lodash-es@4.17.21)(monaco-editor@0.45.0)(pluralize@8.0.0)(qs@6.11.2)(qx-util@0.4.8)(ramda@0.29.1)(vue-router@4.2.5)(vue@3.3.8)(vuedraggable@4.1.0)
   '@ibiz-template/model-helper':
     specifier: 0.7.41-alpha.86
-    version: 0.7.41-alpha.86(@ibiz-template/runtime@0.7.41-alpha.86)(axios@1.13.2)(lodash-es@4.17.21)(qs@6.11.2)(qx-util@0.4.8)(ramda@0.29.1)
+    version: link:../../ibiz-app-hub/packages/model-helper
   '@ibiz-template/runtime':
     specifier: 0.7.41-alpha.86
     version: 0.7.41-alpha.86(@ibiz-template/core@0.7.41-alpha.78)(@ibiz/model-core@0.1.84)(async-validator@4.2.5)(dayjs@1.11.10)(echarts@5.4.3)(handlebars@4.7.8)(lodash-es@4.17.21)(mqtt@2.18.9)(path-browserify@1.0.1)(qs@6.11.2)(qx-util@0.4.8)(ramda@0.29.1)
