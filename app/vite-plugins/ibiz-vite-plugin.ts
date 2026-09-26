@@ -234,6 +234,14 @@ function IBizVitePlugin(): Plugin[] {
             /!0===ibiz\.env\.isSaaSMode&&await this\.loadOrgData\(\)/g,
             '!0===ibiz.env.isSaaSMode&&!0!==ibiz.env.isLocalModel&&await this.loadOrgData()',
           )
+          // The handler is often an operand of a comma expression, so drop the
+          // trailing comma there as well; deleting it on its own leaves the
+          // minified `return ,next()` behind, which fails to parse and stops the
+          // app from booting at all.
+          .replace(
+            /return window\.addEventListener\("unload",[^\)]*\),/g,
+            'return ',
+          )
           .replace(/window\.addEventListener\("unload",[^\)]*\);?/g, '')
           .replace(
             /this\.routeDepth&&this\.state\.drTabPages\[0\]&&this\.router\.push\(this\.state\.drTabPages\[0\]\.fullPath\)/g,

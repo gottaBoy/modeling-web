@@ -1098,6 +1098,13 @@ if (shouldCheckDist) {
                   /!0===ibiz\.env\.isSaaSMode&&await this\.loadOrgData\(\)/g,
                   '!0===ibiz.env.isSaaSMode&&!0!==ibiz.env.isLocalModel&&await this.loadOrgData()',
                 )
+                // Must stay in lockstep with the build-time sanitizer in
+                // vite-plugins/ibiz-vite-plugin.ts, including the comma
+                // expression fix, or this check reports a false difference.
+                .replace(
+                  /return window\.addEventListener\("unload",[^\)]*\),/g,
+                  'return ',
+                )
                 .replace(/window\.addEventListener\("unload",[^\)]*\);?/g, '')
                 .replace(
                   /this\.routeDepth&&this\.state\.drTabPages\[0\]&&this\.router\.push\(this\.state\.drTabPages\[0\]\.fullPath\)/g,
