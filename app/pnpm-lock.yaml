@@ -45,7 +45,7 @@ dependencies:
     version: link:../../ibiz-app-hub/packages/model-helper
   '@ibiz-template/runtime':
     specifier: 0.7.41-alpha.86
-    version: 0.7.41-alpha.86(@ibiz-template/core@0.7.41-alpha.78)(@ibiz/model-core@0.1.84)(async-validator@4.2.5)(dayjs@1.11.10)(echarts@5.4.3)(handlebars@4.7.8)(lodash-es@4.17.21)(mqtt@2.18.9)(path-browserify@1.0.1)(qs@6.11.2)(qx-util@0.4.8)(ramda@0.29.1)
+    version: link:../../ibiz-app-hub/packages/runtime
   '@ibiz-template/theme':
     specifier: 0.7.39
     version: link:../../ibiz-app-hub/packages/theme
