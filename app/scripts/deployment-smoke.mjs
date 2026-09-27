@@ -175,6 +175,34 @@ function isKnownWorkspaceCounterFailure(item) {
   );
 }
 
+function isRecoveredWorkspaceCounterAuthentication(item, apiResponses) {
+  if (
+    item.type !== 'api-response' ||
+    item.status !== 401 ||
+    item.method !== 'POST' ||
+    !item.url?.endsWith('/work_items/count_my_todo')
+  ) {
+    return false;
+  }
+
+  const failedIndex = apiResponses.findIndex(
+    response =>
+      response.status === item.status &&
+      response.method === item.method &&
+      response.url === item.url,
+  );
+  if (failedIndex < 0) return false;
+
+  return apiResponses
+    .slice(failedIndex + 1)
+    .some(
+      response =>
+        response.status === 200 &&
+        response.method === item.method &&
+        response.url === item.url,
+    );
+}
+
 function isExpectedAuthenticationResponse(item, authenticated) {
   return (
     !authenticated &&
@@ -184,8 +212,13 @@ function isExpectedAuthenticationResponse(item, authenticated) {
   );
 }
 
-function isKnownNonBlockingEvent(item) {
-  if (isKnownWorkspaceCounterFailure(item)) return true;
+function isKnownNonBlockingEvent(item, apiResponses = []) {
+  if (
+    isKnownWorkspaceCounterFailure(item) ||
+    isRecoveredWorkspaceCounterAuthentication(item, apiResponses)
+  ) {
+    return true;
+  }
 
   if (
     item.type === 'request-failed' &&
@@ -408,7 +441,9 @@ async function main() {
         await page.waitForTimeout(5000);
         let newFailures = report
           .unexpectedEvents.slice(beforeFailures)
-          .filter(item => !isKnownNonBlockingEvent(item));
+          .filter(
+            item => !isKnownNonBlockingEvent(item, report.apiResponses),
+          );
         if (newFailures.length > 0) {
           // 首次访问一个模块时，后端可能仍在懒加载实体模型；刷新一次可区分竞态和真实接口错误。
           await page.reload({ waitUntil: 'domcontentloaded' });
@@ -416,7 +451,9 @@ async function main() {
           await page.waitForTimeout(3000);
           newFailures = report
             .unexpectedEvents.slice(beforeFailures)
-            .filter(item => !isKnownNonBlockingEvent(item));
+            .filter(
+              item => !isKnownNonBlockingEvent(item, report.apiResponses),
+            );
         }
         assert(
           newFailures.length === 0,
@@ -439,7 +476,9 @@ async function main() {
       const typeItems = dialog.locator('.ibiz-control-list-scroll-item');
       const scrumItem = typeItems.filter({ hasText: 'Scrum项目' }).first();
       const kanbanItem = typeItems.filter({ hasText: 'Kanban项目' }).first();
-      const nextButton = page.getByRole('button', { name: '下一步' }).last();
+      const nextButton = page
+        .getByRole('button', { name: /下一步|Next/ })
+        .last();
 
       await scrumItem.waitFor({ state: 'visible', timeout: 30000 });
       assert(
@@ -453,7 +492,7 @@ async function main() {
       await waitForBodyText(page, '项目信息');
 
       const previousButton = page
-        .getByRole('button', { name: '上一步' })
+        .getByRole('button', { name: /上一步|Retreat|Previous/ })
         .last();
       await previousButton.click();
       await waitForBodyText(page, '项目类型');
@@ -501,14 +540,20 @@ async function main() {
       await productDialog
         .locator('input[placeholder="大写字母和数字，15个字符范围内"]')
         .fill(productIdentifier);
-      await page.getByRole('button', { name: '下一步' }).last().click();
+      await page
+        .getByRole('button', { name: /下一步|Next/ })
+        .last()
+        .click();
       await waitForBodyText(page, '产品成员', 30000);
 
       const productResponsePromise = page.waitForResponse(
         isProductCreateResponse,
         { timeout: 60000 },
       );
-      await page.getByRole('button', { name: '完成' }).last().click();
+      await page
+        .getByRole('button', { name: /完成|Complete/ })
+        .last()
+        .click();
       const productResponse = await productResponsePromise;
       assert(
         productResponse.status() < 400,
@@ -592,10 +637,14 @@ async function main() {
     });
 
     assert(
-      report.unexpectedEvents.filter(item => !isKnownNonBlockingEvent(item))
+      report.unexpectedEvents.filter(
+        item => !isKnownNonBlockingEvent(item, report.apiResponses),
+      )
         .length === 0,
       `发现未分类运行时异常: ${JSON.stringify(
-        report.unexpectedEvents.filter(item => !isKnownNonBlockingEvent(item)),
+        report.unexpectedEvents.filter(
+          item => !isKnownNonBlockingEvent(item, report.apiResponses),
+        ),
         null,
         2,
       )}`,

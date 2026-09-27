@@ -23,46 +23,46 @@ dependencies:
     specifier: ^1.5.3
     version: 1.5.3
   '@ibiz-template-plugin/ai-chat':
-    specifier: 0.0.66
-    version: 0.0.66(@tiptap/extension-text-style@3.13.0)(cherry-markdown@0.8.26)(interactjs@1.10.26)(qx-util@0.4.8)(react@18.3.1)(vite@4.5.0)
+    specifier: link:../../ibiz-app-hub/plugins/ibiz-ai-chat
+    version: link:../../ibiz-app-hub/plugins/ibiz-ai-chat
   '@ibiz-template-plugin/bi-report':
-    specifier: 0.0.32
+    specifier: link:../../ibiz-app-hub/plugins/ibiz-bi-report
     version: link:../../ibiz-app-hub/plugins/ibiz-bi-report
   '@ibiz-template-plugin/data-view':
-    specifier: 0.0.6
+    specifier: link:../../ibiz-app-hub/plugins/ibiz-data-view
     version: link:../../ibiz-app-hub/plugins/ibiz-data-view
   '@ibiz-template-plugin/gantt':
-    specifier: 0.1.8-alpha.378
+    specifier: link:../../ibiz-app-hub/plugins/ibiz-gantt
     version: link:../../ibiz-app-hub/plugins/ibiz-gantt
   '@ibiz-template/core':
-    specifier: 0.7.41-alpha.78
+    specifier: link:../../ibiz-app-hub/packages/core
     version: link:../../ibiz-app-hub/packages/core
   '@ibiz-template/devtool':
-    specifier: 0.0.14
+    specifier: link:../../ibiz-app-hub/plugins/ibiz-template-devtools
     version: link:../../ibiz-app-hub/plugins/ibiz-template-devtools
   '@ibiz-template/model-helper':
-    specifier: 0.7.41-alpha.86
+    specifier: link:../../ibiz-app-hub/packages/model-helper
     version: link:../../ibiz-app-hub/packages/model-helper
   '@ibiz-template/runtime':
-    specifier: 0.7.41-alpha.86
+    specifier: link:../../ibiz-app-hub/packages/runtime
     version: link:../../ibiz-app-hub/packages/runtime
   '@ibiz-template/theme':
-    specifier: 0.7.39
+    specifier: link:../../ibiz-app-hub/packages/theme
     version: link:../../ibiz-app-hub/packages/theme
   '@ibiz-template/vue3-components':
-    specifier: 0.7.41-alpha.78
+    specifier: link:../../ibiz-app-hub/components/ibiz-next-vue3
     version: link:../../ibiz-app-hub/components/ibiz-next-vue3
   '@ibiz-template/vue3-util':
-    specifier: 0.7.41-alpha.86
+    specifier: link:../../ibiz-app-hub/packages/vue3-util
     version: link:../../ibiz-app-hub/packages/vue3-util
   '@ibiz-template/web-theme':
-    specifier: 3.11.0
+    specifier: link:../../ibiz-app-hub/components/web-theme
     version: link:../../ibiz-app-hub/components/web-theme
   '@ibiz/model-core':
-    specifier: ^0.1.84
+    specifier: link:../../ibiz-app-hub/models/model-core
     version: link:../../ibiz-app-hub/models/model-core
   '@ibiz/rt-model-api':
-    specifier: ^0.2.82
+    specifier: link:../../ibiz-app-hub/models/rt-model-api
     version: link:../../ibiz-app-hub/models/rt-model-api
   '@imengyu/vue3-context-menu':
     specifier: ^1.3.5
@@ -3957,39 +3957,6 @@ packages:
     resolution: {integrity: sha512-6EwiSjwWYP7pTckG6I5eyFANjPhmPjUX9JRLUSfNPC7FX7zK9gyZAfUEaECL6ALTpGX5AjnBq3C9XmVWPitNpw==}
     deprecated: Use @eslint/object-schema instead
     dev: true
-
-  /@ibiz-template-plugin/ai-chat@0.0.66(@tiptap/extension-text-style@3.13.0)(cherry-markdown@0.8.26)(interactjs@1.10.26)(qx-util@0.4.8)(react@18.3.1)(vite@4.5.0):
-    resolution: {integrity: sha512-mDP+TwQHmbv6tcEpA2j26WvlbeQPdf6Dyf2y4hEqgPfL8YSnHmQq55Y1/xRftsZ4optmbtH5XeRK14mukax+ZQ==}
-    peerDependencies:
-      cherry-markdown: ^0.8.26
-      interactjs: ^1.10.19
-      qx-util: ^0.4.8
-    dependencies:
-      '@ibiz-template/scss-utils': 0.0.2
-      '@preact/signals': 1.2.1(preact@10.18.1)
-      '@tiptap/core': 3.13.0(@tiptap/pm@3.13.0)
-      '@tiptap/extension-document': 3.13.0(@tiptap/core@3.13.0)
-      '@tiptap/extension-file-handler': 3.13.0(@tiptap/core@3.13.0)(@tiptap/extension-text-style@3.13.0)(@tiptap/pm@3.13.0)
-      '@tiptap/extension-image': 3.13.0(@tiptap/core@3.13.0)
-      '@tiptap/extension-paragraph': 3.13.0(@tiptap/core@3.13.0)
-      '@tiptap/extension-text': 3.13.0(@tiptap/core@3.13.0)
-      '@tiptap/extensions': 3.13.0(@tiptap/core@3.13.0)(@tiptap/pm@3.13.0)
-      '@tiptap/pm': 3.13.0
-      autosize: 6.0.1
-      cherry-markdown: 0.8.26
-      core-js: 3.49.0
-      interactjs: 1.10.26
-      lodash-es: 4.17.21
-      path-browserify: 1.0.1
-      preact: 10.18.1
-      qx-util: 0.4.8
-      react-tabs: 6.0.2(react@18.3.1)
-      vite-plugin-libcss: 1.1.1(vite@4.5.0)
-    transitivePeerDependencies:
-      - '@tiptap/extension-text-style'
-      - react
-      - vite
-    dev: false
 
   /@ibiz-template/cli-core@0.3.30(@types/node@20.8.7)(postcss@8.4.31)(vue@3.3.8):
     resolution: {integrity: sha512-Tg5o8LObfyl3cgVPNNxMbLtSoY76cPWnPBaBkPVLCS03MTG1htlkBSlQWyqAVfV+JVyVMN/Xg/CWM70NQsCXxg==}

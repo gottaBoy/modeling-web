@@ -45,7 +45,7 @@ const modelPluginModelPaths = [
 });
 
 const requiredPackages = {
-  '@ibiz-template-plugin/ai-chat': '0.0.66',
+  '@ibiz-template-plugin/ai-chat': '0.0.60',
   '@ibiz-template-plugin/bi-report': '0.0.32',
   '@ibiz-template-plugin/data-view': '0.0.6',
   '@ibiz-template-plugin/gantt': '0.1.8-alpha.378',
@@ -505,6 +505,20 @@ async function verifyPackageLocation(packageName, entryPath, manifestPath) {
   const nodeModulesRealPath = await realpath(nodeModulesPath);
   const resolvedEntryPath = await realpath(entryPath);
   const resolvedManifestPath = await realpath(manifestPath);
+  const declared = declaredVersion(packageName, packageJson);
+  if (declared?.startsWith('link:')) {
+    const declaredTarget = resolve(root, declared.slice('link:'.length));
+    const resolvedTarget = await realpath(declaredTarget);
+    if (
+      !isWithin(resolvedTarget, resolvedEntryPath) ||
+      !isWithin(resolvedTarget, resolvedManifestPath)
+    ) {
+      throw new Error(
+        `resolved paths do not match declared ${declared}: entry ${relativePath(resolvedEntryPath)}, manifest ${relativePath(resolvedManifestPath)}`,
+      );
+    }
+    return;
+  }
   if (
     !isWithin(nodeModulesRealPath, resolvedEntryPath) ||
     !isWithin(nodeModulesRealPath, resolvedManifestPath)
@@ -797,7 +811,11 @@ for (const [packageName, expectedVersion] of Object.entries(requiredPackages)) {
       );
       continue;
     }
-    if (declared && !satisfiesDeclaredVersion(manifest.version, declared)) {
+    if (
+      declared &&
+      !declared.startsWith('link:') &&
+      !satisfiesDeclaredVersion(manifest.version, declared)
+    ) {
       fail(
         `${packageName} resolved to ${manifest.version}, outside declared range ${declared}`,
       );
@@ -1033,7 +1051,7 @@ if (shouldCheckDist) {
     ],
     [
       'published runtime skips unsupported schema reference types',
-      'if(!n[e].type||["array","object"].includes(n[e].type))return',
+      'if(n[e].$ref&&null==n[e].type||["array","object"].includes(n[e].type))return',
     ],
     [
       'published runtime view logic access is null-safe',

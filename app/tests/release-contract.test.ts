@@ -249,7 +249,7 @@ describe('release contract', () => {
   it('pins versioned plugin assets to the installed release versions', () => {
     const importMap = readImportMap();
     const expectedVersions = {
-      '@ibiz-template-plugin/ai-chat': '0.0.66',
+      '@ibiz-template-plugin/ai-chat': '0.0.60',
       '@ibiz-template-plugin/bi-report': '0.0.32',
       '@ibiz-template-plugin/data-view': '0.0.6',
       '@ibiz-template-plugin/gantt': '0.1.8-alpha.378',

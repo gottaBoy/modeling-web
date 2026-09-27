@@ -257,6 +257,9 @@ const sourceAliases =
 // https://vitejs.dev/config/
 export default defineConfig({
   base: './',
+  test: {
+    setupFiles: ['./tests/setup-node-runtime.ts'],
+  },
   cacheDir: isSourceDebug
     ? path.resolve(__dirname, 'node_modules/.vite-source')
     : path.resolve(__dirname, 'node_modules/.vite'),

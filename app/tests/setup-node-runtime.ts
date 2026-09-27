@@ -5,8 +5,14 @@
 // echarts in server mode and through a hand written node renderer, so there is
 // no window to find and none intended.
 //
-// Removing the property restores the signal those libraries were written
-// against. It is per test file, and tests that need a navigator stub their own.
-delete (globalThis as { navigator?: unknown }).navigator;
+// Node 21+ exposes navigator as a configurable accessor. `delete` alone can
+// leave the accessor visible, so replace it with an explicit undefined value.
+// Tests that need a navigator stub can redefine this property locally.
+Object.defineProperty(globalThis, 'navigator', {
+  configurable: true,
+  enumerable: false,
+  value: undefined,
+  writable: true,
+});
 
 export {};
