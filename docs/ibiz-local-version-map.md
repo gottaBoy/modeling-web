@@ -7,7 +7,7 @@
 | 项目 | 路径 | 分支 | 功能基线 Git revision |
 | --- | --- | --- | --- |
 | iBiz 源码仓库 | `ibiz-app-hub` | `master` | `456b8477f981a83ce8d01a368b669122966e567d` |
-| 建模应用 | `modelingweb` | `main` | `b6f944d57db707d478dab89692b61ff71fadc96b` |
+| 建模应用 | `modelingweb` | `main` | `b07f23fdf234e36329f8ad5133585938fbd479b8` |
 | PLM 前端 | `plm-web` | `main` | `cfedb58a4b77274fba8257b5ae5981f26a8c56e5` |
 | PLM 部署与服务 | `plm` | `mydev` | `55cd6f72c80b6d46794ba34451dbb8c4ca181145` |
 | PLM E2E | `plm-e2e` | `main` | `b64696aa56b07fd32d582fa7df150c35b0df7fee` |
@@ -57,11 +57,17 @@ PLM 本地 compose 使用 `plm/deploy/compose/docker-compose-plm-local.yml`，�
 
 `@ibiz/model-core` 和 `@ibiz/rt-model-api` 已完成本地源码链接；它们不再从 npm 安装运行时版本。第三方开源组件仍按 npm 依赖管理，不纳入本地 iBiz 基线。
 
+## PLM lockfile 审计
+
+`plm-web/package.json` 和 `plm-web/pnpm-lock.yaml` 的顶层 `@ibiz/rt-model-api` 均为 `link:../ibiz-app-hub/models/rt-model-api`，因此 PLM 运行时使用本地源码。lockfile 中另有 registry 版 `/@ibiz/rt-model-api@0.2.82`，该条目标记为 `dev: true`，依赖链为 `@ibiz-template/full-code-generator@0.0.10` -> `@ibizlab/cli@0.2.30` -> `@ibizlab/template@0.2.30` -> `@ibizlab/template-model@0.2.30` -> `@ibiz/rt-model-api@0.2.82`，属于代码生成工具链的传递开发依赖。
+
+不要从 `plm-web/pnpm-lock.yaml` 手工删除该 registry 条目，否则可能破坏 `pnpm install --frozen-lockfile` 或代码生成工具链。若未来需要完全消除它，应先升级或修复 `@ibizlab/template-model` 的上游依赖，并在隔离环境验证安装和生成流程。
+
 ## PLM 插件关系
 
 `plm-web/tools/plugin-recovery/runtime-plugins.txt` 记录当前模型直接引用的 66 个运行时插件，`plm-web/plugin-src/@scope/name/package.json` 是本地源码和权威版本，构建产物写回 `plm-web/public/plugins/@scope/name@version`。`pnpm plugins:check` 检查产物，`pnpm ibiz:versions:check` 检查源码、产物和版本目录的一致性。
 
-当前 66 个插件均已恢复到本地可编辑、可构建目录：`cron-editor` 保留原始源码，`person-select` 为拆分式源码，其余主要是 bundle 级可编辑源码；第三方编辑器和库资产继续使用 pinned 产物，不混入 iBiz 本地源码范围。
+当前 66 个插件均已恢复到本地可编辑、可构建目录：`cron-editor` 保留上游原始源码，`person-select` 加本批 8 个共 9 个为拆分式源码，其余 56 个为 bundle 级可编辑源码；第三方编辑器和库资产继续使用 pinned 产物，不混入 iBiz 本地源码范围。PLM 常规插件使用临时 staging 构建并在 HTTP 层校验本地文件哈希，`cron-editor` 仍使用专用构建路径。
 
 ## 校验、构建和测试
 
@@ -103,6 +109,7 @@ pnpm test:sweep
 - PLM 全量扫描：桌面端 `13 passed`，移动端 `12 skipped`，`0 failed`。
 - 建模部署 smoke 覆盖未登录入口、登录工作台、模块导航、项目向导和 Idea 创建刷新。
 - 报告目录：`/home/my/workspace/ainfra/aibiz/.artifacts/modelingweb/version-alignment-smoke-final/`。
+- PLM 插件批次报告：`/home/my/workspace/ainfra/aibiz/.artifacts/plm-plugin-regression/2026-09-27T11-32-03-665Z-1820132/plugin-regression.json`。
 
 ## 定位规则
 
