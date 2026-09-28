@@ -7,8 +7,8 @@
 | 项目 | 路径 | 分支 | 功能基线 Git revision |
 | --- | --- | --- | --- |
 | iBiz 源码仓库 | `ibiz-app-hub` | `master` | `456b8477f981a83ce8d01a368b669122966e567d` |
-| 建模应用 | `modelingweb` | `main` | `b07f23fdf234e36329f8ad5133585938fbd479b8` |
-| PLM 前端 | `plm-web` | `main` | `cfedb58a4b77274fba8257b5ae5981f26a8c56e5` |
+| 建模应用 | `modelingweb` | `main` | `14027e7c256a3d6c50ca2e9c2c26982340b3e792` |
+| PLM 前端 | `plm-web` | `main` | `5faf9d26923b19e10908f157553310e7171ca210` |
 | PLM 部署与服务 | `plm` | `mydev` | `55cd6f72c80b6d46794ba34451dbb8c4ca181145` |
 | PLM E2E | `plm-e2e` | `main` | `b64696aa56b07fd32d582fa7df150c35b0df7fee` |
 
@@ -20,7 +20,8 @@ Git revision 是定位构建输入的依据。当前 `ibiz-app-hub` 有未跟踪
 | --- | --- | --- |
 | 建模应用 `@ibiz-template/next` | `0.7.38-alpha.55` | 应用自身版本 |
 | PLM Web runner | `swr.ap-southeast-1.myhuaweicloud.com/find1024/ibiz-cloud-web-runner:9.0.7.41-alpha.55.plm.251228` | `sha256:fa8797829109130aeaded82f2eda5a4d511ddbc91fca97839cb0150ed4d1cf76` |
-| 建模 Web | 本地部署镜像 | `sha256:aaaa59bc47f296365e2bbc5f2ce15f6861a5d6204bb06989492558cd2b928282` |
+| 建模 Web 远程回滚 overlay | `swr.ap-southeast-1.myhuaweicloud.com/find1024/ibiz-cloud-web-runner:v9.0.7.40-alpha.19` | `sha256:aaaa59bc47f296365e2bbc5f2ce15f6861a5d6204bb06989492558cd2b928282`；`linux/amd64`；Compose 目标端口 `8080` |
+| 建模 Web 本地镜像（正式 Compose 默认） | `aibiz/modelingweb:local` | `sha256:7e9d79c5a0f34459bb134e34bb558d736fdc92526905584c04e7dc2aaa970712`；`linux/arm64`；容器端口 `8080`；UID `101` |
 | 建模 Service | 本地部署镜像 | `sha256:c8008ede053f78c48f3977745d3701f298672247e24058ba85abb9137e7bb318` |
 | PLM Service | 本地部署镜像 | `sha256:fc7c318c645b35ab150ab9dc7812aa1b9458261910a0b4e31d488fec2ff998c6` |
 
@@ -32,7 +33,21 @@ Git revision 是定位构建输入的依据。当前 `ibiz-app-hub` 有未跟踪
 | 建模应用 | `http://127.0.0.1:32003/modeldesign/` | `aibizhi` / `123456` |
 | 建模 Service | `http://127.0.0.1:32002` | 服务接口 |
 
-PLM 本地 compose 使用 `plm/deploy/compose/docker-compose-plm-local.yml`，将宿主机 `plm-web/dist` 以只读方式挂载到容器 `/dist`，因此 `/ibizplm-plmweb/` 和 `/doc/` 使用本地构建产物。全量 compose 的基础 Web runner 仍是上表外部镜像，代码通过本地 dist overlay 注入；如需完全可复现的 Docker 构建，需要继续将该 runner 基础镜像纳入本地构建链。
+PLM 本地 compose 使用 `plm/deploy/compose/docker-compose-plm-local.yml`，将宿主机
+`plm-web/dist` 以只读方式挂载到容器 `/dist`，因此 `/ibizplm-plmweb/` 和
+`/doc/` 使用本地构建产物。建模正式开发 Compose
+`docker-compose-dev.yml` 默认使用上表本地镜像并将本地 `modelingweb/app/dist`
+以只读方式覆盖到 `/dist`，端口统一为 `32003:8080`；可通过
+`MODELING_WEB_IMAGE` 显式替换镜像。`docker-compose-modeling-local.yml` 仅用于
+宿主机 dist 迭代，`docker-compose-modeling-remote.yml` 是显式远程回滚配置。
+
+## 核心模型阻断
+
+当前已完成的是本地静态 Web、插件 sidecar、Docker 构建和 Compose 接入；真实
+iBizModeling Central/ModelDesign 核心模型仍保持 fail-closed。核心审计结果为
+`originalSourceCandidates: 0`、`originalExtensionsVerified: 0`、
+`coreExactRequested: null`、`coreExactComplete: null`。在获得可验证的核心模型
+源码及扩展集合前，不得用 PLM 模型冒充，也不得把原生 ModelDesign 集成标记为完成。
 
 ## 本地 iBiz 包
 
@@ -56,6 +71,25 @@ PLM 本地 compose 使用 `plm/deploy/compose/docker-compose-plm-local.yml`，�
 | `@ibiz/rt-model-api` | `../../ibiz-app-hub/models/rt-model-api` | `0.2.82` |
 
 `@ibiz/model-core` 和 `@ibiz/rt-model-api` 已完成本地源码链接；它们不再从 npm 安装运行时版本。第三方开源组件仍按 npm 依赖管理，不纳入本地 iBiz 基线。
+
+## 非活动版本树与历史产物风险
+
+2026-09-27 复核确认，以下目录不是 `modelingweb/app` 的当前解析来源：
+
+| 目录 | 代表版本 | 状态 |
+| --- | --- | --- |
+| `modelingweb/packages` | `@ibiz/model-core@0.1.64`、`@ibiz-template/core@0.7.38-alpha.57` | 历史源码树 |
+| `modelingweb/packages-latest` | `@ibiz/model-core@0.1.89`、`@ibiz-template/core@0.7.41-alpha.119` | 候选源码树 |
+
+当前应用仍以 `app/package.json` 和 `app/pnpm-lock.yaml` 的 `link:../../ibiz-app-hub/...`
+为准，不得从上述目录补依赖或构建。
+
+PLM Web 另有 `public/plugins` 历史输出目录。复核时共发现 124 个 manifest，
+其中 66 个被 `plm-web/tools/plugin-recovery/runtime-plugins.txt` 引用，余下 58 个
+仅作为历史产物保留，不参与当前运行时。PLM 插件目录还发现
+`data-info-title/node_modules` 内嵌的 `@ibiz/model-core@0.1.89` 和
+`@ibiz/rt-model-api@0.2.72`；该目录可能影响插件独立构建，需单独清理或在版本检查器中阻断，
+但不改变当前应用的本地链接基线。
 
 ## PLM lockfile 审计
 

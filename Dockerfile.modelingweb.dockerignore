@@ -1,0 +1,8 @@
+**
+!Dockerfile.modelingweb
+!nginx-local.conf
+!start.sh
+!environment.config
+!app/
+!app/dist/
+!app/dist/**

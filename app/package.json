@@ -29,6 +29,7 @@
     "build:release": "pnpm verify:release && pnpm build && pnpm verify:dist",
     "verify:release": "node scripts/release-harness.mjs",
     "verify:dist": "node scripts/release-harness.mjs --dist",
+    "test:docker:web": "node tests/modeling-web-docker.harness.mjs",
     "smoke:deployment": "node scripts/deployment-smoke.mjs",
     "preview": "vite preview",
     "test": "vitest",

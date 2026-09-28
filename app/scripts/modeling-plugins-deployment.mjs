@@ -81,9 +81,36 @@ export async function checkConfiguration() {
   const sidecar = compose.services['modeling-plugins'];
   const modelingWeb = compose.services.modelingweb;
   assert.ok(sidecar, 'Missing sidecar service');
+  assert.equal(
+    modelingWeb.image,
+    '${MODELING_WEB_IMAGE:-aibiz/modelingweb:local}',
+  );
+  assert.doesNotMatch(modelingWeb.image, /ibiz-cloud-web-runner/);
+  assert.equal(modelingWeb.pull_policy, 'never');
+  assert.equal(
+    resolve(dirname(composePath), modelingWeb.build.context),
+    workspaceRoot + '/modelingweb',
+  );
+  assert.equal(modelingWeb.build.dockerfile, 'Dockerfile.modelingweb');
+  assert.deepEqual(modelingWeb.entrypoint, ['/start.sh']);
+  assert.deepEqual(modelingWeb.command, []);
+  assert.deepEqual(modelingWeb.tmpfs, [
+    '/dist:uid=101,gid=101,mode=0755',
+  ]);
+  assert.ok(modelingWeb.environment.includes('LOCAL_DIST_SOURCE=/opt/aibiz/local-dist'));
+  assert.ok(
+    modelingWeb.volumes.includes(
+      '../../../modelingweb/app/dist:/opt/aibiz/local-dist:ro',
+    ),
+  );
   assert.deepEqual(modelingWeb.depends_on['modeling-plugins'], {
     condition: 'service_healthy',
   });
+  assert.deepEqual(
+    modelingWeb.ports,
+    ['32003:8080'],
+    'Modeling Web Compose port must match nginx-local.conf',
+  );
   assert.deepEqual(sidecar.profiles, ['modeling']);
   assert.equal(resolve(dirname(composePath), sidecar.build.context), appRoot);
   assert.equal(sidecar.build.dockerfile, 'Dockerfile.modeling-plugins');
@@ -101,6 +128,34 @@ export async function checkConfiguration() {
   ]);
   assert.deepEqual(localCompose.services.modelingweb.volumes, [
     '../../../modelingweb/app/dist:/opt/aibiz/local-dist:ro',
+  ]);
+  assert.equal(
+    localCompose.services.modelingweb.image,
+    '${MODELING_WEB_IMAGE:-aibiz/modelingweb:local}',
+  );
+  assert.equal(
+    resolve(
+      dirname(localComposePath),
+      localCompose.services.modelingweb.build.context,
+    ),
+    workspaceRoot + '/modelingweb',
+  );
+  assert.equal(
+    localCompose.services.modelingweb.build.dockerfile,
+    'Dockerfile.modelingweb',
+  );
+  assert.equal(
+    localCompose.services.modelingweb.build.args.NGINX_IMAGE,
+    '${MODELING_WEB_NGINX_IMAGE:-nginxinc/nginx-unprivileged:alpine}',
+  );
+  assert.deepEqual(localCompose.services.modelingweb.entrypoint, ['/start.sh']);
+  assert.deepEqual(
+    localCompose.services.modelingweb.command,
+    [],
+    'Local image must not inherit the remote runner command',
+  );
+  assert.deepEqual(localCompose.services.modelingweb.tmpfs, [
+    '/dist:uid=101,gid=101,mode=0755',
   ]);
   assert.ok(compose.volumes.modeling_plugins_data);
   assert.equal(sidecar.read_only, true);
@@ -186,7 +241,7 @@ export async function checkConfiguration() {
   assert.ok(ignore.includes('dist-modeling-plugins/assets/*.map'));
   const startScript = await readFile(join(workspaceRoot, 'modelingweb/start.sh'), 'utf8');
   assert.match(startScript, /LOCAL_DIST_SOURCE/);
-  assert.match(startScript, /cp -a "\$LOCAL_DIST_SOURCE"\/\. \/dist\//);
+  assert.match(startScript, /cp -R "\$LOCAL_DIST_SOURCE"\/\. \/dist\//);
   return {
     services: ['modeling-plugins'],
     staticPath: '/modeling-plugins/',

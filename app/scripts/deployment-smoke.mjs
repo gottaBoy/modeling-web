@@ -156,34 +156,32 @@ function isProductCreateResponse(response) {
   );
 }
 
-function isKnownWorkspaceCounterFailure(item) {
-  const endpoint = '/work_items/count_my_todo';
+const WORKSPACE_COUNTER_ENDPOINT = '/work_items/count_my_todo';
+const REFRESH_TOKEN_ENDPOINT = '/uaa/refresh_token/';
 
-  if (
-    item.type === 'api-response' &&
-    item.status === 404 &&
-    item.method === 'POST' &&
-    item.url?.endsWith(endpoint)
-  ) {
-    return true;
-  }
-
+function isWorkspaceCounterResponse(item, status) {
   return (
-    item.type === 'console' &&
-    (item.url?.endsWith(endpoint) ||
-      item.recentRequests?.some(request => request.url?.endsWith(endpoint)))
+    item.type === 'api-response' &&
+    item.status === status &&
+    item.method === 'POST' &&
+    item.url?.endsWith(WORKSPACE_COUNTER_ENDPOINT)
   );
 }
 
-function isRecoveredWorkspaceCounterAuthentication(item, apiResponses) {
-  if (
-    item.type !== 'api-response' ||
-    item.status !== 401 ||
-    item.method !== 'POST' ||
-    !item.url?.endsWith('/work_items/count_my_todo')
-  ) {
-    return false;
-  }
+function isKnownWorkspaceCounterFailure(item) {
+  return isWorkspaceCounterResponse(item, 404);
+}
+
+function isRefreshTokenResponse(item) {
+  return (
+    item.status === 200 &&
+    item.method === 'GET' &&
+    item.url?.includes(REFRESH_TOKEN_ENDPOINT)
+  );
+}
+
+function hasRecoveredWorkspaceCounterAuthentication(item, apiResponses) {
+  if (!isWorkspaceCounterResponse(item, 401)) return false;
 
   const failedIndex = apiResponses.findIndex(
     response =>
@@ -193,14 +191,42 @@ function isRecoveredWorkspaceCounterAuthentication(item, apiResponses) {
   );
   if (failedIndex < 0) return false;
 
-  return apiResponses
-    .slice(failedIndex + 1)
-    .some(
-      response =>
-        response.status === 200 &&
-        response.method === item.method &&
-        response.url === item.url,
-    );
+  const refreshIndex = apiResponses.findIndex(
+    (response, index) =>
+      index > failedIndex && isRefreshTokenResponse(response),
+  );
+  if (refreshIndex < 0) return false;
+
+  return apiResponses.some(
+    (response, index) =>
+      index > refreshIndex &&
+      response.status === 200 &&
+      response.method === item.method &&
+      response.url === item.url,
+  );
+}
+
+function isRecoveredWorkspaceCounterAuthentication(item, apiResponses) {
+  if (hasRecoveredWorkspaceCounterAuthentication(item, apiResponses)) {
+    return true;
+  }
+
+  return (
+    item.type === 'console' &&
+    item.url?.endsWith(WORKSPACE_COUNTER_ENDPOINT) &&
+    /\b401\b/.test(item.message ?? '') &&
+    apiResponses.some(response =>
+      hasRecoveredWorkspaceCounterAuthentication(
+        {
+          type: 'api-response',
+          status: 401,
+          method: 'POST',
+          url: item.url,
+        },
+        apiResponses,
+      ),
+    )
+  );
 }
 
 function isExpectedAuthenticationResponse(item, authenticated) {
@@ -228,14 +254,25 @@ function isKnownNonBlockingEvent(item, apiResponses = []) {
   }
 
   if (item.type !== 'console') return false;
-  return [
-    '[EN_US]语言未支持',
-    '未支持的类型',
-    '值项异常',
-    '视图逻辑初始化参数',
-    '编辑区域高度 < 300px',
-    "Cannot read properties of null (reading 'getController')",
-  ].some(pattern => item.message?.includes(pattern));
+  return false;
+}
+
+function classifyRuntimeEvents(events, apiResponses) {
+  const knownNonBlocking = [];
+  const recovered = [];
+  const unexpected = [];
+
+  for (const item of events) {
+    if (isRecoveredWorkspaceCounterAuthentication(item, apiResponses)) {
+      recovered.push(item);
+    } else if (isKnownNonBlockingEvent(item, apiResponses)) {
+      knownNonBlocking.push(item);
+    } else {
+      unexpected.push(item);
+    }
+  }
+
+  return { knownNonBlocking, recovered, unexpected };
 }
 
 async function main() {
@@ -277,6 +314,23 @@ async function main() {
       pageUrl: page.url(),
       recentRequests: recentRequests.slice(-8),
     };
+  }
+
+  function updateEventSummary() {
+    const eventSummary = classifyRuntimeEvents(
+      report.unexpectedEvents,
+      report.apiResponses,
+    );
+    report.eventSummary = {
+      rawUnexpectedEvents: report.unexpectedEvents.length,
+      recoveredCount: eventSummary.recovered.length,
+      knownNonBlockingCount: eventSummary.knownNonBlocking.length,
+      unexpectedCount: eventSummary.unexpected.length,
+      recoveredEvents: eventSummary.recovered,
+      knownNonBlockingEvents: eventSummary.knownNonBlocking,
+      unexpectedEvents: eventSummary.unexpected,
+    };
+    return eventSummary;
   }
 
   page.on('response', response => {
@@ -439,21 +493,19 @@ async function main() {
         const beforeFailures = report.unexpectedEvents.length;
         await clickExact(page, moduleName);
         await page.waitForTimeout(5000);
-        let newFailures = report
-          .unexpectedEvents.slice(beforeFailures)
-          .filter(
-            item => !isKnownNonBlockingEvent(item, report.apiResponses),
-          );
+        let newFailures = classifyRuntimeEvents(
+          report.unexpectedEvents.slice(beforeFailures),
+          report.apiResponses,
+        ).unexpected;
         if (newFailures.length > 0) {
           // 首次访问一个模块时，后端可能仍在懒加载实体模型；刷新一次可区分竞态和真实接口错误。
           await page.reload({ waitUntil: 'domcontentloaded' });
           await waitForBodyText(page, moduleName, 60000);
           await page.waitForTimeout(3000);
-          newFailures = report
-            .unexpectedEvents.slice(beforeFailures)
-            .filter(
-              item => !isKnownNonBlockingEvent(item, report.apiResponses),
-            );
+          newFailures = classifyRuntimeEvents(
+            report.unexpectedEvents.slice(beforeFailures),
+            report.apiResponses,
+          ).unexpected;
         }
         assert(
           newFailures.length === 0,
@@ -636,15 +688,11 @@ async function main() {
       );
     });
 
+    const eventSummary = updateEventSummary();
     assert(
-      report.unexpectedEvents.filter(
-        item => !isKnownNonBlockingEvent(item, report.apiResponses),
-      )
-        .length === 0,
+      eventSummary.unexpected.length === 0,
       `发现未分类运行时异常: ${JSON.stringify(
-        report.unexpectedEvents.filter(
-          item => !isKnownNonBlockingEvent(item, report.apiResponses),
-        ),
+        eventSummary.unexpected,
         null,
         2,
       )}`,
@@ -656,6 +704,7 @@ async function main() {
     throw error;
   } finally {
     currentPhase = 'finalize';
+    updateEventSummary();
     await sourceDiagnostics?.close().catch(error => {
       report.sourceDiagnostics.closeError = error.message;
     });
@@ -677,7 +726,17 @@ async function main() {
   }
 }
 
-main().catch(error => {
-  console.error(`[deployment-smoke] FAIL: ${error.message}`);
-  process.exitCode = 1;
-});
+export {
+  WORKSPACE_COUNTER_ENDPOINT,
+  REFRESH_TOKEN_ENDPOINT,
+  classifyRuntimeEvents,
+  hasRecoveredWorkspaceCounterAuthentication,
+  isKnownNonBlockingEvent,
+};
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch(error => {
+    console.error(`[deployment-smoke] FAIL: ${error.message}`);
+    process.exitCode = 1;
+  });
+}
