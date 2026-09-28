@@ -20,28 +20,31 @@
 | 项目 | 当前提交 |
 | --- | --- |
 | `ibiz-app-hub` | `e3a0ec7f` |
-| `ibiz-service-hub` | `7357e82b` |
+| `ibiz-service-hub` | `010b6f6b` |
 | `modelingservice` | `bbcbfc9` |
-| `modelingweb` | `0a856a5a` |
+| `modelingweb` | `1c4b4c4d` |
 | `plm-e2e` | `ec416fb` |
 | `plm-web` | `7786d764` |
-| `plm` | `a3737c9f7` |
-| `scripts` | `89f4d4a4` |
+| `plm` | `88a104bb` |
+| `scripts` | `9d8f29c5` |
 | `task7` | `6873cda8` |
 | `ibizlab-runtime/ibzuaa` | `39f09e1a` |
 
-Git revision 是定位构建输入的依据。2026-09-28 最终回归前的工作树审计结果如下；本轮功能改动提交后，文档提交本身不改变运行时代码 revision：
+Git revision 是定位构建输入的依据。2026-09-28 最终回归后的工作树审计结果如下；文档提交本身不改变运行时代码 revision：
 
 | 仓库 | 未提交状态 |
 | --- | --- |
-| `ibiz-service-hub` | `scripts/build-local-images.sh`（本轮待提交） |
-| `modelingweb` | `app/scripts/deployment-smoke.mjs`（本轮待提交） |
+| `ibiz-service-hub` | clean |
+| `modelingweb` | clean |
 | `plm` | clean |
-| `scripts` | `package.json`、`harness-modeling-runtime.mjs`、相关契约测试（本轮待提交） |
+| `scripts` | clean |
 
 其余仓库在该次检查时无未提交改动。`ibiz-service-hub` 的
 `backend-local-build-clean-20260928.json` 已从 `7b073023` 的 clean tree
-生成；本轮脚本修复提交后会重新以 Git revision 定位代码，旧回执仍保持不可覆盖。
+生成，作为历史回执保留；当前构建输入 `010b6f6b` 的回执为
+`backend-local-build-final-20260928.json`，记录 `git_dirty: false`，
+使用独立文件名，避免覆盖历史证据。上表 clean 指运行时代码状态，
+本次版本文档和新回执在回归通过后独立提交。
 
 ## 应用和镜像
 
@@ -55,6 +58,15 @@ Git revision 是定位构建输入的依据。2026-09-28 最终回归前的工�
 | PLM Service | 本地部署镜像 | `sha256:fc7c318c645b35ab150ab9dc7812aa1b9458261910a0b4e31d488fec2ff998c6` |
 | allinone 本地 clean 镜像 | `aibiz/ibiz-ebsx-allinone-rt:8.1.0.584.1-local-clean-20260928` | `sha256:8d6ec725d83b030b534afaf087f08a6ad9fc23ffd374ba7a27c0cfc3bf0670da`；`linux/arm64`；artifact `db2f18e4e43f0489cc2c40b145b626a24d28076295278e193e86b22f96212aad` |
 | gateway 本地 clean 镜像 | `aibiz/ibiz-ebsx-gateway:8.1.0.584.1-local-clean-20260928` | `sha256:60187c28d0f800bed325344bb9e640a8f0fe6343f6023689b650af5032032a2a`；`linux/arm64`；artifact `a6aba9b82f8f6ae498d66e981b94852dffb77c9f478844771e8e16f76fe333de` |
+| allinone 本轮构建镜像 | `aibiz/ibiz-ebsx-allinone-rt:8.1.0.584.1-local-final-20260928` | `sha256:ad6dac86cbf303551b734616f034ba586c2dfd4b865e26d8c21f37eaf3ebda31`；`linux/arm64`；artifact `1202b01ba43ff983a9802c43945f683d99d1339bbf165c533464d9bd642fceed`；源码 `010b6f6b` |
+| gateway 本轮构建镜像 | `aibiz/ibiz-ebsx-gateway:8.1.0.584.1-local-final-20260928` | `sha256:b8c6faf2f7431851f741415036b4dd5ccc27fbc4497a52412da0c90476508b46`；`linux/arm64`；artifact `1e5e011048eb74f16cfc604480608794217ed4103a12f562150cd6fe1991e5d7`；源码 `010b6f6b` |
+
+本轮后端构建回执：
+`ibiz-service-hub/scripts/records/backend-local-build-final-20260928.json`。
+该回执记录完整源码 revision
+`010b6f6bfb601b1191a2defca4624ad2f66a6a97`、Maven/Java 基础镜像
+digest、`linux/arm64` 架构、产物 SHA256 和两个 Docker image ID。
+镜像是本地构建产物，尚无 registry repo digest，image ID 不等同于 repo digest。
 
 本地入口和测试账号：
 
@@ -169,13 +181,18 @@ pnpm test:sweep
 
 已验证结果：
 
-- 建模单测：`543 passed, 1 skipped`。
+- 建模单测：`547 passed, 1 skipped`。
 - PLM 已知问题回归：桌面端 `4 passed`，移动端 `3 skipped`。
 - PLM 全量扫描：桌面端 `13 passed`，移动端 `12 skipped`，`0 failed`。
-- 建模部署 smoke 覆盖未登录入口、登录工作台、模块导航、项目向导和 Idea 创建刷新；本轮报告为 `final-regression-20260928`，5 个阶段全部通过。
+- 建模部署 smoke 覆盖未登录入口、登录工作台、模块导航、项目向导和 Idea 创建刷新；本轮报告为 `/home/my/workspace/ainfra/aibiz/.artifacts/modelingweb/final-regression-20260928-rerun/report.json`，5 个阶段全部通过。
 - Modeling runtime required harness：容器、日志、32002/32003 HTTP 门禁全部通过；报告目录为 `/home/my/workspace/ainfra/aibiz/.artifacts/modeling-runtime/2026-09-28T05-50-47-862Z/`。
 - 本地 allinone/gateway target-port smoke：`30100/30186`，7/7 通过；报告目录为 `/home/my/workspace/ainfra/aibiz/.artifacts/source-platform-smoke/final-local-clean-20260928/`。
 - PLM 插件批次报告：`/home/my/workspace/ainfra/aibiz/.artifacts/plm-plugin-regression/2026-09-27T11-32-03-665Z-1820132/plugin-regression.json`。
+- 建模插件部署 smoke：46 个插件/语言场景全部通过，92 个 viewport 场景全部通过，清理 46 个文档；报告为 `/home/my/workspace/ainfra/aibiz/.artifacts/modeling-plugins/2026-09-28T06-18-47.737Z-a07bae60/report.json`。
+- 建模插件本地源验证：schemas、types、tests、client-build、server-build 全部通过；报告为 `/home/my/workspace/ainfra/aibiz/.artifacts/modeling-plugins-source/2026-09-28T06-18-47-557Z-f808c6c1/report.json`。
+- 当前运行时回归报告：`/home/my/workspace/ainfra/aibiz/.artifacts/modeling-runtime/2026-09-28T06-03-26-182Z/report.json`，建模服务、建模 Web 和插件 sidecar 均 healthy，32002/32003 门禁通过。
+- 外部 UI `http://127.0.0.1:19323/#?` 已接入 `scripts/external-ui-harness.mjs`、`npm run test:external-ui` 和 required 模式；本机本轮服务未启动，因此自动模式按设计记录 skip，报告为 `/home/my/workspace/ainfra/aibiz/.artifacts/external-ui/current-20260928/report.json`。
+- 项目级 harness：`npm run test:baseline` 通过，报告目录为 `/home/my/workspace/ainfra/aibiz/.artifacts/harness-baseline/20260928-142935/`；其中外部 UI 仍为 unavailable skip。
 
 ## 定位规则
 
@@ -188,3 +205,8 @@ pnpm test:sweep
 5. 对照对应仓库 commit，区分 iBiz 源码、建模应用、PLM 插件和部署 overlay 问题，不把第三方开源组件版本混入本地化基线。
 
 `modelingweb/packages`、`modelingweb/packages-latest` 是历史或源码候选目录，不作为当前运行时链接来源。
+其中 `modelingweb/packages/@ibiz-template/devtool/dist/index.min.css` 也属于历史产物；
+建模应用当前通过 `link:../../ibiz-app-hub/plugins/ibiz-template-devtools` 解析
+`@ibiz-template/devtool`，正式构建后的
+`app/dist/extras/js/@ibiz-template/devtool/index.min.css` 必须与该链接源码的
+`dist/index.min.css` 一致。不要用 `modelingweb/packages` 下的文件覆盖正式 dist。
