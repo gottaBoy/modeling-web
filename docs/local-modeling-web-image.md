@@ -56,16 +56,18 @@ requires these files in `app/dist`:
 `doc/README.md`, and `doc/script/docsify.js`.
 
 The image harness starts a uniquely named temporary container on a random
-loopback port, verifies UID 101 can write the Nginx temp/log directories, and
-checks HTTP 200 for `/modeldesign/`, `/modeldesign/doc/`, and
-`/modeldesign/doc/README.md` both with the packaged `app/dist` and with
-`LOCAL_DIST_SOURCE` enabled. It removes only those temporary containers.
+loopback port, waits for the Docker healthcheck, verifies UID 101 can write the
+Nginx temp/log directories, and checks HTTP 200 for `/modeldesign/`,
+`/modeldesign/doc/`, and `/modeldesign/doc/README.md` both with the packaged
+`app/dist` and with `LOCAL_DIST_SOURCE` enabled. It removes only those
+temporary containers.
 
-Verification snapshot for September 27, 2026:
+Verification snapshot for September 28, 2026:
 
 - `aibiz/modelingweb:local`
-- image ID `sha256:7e9d79c5a0f34459bb134e34bb558d736fdc92526905584c04e7dc2aaa970712`
+- image ID `sha256:c97051540e65c441f4a0084c920d83c5dd62dde0faaedc864b13bac229789549`
 - `linux/arm64`, UID `101`, container port `8080`
+- Docker healthcheck target `http://127.0.0.1:8080/modeldesign/`
 - base tag `nginxinc/nginx-unprivileged:alpine`
 
 The formal development Compose file

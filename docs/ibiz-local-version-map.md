@@ -22,15 +22,25 @@
 | `ibiz-app-hub` | `e3a0ec7f` |
 | `ibiz-service-hub` | `e08457c5` |
 | `modelingservice` | `bbcbfc9` |
-| `modelingweb` | `d3b686d6` |
+| `modelingweb` | `54d497cc` |
 | `plm-e2e` | `ec416fb` |
 | `plm-web` | `7786d764` |
 | `plm` | `a3737c9f7` |
-| `scripts` | `52d7dec` |
+| `scripts` | `a4fddf78` |
 | `task7` | `6873cda8` |
 | `ibizlab-runtime/ibzuaa` | `39f09e1a` |
 
-Git revision 是定位构建输入的依据。当前 `ibiz-app-hub` 有未跟踪的 `lerna-debug.log`，`plm-e2e` 有四个临时诊断脚本，均不属于基线提交；排查时不要把它们当作源码变更。
+Git revision 是定位构建输入的依据。2026-09-28 工作树审计结果如下：
+
+| 仓库 | 未提交状态 |
+| --- | --- |
+| `ibiz-service-hub` | `scripts/build-local-images.sh`、`scripts/tests/backend-local-build.test.mjs`，以及 `scripts/records/` 下三个未跟踪回执 |
+| `modelingweb` | `Dockerfile.modelingweb`、`app/tests/modeling-web-docker.harness.mjs` |
+| `plm` | `deploy/compose/docker-compose-dev.yml`；保留为现有工作树改动，未在本次文档审查中修改 |
+| `scripts` | `package.json`，以及未跟踪的 modeling-runtime harness 和测试 |
+
+其余仓库在该次检查时无未提交改动。上述状态必须与镜像回执中的
+`git_dirty` 一起解读，不能把工作树候选误当成干净发布输入。
 
 ## 应用和镜像
 
@@ -39,9 +49,11 @@ Git revision 是定位构建输入的依据。当前 `ibiz-app-hub` 有未跟踪
 | 建模应用 `@ibiz-template/next` | `0.7.38-alpha.55` | 应用自身版本 |
 | PLM Web runner | `swr.ap-southeast-1.myhuaweicloud.com/find1024/ibiz-cloud-web-runner:9.0.7.41-alpha.55.plm.251228` | `sha256:fa8797829109130aeaded82f2eda5a4d511ddbc91fca97839cb0150ed4d1cf76` |
 | 建模 Web 远程回滚 overlay | `swr.ap-southeast-1.myhuaweicloud.com/find1024/ibiz-cloud-web-runner:v9.0.7.40-alpha.19` | `sha256:aaaa59bc47f296365e2bbc5f2ce15f6861a5d6204bb06989492558cd2b928282`；`linux/amd64`；Compose 目标端口 `8080` |
-| 建模 Web 本地镜像（正式 Compose 默认） | `aibiz/modelingweb:local` | `sha256:7e9d79c5a0f34459bb134e34bb558d736fdc92526905584c04e7dc2aaa970712`；`linux/arm64`；容器端口 `8080`；UID `101` |
+| 建模 Web 本地镜像（正式 Compose 默认） | `aibiz/modelingweb:local` | `sha256:c97051540e65c441f4a0084c920d83c5dd62dde0faaedc864b13bac229789549`；`linux/arm64`；容器端口 `8080`；UID `101`；含 Docker healthcheck |
 | 建模 Service | 本地部署镜像 | `sha256:c8008ede053f78c48f3977745d3701f298672247e24058ba85abb9137e7bb318` |
 | PLM Service | 本地部署镜像 | `sha256:fc7c318c645b35ab150ab9dc7812aa1b9458261910a0b4e31d488fec2ff998c6` |
+| allinone 本地验证镜像 | `aibiz/ibiz-ebsx-allinone-rt:8.1.0.584.1-local-verify2-20260928` | `sha256:6ecdfa4ab495426946fb7d2d7e5b7ae00da68f99d975809b19ce3b181d28d054`；`linux/arm64`；artifact `1fda6284b49c690547a687fbc620010486f520a5751a21be8c153a23a8a9a07a` |
+| gateway 本地验证镜像 | `aibiz/ibiz-ebsx-gateway:8.1.0.584.1-local-verify2-20260928` | `sha256:8207849bc150f4b090b7f04c9d72bf8ce4417ce4ccc2d2460a76066d63dbfcb3`；`linux/arm64`；artifact `a1e60b43f5ec7fd3ae3705bc987576348ed5f1e91179cf93d5503e62a9b2076d` |
 
 本地入口和测试账号：
 

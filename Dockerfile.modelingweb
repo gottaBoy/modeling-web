@@ -36,5 +36,8 @@ RUN test -s /dist/index.html \
 
 EXPOSE 8080
 
+HEALTHCHECK --interval=10s --timeout=5s --start-period=15s --retries=6 \
+  CMD ["wget", "-q", "-O", "/dev/null", "--timeout=3", "http://127.0.0.1:8080/modeldesign/"]
+
 USER 101
 ENTRYPOINT ["/start.sh"]

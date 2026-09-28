@@ -124,6 +124,16 @@ async function verifyStaticContract() {
     'Dockerfile.modelingweb',
   );
   requireText(dockerfile, 'EXPOSE 8080', 'Dockerfile.modelingweb');
+  requireText(
+    dockerfile,
+    'HEALTHCHECK --interval=10s --timeout=5s --start-period=15s --retries=6',
+    'Dockerfile.modelingweb',
+  );
+  requireText(
+    dockerfile,
+    'http://127.0.0.1:8080/modeldesign/',
+    'Dockerfile.modelingweb',
+  );
   requireText(dockerfile, 'USER 101', 'Dockerfile.modelingweb');
   requireText(dockerfile, 'ENTRYPOINT ["/start.sh"]', 'Dockerfile.modelingweb');
   if (/\b(?:runner|modeling-plugins)\b/i.test(dockerfile)) {
@@ -370,6 +380,30 @@ async function waitForStatus(url, expectedStatus, timeoutMs = 30000) {
   return lastStatus;
 }
 
+async function waitForContainerHealth(containerName, timeoutMs = 90000) {
+  const deadline = Date.now() + timeoutMs;
+  let lastStatus = 'unknown';
+  while (Date.now() < deadline) {
+    const result = await run(
+      'docker',
+      [
+        'inspect',
+        '--format',
+        '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}',
+        containerName,
+      ],
+      { allowFailure: true },
+    );
+    lastStatus = result.stdout.trim() || 'unknown';
+    if (lastStatus === 'healthy') return true;
+    if (lastStatus === 'unhealthy' || lastStatus === 'none') return false;
+    await sleep(500);
+  }
+  throw new Error(
+    `container ${containerName} did not become healthy: ${lastStatus}`,
+  );
+}
+
 async function createLocalDistFixture() {
   const fixtureRoot = await mkdtemp(join(tmpdir(), 'aibiz-modelingweb-dist-'));
   await chmod(fixtureRoot, 0o755);
@@ -424,6 +458,21 @@ async function smokeContainer(image, { localDistSource = false } = {}) {
       image,
     );
     await run('docker', dockerRunArgs);
+    try {
+      if (await waitForContainerHealth(containerName)) {
+        pass(
+          `image${localDistSource ? ' with LOCAL_DIST_SOURCE' : ''} reports healthy`,
+        );
+      } else {
+        fail(
+          `image${localDistSource ? ' with LOCAL_DIST_SOURCE' : ''} has no usable healthcheck`,
+        );
+      }
+    } catch (error) {
+      fail(
+        `image${localDistSource ? ' with LOCAL_DIST_SOURCE' : ''} healthcheck failed: ${error.message}`,
+      );
+    }
     const portOutput = await run('docker', [
       'inspect',
       '--format',
