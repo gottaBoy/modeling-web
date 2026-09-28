@@ -592,20 +592,28 @@ async function main() {
       await productDialog
         .locator('input[placeholder="大写字母和数字，15个字符范围内"]')
         .fill(productIdentifier);
-      await page
-        .getByRole('button', { name: /下一步|Next/ })
-        .last()
-        .click();
+      const productWizard = await firstVisible(
+        page.locator('[role="dialog"]'),
+        30000,
+      );
+      const productNextButton = await firstVisible(
+        productWizard.getByRole('button', { name: /下一步|Next/ }),
+        30000,
+      );
+      await waitForEnabled(productNextButton, 30000);
+      await productNextButton.click();
       await waitForBodyText(page, '产品成员', 30000);
 
       const productResponsePromise = page.waitForResponse(
         isProductCreateResponse,
         { timeout: 60000 },
       );
-      await page
-        .getByRole('button', { name: /完成|Complete/ })
-        .last()
-        .click();
+      const completeButton = await firstVisible(
+        productWizard.getByRole('button', { name: /完成|Complete/ }),
+        30000,
+      );
+      await waitForEnabled(completeButton, 30000);
+      await completeButton.click();
       const productResponse = await productResponsePromise;
       assert(
         productResponse.status() < 400,
