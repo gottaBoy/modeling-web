@@ -1,6 +1,6 @@
 # 建模应用 iBiz 本地版本关系
 
-本记录是本地开发、Docker 构建和问题定位的版本基线。记录日期：2026-09-27。每次更新代码或镜像时同步追加 Git revision、镜像 ID 和验证报告路径。
+本记录是本地开发、Docker 构建和问题定位的版本基线。记录日期：2026-09-28。每次更新代码或镜像时同步追加 Git revision、镜像 ID 和验证报告路径。
 
 ## 跨仓库基线
 
@@ -11,6 +11,24 @@
 | PLM 前端 | `plm-web` | `main` | `5faf9d26923b19e10908f157553310e7171ca210` |
 | PLM 部署与服务 | `plm` | `mydev` | `55cd6f72c80b6d46794ba34451dbb8c4ca181145` |
 | PLM E2E | `plm-e2e` | `main` | `b64696aa56b07fd32d582fa7df150c35b0df7fee` |
+
+## 当前本地化提交
+
+下表是本轮提交后的可定位 revision。上表保留功能基线 revision，用于区分
+依赖输入和本轮本地化变更。
+
+| 项目 | 当前提交 |
+| --- | --- |
+| `ibiz-app-hub` | `e3a0ec7f` |
+| `ibiz-service-hub` | `e08457c5` |
+| `modelingservice` | `bbcbfc9` |
+| `modelingweb` | `d3b686d6` |
+| `plm-e2e` | `ec416fb` |
+| `plm-web` | `7786d764` |
+| `plm` | `a3737c9f7` |
+| `scripts` | `52d7dec` |
+| `task7` | `6873cda8` |
+| `ibizlab-runtime/ibzuaa` | `39f09e1a` |
 
 Git revision 是定位构建输入的依据。当前 `ibiz-app-hub` 有未跟踪的 `lerna-debug.log`，`plm-e2e` 有四个临时诊断脚本，均不属于基线提交；排查时不要把它们当作源码变更。
 
