@@ -1,4 +1,5 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createServer } from 'node:http';
 import { computed, createSSRApp } from 'vue';
 import type { Component } from 'vue';
 import { renderToString } from 'vue/server-renderer';
@@ -6,7 +7,7 @@ import { parse as parseSfc } from 'vue/compiler-sfc';
 import ts from 'typescript';
 import { createRequire } from 'node:module';
 import { readFileSync, readdirSync } from 'node:fs';
-import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -41,12 +42,13 @@ import {
 } from '../src/modeling-plugins/tools/definitions';
 import { ToolValidationError } from '../src/modeling-plugins/tools/safe';
 import { PluginStore, StoreError } from '../modeling-server/store';
+import { modelingPluginHandler } from '../modeling-server/http';
 import GraphEditor from '../src/modeling-plugins/graph/GraphEditor.vue';
 import LayoutEditor from '../src/modeling-plugins/layout/LayoutEditor.vue';
 import ToolsEditor from '../src/modeling-plugins/tools/ToolsEditor.vue';
 
-// LOCAL acceptance only: real translators, validators, Vue SSR, and file storage.
-// No browser/HTTP transport or original/upstream product integration is exercised.
+// LOCAL acceptance: real translators, validators, Vue SSR, file storage, and loopback HTTP.
+// Browser rendering and original/upstream product integration remain outside this suite.
 // X6 needs DOM globals even at import time; SSR must never construct its canvas.
 const graphConstructor = vi.hoisted(() => vi.fn(() => {
   throw new Error('A browser graph must not be constructed during in-process SSR');
@@ -441,7 +443,86 @@ describe.sequential('independent LOCAL bilingual dictionaries and source contrac
     }
   });
 
-  it.skip('original/upstream integration and browser/HTTP transport are NOT TESTED by this LOCAL suite', () => {});
+  it('local loopback HTTP serves the bilingual catalog, static entry and CRUD without masking upstream status', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'modeling-bilingual-http-'));
+    await mkdir(join(directory, 'assets'));
+    await writeFile(join(directory, 'modeling-plugins.html'), '<!doctype html><script src="./assets/app.js"></script>');
+    await writeFile(join(directory, 'assets/app.js'), 'export const ready = true;');
+    const store = new PluginStore(join(directory, 'data'));
+    const server = createServer(modelingPluginHandler(store, directory, async () => {}));
+    await new Promise<void>((resolveListen, rejectListen) => {
+      server.once('error', rejectListen);
+      server.listen(0, '127.0.0.1', resolveListen);
+    });
+    const address = server.address();
+    if (!address || typeof address === 'string') throw new Error('HTTP test server did not bind to a TCP port');
+    const base = `http://127.0.0.1:${address.port}`;
+    const request = async (path: string, init: RequestInit = {}) => {
+      const response = await fetch(new URL(path, base), {
+        ...init,
+        headers: { origin: base, ...(init.headers || {}) },
+      });
+      const text = await response.text();
+      const json = response.headers.get('content-type')?.includes('application/json')
+        ? JSON.parse(text) as any
+        : undefined;
+      return { status: response.status, text, json };
+    };
+    try {
+      setLocale('zh-CN');
+      const catalogZh = await request('/api/modeling-plugins/catalog');
+      expect(catalogZh.status).toBe(200);
+      expect(catalogZh.json).toHaveLength(23);
+      expect(catalogZh.json.every((entry: { upstreamIntegration: string }) =>
+        entry.upstreamIntegration === 'unverified')).toBe(true);
+      expect(catalogZh.json.some((entry: { title: string }) => han.test(entry.title))).toBe(true);
+
+      setLocale('en');
+      const catalogEn = await request('/api/modeling-plugins/catalog');
+      expect(catalogEn.status).toBe(200);
+      expect(catalogEn.json.every((entry: { title: string }) => !han.test(entry.title))).toBe(true);
+      expect(catalogEn.json.every((entry: { upstreamIntegration: string }) =>
+        entry.upstreamIntegration === 'unverified')).toBe(true);
+
+      const draft: PluginDocument = {
+        schemaVersion: 1, id: 'http-bilingual-A9', pluginId: 'ibizmodelingadvanced',
+        title: 'HTTP bilingual draft', revision: 0, updatedAt: '',
+        content: getPlugin('ibizmodelingadvanced').create(),
+      };
+      const saved = await request('/api/modeling-plugins/ibizmodelingadvanced/documents/http-bilingual-A9', {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(draft),
+      });
+      expect(saved.status).toBe(200);
+      expect(saved.json).toMatchObject({ id: draft.id, revision: 1, content: draft.content });
+
+      const reloaded = await request('/api/modeling-plugins/ibizmodelingadvanced/documents/http-bilingual-A9');
+      expect(reloaded.status).toBe(200);
+      expect(reloaded.json).toEqual(saved.json);
+
+      const health = await request('/healthz');
+      expect(health.status).toBe(200);
+      expect(health.json).toEqual({ status: 'ok' });
+      const entry = await request('/');
+      expect(entry.status).toBe(200);
+      expect(entry.text).toContain('./assets/app.js');
+      expect((await request('/assets/missing.js')).status).toBe(404);
+    } finally {
+      await new Promise<void>((resolveClose, rejectClose) => server.close(error => error ? rejectClose(error) : resolveClose()));
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('keeps HtmlView engine registration wired into the local app bootstrap', () => {
+    const main = readFileSync(resolve(dirname(sourceRoot), 'main.ts'), 'utf8');
+    const register = readFileSync(resolve(dirname(sourceRoot), 'user-register.ts'), 'utf8');
+    expect(main).toContain('UserRegister');
+    expect(main).toContain('runApp([VueTextFormat, gridLayout, UserRegister])');
+    expect(register).toContain("'VIEW_HtmlView'");
+    expect(register).toContain("'VIEW_DEHTMLVIEW'");
+    expect(register).toContain('new ViewEngineBase(c)');
+  });
 });
 
 interface LabelRef { path: string; read: () => string }

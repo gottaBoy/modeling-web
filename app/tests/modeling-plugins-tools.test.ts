@@ -322,6 +322,20 @@ describe('modelperspectivetool: structured import, search and reference diagnost
 });
 
 describe('ibizmodelingadvanced: settings whitelist, readonly and consistency checks', () => {
+  it('accepts legacy locale aliases and persists the canonical model value', () => {
+    const initial = createAdvanced();
+    for (const [input, expected] of [
+      ['zh', 'zh-CN'], ['ZH_cn', 'zh-CN'], ['en', 'en-US'], ['EN_US', 'en-US'],
+    ] as const) {
+      const updated = updateSettings(initial, { locale: input });
+      expect(object(updated.settings).locale).toBe(expected);
+      expect(definition('ibizmodelingadvanced').validate(updated)).toEqual([]);
+    }
+    for (const input of ['', 'fr-FR', 'en-GB', null, 42]) {
+      rejectedWithoutMutation(initial, () => updateSettings(initial, { locale: input }));
+    }
+  });
+
   it('enforces read-only structured import and explicit unsupported-setting removal', () => {
     const initial = createAdvanced();
     const value = importAdvancedModel(initial, { name: '模型', extension: storedLabels });

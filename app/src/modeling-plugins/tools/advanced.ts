@@ -13,6 +13,16 @@ export const settingDefinitions = [
   { key: 'readOnly', get label() { return toolsT('只读模型'); }, type: 'boolean' },
 ] as const;
 
+export type AdvancedModelLocale = 'zh-CN' | 'en-US';
+
+export function normalizeAdvancedLocale(value: unknown): AdvancedModelLocale | undefined {
+  if (typeof value !== 'string') return undefined;
+  const normalized = value.trim().replace(/_/g, '-').toLowerCase();
+  if (normalized === 'zh' || normalized === 'zh-cn') return 'zh-CN';
+  if (normalized === 'en' || normalized === 'en-us') return 'en-US';
+  return undefined;
+}
+
 export function validateAdvanced(content: PluginContent): ValidationIssue[] {
   return validateWith(content, (value, issues) => {
     recordAt(value.model, '/model');
@@ -23,7 +33,7 @@ export function validateAdvanced(content: PluginContent): ValidationIssue[] {
       }
     });
     if (!nonempty(settings.systemName)) issues.push({ path: '/settings/systemName', message: '系统名称不能为空' });
-    if (!['zh-CN', 'en-US'].includes(String(settings.locale))) issues.push({ path: '/settings/locale', message: '不支持的语言' });
+    if (!normalizeAdvancedLocale(settings.locale)) issues.push({ path: '/settings/locale', message: '不支持的语言' });
     if (!Number.isInteger(settings.pageSize) || Number(settings.pageSize) < 1 || Number(settings.pageSize) > 500) {
       issues.push({ path: '/settings/pageSize', message: '分页大小必须是 1 到 500 的整数' });
     }
@@ -45,6 +55,10 @@ export function updateSettings(content: PluginContent, patch: PluginContent): Pl
   const safePatch = cloneJson(patch);
   assertValid(Object.keys(safePatch).filter(key => !settingDefinitions.some(item => item.key === key))
     .map(key => ({ path: `/settings/${pointerKey(key)}`, message: '设置不在本地白名单中' })));
+  if (own(safePatch, 'locale')) {
+    const normalized = normalizeAdvancedLocale(safePatch.locale);
+    if (normalized) safePatch.locale = normalized;
+  }
   value.settings = { ...recordAt(value.settings, '/settings'), ...safePatch };
   return checked(value, validateAdvanced);
 }

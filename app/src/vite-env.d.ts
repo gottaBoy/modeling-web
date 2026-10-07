@@ -9,3 +9,9 @@ declare module '@ibiz-template/vue3-components' {
 declare module '@ibiz-template-plugin/gantt';
 
 declare module '@ibiz-template/devtool';
+
+interface Window {
+  Environment?: {
+    modelingWebUrl?: string;
+  };
+}

@@ -5,6 +5,7 @@ import type { PluginContent, PluginDocument } from './types';
 import { jsonSafetyProblem, MAX_DOCUMENT_BYTES } from './document-safety';
 import { locale, setLocale } from './i18n';
 import { errorKeys, errorText, messages, pluginTitle, t, WorkspaceError } from './messages';
+import { getModelingWebUrl } from './modeling-url';
 
 const editors = {
   graph: defineAsyncComponent(() => import('./graph/GraphEditor.vue')),
@@ -27,6 +28,7 @@ const error = shallowRef<unknown>();
 const view = ref<'editor' | 'model'>('editor');
 const validationVisible = ref(false);
 const importInput = ref<HTMLInputElement>();
+const modelingWebUrl = getModelingWebUrl();
 let navigationSequence = 0;
 
 const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
@@ -265,7 +267,7 @@ onBeforeUnmount(() => {
         <option value="zh-CN">简体中文</option>
         <option value="en">English</option>
       </select>
-      <a href="http://127.0.0.1:32003/modeldesign/" target="_blank" rel="noopener">{{ t('建模平台') }} <i class="fa fa-external-link" aria-hidden="true"></i></a>
+      <a :href="modelingWebUrl" target="_blank" rel="noopener">{{ t('建模平台') }} <i class="fa fa-external-link" aria-hidden="true"></i></a>
     </header>
     <aside class="mp-navigation" :aria-label="t('插件导航')">
       <label class="mp-search">
