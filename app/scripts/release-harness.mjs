@@ -900,10 +900,12 @@ if (!(await exists(nginxConfigPath))) {
   }
   if (
     !nginx.includes('set $modeling_upstream http://modelingservice:32002;') ||
+    !nginx.includes('map $request_uri $modeling_api_upstream {') ||
+    !nginx.includes('default http://modelingservice:32002;') ||
     !nginx.includes(
-      'rewrite ^/api/ibizmodeling__modeldesign/(.*)$ /ibizmodeling/serviceapi/$1 break;',
+      'rewrite ^/api/ibizmodeling__modeldesign/(?<modeling_api_path>.*)$ $modeling_api_service_prefix/$modeling_api_path break;',
     ) ||
-    !nginx.includes('proxy_pass $modeling_upstream;')
+    !nginx.includes('proxy_pass $modeling_api_upstream;')
   ) {
     fail('nginx-local.conf must route ModelDesign APIs to modelingservice');
   } else if (

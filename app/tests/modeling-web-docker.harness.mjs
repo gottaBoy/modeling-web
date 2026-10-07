@@ -176,6 +176,7 @@ async function verifyStaticContract() {
   requireText(nginx, 'location /modeldesign/ {', 'nginx-local.conf');
   requireText(nginx, 'alias  /dist/;', 'nginx-local.conf');
   requireText(nginx, 'index  index.html index.htm;', 'nginx-local.conf');
+  requireText(nginx, 'text/markdown md;', 'nginx-local.conf');
   requireText(
     dockerfile,
     'proxy_temp_path /tmp/nginx-proxy-temp 1 2;',
@@ -199,6 +200,7 @@ async function verifyStaticContract() {
 
   const start = await text(startPath, 'start.sh');
   requireText(start, 'LOCAL_DIST_SOURCE', 'start.sh');
+  requireText(start, '/opt/aibiz/nginx-local.conf', 'start.sh');
   requireText(start, '/dist/environments/environment.js', 'start.sh');
   requireText(start, 'nginx -g "daemon off;"', 'start.sh');
 
@@ -261,6 +263,12 @@ async function verifyStartupInjection() {
       env: { APPCODE: 'ibiz-modeling__01' },
       expectedNginx: 'location /ibiz-modeling__01/ { }\n',
     },
+    {
+      label: 'mounted local Nginx config overrides image config',
+      mountedNginx: 'location /appcode/doc/ { }\n',
+      env: { APPCODE: 'modeldesign' },
+      expectedNginx: 'location /modeldesign/doc/ { }\n',
+    },
     ...['&', '#', "'", '"', '\\', '\n', ';', '$', ' '].map(value => ({
       label: `reject unsafe APPCODE ${JSON.stringify(value)}`,
       env: { APPCODE: `unsafe${value}code` },
@@ -275,6 +283,7 @@ async function verifyStartupInjection() {
       const bin = join(fixture, 'bin');
       const environmentJs = join(dist, 'environments/environment.js');
       const nginxConfig = join(fixture, 'nginx.conf');
+      const mountedNginxConfig = join(fixture, 'mounted-nginx.conf');
       const environmentConfig = join(fixture, 'environment.config');
       const scriptPath = join(fixture, 'start.sh');
       const nginxCalled = join(fixture, 'nginx-called');
@@ -291,10 +300,14 @@ async function verifyStartupInjection() {
       const originalNginx = 'location /appcode/ { }\n';
       await writeFile(environmentJs, source);
       await writeFile(nginxConfig, originalNginx);
+      if (testCase.mountedNginx) {
+        await writeFile(mountedNginxConfig, testCase.mountedNginx);
+      }
       await writeFile(environmentConfig, environment);
       await writeFile(
         scriptPath,
         start
+          .replaceAll('/opt/aibiz/nginx-local.conf', mountedNginxConfig)
           .replaceAll('/etc/nginx/conf.d/nginx.conf', nginxConfig)
           .replaceAll('/environment.config', environmentConfig)
           .replaceAll('/dist', dist),
@@ -364,6 +377,19 @@ async function requestStatus(url) {
     return response.status;
   } catch {
     return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function requestContentType(url) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 2500);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    return response.headers.get('content-type') || '';
+  } catch {
+    return '';
   } finally {
     clearTimeout(timeout);
   }
@@ -529,6 +555,18 @@ async function smokeContainer(image, { localDistSource = false } = {}) {
         pass(
           `image${localDistSource ? ' with LOCAL_DIST_SOURCE' : ''} serves ${path} with HTTP 200`,
         );
+        if (path.endsWith('.md')) {
+          const contentType = await requestContentType(url);
+          if (/^text\/markdown(?:;|$)/i.test(contentType)) {
+            pass(
+              `image${localDistSource ? ' with LOCAL_DIST_SOURCE' : ''} serves ${path} as ${contentType}`,
+            );
+          } else {
+            fail(
+              `image${localDistSource ? ' with LOCAL_DIST_SOURCE' : ''} serves ${path} with invalid content-type ${contentType || 'none'}`,
+            );
+          }
+        }
       } else {
         fail(
           `image${localDistSource ? ' with LOCAL_DIST_SOURCE' : ''} serves ${path} with HTTP ${status ?? 'no response'}`,

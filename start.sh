@@ -9,6 +9,32 @@ case "${APPCODE:-}" in
     ;;
 esac
 
+if [ -n "${NATIVE_MODEL_APP:-}" ]; then
+  case "$NATIVE_MODEL_APP" in
+    Central|ModelDesign) ;;
+    *)
+      echo "Invalid NATIVE_MODEL_APP: expected Central or ModelDesign" >&2
+      exit 1
+      ;;
+  esac
+  case "${APICODE:-}" in
+    ""|*[!a-zA-Z0-9_]*)
+      echo "Invalid APICODE: expected letters, digits and underscores" >&2
+      exit 1
+      ;;
+  esac
+  if [ -z "${APPCODE:-}" ]; then
+    echo "APPCODE is required for a native modeling app" >&2
+    exit 1
+  fi
+  case "${NATIVE_PLATFORM_HOST:-ibiz-ebsx-allinone}" in
+    *[!a-zA-Z0-9_.-]*|-*|.*)
+      echo "Invalid NATIVE_PLATFORM_HOST: expected a service hostname" >&2
+      exit 1
+      ;;
+  esac
+fi
+
 if [ -n "${LOCAL_DIST_SOURCE:-}" ]; then
   if [ ! -d "$LOCAL_DIST_SOURCE" ]; then
     echo "LOCAL_DIST_SOURCE does not exist: $LOCAL_DIST_SOURCE" >&2
@@ -16,6 +42,18 @@ if [ -n "${LOCAL_DIST_SOURCE:-}" ]; then
   fi
   find /dist -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
   cp -R "$LOCAL_DIST_SOURCE"/. /dist/
+fi
+
+if [ -n "${NATIVE_MODEL_APP:-}" ]; then
+  cp /opt/aibiz/nginx-native.conf /etc/nginx/conf.d/nginx.conf
+  sed -i \
+    -e "s#nativeappcode#${APPCODE}#g" \
+    -e "s#nativeapicode#${APICODE}#g" \
+    -e "s#nativeappmodel#${NATIVE_MODEL_APP}#g" \
+    -e "s#http://ibiz-ebsx-allinone:30000#http://${NATIVE_PLATFORM_HOST:-ibiz-ebsx-allinone}:30000#g" \
+    /etc/nginx/conf.d/nginx.conf
+elif [ -f /opt/aibiz/nginx-local.conf ]; then
+  cp /opt/aibiz/nginx-local.conf /etc/nginx/conf.d/nginx.conf
 fi
 
 sed -i "s#appcode#${APPCODE:-}#g" /etc/nginx/conf.d/nginx.conf

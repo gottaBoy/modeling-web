@@ -4,6 +4,7 @@ window.Environment = {
   // 日志输出级别, 支持: TRACE,DEBUG,INFO,WARN,ERROR,SILENT
   logLevel: 'ERROR',
   BaseUrl: '/api',
+  modelingWebUrl: 'http://127.0.0.1:32003/modeldesign/',
   pluginBaseUrl: './plugins',
   hub: true,
   enableMqtt: true,
@@ -14,6 +15,8 @@ window.Environment = {
   // 应用市场地址
   marketAddress: '',
   environmentTag: 'development',
+  // Set by the native Central/ModelDesign candidate overlay only.
+  nativeModelApp: '',
   // central 系统
   // appId: 'centralstudio__centralstudio',
   // mockDcSystemId: 'demo-centralstudio',

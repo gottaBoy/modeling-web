@@ -99,6 +99,10 @@ export async function checkConfiguration() {
   ]);
   assert.ok(modelingWeb.environment.includes('LOCAL_DIST_SOURCE=/opt/aibiz/local-dist'));
   assert.ok(
+    modelingWeb.environment.includes('PLUGINBASEURL=./plugins'),
+    'Modeling Web must resolve runtime plugins from the local dist',
+  );
+  assert.ok(
     modelingWeb.volumes.includes(
       '../../../modelingweb/app/dist:/opt/aibiz/local-dist:ro',
     ),
