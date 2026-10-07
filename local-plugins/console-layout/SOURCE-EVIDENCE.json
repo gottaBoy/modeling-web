@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-10-06",
+  "exactOriginalSourcesRecovered": false,
+  "boundary": "Bounded acquisition observations, not proof of global source absence or original compatibility",
+  "originalPackages": [
+    {
+      "identity": "@ibiz-template-plugin/console-terminal@0.0.3-alpha.87",
+      "registryCommand": "curl --max-time 20 --silent --show-error --write-out '\\nHTTP %{http_code}\\n' https://registry.npmjs.org/@ibiz-template-plugin%2fconsole-terminal",
+      "httpStatus": 404,
+      "response": { "error": "Not found" }
+    },
+    {
+      "identity": "@ibiz-template-plugin/layout-design@0.0.3-alpha.90",
+      "registryCommand": "curl --max-time 20 --silent --show-error --write-out '\\nHTTP %{http_code}\\n' https://registry.npmjs.org/@ibiz-template-plugin%2flayout-design",
+      "httpStatus": 404,
+      "response": { "error": "Not found" }
+    }
+  ],
+  "previousBoundedSearches": {
+    "workspaceVendorAndPackageStores": "No exact package source/build found in prior workspace, vendor, cache and pnpm-store checks",
+    "githubDefaultBranchPathHistory": {
+      "repository": "iBizLab/plm-web",
+      "paths": [
+        "plugin-src/@ibiz-template-plugin/console-terminal",
+        "plugin-src/@ibiz-template-plugin/layout-design"
+      ],
+      "httpStatus": 200,
+      "response": [],
+      "limitation": "Only queried path history; not all private repositories, renamed paths or inaccessible refs"
+    }
+  },
+  "implementationEvidence": [
+    "ibiz-service-hub/libs/ibiz-cloud-log-core/src/main/java/net/ibizsys/central/cloud/log/core/addin/PSStudioConsoleSender.java",
+    "ibiz-app-hub/packages/runtime/src/service/mqtt/mqtt.service.ts",
+    "modelingweb/packages/@ibiz-template/runtime/out/service/mqtt/mqtt.service.js",
+    "ibiz-app-hub/packages/vue3-util/src/view/common/view.tsx",
+    "ibiz-app-hub/packages/vue3-util/src/control/panel/view-layout-panel/view-layout-panel.tsx",
+    "vendor-upstream/ibizmodeling-standard/modelapi-core/src/main/resources/model/net/ibizsys/modeling/PSSYSAPPS/ModelDesign/PSAPPDEVIEWS/PSSysDevBKTaskCustomView.json",
+    "vendor-upstream/ibizmodeling-standard/modelapi-core/src/main/resources/model/net/ibizsys/modeling/PSSYSAPPS/ModelDesign/PSAPPDEVIEWS/PSSysServiceAPISchemaPreviewView.json"
+  ],
+  "independentMappings": [
+    {
+      "from": "@ibiz-template-plugin/console-terminal@0.0.3-alpha.87",
+      "to": "@aibiz/console-terminal@0.1.0",
+      "pluginType": "VIEW_CUSTOM",
+      "pluginCode": "CONSOLE_VIEW"
+    },
+    {
+      "from": "@ibiz-template-plugin/layout-design@0.0.3-alpha.90",
+      "to": "@aibiz/swagger-preview@0.1.0",
+      "pluginType": "VIEW_CUSTOM",
+      "pluginCode": "SWAGGER_PREVIEW_VIEW"
+    }
+  ],
+  "sourceStatus": "independent-local-implementation",
+  "originalSourceRecovered": false,
+  "nativeCompatibilityVerified": false,
+  "acceptedForProduction": false
+}

@@ -1,0 +1,52 @@
+{
+  "name": "@ibiz-template-plugin/runtime-model",
+  "version": "0.2.2-local.2",
+  "private": true,
+  "description": "Editable runtime-model reconstruction with independently tested local defect fixes",
+  "license": "UNLICENSED",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.js",
+  "es2015": "dist/esm/index.js",
+  "types": "dist/types/index.d.ts",
+  "collection": "dist/collection/collection-manifest.json",
+  "files": ["dist", "loader", "src", "stencil.config.ts", "tsconfig.json"],
+  "scripts": {
+    "build": "stencil build --ci --max-workers=2",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test ../../../scripts/tests/runtime-model-next.test.mjs ../../../scripts/tests/runtime-model-next-quality.test.mjs",
+    "test:browser": "node --test ../../../scripts/tests/runtime-model-next.browser.mjs"
+  },
+  "dependencies": {
+    "@stencil/core": "2.17.0",
+    "@stencil/store": "2.0.16",
+    "@webcreate/infinite-ajax-scroll": "3.0.0",
+    "ramda": "0.29.1"
+  },
+  "devDependencies": {
+    "@types/ramda": "0.29.12",
+    "typescript": "4.7.4"
+  },
+  "aibiz": {
+    "sourceKind": "reconstructed-from-compiled-observation",
+    "baselineVersion": "0.2.2-local.1",
+    "intentionalDifferences": [
+      "response-shadows-cache-key",
+      "pagination-delete-count",
+      "unescaped-search-expression",
+      "empty-root-never-loaded",
+      "children-promise-does-not-wait",
+      "config-http-status-unchecked",
+      "selection-not-reactive"
+    ],
+    "upstreamReference": {
+      "name": "@ibiz-template-plugin/runtime-model",
+      "version": "0.2.2",
+      "observationPath": "plm-web/public/plugins/@ibiz-template-plugin/model-design@0.0.3-alpha.122/es/node_modules/.pnpm/@ibiz-template-plugin_runtime-model@0.2.2_@stencil_store@2.0.16/node_modules/@ibiz-template-plugin/runtime-model",
+      "observationFingerprint": "b8e6ea99941967181c723b693d56f64a00db3777ffd2b521fa1692a00973eae3"
+    },
+    "originalSourceRecovered": false,
+    "originalLicenseAuthenticated": false,
+    "nativeAccepted": false,
+    "acceptedForProduction": false
+  }
+}

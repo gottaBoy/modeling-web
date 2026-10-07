@@ -1,0 +1,13 @@
+{
+  "name": "@aibiz/console-layout-bundle",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "build": "node build.mjs" },
+  "peerDependencies": {
+    "@ibiz-template/runtime": "*",
+    "@ibiz-template/vue3-util": "*",
+    "vue": "^3.3.8"
+  },
+  "devDependencies": { "rollup": "4.9.3", "typescript": "5.3.3" }
+}

@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "package": {
+    "name": "@aibiz/studio-theme-bundle",
+    "version": "0.1.0"
+  },
+  "sourceStatus": "independent-local-implementation",
+  "originalSourceRecovered": false,
+  "nativeCompatibilityVerified": false,
+  "compilerChecks": "TypeScript strict isolated-plugin typecheck; no full application typecheck",
+  "toolchain": {
+    "typescript": {
+      "version": "5.3.3",
+      "sha256": "a465a98e2fcb650a7b0d7ec63f3e15bc0eeb7e447e043bfa72c4109015d5e7c5"
+    },
+    "rollup": {
+      "version": "4.9.3",
+      "sha256": "7d9f19ee185398ea82ca425d3b1b37b9e9b46b99b3cbaa295fe4cf7e8f560d62"
+    }
+  },
+  "inputs": [
+    {
+      "path": "build.mjs",
+      "sha256": "13b704f391da656de7a5b0c9b94725a2b3ebca4fc7ec9ca9edb33cbfdcd9d5d5"
+    },
+    {
+      "path": "package.json",
+      "sha256": "6fb884f83da18a709d3f74644850980a743fa92daba2dc8eafc4b98a2fa2a918"
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "5b99adc10078e545f85c7b1484cbe1a8f0674b8c830323a4b17c496a4224188e"
+    },
+    {
+      "path": "src/color.css",
+      "sha256": "fc40f877f83dc6721e3e1bdf84b770b2c73c7418a2a2b3286046f297abe2ee0d"
+    },
+    {
+      "path": "src/icon.css",
+      "sha256": "17e9fd336cf1eb1608ecdf31d01be8e95aaeb5f87888b98cbf8007c40ae772b3"
+    }
+  ],
+  "runtimeImports": [],
+  "outputs": [
+    {
+      "path": "color/index.mjs",
+      "sha256": "e964c6a9844cb784d6a8c984b5d0ffc2822cc326384b6f0e630b4c578aa8112b"
+    },
+    {
+      "path": "color/index.system.js",
+      "sha256": "a623e32b0a0c3ecd6b6a232ed2056b61577b47a9db550b7ab3e9c96f43808e84"
+    },
+    {
+      "path": "color/package.json",
+      "sha256": "08b0e182d5baa95ac03313169249a74a6708362498f526c74bdcf844d5a99c40"
+    },
+    {
+      "path": "color/style.css",
+      "sha256": "fc40f877f83dc6721e3e1bdf84b770b2c73c7418a2a2b3286046f297abe2ee0d"
+    },
+    {
+      "path": "icon/index.mjs",
+      "sha256": "e5c70afdbb4aae9cf2fbbdb155bb1078d52d2c202dac8b45301ac905bbbb11d8"
+    },
+    {
+      "path": "icon/index.system.js",
+      "sha256": "c659e776ee79768de3616abec546b635647f3ea8939122481396a13c998c8a1d"
+    },
+    {
+      "path": "icon/package.json",
+      "sha256": "5ab1d2db262f72928a7cb44b741ff5c1e5856107cd3a4eb8636e238a39f969a9"
+    },
+    {
+      "path": "icon/style.css",
+      "sha256": "17e9fd336cf1eb1608ecdf31d01be8e95aaeb5f87888b98cbf8007c40ae772b3"
+    }
+  ]
+}

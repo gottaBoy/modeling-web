@@ -1,0 +1,36 @@
+{
+  "name": "@aibiz/model-edit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "main": "dist/index.mjs",
+  "module": "dist/index.mjs",
+  "system": "dist/index.system.js",
+  "styles": ["dist/style.css"],
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test tests/local-model-edit.test.mjs",
+    "test:browser": "node --test tests/model-edit.browser.mjs"
+  },
+  "peerDependencies": {
+    "@ibiz-template/runtime": "0.7.41-alpha.86",
+    "@monaco-editor/loader": "1.7.0",
+    "vue": "3.3.8"
+  },
+  "devDependencies": {
+    "rollup": "4.9.3",
+    "typescript": "5.3.3"
+  },
+  "aibiz": {
+    "supportedPluginTypes": ["DEUIACTION"],
+    "supportedPluginCodes": ["MODEL_EDIT"],
+    "upstreamReference": {
+      "name": "@ibiz-template-plugin/model-design",
+      "version": "0.0.3-alpha.122",
+      "gitHead": "7780006275953e510a725c449f9638a6ed878b97",
+      "sourcePath": "vendor-upstream/gottaboy-plm-web/plugin-src/@ibiz-template-plugin/model-design@0.0.3-alpha.122",
+      "nativeRequestedVersion": "0.0.3-alpha.90"
+    }
+  }
+}

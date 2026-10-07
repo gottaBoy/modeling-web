@@ -1,0 +1,15 @@
+.aibiz-design-index {
+  min-width: 0;
+  min-height: 0;
+}
+
+.aibiz-design-index .ibiz-nav-pos-index,
+.aibiz-design-index .ibiz-nav-tabs,
+.aibiz-design-index .ibiz-view-layout-panel {
+  min-width: 0;
+  min-height: 0;
+}
+
+.aibiz-design-index .ibiz-common-extend-menu {
+  max-width: 100%;
+}

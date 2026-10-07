@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "package": {
+    "name": "@aibiz/model-edit",
+    "version": "0.1.0"
+  },
+  "sourceStatus": "independent-local-implementation",
+  "originalSourceRecovered": false,
+  "nativeCompatibilityVerified": false,
+  "acceptedForProduction": false,
+  "supportedPluginTypes": [
+    "DEUIACTION"
+  ],
+  "supportedPluginCodes": [
+    "MODEL_EDIT"
+  ],
+  "upstreamReference": {
+    "name": "@ibiz-template-plugin/model-design",
+    "version": "0.0.3-alpha.122",
+    "gitHead": "7780006275953e510a725c449f9638a6ed878b97",
+    "sourcePath": "vendor-upstream/gottaboy-plm-web/plugin-src/@ibiz-template-plugin/model-design@0.0.3-alpha.122",
+    "nativeRequestedVersion": "0.0.3-alpha.90"
+  },
+  "dependencyRebase": {
+    "referenceRuntime": "0.7.41-alpha.31",
+    "hostRuntime": "0.7.41-alpha.86",
+    "referenceVue": "^3.3.8",
+    "hostVue": "3.3.8",
+    "referenceLoader": "^1.4.0",
+    "hostLoader": "1.7.0",
+    "monacoAssets": "0.52.2",
+    "referenceTypeScript": "~5.2.2",
+    "buildTypeScript": "5.3.3",
+    "buildRollup": "4.9.3"
+  },
+  "compilerChecks": {
+    "strictSemanticFiles": [
+      "src/contracts.ts",
+      "src/session.ts",
+      "src/monaco.ts"
+    ],
+    "allTypeScriptSyntaxAndIsolatedTranspilation": true,
+    "fullHostApplicationTypecheck": false
+  },
+  "inputs": [
+    {
+      "path": "build.mjs",
+      "sha256": "d7ea2dc69c8345334af42c93441f908f54dea5696834cbd107364ceb5344e89f"
+    },
+    {
+      "path": "package.json",
+      "sha256": "c865b4e1d3c5a920112523b5655133b9de00c574933ac4b73cbe53764dea5e2b"
+    },
+    {
+      "path": "src/contracts.ts",
+      "sha256": "18cfe5249218f5add0ea8d82eb744ea3e5d9ddba5936fcfa6b2d47724c6e55e0"
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "e87e999d552782a69dce13ab0c193bdd56b615d6151bcdc9e819e0c59a4377b4"
+    },
+    {
+      "path": "src/monaco.ts",
+      "sha256": "f6fa9d64c060ea6ecc2b38df28139ba19762088d50f420a9ee20f5f7b6cbb9fc"
+    },
+    {
+      "path": "src/provider.ts",
+      "sha256": "b64eccc01af47e1758d2317aab2ce776751fea36668ad7520328616de7f4efcd"
+    },
+    {
+      "path": "src/session.ts",
+      "sha256": "ca2a85b6f339cd893642911a348bff699660be78b5be9fa2b93cc9a57cf5b692"
+    },
+    {
+      "path": "src/style.css",
+      "sha256": "db856f85ab89dea1d8f7a132a0e0b35ab9e8df171c0ac26032cd4b1cfd3579ec"
+    },
+    {
+      "path": "src/view.ts",
+      "sha256": "684f95ecb5caf899050907f30c18d71568a78ddc565ba462ca112f1fb1e698c1"
+    }
+  ],
+  "toolchain": {
+    "typescript": {
+      "version": "5.3.3",
+      "sha256": "a465a98e2fcb650a7b0d7ec63f3e15bc0eeb7e447e043bfa72c4109015d5e7c5"
+    },
+    "rollup": {
+      "version": "4.9.3",
+      "sha256": "7d9f19ee185398ea82ca425d3b1b37b9e9b46b99b3cbaa295fe4cf7e8f560d62"
+    }
+  },
+  "runtimeImports": [
+    "@ibiz-template/runtime",
+    "@monaco-editor/loader",
+    "vue"
+  ],
+  "outputs": [
+    {
+      "path": "index.mjs",
+      "sha256": "10284e1550c5213685d3cfcb413bb16d6ab1b28211f50a60e7bd5ec649c2d7fe"
+    },
+    {
+      "path": "index.system.js",
+      "sha256": "8bde8cc71a6158bc28161e91cb4b0ee679490a5214cf947d8844de707857d2f7"
+    },
+    {
+      "path": "style.css",
+      "sha256": "db856f85ab89dea1d8f7a132a0e0b35ab9e8df171c0ac26032cd4b1cfd3579ec"
+    }
+  ]
+}

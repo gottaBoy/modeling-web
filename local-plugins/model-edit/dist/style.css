@@ -1,0 +1,64 @@
+.aibiz-model-edit {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  overflow: hidden;
+  color: var(--ibiz-color-text-0, #20242a);
+  background: var(--ibiz-color-bg-1, #fff);
+  font: 14px/1.4 var(--ibiz-font-family, sans-serif);
+  letter-spacing: 0;
+}
+.aibiz-model-edit__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--ibiz-color-border, #d6dae0);
+}
+.aibiz-model-edit__header h2 {
+  flex: 1 1 120px;
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 16px;
+  font-weight: 600;
+}
+.aibiz-model-edit__status {
+  color: var(--ibiz-color-text-2, #515a65);
+  font-size: 12px;
+}
+.aibiz-model-edit__header nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.aibiz-model-edit button {
+  min-height: 30px;
+  padding: 4px 8px;
+  border: 1px solid var(--ibiz-color-border, #c5cbd3);
+  border-radius: 4px;
+  color: inherit;
+  background: var(--ibiz-color-bg-1, #fff);
+  font: inherit;
+  cursor: pointer;
+}
+.aibiz-model-edit button:disabled { opacity: .5; cursor: default; }
+.aibiz-model-edit button:focus-visible { outline: 2px solid #16776a; outline-offset: 2px; }
+.aibiz-model-edit__error {
+  padding: 8px 12px;
+  color: #a12e35;
+  background: #fff2f3;
+  overflow-wrap: anywhere;
+}
+.aibiz-model-edit__body { position: relative; flex: 1 1 0; min-height: 200px; }
+.aibiz-model-edit__editor { position: absolute; inset: 0; }
+.aibiz-model-edit__loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--ibiz-color-bg-1, #fff);
+}

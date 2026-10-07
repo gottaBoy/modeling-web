@@ -1,0 +1,215 @@
+.app-theme-bluedark:root {
+  --view-runtime-code-color: rgb(var(--view-runtime-code-color-rgb));
+  --view-runtime-code-color-rgb: 7, 150, 183;
+}
+.app-theme-dark:root {
+  --view-runtime-code-color: rgb(var(--view-runtime-code-color-rgb));
+  --view-runtime-code-color-rgb: 72, 166, 243;
+}
+.app-theme-light:root {
+  --view-runtime-code-color: rgb(var(--view-runtime-code-color-rgb));
+  --view-runtime-code-color-rgb: 147, 167, 132;
+}
+.dynamic-model-copy-float-text {
+  position: absolute;
+  color: var(--view-font-color);
+  opacity: 1;
+  transition: top 3s ease-out, opacity 3s ease-out;
+  z-index: 1000000000000;
+}
+.ibiz-model-runtime-list-container {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  padding: 2px 0px;
+  background: var(--view-background-color-tint);
+}
+.ibiz-model-runtime-list-container > .hidden-input {
+  position: absolute;
+  top: -9999px;
+}
+.ibiz-model-runtime-list-container > .ibiz-model-runtime-list-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 36px;
+  border-bottom: 1px solid var(--app-dividing-line-color-bright);
+}
+.ibiz-model-runtime-list-container
+  > .ibiz-model-runtime-list-header
+  > .ibiz-model-runtime-list-title {
+  flex-grow: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 5px;
+}
+.ibiz-model-runtime-list-container
+  > .ibiz-model-runtime-list-header
+  > .ibiz-model-runtime-list-search {
+  flex-shrink: 0;
+  width: 186px;
+}
+.ibiz-model-runtime-list-container
+  > .ibiz-model-runtime-list-header
+  > .ibiz-model-runtime-refresh {
+  cursor: pointer;
+  flex-shrink: 0;
+  width: 25px;
+  font-size: 15px;
+  text-align: center;
+}
+.ibiz-model-runtime-list-container > .ibiz-model-runtime-list-content {
+  width: 100%;
+  height: calc(100% - 37px);
+}
+.ibiz-model-runtime-list-container
+  > .ibiz-model-runtime-list-content
+  .model-runtime-list-item.api
+  .model-runtime-item-content-method {
+  color: #f9d7ac;
+}
+.ibiz-model-runtime-list-container
+  > .ibiz-model-runtime-list-content
+  .model-runtime-list-item {
+  display: flex;
+  padding: 3px 0;
+}
+.ibiz-model-runtime-list-container
+  > .ibiz-model-runtime-list-content
+  .model-runtime-list-item.active {
+  background: var(--view-background-color-active);
+}
+.ibiz-model-runtime-list-container
+  > .ibiz-model-runtime-list-content
+  .model-runtime-list-item:hover {
+  background: var(--view-background-color-active);
+}
+.ibiz-model-runtime-list-container
+  > .ibiz-model-runtime-list-content
+  .model-runtime-item {
+  flex-grow: 1;
+  width: calc(100% - 27px);
+  cursor: pointer;
+  padding: 3px 0px 3px 6px;
+  color: var(--view-font-color-tint);
+}
+.ibiz-model-runtime-list-container
+  > .ibiz-model-runtime-list-content
+  .model-runtime-item
+  .model-runtime-item-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding-bottom: 3px;
+}
+.ibiz-model-runtime-list-container
+  > .ibiz-model-runtime-list-content
+  .model-runtime-item
+  .model-runtime-item-container
+  .model-runtime-item-content-method {
+  color: var(--view-runtime-code-color);
+  font-family: Consolas, "Courier New", monospace;
+  font-weight: bold;
+  font-size: 14px;
+  letter-spacing: 0px;
+  flex-grow: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ibiz-model-runtime-list-container
+  > .ibiz-model-runtime-list-content
+  .model-runtime-item
+  .model-runtime-item-container
+  .model-runtime-item-content-value {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  font-style: italic;
+  color: var(--view-font-color-bright);
+  font-family: Consolas, "Courier New", monospace;
+  font-weight: normal;
+  font-size: 12px;
+  letter-spacing: 0px;
+}
+.ibiz-model-runtime-list-container
+  > .ibiz-model-runtime-list-content
+  .model-runtime-item
+  .model-runtime-item-container
+  .model-runtime-item-content-value
+  > .ivu-tooltip {
+  width: 100%;
+  padding-left: 6px;
+}
+.ibiz-model-runtime-list-container
+  > .ibiz-model-runtime-list-content
+  .model-runtime-item
+  .model-runtime-item-container
+  .model-runtime-item-content-value
+  > .ivu-tooltip
+  > .ivu-tooltip-rel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: -6px;
+}
+.ibiz-model-runtime-list-container
+  > .ibiz-model-runtime-list-content
+  .model-runtime-item
+  .model-runtime-item-content {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  font-style: italic;
+  font-family: Consolas, "Courier New", monospace;
+  font-weight: normal;
+  font-size: 14px;
+  letter-spacing: 0px;
+}
+.ibiz-model-runtime-list-container .model-runtime-item-arrow {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: var(--view-font-color-tint);
+}
+.ibiz-model-runtime-list-search-input {
+  display: inline-block;
+  line-height: 1.5;
+  font-size: 14px;
+  color: var(--form-editor-font-color);
+  background-image: none;
+  position: relative;
+  cursor: text;
+  transition: border 0.2s ease-in-out, background 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  padding: 1px 7px;
+  height: 24px;
+  border: 1px solid var(--form-editor-border-color);
+  border-radius: 3px;
+  background-color: var(--form-editor-background-color);
+}
+.ibiz-model-runtime-list-search-input:hover {
+  border-color: var(--form-editor-active-color);
+}
+.ibiz-model-runtime-list-search-input:focus-visible {
+  outline: 0;
+}
+.ibiz-model-runtime-list {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.model-runtime-list-item {
+  border-bottom: 1px solid var(--view-font-color-tint);
+}
+.model-runtime-item-arrow {
+  cursor: pointer;
+}
+.loader {
+  height: 40px;
+  margin-top: 0;
+  text-align: center;
+  background: transparent url(assets/svg/loader.svg) no-repeat center center;
+  background-size: 40px 19px;
+  opacity: 0;
+  animation: flipAnimation 1s infinite;
+  transition: opacity 300ms;
+}

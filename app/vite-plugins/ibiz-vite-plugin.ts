@@ -5,14 +5,37 @@ import {
   readFileSync,
   writeFileSync,
   existsSync,
+  statSync,
+  realpathSync,
+  lstatSync,
+  readdirSync,
 } from 'node:fs';
-import { copyFile, cp, readdir, readFile, writeFile } from 'node:fs/promises';
-import { resolve, join } from 'node:path';
+import {
+  copyFile,
+  cp,
+  mkdtemp,
+  readdir,
+  readFile,
+  rename,
+  rm,
+  writeFile,
+} from 'node:fs/promises';
+import {
+  resolve,
+  join,
+  dirname,
+  basename,
+  relative,
+  isAbsolute,
+  sep,
+} from 'node:path';
+import type { IncomingMessage, ServerResponse } from 'node:http';
 import { HtmlTagDescriptor, Plugin } from 'vite';
 import cpy from 'cpy';
 import { localDocumentationPlugin } from './local-documentation';
 
 type PluginManifest = {
+  name?: string;
   version?: string;
   system?: string;
   styles?: string | string[];
@@ -43,6 +66,7 @@ function pluginPathParts(pluginRef: string): string[] {
   if (
     !pluginRef ||
     pluginRef.startsWith('/') ||
+    /[\\%?#:\x00-\x20\x7f]/.test(pluginRef) ||
     parts.some(part => !part || part === '.' || part === '..')
   ) {
     throw new Error(`Invalid runtime plugin repository: ${pluginRef}`);
@@ -50,9 +74,17 @@ function pluginPathParts(pluginRef: string): string[] {
   return parts;
 }
 
-function findPluginSource(cwd: string): string | undefined {
+export function findPluginSource(cwd: string): string | undefined {
+  if (process.env.IBIZ_PLUGIN_SOURCE) {
+    const source = resolve(cwd, process.env.IBIZ_PLUGIN_SOURCE);
+    if (!existsSync(source) || !statSync(source).isDirectory()) {
+      throw new Error(
+        `[iBizVitePlugin] explicit runtime plugin source is unavailable: ${source}`,
+      );
+    }
+    return source;
+  }
   const candidates = [
-    process.env.IBIZ_PLUGIN_SOURCE,
     join(cwd, 'public/plugins'),
     join(cwd, '../../plm-web/public/plugins'),
   ].filter((candidate): candidate is string => Boolean(candidate));
@@ -60,13 +92,18 @@ function findPluginSource(cwd: string): string | undefined {
   return candidates.find(candidate => existsSync(candidate));
 }
 
-function findPluginModelFiles(cwd: string): string[] {
+export function findPluginModelFiles(cwd: string): string[] {
+  if (process.env.IBIZ_PLUGIN_MODEL_FILE) {
+    const model = resolve(cwd, process.env.IBIZ_PLUGIN_MODEL_FILE);
+    if (!existsSync(model) || !statSync(model).isFile()) {
+      throw new Error(
+        `[iBizVitePlugin] explicit runtime plugin model is unavailable: ${model}`,
+      );
+    }
+    return [model];
+  }
   return [
-    process.env.IBIZ_PLUGIN_MODEL_FILE,
-    join(
-      cwd,
-      '../../plm/model/PSSYSAPPS/plmweb/PSSYSAPP.simple.json',
-    ),
+    join(cwd, '../../plm/model/PSSYSAPPS/plmweb/PSSYSAPP.simple.json'),
     join(cwd, '../../plm/model/PSSYSAPPS/plmweb/PSSYSAPP.json'),
     join(cwd, '../../plm/model/PSSYSAPPS/plmweb/PSSYSAPP.hubsubapp.json'),
     join(cwd, '../../plm-web/public/static/app/sub-app.json'),
@@ -78,8 +115,87 @@ function findPluginModelFiles(cwd: string): string[] {
   );
 }
 
-async function copyModelPlugins(cwd: string): Promise<void> {
-  const pluginSource = findPluginSource(cwd);
+function within(root: string, target: string): boolean {
+  const child = relative(root, target);
+  return child !== '..' && !child.startsWith(`..${sep}`) && !isAbsolute(child);
+}
+
+function canonicalOutput(path: string): string {
+  if (
+    lstatSync(path, { throwIfNoEntry: false })?.isSymbolicLink() &&
+    !existsSync(path)
+  ) {
+    throw new Error(`[iBizVitePlugin] dangling output symlink: ${path}`);
+  }
+  return existsSync(path)
+    ? realpathSync(path)
+    : join(canonicalOutput(dirname(path)), basename(path));
+}
+
+function runtimeAssetParts(file: string): string[] {
+  const normalized = file.startsWith('./') ? file.slice(2) : file;
+  const parts = pluginPathParts(normalized);
+  if (
+    parts.some(part => part.startsWith('.')) ||
+    ['src', 'node_modules'].includes(parts[0])
+  ) {
+    throw new Error(`Invalid runtime plugin asset: ${file}`);
+  }
+  return parts;
+}
+
+function inspectRuntimeResource(path: string): void {
+  const info = lstatSync(path);
+  if (info.isSymbolicLink()) {
+    throw new Error(
+      `[iBizVitePlugin] symlink runtime plugin resource: ${path}`,
+    );
+  }
+  if (info.isDirectory()) {
+    for (const name of readdirSync(path)) {
+      if (
+        name === 'node_modules' ||
+        name === 'src' ||
+        name === '.dependencies'
+      ) {
+        throw new Error(
+          `[iBizVitePlugin] non-runtime plugin resource: ${path}/${name}`,
+        );
+      }
+      inspectRuntimeResource(join(path, name));
+    }
+  } else if (!info.isFile()) {
+    throw new Error(
+      `[iBizVitePlugin] non-regular runtime plugin resource: ${path}`,
+    );
+  }
+}
+
+function inspectPluginOutput(root: string, target: string): void {
+  if (!within(root, canonicalOutput(target))) {
+    throw new Error(`[iBizVitePlugin] runtime plugin escaped output: ${target}`);
+  }
+  let path = root;
+  for (const part of relative(root, target).split(sep)) {
+    path = join(path, part);
+    const info = lstatSync(path, { throwIfNoEntry: false });
+    if (info?.isSymbolicLink() || (info && !info.isDirectory())) {
+      throw new Error(`[iBizVitePlugin] invalid runtime plugin output: ${path}`);
+    }
+  }
+}
+
+export async function copyModelPlugins(
+  cwd: string,
+  options: {
+    pluginSource?: string;
+    modelFiles?: string[];
+    targetRoot?: string;
+  } = {},
+): Promise<void> {
+  const pluginSource = options.pluginSource
+    ? resolve(cwd, options.pluginSource)
+    : findPluginSource(cwd);
   if (!pluginSource) {
     console.warn(
       '[iBizVitePlugin] runtime plugin source is unavailable; skipping dist/plugins copy',
@@ -88,7 +204,7 @@ async function copyModelPlugins(cwd: string): Promise<void> {
   }
 
   const pluginRefs = new Set<string>();
-  const modelFiles = findPluginModelFiles(cwd);
+  const modelFiles = options.modelFiles ?? findPluginModelFiles(cwd);
   modelFiles.forEach(modelFile => {
     const model = JSON.parse(readFileSync(modelFile, 'utf-8')) as unknown;
     collectRuntimePluginRefs(model, pluginRefs);
@@ -101,19 +217,25 @@ async function copyModelPlugins(cwd: string): Promise<void> {
     return;
   }
 
-  const targetRoot = join(cwd, 'dist/plugins');
+  const sourceRoot = realpathSync(pluginSource);
+  const targetRoot = canonicalOutput(
+    resolve(cwd, options.targetRoot ?? 'dist/plugins'),
+  );
+  if (within(sourceRoot, targetRoot) || within(targetRoot, sourceRoot)) {
+    throw new Error(
+      '[iBizVitePlugin] runtime plugin source and output must not overlap',
+    );
+  }
   const pluginEntries = [...pluginRefs].sort().map(pluginRef => {
     const parts = pluginPathParts(pluginRef);
     return {
       pluginRef,
-      source: join(pluginSource, ...parts),
+      source: join(sourceRoot, ...parts),
       target: join(targetRoot, ...parts),
     };
   });
   const missing = pluginEntries.filter(
-    ({ source }) =>
-      !existsSync(join(source, 'package.json')) ||
-      !existsSync(join(source, 'dist')),
+    ({ source }) => !existsSync(join(source, 'package.json')),
   );
   if (missing.length) {
     throw new Error(
@@ -123,55 +245,216 @@ async function copyModelPlugins(cwd: string): Promise<void> {
     );
   }
 
-  await Promise.all(
-    pluginEntries.map(async ({ source, target }) => {
-      const manifestPath = join(source, 'package.json');
-      const manifest = JSON.parse(
-        readFileSync(manifestPath, 'utf-8'),
-      ) as PluginManifest;
-      if (!manifest.version) {
-        throw new Error(
-          `[iBizVitePlugin] runtime plugin manifest has no version: ${manifestPath}`,
-        );
-      }
-      const runtimeFiles = [
-        manifest.system,
-        ...(Array.isArray(manifest.styles)
-          ? manifest.styles
-          : manifest.styles
-            ? [manifest.styles]
-            : []),
-      ].filter((file): file is string => Boolean(file));
-      const missingRuntimeFiles = runtimeFiles.filter(
-        file => !existsSync(join(source, file)),
+  // Validate the whole manifest set before publishing any package.
+  const plans = pluginEntries.map(({ pluginRef, source, target }) => {
+    if (!within(sourceRoot, realpathSync(source))) {
+      throw new Error(
+        `[iBizVitePlugin] runtime plugin escaped source: ${pluginRef}`,
       );
-      if (missingRuntimeFiles.length) {
+    }
+    inspectPluginOutput(targetRoot, target);
+    const manifestPath = join(source, 'package.json');
+    if (!within(source, realpathSync(manifestPath))) {
+      throw new Error(
+        `[iBizVitePlugin] runtime plugin manifest escaped package: ${pluginRef}`,
+      );
+    }
+    const manifest = JSON.parse(
+      readFileSync(manifestPath, 'utf-8'),
+    ) as PluginManifest;
+    if (
+      !manifest ||
+      typeof manifest.version !== 'string' ||
+      !manifest.version.trim()
+    ) {
+      throw new Error(
+        `[iBizVitePlugin] runtime plugin manifest has no version: ${manifestPath}`,
+      );
+    }
+    if (
+      typeof manifest.name !== 'string' ||
+      `${manifest.name}@${manifest.version}` !== pluginRef
+    ) {
+      throw new Error(
+        `[iBizVitePlugin] runtime plugin manifest identity differs: ${pluginRef}`,
+      );
+    }
+    if (
+      typeof manifest.system !== 'string' ||
+      !manifest.system ||
+      (manifest.styles !== undefined &&
+        typeof manifest.styles !== 'string' &&
+        (!Array.isArray(manifest.styles) ||
+          manifest.styles.some(file => typeof file !== 'string')))
+    ) {
+      throw new Error(
+        `[iBizVitePlugin] invalid runtime plugin manifest assets: ${manifestPath}`,
+      );
+    }
+    const runtimeFiles = [
+      manifest.system,
+      ...(Array.isArray(manifest.styles)
+        ? manifest.styles
+        : manifest.styles !== undefined
+          ? [manifest.styles]
+          : []),
+    ] as string[];
+    runtimeFiles.forEach(runtimeAssetParts);
+    const missingRuntimeFiles = runtimeFiles.filter(
+      file =>
+        !existsSync(join(source, file)) ||
+        !statSync(join(source, file)).isFile(),
+    );
+    if (missingRuntimeFiles.length) {
+      throw new Error(
+        `[iBizVitePlugin] runtime plugin ${manifest.version} is missing declared file(s): ${missingRuntimeFiles.join(', ')}`,
+      );
+    }
+    const resources = new Set([
+      'package.json',
+      ...runtimeFiles.map(file => runtimeAssetParts(file)[0]),
+    ]);
+    // Stencil's public loader reexports dist/esm and loads relative lazy chunks.
+    for (const directory of ['dist', 'loader']) {
+      if (existsSync(join(source, directory))) resources.add(directory);
+    }
+    for (const resource of resources) {
+      if (!within(source, realpathSync(join(source, resource)))) {
         throw new Error(
-          `[iBizVitePlugin] runtime plugin ${manifest.version} is missing declared file(s): ${missingRuntimeFiles.join(', ')}`,
+          `[iBizVitePlugin] runtime plugin asset escaped package: ${resource}`,
         );
       }
-
-      mkdirSync(target, { recursive: true });
-      await Promise.all([
-        cp(manifestPath, join(target, 'package.json'), {
-          force: true,
-        }),
-        cp(join(source, 'dist'), join(target, 'dist'), {
+      inspectRuntimeResource(join(source, resource));
+    }
+    return { pluginRef, source, target, resources };
+  });
+  mkdirSync(targetRoot, { recursive: true });
+  const staging = await mkdtemp(join(targetRoot, '.ibiz-plugins-'));
+  try {
+    // Finish every copy before replacing a package, so old chunks cannot survive.
+    for (const { pluginRef, source, resources } of plans) {
+      const staged = join(staging, 'next', pluginRef);
+      mkdirSync(staged, { recursive: true });
+      for (const resource of resources) {
+        await cp(join(source, resource), join(staged, resource), {
           recursive: true,
           force: true,
-        }),
-      ]);
-    }),
-  );
+        });
+      }
+    }
+    plans.forEach(({ target }) => inspectPluginOutput(targetRoot, target));
+    for (const { pluginRef, target } of plans) {
+      const previous = join(staging, 'previous', pluginRef);
+      mkdirSync(dirname(target), { recursive: true });
+      const hadPrevious = existsSync(target);
+      if (hadPrevious) {
+        mkdirSync(dirname(previous), { recursive: true });
+        await rename(target, previous);
+      }
+      try {
+        await rename(join(staging, 'next', pluginRef), target);
+      } catch (error) {
+        if (hadPrevious) await rename(previous, target);
+        throw error;
+      }
+    }
+  } catch (error) {
+    console.error(`[iBizVitePlugin] failed copy retained at ${staging}`);
+    throw error;
+  }
+  await rm(staging, { recursive: true });
   console.log(
     `[iBizVitePlugin] copied ${pluginEntries.length} model runtime plugin package(s) to dist/plugins`,
   );
 }
 
+export function modelPluginMiddleware(sourceDirectory: string) {
+  const source = realpathSync(sourceDirectory);
+  const mounts = ['/modeldesign/plugins/', '/central/plugins/', '/plugins/'];
+  return async (
+    req: IncomingMessage,
+    res: ServerResponse,
+    next: () => void,
+  ): Promise<void> => {
+    const rawPath = (req.url || '').split('?', 1)[0];
+    const mount = mounts.find(prefix => rawPath.startsWith(prefix));
+    if (!mount) {
+      next();
+      return;
+    }
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      res.statusCode = 405;
+      res.setHeader('Allow', 'GET, HEAD');
+      res.end();
+      return;
+    }
+    let path: string;
+    try {
+      path = decodeURIComponent(rawPath.slice(mount.length));
+    } catch {
+      res.statusCode = 400;
+      res.end();
+      return;
+    }
+    try {
+      const parts = pluginPathParts(path);
+      const packageParts = parts[0].startsWith('@') ? 2 : 1;
+      runtimeAssetParts(parts.slice(packageParts).join('/'));
+      if (/\.(?:map|ts|tsx|vue)$/.test(path)) throw new Error('Source asset');
+    } catch {
+      res.statusCode = 403;
+      res.end();
+      return;
+    }
+    try {
+      const file = realpathSync(join(source, path));
+      if (!within(source, file)) {
+        res.statusCode = 403;
+        res.end();
+        return;
+      }
+      if (!statSync(file).isFile()) {
+        res.statusCode = 404;
+        res.end();
+        return;
+      }
+      const contentTypes: Record<string, string> = {
+        '.css': 'text/css; charset=utf-8',
+        '.js': 'application/javascript; charset=utf-8',
+        '.mjs': 'application/javascript; charset=utf-8',
+        '.json': 'application/json; charset=utf-8',
+        '.svg': 'image/svg+xml',
+        '.png': 'image/png',
+        '.woff': 'font/woff',
+        '.woff2': 'font/woff2',
+      };
+      res.statusCode = 200;
+      res.setHeader(
+        'Content-Type',
+        contentTypes[file.slice(file.lastIndexOf('.'))] ||
+          'application/octet-stream',
+      );
+      res.setHeader('Cache-Control', 'no-store');
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.end(req.method === 'HEAD' ? undefined : await readFile(file));
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      res.statusCode = code === 'ENOENT' || code === 'ENOTDIR' ? 404 : 500;
+      res.end();
+    }
+  };
+}
+
 function IBizVitePlugin(): Plugin[] {
+  let appRoot = process.cwd();
+  let outputRoot = join(appRoot, 'dist');
   const p: Plugin = {
     name: 'iBizSys:System',
     apply: 'build',
+    configResolved(config) {
+      appRoot = config.root;
+      outputRoot = resolve(config.root, config.build.outDir);
+    },
     async closeBundle() {
       // 模板底包
       const templatePackages = ['core', 'runtime', 'model-helper'];
@@ -182,9 +465,9 @@ function IBizVitePlugin(): Plugin[] {
         'web-theme',
         'devtool',
       ];
-      const cwd = process.cwd();
+      const cwd = appRoot;
       const baseModule = join(cwd, 'node_modules/@ibiz-template');
-      const baseOutModule = join(cwd, 'dist/extras/js/@ibiz-template');
+      const baseOutModule = join(outputRoot, 'extras/js/@ibiz-template');
       const pluginPackages = [
         ['ai-chat', '@ibiz-template-plugin'],
         ['gantt', '@ibiz-template-plugin'],
@@ -257,8 +540,8 @@ function IBizVitePlugin(): Plugin[] {
         }
       }
       const elementPlusBundlePath = join(
-        cwd,
-        'dist/extras/js/element-plus/2.4.4/element-plus.system.min.js',
+        outputRoot,
+        'extras/js/element-plus/2.4.4/element-plus.system.min.js',
       );
       if (existsSync(elementPlusBundlePath)) {
         const content = await readFile(elementPlusBundlePath, 'utf-8');
@@ -271,21 +554,24 @@ function IBizVitePlugin(): Plugin[] {
         }
       }
       const vueRuntimeBundlePath = join(
-        cwd,
-        'dist/extras/js/vue/3.3.8/vue.runtime.global.system.prod.js',
+        outputRoot,
+        'extras/js/vue/3.3.8/vue.runtime.global.system.prod.js',
       );
       if (existsSync(vueRuntimeBundlePath)) {
         const content = await readFile(vueRuntimeBundlePath, 'utf-8');
-        const sanitized = content.replace(
-          'nextSibling:e=>e.nextSibling',
-          'nextSibling:e=>e?e.nextSibling:null',
-        ).replace(
-          'remove:e=>{const t=e.parentNode;t&&t.removeChild(e)}',
-          'remove:e=>{const t=e&&e.parentNode;t&&t.removeChild(e)}',
-        ).replace(
-          'parentNode:e=>e.parentNode',
-          'parentNode:e=>e?e.parentNode:null',
-        );
+        const sanitized = content
+          .replace(
+            'nextSibling:e=>e.nextSibling',
+            'nextSibling:e=>e?e.nextSibling:null',
+          )
+          .replace(
+            'remove:e=>{const t=e.parentNode;t&&t.removeChild(e)}',
+            'remove:e=>{const t=e&&e.parentNode;t&&t.removeChild(e)}',
+          )
+          .replace(
+            'parentNode:e=>e.parentNode',
+            'parentNode:e=>e?e.parentNode:null',
+          );
         if (sanitized !== content) {
           await writeFile(vueRuntimeBundlePath, sanitized, 'utf-8');
         }
@@ -296,13 +582,15 @@ function IBizVitePlugin(): Plugin[] {
       );
       if (existsSync(vue3UtilBundlePath)) {
         const content = await readFile(vue3UtilBundlePath, 'utf-8');
-        const sanitized = content.replace(
-          /const e=""!==n&&t\?A\(t,null,null\):null/g,
-          'const e=""!==n&&t?t:null',
-        ).replace(
-          'setup(t,{attrs:e}){return{renderComp:i=>i?A(i,{...e,key:t.manualKey}):void 0}}',
-          'setup(t,{attrs:e}){const n={};let o=!0;l(()=>t.manualKey,(l,s)=>{et(l)&&l!==s&&(o=!0)});const r=(l,s)=>{if(!o)return n.vNode;o=!1;if(l){const s={...l.props};delete s.onVnodeUnmounted;delete s.ref;const r=w(l.type,{...s,...e,key:t.manualKey});return n.vNode=r,r}return void 0};return{renderComp:r}}',
-        );
+        const sanitized = content
+          .replace(
+            /const e=""!==n&&t\?A\(t,null,null\):null/g,
+            'const e=""!==n&&t?t:null',
+          )
+          .replace(
+            'setup(t,{attrs:e}){return{renderComp:i=>i?A(i,{...e,key:t.manualKey}):void 0}}',
+            'setup(t,{attrs:e}){const n={};let o=!0;l(()=>t.manualKey,(l,s)=>{et(l)&&l!==s&&(o=!0)});const r=(l,s)=>{if(!o)return n.vNode;o=!1;if(l){const s={...l.props};delete s.onVnodeUnmounted;delete s.ref;const r=w(l.type,{...s,...e,key:t.manualKey});return n.vNode=r,r}return void 0};return{renderComp:r}}',
+          );
         if (sanitized !== content) {
           await writeFile(vue3UtilBundlePath, sanitized, 'utf-8');
         }
@@ -368,8 +656,8 @@ function IBizVitePlugin(): Plugin[] {
             version: string;
           };
           const outDir = join(
-            cwd,
-            'dist/extras/js',
+            outputRoot,
+            'extras/js',
             scope,
             pkg,
             manifest.version,
@@ -391,9 +679,9 @@ function IBizVitePlugin(): Plugin[] {
           ]);
         }),
       );
-      await copyModelPlugins(cwd);
+      await copyModelPlugins(cwd, { targetRoot: join(outputRoot, 'plugins') });
       // 重新改写 index.html 部分代码
-      const htmlFilePath = join(cwd, 'dist/index.html');
+      const htmlFilePath = join(outputRoot, 'index.html');
       if (existsSync(htmlFilePath)) {
         let html = readFileSync(htmlFilePath, 'utf-8');
         html = html
@@ -428,8 +716,8 @@ function IBizVitePlugin(): Plugin[] {
       // 重新修改 system-import.json 补充时间戳
       {
         const systemImportPath = join(
-          cwd,
-          'dist/extras/json/system-import.json',
+          outputRoot,
+          'extras/json/system-import.json',
         );
         if (existsSync(systemImportPath)) {
           const content = readFileSync(systemImportPath, 'utf-8');
@@ -464,7 +752,7 @@ function IBizVitePlugin(): Plugin[] {
       }
       // 修改 dist/environments/environment.js 把 dev 模式改为 false
       {
-        const envPath = join(cwd, 'dist/environments/environment.js');
+        const envPath = join(outputRoot, 'environments/environment.js');
         if (existsSync(envPath)) {
           let env = readFileSync(envPath, 'utf-8');
           if (env) {
@@ -491,51 +779,7 @@ function IBizVitePlugin(): Plugin[] {
         return;
       }
 
-      server.middlewares.use(async (req, res, next) => {
-        const requestUrl = req.url || '';
-        const prefix = '/modeldesign/plugins/';
-        if (!requestUrl.startsWith(prefix)) {
-          next();
-          return;
-        }
-
-        let relativePath: string;
-        try {
-          relativePath = decodeURIComponent(
-            requestUrl.slice(prefix.length).split('?', 1)[0],
-          );
-        } catch {
-          next();
-          return;
-        }
-        const filePath = resolve(pluginSource, relativePath);
-        if (
-          !filePath.startsWith(`${pluginSource}/`) ||
-          !existsSync(filePath)
-        ) {
-          next();
-          return;
-        }
-
-        const contentTypes: Record<string, string> = {
-          '.css': 'text/css; charset=utf-8',
-          '.js': 'application/javascript; charset=utf-8',
-          '.json': 'application/json; charset=utf-8',
-        };
-        try {
-          const content = await readFile(filePath);
-          res.statusCode = 200;
-          res.setHeader(
-            'Content-Type',
-            contentTypes[filePath.slice(filePath.lastIndexOf('.'))] ||
-              'application/octet-stream',
-          );
-          res.setHeader('Cache-Control', 'no-store');
-          res.end(content);
-        } catch {
-          next();
-        }
-      });
+      server.middlewares.use(modelPluginMiddleware(pluginSource));
     },
     configResolved() {
       const baseModule = resolve(__dirname, '../node_modules');

@@ -1,0 +1,21 @@
+:root.studio_icon .studio-icon.pssysapp::before,
+:root.studio_icon .studio-icon.psdeserviceapi::before {
+  display: inline-block;
+  font-family: FontAwesome;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  font-size: inherit;
+  line-height: 1;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:root.studio_icon .studio-icon.pssysapp::before {
+  content: "\f108";
+}
+
+:root.studio_icon .studio-icon.psdeserviceapi::before {
+  content: "\f0ec";
+}

@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "package": {
+    "name": "@aibiz/console-layout-bundle",
+    "version": "0.1.0"
+  },
+  "packages": [
+    {
+      "variant": "console",
+      "name": "@aibiz/console-terminal",
+      "version": "0.1.0",
+      "supportedPluginCodes": [
+        "CONSOLE_VIEW"
+      ]
+    },
+    {
+      "variant": "swagger",
+      "name": "@aibiz/swagger-preview",
+      "version": "0.1.0",
+      "supportedPluginCodes": [
+        "SWAGGER_PREVIEW_VIEW"
+      ]
+    }
+  ],
+  "sourceStatus": "independent-local-implementation",
+  "originalSourceRecovered": false,
+  "nativeCompatibilityVerified": false,
+  "compilerChecks": "TypeScript isolated transpilation and syntax diagnostics; no full host application typecheck",
+  "inputs": [
+    {
+      "path": "build.mjs",
+      "sha256": "22b61a9d99318c9186870bc55284910e4ddf4a9bb035724a31a9b84316c1dd73"
+    },
+    {
+      "path": "package.json",
+      "sha256": "9886e65fa0cc5fdcbce39c42eda309a16993ab157c1d389e9871eebb18861426"
+    },
+    {
+      "path": "src/console.css",
+      "sha256": "89c56226cec7c59c08c9bcd07ae998b4c4f2b56be190eae1496026bf256d1034"
+    },
+    {
+      "path": "src/console.ts",
+      "sha256": "4b6be2017524686573fb0af3f21af28b16a1b6659b0a9d637701140d67d0e31f"
+    },
+    {
+      "path": "src/swagger.css",
+      "sha256": "5f60bf03870ec7b514d51596d77f2feeea8be2764c73e6d6fdb25c1c88e896af"
+    },
+    {
+      "path": "src/swagger.ts",
+      "sha256": "59729666b54173a899b069e6483b2bec8188078bffeaf05cabcf659ae08d54b8"
+    },
+    {
+      "path": "src/view.ts",
+      "sha256": "a594021edcbcc54bb5b1aed3222a6378d4496bb61cafe5a70bb37fbb8865015a"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "console/index.mjs",
+      "sha256": "8fb343dd24907fb448f474dea0f33b5f3b34397b28f87f0bf4be6e0b3ec5096a"
+    },
+    {
+      "path": "console/index.system.js",
+      "sha256": "7039bd7b82d5974e1184031d056d1a697c6c8f0e3f372f90cb71d2273d069743"
+    },
+    {
+      "path": "console/package.json",
+      "sha256": "5333d0485fa77046e5d0f358607d0ad3ffb356c06376043999c45814506d53cc"
+    },
+    {
+      "path": "console/style.css",
+      "sha256": "89c56226cec7c59c08c9bcd07ae998b4c4f2b56be190eae1496026bf256d1034"
+    },
+    {
+      "path": "swagger/index.mjs",
+      "sha256": "af3aab55c16a2b70131380603cb3f0dd12b3b331ccae7206cb68ea7270bb3f46"
+    },
+    {
+      "path": "swagger/index.system.js",
+      "sha256": "20c9c1b5b2a0889d70bdfeb21851f82ad5470df9def26bd3dcf2f9609cd9c274"
+    },
+    {
+      "path": "swagger/package.json",
+      "sha256": "95027b71b418df28d8d6ff66e64a05e5a6d66113bcfba2a41bfe8a4e55f457d3"
+    },
+    {
+      "path": "swagger/style.css",
+      "sha256": "5f60bf03870ec7b514d51596d77f2feeea8be2764c73e6d6fdb25c1c88e896af"
+    }
+  ],
+  "toolchain": {
+    "typescript": {
+      "version": "5.3.3",
+      "sha256": "a465a98e2fcb650a7b0d7ec63f3e15bc0eeb7e447e043bfa72c4109015d5e7c5"
+    },
+    "rollup": {
+      "version": "4.9.3",
+      "sha256": "7d9f19ee185398ea82ca425d3b1b37b9e9b46b99b3cbaa295fe4cf7e8f560d62"
+    }
+  },
+  "runtimeImports": {
+    "console": [
+      "@ibiz-template/runtime",
+      "@ibiz-template/vue3-util",
+      "vue"
+    ],
+    "swagger": [
+      "@ibiz-template/runtime",
+      "@ibiz-template/vue3-util",
+      "vue"
+    ]
+  }
+}

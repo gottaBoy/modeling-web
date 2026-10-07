@@ -1,0 +1,25 @@
+{
+  "name": "@aibiz/studio-icon",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "index.mjs",
+  "module": "index.mjs",
+  "system": "index.system.js",
+  "styles": [
+    "style.css"
+  ],
+  "exports": {
+    ".": "./index.mjs",
+    "./style.css": "./style.css"
+  },
+  "files": [
+    "index.mjs",
+    "index.system.js",
+    "style.css"
+  ],
+  "peerDependencies": {
+    "@ibiz-template/runtime": "0.7.41-alpha.86",
+    "vue": "^3.3.8"
+  }
+}

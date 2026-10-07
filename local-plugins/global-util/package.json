@@ -1,0 +1,26 @@
+{
+  "name": "@aibiz/global-util",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Independent local global modeling utilities for iBiz runtime",
+  "type": "module",
+  "main": "dist/index.mjs",
+  "module": "dist/index.mjs",
+  "system": "dist/index.system.js",
+  "exports": {
+    ".": "./dist/index.mjs"
+  },
+  "files": ["src", "dist", "build.mjs", "README.md"],
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test ../../../scripts/tests/local-global-util.test.mjs"
+  },
+  "peerDependencies": {
+    "@ibiz-template/runtime": "0.7.41-alpha.86",
+    "vue": "^3.3.8"
+  },
+  "devDependencies": {
+    "rollup": "4.9.3",
+    "typescript": "5.3.3"
+  }
+}

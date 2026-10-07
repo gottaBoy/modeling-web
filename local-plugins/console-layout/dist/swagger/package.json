@@ -1,0 +1,17 @@
+{
+  "name": "@aibiz/swagger-preview",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "index.mjs",
+  "module": "index.mjs",
+  "system": "index.system.js",
+  "styles": [
+    "style.css"
+  ],
+  "peerDependencies": {
+    "@ibiz-template/runtime": "*",
+    "@ibiz-template/vue3-util": "*",
+    "vue": "^3.3.8"
+  }
+}

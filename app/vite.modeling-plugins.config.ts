@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { modelingPluginApi } from './modeling-server/api';
 import { PluginStore } from './modeling-server/store';
@@ -19,6 +20,14 @@ export default defineConfig({
     {
       name: 'local-modeling-plugin-api',
       configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          if (req.url !== '/assets/environment.js') {
+            next();
+            return;
+          }
+          res.setHeader('Content-Type', 'application/javascript');
+          res.end(readFileSync(resolve(root, 'public/environments/environment.js')));
+        });
         // Unit tests use in-process middleware; they do not need a WebSocket listener.
         if (process.env.VITEST || process.env.NODE_ENV === 'test') {
           server.ws.listen = () => {};
@@ -34,6 +43,16 @@ export default defineConfig({
       },
       configurePreviewServer(server) {
         server.middlewares.use(modelingPluginApi(store));
+      },
+    },
+    {
+      name: 'modeling-plugin-runtime-environment',
+      generateBundle() {
+        this.emitFile({
+          type: 'asset',
+          fileName: 'assets/environment.js',
+          source: readFileSync(resolve(root, 'public/environments/environment.js')),
+        });
       },
     },
   ],

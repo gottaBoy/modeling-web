@@ -1,0 +1,24 @@
+{
+  "name": "@aibiz/studio-theme-bundle",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Independent editable local studio color and icon themes",
+  "type": "module",
+  "exports": {
+    "./color": "./dist/color/index.mjs",
+    "./icon": "./dist/icon/index.mjs"
+  },
+  "files": ["src", "dist", "build.mjs", "README.md"],
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test ../../../scripts/tests/local-studio-theme.test.mjs"
+  },
+  "peerDependencies": {
+    "@ibiz-template/runtime": "0.7.41-alpha.86",
+    "vue": "^3.3.8"
+  },
+  "devDependencies": {
+    "rollup": "4.9.3",
+    "typescript": "5.3.3"
+  }
+}

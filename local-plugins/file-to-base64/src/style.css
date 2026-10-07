@@ -1,0 +1,76 @@
+.aibiz-file-to-base64 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  color: var(--ibiz-color-text-0, #20252b);
+  font-size: 14px;
+  letter-spacing: 0;
+}
+
+.aibiz-file-to-base64__input {
+  width: 100%;
+  min-width: 0;
+  font: inherit;
+}
+
+.aibiz-file-to-base64__input::file-selector-button,
+.aibiz-file-to-base64__remove {
+  min-height: 30px;
+  padding: 4px 10px;
+  border: 1px solid var(--ibiz-color-border, #c5cbd2);
+  border-radius: 4px;
+  background: var(--ibiz-color-bg-1, #fff);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.aibiz-file-to-base64__file {
+  display: flex;
+  flex: 1 1 160px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.aibiz-file-to-base64__name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.aibiz-file-to-base64__size,
+.aibiz-file-to-base64__status {
+  color: var(--ibiz-color-text-2, #656c75);
+}
+
+.aibiz-file-to-base64__remove {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+
+.aibiz-file-to-base64__remove ion-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.aibiz-file-to-base64 :disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.aibiz-file-to-base64__error {
+  flex-basis: 100%;
+  overflow-wrap: anywhere;
+  color: var(--ibiz-color-danger, #b42318);
+}
+
+.aibiz-file-to-base64 :focus-visible {
+  outline: 2px solid var(--ibiz-color-primary, #1976b8);
+  outline-offset: 2px;
+}

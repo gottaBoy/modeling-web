@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "package": {
+    "name": "@aibiz/design-index",
+    "version": "0.1.0"
+  },
+  "sourceStatus": "independent-local-implementation",
+  "originalSourceRecovered": false,
+  "nativeCompatibilityVerified": false,
+  "supportedPluginCodes": [
+    "DESIGN_INDEX_VIEW"
+  ],
+  "compilerChecks": "TypeScript isolated transpilation and syntax diagnostics; no full host application typecheck",
+  "inputs": [
+    {
+      "path": "build.mjs",
+      "sha256": "a79a36d577a04e84c6efd814b8a48d5cfc32054bf1fcbbc22c8ea7e50aa72f8b"
+    },
+    {
+      "path": "package.json",
+      "sha256": "83527e64bbd2bdb46f12a8b293914f27840bf8de1f436261f0992e12e25112af"
+    },
+    {
+      "path": "src/controller.ts",
+      "sha256": "93a85b8218f8b77d1bc9d8a90bb64edf22036ecdf825b15463d44e3e20ce7826"
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "1b65424864cf596151821600446fcb9fc85cd1d72dfd5ffab2e4be8b060da315"
+    },
+    {
+      "path": "src/model.ts",
+      "sha256": "08bb9c646ba0eac93c30aaa1fb0e9ed8ed2352a8f51927db721bd0a0608cf448"
+    },
+    {
+      "path": "src/style.css",
+      "sha256": "4aa97cbcdf0c211b4bbbcb18d3a4f53d8a934f5c2fdeb4d636226f9d008237f0"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "index.mjs",
+      "sha256": "d241c6ac72dca87ac15981633ade100381fe47d0173567bfe75cc4747625aaad"
+    },
+    {
+      "path": "index.system.js",
+      "sha256": "1fd78644102af7055898d11c779c4ffd0dc4edaf46389df639de9407d2584a42"
+    },
+    {
+      "path": "style.css",
+      "sha256": "4aa97cbcdf0c211b4bbbcb18d3a4f53d8a934f5c2fdeb4d636226f9d008237f0"
+    }
+  ],
+  "toolchain": {
+    "typescript": {
+      "version": "5.3.3",
+      "sha256": "a465a98e2fcb650a7b0d7ec63f3e15bc0eeb7e447e043bfa72c4109015d5e7c5"
+    },
+    "rollup": {
+      "version": "4.9.3",
+      "sha256": "7d9f19ee185398ea82ca425d3b1b37b9e9b46b99b3cbaa295fe4cf7e8f560d62"
+    }
+  },
+  "runtimeImports": [
+    "@ibiz-template/runtime",
+    "@ibiz-template/vue3-util"
+  ]
+}

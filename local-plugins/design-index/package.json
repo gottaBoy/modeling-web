@@ -1,0 +1,21 @@
+{
+  "name": "@aibiz/design-index",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.mjs",
+  "module": "dist/index.mjs",
+  "system": "dist/index.system.js",
+  "styles": ["dist/style.css"],
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "peerDependencies": {
+    "@ibiz-template/runtime": "*",
+    "@ibiz-template/vue3-util": "*"
+  },
+  "devDependencies": {
+    "rollup": "4.9.3",
+    "typescript": "5.3.3"
+  }
+}

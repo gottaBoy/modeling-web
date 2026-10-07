@@ -1,0 +1,154 @@
+html {
+  overflow: hidden;
+}
+body {
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+  background-color: #1e1e1e;
+}
+:root ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+  background: transparent;
+}
+:root ::-webkit-scrollbar-track {
+  border-radius: 0;
+  box-shadow: none;
+  border: 0;
+}
+:root ::-webkit-scrollbar-thumb {
+  border-radius: 0;
+  box-shadow: none;
+  border: 0;
+  background-color: rgba(121, 121, 121, 0.4);
+}
+.ibiz-model-runtime {
+  --app-header-color: #ccc;
+  --app-color-danger: #f04141;
+  --app-header-background-color: #3c3c3c;
+  --app-header-color-rgb: 204, 204, 204;
+  --app-dividing-line-color-bright-rgb: 135, 135, 135;
+  --view-font-color: #ccc;
+  --view-background-color-tint: #333;
+  --app-dividing-line-color-bright: hsla(0, 0%, 52.9%, 0.45);
+  --view-background-color-active: rgba(72, 166, 243, 0.8);
+  --view-font-color-tint: hsla(0, 0%, 80%, 0.7);
+  --view-font-color-bright: #fff;
+  --view-runtime-code-color: rgb(var(--view-runtime-code-color-rgb));
+  --view-runtime-code-color-rgb: 72, 166, 243;
+  --form-editor-background-color: #3c3c3c;
+  --form-editor-border-color: #3c3c3c;
+  --form-editor-font-color: #fff;
+  --form-editor-active-color: rgba(72, 166, 243, 0.8);
+}
+.ibiz-model-runtime {
+  font-size: 14px;
+  width: 100%;
+  height: 100%;
+  color: var(--app-header-color);
+}
+.ibiz-model-runtime-breadcrumb-container {
+  position: relative;
+  width: 100%;
+  height: 28px;
+  border-bottom: 1px solid var(--app-dividing-line-color-bright);
+  background: var(--app-header-background-color);
+}
+.ibiz-model-runtime-breadcrumb-container > .ibiz-model-runtime-breadcrumb {
+  width: 100%;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 3px 0px 0px 5px;
+}
+.ibiz-model-runtime-breadcrumb-container
+  > .ibiz-model-runtime-breadcrumb
+  > .ibiz-model-runtime-breadcrumb-separator {
+  display: inline-block;
+  padding: 0px 5px;
+  color: rgba(var(--app-header-color-rgb), 0.5);
+}
+.ibiz-model-runtime-breadcrumb-container
+  > .ibiz-model-runtime-breadcrumb
+  > .ibiz-model-runtime-breadcrumb-item {
+  cursor: pointer;
+  display: inline-block;
+}
+.ibiz-model-runtime-breadcrumb-container
+  > .ibiz-model-runtime-breadcrumb
+  > .ibiz-model-runtime-breadcrumb-item:hover {
+  color: var(--view-background-color-active);
+}
+.ibiz-model-runtime-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  overflow-y: hidden;
+  overflow-x: auto;
+}
+.ibiz-model-runtime-content > .ibiz-model-runtime-column.hover {
+  border-top: 2px solid var(--view-background-color-active);
+}
+.ibiz-model-runtime-content > .ibiz-model-runtime-column,
+.ibiz-model-runtime-content > .ibiz-model-runtime-column-next {
+  position: relative;
+  padding-right: 5px;
+  width: 400px;
+  height: calc(100% - 2px);
+  flex-shrink: 0;
+  background: var(--view-background-color-tint);
+  border-top: 2px solid transparent;
+}
+.ibiz-model-runtime-content
+  > .ibiz-model-runtime-column
+  > .ibiz-model-runtime-column-split,
+.ibiz-model-runtime-content
+  > .ibiz-model-runtime-column-next
+  > .ibiz-model-runtime-column-split {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 5px;
+  height: 100%;
+  background: rgba(var(--app-dividing-line-color-bright-rgb), 0.6);
+}
+.ibiz-model-runtime-content > .ibiz-model-runtime-column-next {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ibiz-model-runtime-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.ibiz-model-runtime-empty > .ibiz-model-runtime-empty-refresh {
+  margin-top: 5px;
+}
+.ibiz-model-runtime-empty > .ibiz-model-runtime-empty-error {
+  margin-top: 30px;
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--app-color-danger);
+}
+.ant-empty {
+  margin: 0 8px;
+  font-size: 14px;
+  line-height: 22px;
+  text-align: center;
+}
+.ant-empty-image {
+  height: 100px;
+  margin-bottom: 8px;
+}
+.ant-empty-image img {
+  height: 100%;
+}
+.ant-empty-description {
+  margin: 0;
+}

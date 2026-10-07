@@ -1,0 +1,18 @@
+{
+  "name": "@aibiz/model-design-candidate",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Isolated source-derived model-design alpha.122 build candidate",
+  "scripts": {
+    "test": "node --test tests/candidate.test.mjs"
+  },
+  "aibiz": {
+    "sourceStatus": "vendored-source-with-independent-local-fixes",
+    "upstreamReference": "@ibiz-template-plugin/model-design@0.0.3-alpha.122",
+    "requestedReference": "@ibiz-template-plugin/model-design@0.0.3-alpha.90",
+    "originalSourceRecovered": false,
+    "nativeCompatibilityVerified": false,
+    "acceptedForProduction": false
+  }
+}

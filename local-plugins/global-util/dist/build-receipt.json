@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "package": {
+    "name": "@aibiz/global-util",
+    "version": "0.1.0"
+  },
+  "sourceStatus": "independent-local-implementation",
+  "originalSourceRecovered": false,
+  "nativeCompatibilityVerified": false,
+  "compilerChecks": "TypeScript strict isolated-plugin typecheck; no full application typecheck",
+  "toolchain": {
+    "typescript": {
+      "version": "5.3.3",
+      "sha256": "a465a98e2fcb650a7b0d7ec63f3e15bc0eeb7e447e043bfa72c4109015d5e7c5"
+    },
+    "rollup": {
+      "version": "4.9.3",
+      "sha256": "7d9f19ee185398ea82ca425d3b1b37b9e9b46b99b3cbaa295fe4cf7e8f560d62"
+    }
+  },
+  "inputs": [
+    {
+      "path": "build.mjs",
+      "sha256": "0c1999d6f4f0be156489f485d2819328d489fcd9945569714ea45d28b0dc0e89"
+    },
+    {
+      "path": "package.json",
+      "sha256": "a48a943795e7ea638deffa80b40e0bfb8818f1f46a85ae9144870d4e3b7eb6b1"
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "27c146739e64067a202f49d483ffe842136c62eff88aa11f8e289de682f85e62"
+    }
+  ],
+  "runtimeImports": [],
+  "outputs": [
+    {
+      "path": "index.mjs",
+      "sha256": "fa0c7268674aa96832f374754b0671bfffd494d23ce28b3a68ed1262bad6b74b"
+    },
+    {
+      "path": "index.system.js",
+      "sha256": "bbe18fd9e3b1b8dd0549b55112b6c0a840aec4edcfdcc0ff81d11b548d02331c"
+    }
+  ]
+}

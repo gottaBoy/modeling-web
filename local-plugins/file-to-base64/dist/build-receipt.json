@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "package": {
+    "name": "@aibiz/file-to-base64",
+    "version": "0.1.0"
+  },
+  "sourceStatus": "independent-local-implementation",
+  "originalSourceRecovered": false,
+  "nativeCompatibilityVerified": false,
+  "compilerChecks": "TypeScript syntax diagnostics; no full application typecheck",
+  "toolchain": {
+    "typescript": {
+      "version": "5.3.3",
+      "sha256": "a465a98e2fcb650a7b0d7ec63f3e15bc0eeb7e447e043bfa72c4109015d5e7c5"
+    },
+    "rollup": {
+      "version": "4.9.3",
+      "sha256": "7d9f19ee185398ea82ca425d3b1b37b9e9b46b99b3cbaa295fe4cf7e8f560d62"
+    }
+  },
+  "inputs": [
+    {
+      "path": "build.mjs",
+      "sha256": "ecb461238d5572ee3ac03abea8f4949e039c0340e95928e4769eaeea85d18d29"
+    },
+    {
+      "path": "package.json",
+      "sha256": "e53ff3c3f9b872fc99a1b96754a2e33f1b0bcc66c6a213f11585bb9977495e01"
+    },
+    {
+      "path": "src/controller.ts",
+      "sha256": "eb0c8cd7bf8dc16686a4c897fca5e135478ac6ef6299047fd8089948b12bb66d"
+    },
+    {
+      "path": "src/editor.ts",
+      "sha256": "ed212689b6ee0c4666e6a1d319fc32db50abb738a3c202b594a90559888ba547"
+    },
+    {
+      "path": "src/file-logic.ts",
+      "sha256": "b9e94dbfc90e3bede3265bf9b151132b3780b09d8805f448fc7203475faa1388"
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "6ccdab06d7ccc187aa649fbc83ab0fc2cfb609b8d4353ee571bea5ddd277bd1e"
+    },
+    {
+      "path": "src/provider.ts",
+      "sha256": "8170e15db8e4573789b852953f8bec202a829bb3555c614da0dfd7c6e3a0fc33"
+    },
+    {
+      "path": "src/style.css",
+      "sha256": "5131c6e3dbcb75a073b63bf6b9b5537fd27e595fbd2cd1742612d19f654fbd78"
+    }
+  ],
+  "runtimeImports": [
+    "@ibiz-template/runtime",
+    "@ibiz-template/vue3-util",
+    "vue"
+  ],
+  "outputs": [
+    {
+      "path": "index.mjs",
+      "sha256": "9b7b2402227dfe245ec8909307180fc9c1941094d38b315c28d82a05a88e0209"
+    },
+    {
+      "path": "index.system.js",
+      "sha256": "8806e80f436f37e6d8efdfeda5d36a540381a281941460925e43fde18b6bf204"
+    },
+    {
+      "path": "file-logic.mjs",
+      "sha256": "3c8ed21a904cc687abafbaa3a144e291fbab2039c7ae66c4e14e091e5e32fff8"
+    },
+    {
+      "path": "style.css",
+      "sha256": "5131c6e3dbcb75a073b63bf6b9b5537fd27e595fbd2cd1742612d19f654fbd78"
+    }
+  ]
+}
