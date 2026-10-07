@@ -85,3 +85,56 @@ verification gate. This proves the local static delivery boundary, not the
 provenance of the real iBizModeling Central/ModelDesign core model. That core
 audit remains fail-closed until an exact upstream source and extension set are
 found.
+
+## Regression Command Matrix
+
+Run the following from `modelingweb/app` with pnpm 8.15.9:
+
+```sh
+cd modelingweb/app
+corepack pnpm@8.15.9 install --frozen-lockfile
+pnpm ibiz:versions:check
+pnpm test:run
+pnpm verify:release
+pnpm build:release
+pnpm verify:plugins
+pnpm test:plugins:deployment
+pnpm test:docker:web
+```
+
+The release lane checks the linked local iBiz packages, TypeScript, Vite
+output, import-map assets, route configuration, and published model plugins.
+The current September 29, 2026 evidence records `551 passed, 0 failed` for
+the Vitest suite, release/build verification passed, and 73 model plugins
+resolved from the build output:
+
+```text
+.artifacts/modelingweb-regression-20260929/test-run.log
+.artifacts/modelingweb-regression-20260929/build-release.log
+.artifacts/modelingweb-regression-20260929/verify-release.log
+.artifacts/modelingweb-regression-20260929/plugins-deployment.log
+.artifacts/modeling-runtime-current-20260929/report.json
+```
+
+For a running local stack, add the deployment checks:
+
+```sh
+cd modelingweb/app
+PLAYWRIGHT_MODULE="$WORKSPACE_ROOT/plm-e2e/node_modules/@playwright/test" \
+  pnpm smoke:deployment
+PLAYWRIGHT_MODULE="$WORKSPACE_ROOT/plm-e2e/node_modules/@playwright/test" \
+  pnpm smoke:plugins:deployed
+```
+
+`PLAYWRIGHT_MODULE` is only required when the module cannot be resolved from
+the current project. `CHROME_PATH` is optional and platform-dependent; omit it
+to use Playwright Chromium, or set a valid executable path for the current
+host. The historical macOS path
+`/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` must not be
+copied into a Linux or CI command.
+
+`smoke:plugins` starts an isolated plugin service and checks restart/recovery;
+`smoke:plugins:deployed` checks the already deployed 32003-sidecar endpoint.
+The Docker harness uses temporary uniquely named containers and does not
+restart the shared Compose stack. A passing local plugin or static-image check
+does not prove that the original Central/ModelDesign source has been recovered.
