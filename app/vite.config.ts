@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import { configDefaults } from 'vitest/config';
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import path from 'path';
 import vue from '@vitejs/plugin-vue';
@@ -259,6 +260,10 @@ export default defineConfig({
   base: './',
   test: {
     setupFiles: ['./tests/setup-node-runtime.ts'],
+    // native-model-report.test.mjs is a node:test suite run through
+    // `pnpm test:native-model-report`; vitest cannot collect node:test files
+    // and reports "No test suite found" for them.
+    exclude: [...configDefaults.exclude, 'tests/native-model-report.test.mjs'],
   },
   cacheDir: isSourceDebug
     ? path.resolve(__dirname, 'node_modules/.vite-source')

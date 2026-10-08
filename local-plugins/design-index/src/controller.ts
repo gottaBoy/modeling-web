@@ -8,6 +8,7 @@ type Cleanup = () => void;
 
 export class DesignIndexController extends ViewController {
   public readonly sourceStatus = 'independent-local-implementation';
+  public readonly myTodoCount?: number;
   public readonly defaultOpenTasks = new Map<string, Promise<unknown>>();
   private readonly cleanups: Cleanup[] = [];
   private readonly menus = new Map<string, any>();
@@ -32,12 +33,35 @@ export class DesignIndexController extends ViewController {
     Object.assign(this.state, {
       designIndexDefaultOpens: {},
       designIndexErrors: [],
+      myTodoCount: undefined,
+    });
+    this.loadMyTodoCount().catch(error => {
+      if (!this.live) return;
+      (this.state as any).designIndexErrors.push({
+        phase: 'my-todo-counter', message: String(error),
+      });
+      (globalThis as any).ibiz.log.error(error);
     });
     const registered = (_name: string, controller: any): void => {
       if (controller !== this && controller?.model?.viewType) this.observeChild(controller);
     };
     this.ctx.evt.on('onRegister', registered);
     this.cleanups.push(() => this.ctx.evt.off('onRegister', registered));
+  }
+
+  private async loadMyTodoCount(): Promise<void> {
+    const runtime = (globalThis as any).ibiz;
+    const response = await runtime.net.post('/work_items/count_my_todo', {});
+    const count = (response.data as any)?.my_todo_count;
+    if (typeof count !== 'number' &&
+        (typeof count !== 'string' || !/^\d+$/.test(count))) {
+      throw new Error('my_todo_count must be a nonnegative decimal integer.');
+    }
+    const value = Number(count);
+    if (!Number.isSafeInteger(value) || value < 0) {
+      throw new Error('my_todo_count must be a safe nonnegative integer.');
+    }
+    (this.state as any).myTodoCount = value;
   }
 
   private listen(target: any, event: string, callback: (...args: any[]) => void): void {

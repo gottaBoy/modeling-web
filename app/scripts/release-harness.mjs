@@ -3,6 +3,8 @@ import { constants } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join, parse, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { sourcePackages } from './build-source-runtime.mjs';
+import { createSourceOverlayResolver } from './source-overlay-provenance.mjs';
 
 const require = createRequire(import.meta.url);
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -116,6 +118,49 @@ const publishedComponentPackages = [
   '@ibiz-template/devtool',
 ];
 
+// Build-time sanitizers mirrored from vite-plugins/ibiz-vite-plugin.ts. They
+// must stay in lockstep with the plugin, including the comma expression fix,
+// or the exact-copy checks report a false difference.
+const componentAssetTransforms = {
+  '@ibiz-template/vue3-components': (sourcePath, source) => {
+    if (!sourcePath.endsWith('.js')) return source;
+    const sanitized = source
+      .toString('utf8')
+      .replace(
+        /!0===ibiz\.env\.isSaaSMode&&await this\.loadOrgData\(\)/g,
+        '!0===ibiz.env.isSaaSMode&&!0!==ibiz.env.isLocalModel&&await this.loadOrgData()',
+      )
+      .replace(
+        /return window\.addEventListener\("unload",[^\)]*\),/g,
+        'return ',
+      )
+      .replace(/window\.addEventListener\("unload",[^\)]*\);?/g, '')
+      .replace(
+        /this\.routeDepth&&this\.state\.drTabPages\[0\]&&this\.router\.push\(this\.state\.drTabPages\[0\]\.fullPath\)/g,
+        'this.routeDepth&&this.state.drTabPages[0]&&this.state.drTabPages[0].fullPath&&this.router.push(this.state.drTabPages[0].fullPath)',
+      )
+      .replace(
+        /this\.c\.noCache\?e\?a\(e,null,null\):null:a\(i\("keepAlive"\),\{include:o,max:30,isKey:!0\},\{default:\(\)=>\[e&&a\(e,null,null\)\]\}\)/g,
+        'this.c.noCache?e||null:a(i("keepAlive"),{include:o,max:30,isKey:!0},{default:()=>[e]})',
+      );
+    return Buffer.from(sanitized);
+  },
+  '@ibiz-template/vue3-util': (sourcePath, source) => {
+    if (!sourcePath.endsWith('.js')) return source;
+    const sanitized = source
+      .toString('utf8')
+      .replace(
+        /const e=""!==n&&t\?A\(t,null,null\):null/g,
+        'const e=""!==n&&t?t:null',
+      )
+      .replace(
+        'setup(t,{attrs:e}){return{renderComp:i=>i?A(i,{...e,key:t.manualKey}):void 0}}',
+        'setup(t,{attrs:e}){const n={};let o=!0;l(()=>t.manualKey,(l,s)=>{et(l)&&l!==s&&(o=!0)});const r=(l,s)=>{if(!o)return n.vNode;o=!1;if(l){const s={...l.props};delete s.onVnodeUnmounted;delete s.ref;const r=w(l.type,{...s,...e,key:t.manualKey});return n.vNode=r,r}return void 0};return{renderComp:r}}',
+      );
+    return Buffer.from(sanitized);
+  },
+};
+
 const publishedPluginAssets = {
   '@ibiz-template-plugin/ai-chat': {
     source: {
@@ -170,6 +215,15 @@ const publishedPluginAssets = {
 const exactPackageManager = 'pnpm@8.15.9';
 const exactLockfileVersion = '6.0';
 const shouldCheckDist = process.argv.includes('--dist');
+// Lazily created so `verify:release` (no dist) never walks the source artifact
+// tree or runs build-report verification.
+let sourceOverlayResolver = null;
+function getSourceOverlayResolver() {
+  if (!sourceOverlayResolver) {
+    sourceOverlayResolver = createSourceOverlayResolver();
+  }
+  return sourceOverlayResolver;
+}
 const relativeAssetPattern =
   /(?:["'`])((?:\.{1,2}\/)[^"'`\s)]+)(?:["'`])|url\(\s*["']?((?:\.{1,2}\/)[^"'\s)]+)["']?\s*\)/g;
 const relativeAssetExtensions =
@@ -299,6 +353,7 @@ async function verifyCopiedDirectory(
   label,
   additionalSources = [],
   transformSource = (_sourcePath, source) => source,
+  overlay = null,
 ) {
   if (!(await exists(sourceDirectory))) {
     fail(`${label} source directory is missing: ${relativePath(sourceDirectory)}`);
@@ -341,7 +396,7 @@ async function verifyCopiedDirectory(
   const sourceSet = new Set(expectedFileMap.keys());
   const targetSet = new Set(targetFiles);
   const missing = sourceFiles.filter(file => !targetSet.has(file));
-  const extra = targetFiles.filter(file => !sourceSet.has(file));
+  const extraFiles = targetFiles.filter(file => !sourceSet.has(file));
   const different = [];
 
   for (const file of sourceFiles) {
@@ -352,6 +407,37 @@ async function verifyCopiedDirectory(
     ]);
     if (!transformSource(expectedFileMap.get(file), source).equals(target)) {
       different.push(file);
+    }
+  }
+
+  // Files outside the installed release tree are only tolerated when their
+  // bytes trace to a still-verifying isolated source-candidate build.
+  let extra = extraFiles;
+  let overlayFiles = [];
+  if (extraFiles.length && overlay?.resolver) {
+    const bytesByPath = new Map();
+    for (const file of extraFiles) {
+      bytesByPath.set(file, await readFile(join(targetDirectory, file)));
+    }
+    try {
+      const resolved = await overlay.resolver.resolvePackageOverlay(
+        overlay.packageName,
+        extraFiles.map(file => ({ path: file, bytes: bytesByPath.get(file) })),
+      );
+      const allowedPaths = new Set(resolved.allowed.map(entry => entry.path));
+      extra = extraFiles.filter(file => !allowedPaths.has(file));
+      overlayFiles = resolved.allowed.map(entry => `${entry.path}<-${entry.run}/${entry.path}`);
+      if (resolved.unprovenanced.length) {
+        fail(
+          `${label} overlay files are not traceable to a verified source build: ` +
+            resolved.unprovenanced
+              .map(entry => `${entry.path} (sha256 ${entry.sha256.slice(0, 12)})`)
+              .join(', '),
+        );
+        return;
+      }
+    } catch (error) {
+      fail(`${label} overlay provenance check could not run: ${error.message}`);
     }
   }
 
@@ -367,7 +453,92 @@ async function verifyCopiedDirectory(
     return;
   }
 
-  pass(`${label} exactly matches ${sourceFiles.length} expected file(s)`);
+  if (overlayFiles.length) {
+    pass(
+      `${label} exactly matches ${sourceFiles.length} expected file(s) plus ` +
+        `${overlayFiles.length} verified source-build overlay file(s)`,
+    );
+  } else {
+    pass(`${label} exactly matches ${sourceFiles.length} expected file(s)`);
+  }
+}
+
+// The import map, not the installed package tree, decides which bytes the
+// browser actually loads. A source overlay may repoint an entry at an
+// unminified source build, so every served asset for a source-buildable
+// package must either equal its installed release asset or trace to a
+// source-candidate run that still verifies clean.
+async function verifyServedSourceAssets(importMapPath, importMap) {
+  const resolver = getSourceOverlayResolver();
+  const checked = [];
+  const unresolved = [];
+  for (const section of ['imports', 'styles']) {
+    for (const [packageName, assetValue] of Object.entries(
+      importMap[section] ?? {},
+    )) {
+      const shortName = packageName.split('/').pop();
+      if (
+        !packageName.startsWith('@ibiz-template/') ||
+        !sourcePackages.includes(shortName)
+      ) {
+        continue;
+      }
+      const assetPaths = Array.isArray(assetValue) ? assetValue : [assetValue];
+      for (const assetPath of assetPaths) {
+        const cleanPath = assetPath.split('?')[0];
+        const servedPath = resolve(dirname(importMapPath), cleanPath);
+        if (!(await exists(servedPath))) continue;
+        const bytes = await readFile(servedPath);
+        let installedPath = null;
+        try {
+          const { manifestPath } = await resolvePackage(packageName);
+          installedPath = join(
+            dirname(manifestPath),
+            'dist',
+            cleanPath.split('/').pop(),
+          );
+        } catch {
+          installedPath = null;
+        }
+        if (installedPath && (await exists(installedPath))) {
+          const installedBytes = await readFile(installedPath);
+          if (
+            (componentAssetTransforms[packageName] ?? ((_p, s) => s))(
+              installedPath,
+              installedBytes,
+            ).equals(bytes)
+          ) {
+            checked.push(`${packageName} ${cleanPath} (installed release asset)`);
+            continue;
+          }
+        }
+        const provenance = await resolver.provenanceFor(shortName, bytes);
+        if (provenance) {
+          checked.push(
+            `${packageName} ${cleanPath} (source build ${provenance.run} ${provenance.sourceVersion})`,
+          );
+        } else {
+          unresolved.push(
+            `${packageName} ${cleanPath} matches neither its installed release asset nor a verified source build`,
+          );
+        }
+      }
+    }
+  }
+
+  if (!checked.length) {
+    fail(
+      'no served source-buildable package asset was checked; the dist import map is not wired to this harness',
+    );
+    return;
+  }
+  if (unresolved.length) {
+    fail(`served package assets are unprovenanced: ${unresolved.join('; ')}`);
+    return;
+  }
+  pass(
+    `served import-map assets for ${checked.length} source-buildable package entries are provenanced`,
+  );
 }
 
 async function findPackageJson(entryPath) {
@@ -971,6 +1142,7 @@ if (shouldCheckDist) {
     if (checks.every(check => check.ok)) {
       pass('system-import.json resolves every published JS and CSS asset');
     }
+    await verifyServedSourceAssets(importMapPath, importMap);
   }
 
   const vueRuntimePath = join(
@@ -1093,6 +1265,7 @@ if (shouldCheckDist) {
   for (const packageName of publishedComponentPackages) {
     try {
       const { manifestPath } = await resolvePackage(packageName);
+      const shortName = packageName.split('/').pop();
       await verifyCopiedDirectory(
         join(dirname(manifestPath), 'dist'),
         join(
@@ -1109,49 +1282,13 @@ if (shouldCheckDist) {
               },
             ]
           : [],
-        packageName === '@ibiz-template/vue3-components'
-          ? (sourcePath, source) => {
-              if (!sourcePath.endsWith('.js')) return source;
-              const sanitized = source
-                .toString('utf8')
-                .replace(
-                  /!0===ibiz\.env\.isSaaSMode&&await this\.loadOrgData\(\)/g,
-                  '!0===ibiz.env.isSaaSMode&&!0!==ibiz.env.isLocalModel&&await this.loadOrgData()',
-                )
-                // Must stay in lockstep with the build-time sanitizer in
-                // vite-plugins/ibiz-vite-plugin.ts, including the comma
-                // expression fix, or this check reports a false difference.
-                .replace(
-                  /return window\.addEventListener\("unload",[^\)]*\),/g,
-                  'return ',
-                )
-                .replace(/window\.addEventListener\("unload",[^\)]*\);?/g, '')
-                .replace(
-                  /this\.routeDepth&&this\.state\.drTabPages\[0\]&&this\.router\.push\(this\.state\.drTabPages\[0\]\.fullPath\)/g,
-                  'this.routeDepth&&this.state.drTabPages[0]&&this.state.drTabPages[0].fullPath&&this.router.push(this.state.drTabPages[0].fullPath)',
-                )
-                .replace(
-                  /this\.c\.noCache\?e\?a\(e,null,null\):null:a\(i\("keepAlive"\),\{include:o,max:30,isKey:!0\},\{default:\(\)=>\[e&&a\(e,null,null\)\]\}\)/g,
-                  'this.c.noCache?e||null:a(i("keepAlive"),{include:o,max:30,isKey:!0},{default:()=>[e]})',
-                );
-              return Buffer.from(sanitized);
+        componentAssetTransforms[packageName],
+        sourcePackages.includes(shortName)
+          ? {
+              packageName: shortName,
+              resolver: getSourceOverlayResolver(),
             }
-          : packageName === '@ibiz-template/vue3-util'
-            ? (sourcePath, source) => {
-                if (!sourcePath.endsWith('.js')) return source;
-                const sanitized = source
-                  .toString('utf8')
-                  .replace(
-                    /const e=""!==n&&t\?A\(t,null,null\):null/g,
-                    'const e=""!==n&&t?t:null',
-                  )
-                  .replace(
-                    'setup(t,{attrs:e}){return{renderComp:i=>i?A(i,{...e,key:t.manualKey}):void 0}}',
-                    'setup(t,{attrs:e}){const n={};let o=!0;l(()=>t.manualKey,(l,s)=>{et(l)&&l!==s&&(o=!0)});const r=(l,s)=>{if(!o)return n.vNode;o=!1;if(l){const s={...l.props};delete s.onVnodeUnmounted;delete s.ref;const r=w(l.type,{...s,...e,key:t.manualKey});return n.vNode=r,r}return void 0};return{renderComp:r}}',
-                  );
-                return Buffer.from(sanitized);
-              }
-          : undefined,
+          : null,
       );
     } catch (error) {
       fail(

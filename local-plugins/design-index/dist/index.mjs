@@ -170,6 +170,15 @@ class DesignIndexController extends ViewController {
         Object.assign(this.state, {
             designIndexDefaultOpens: {},
             designIndexErrors: [],
+            myTodoCount: undefined,
+        });
+        this.loadMyTodoCount().catch(error => {
+            if (!this.live)
+                return;
+            this.state.designIndexErrors.push({
+                phase: 'my-todo-counter', message: String(error),
+            });
+            globalThis.ibiz.log.error(error);
         });
         const registered = (_name, controller) => {
             if (controller !== this && controller?.model?.viewType)
@@ -177,6 +186,20 @@ class DesignIndexController extends ViewController {
         };
         this.ctx.evt.on('onRegister', registered);
         this.cleanups.push(() => this.ctx.evt.off('onRegister', registered));
+    }
+    async loadMyTodoCount() {
+        const runtime = globalThis.ibiz;
+        const response = await runtime.net.post('/work_items/count_my_todo', {});
+        const count = response.data?.my_todo_count;
+        if (typeof count !== 'number' &&
+            (typeof count !== 'string' || !/^\d+$/.test(count))) {
+            throw new Error('my_todo_count must be a nonnegative decimal integer.');
+        }
+        const value = Number(count);
+        if (!Number.isSafeInteger(value) || value < 0) {
+            throw new Error('my_todo_count must be a safe nonnegative integer.');
+        }
+        this.state.myTodoCount = value;
     }
     listen(target, event, callback) {
         target.evt.on(event, callback);

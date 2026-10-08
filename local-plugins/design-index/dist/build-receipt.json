@@ -22,7 +22,7 @@
     },
     {
       "path": "src/controller.ts",
-      "sha256": "93a85b8218f8b77d1bc9d8a90bb64edf22036ecdf825b15463d44e3e20ce7826"
+      "sha256": "987cb9ed5e1a95d37d32814a85bc8b4e7a86c6d337fa6290ac7cef2c3bda8b2b"
     },
     {
       "path": "src/index.ts",
@@ -40,11 +40,11 @@
   "outputs": [
     {
       "path": "index.mjs",
-      "sha256": "d241c6ac72dca87ac15981633ade100381fe47d0173567bfe75cc4747625aaad"
+      "sha256": "68262db2961612932745225483ada39a3f11a70d5100aa9764a6753a4dd39da3"
     },
     {
       "path": "index.system.js",
-      "sha256": "1fd78644102af7055898d11c779c4ffd0dc4edaf46389df639de9407d2584a42"
+      "sha256": "f8169e48d499e86dd0d1a7c9ead920a10814e0a86c0f4e97ae36bacee594e461"
     },
     {
       "path": "style.css",

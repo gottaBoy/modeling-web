@@ -4,7 +4,7 @@ window.Environment = {
   // 日志输出级别, 支持: TRACE,DEBUG,INFO,WARN,ERROR,SILENT
   logLevel: 'ERROR',
   BaseUrl: '/api',
-  modelingWebUrl: 'http://127.0.0.1:32003/modeldesign/',
+  modelingWebUrl: 'http://127.0.0.1:32009/modeldesign/#/psdevslnsys=28F7326A-7C72-4C2D-A497-A16372ABBADC/modelingindex/-',
   pluginBaseUrl: './plugins',
   hub: true,
   enableMqtt: true,

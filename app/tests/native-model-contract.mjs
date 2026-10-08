@@ -394,7 +394,7 @@ export function expectedAuthenticationEvent(event, applicationId) {
   ) {
     return true;
   }
-  return /Navigation aborted from "\/" to "\/-\/index\/-" via a navigation guard/
+  return /Navigation aborted from "\/" to "(?:\/-\/index\/-|\/psdevslnsys=[^"\\]+\/modelingindex\/-)" via a navigation guard/
     .test(event.text);
 }
 

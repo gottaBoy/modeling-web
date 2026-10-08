@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { summarizeNativeBrowserReport } from './native-model-contract.mjs';
+import {
+  expectedAuthenticationEvent, summarizeNativeBrowserReport,
+} from './native-model-contract.mjs';
 
 const applications = ['Central', 'ModelDesign'];
 const requiredStages = [
@@ -23,6 +25,23 @@ test('all native prerequisites pass without claiming editor save or readback acc
   ]);
   assert.equal('nativeAccepted' in report, false);
   assert.equal('fullFlowVerified' in report, false);
+});
+
+test('native index navigation aborts during authentication are expected, not browser errors', () => {
+  const path = '/central/extras/js/loglevel-plugin-prefix/0.8.4/loglevel-plugin-prefix.system.min.js';
+  const base = { authenticated: false, kind: 'console', path };
+  const centralText = 'Navigation aborted from "/" to "/-/index/-" via a navigation guard.';
+  const modelDesignText = 'Navigation aborted from "/" to "/psdevslnsys=28F7326A-7C72-4C2D-A497-A16372ABBADC/modelingindex/-" via a navigation guard.';
+  const central = { ...base, text: centralText,
+    path: '/central/extras/js/loglevel-plugin-prefix/0.8.4/loglevel-plugin-prefix.system.min.js' };
+  assert.equal(expectedAuthenticationEvent(central, 'ibizmodeling__central'), true);
+  assert.equal(expectedAuthenticationEvent({ ...base, text: modelDesignText },
+    'ibizmodeling__modeldesign'), true);
+  assert.equal(expectedAuthenticationEvent({ ...base,
+    text: 'Navigation aborted from "/" to "/-/other/-" via a navigation guard.' },
+  'ibizmodeling__modeldesign'), false);
+  assert.equal(expectedAuthenticationEvent({ ...base, authenticated: true,
+    text: centralText }, 'ibizmodeling__central'), false);
 });
 
 test('a failed theme cannot pass native probe prerequisites for either application', () => {
