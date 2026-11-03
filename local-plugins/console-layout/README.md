@@ -40,6 +40,13 @@ Missing topic, unavailable transport, and rejected subscriptions are visible
 errors. Reconnect re-subscribes; disposal removes all owned listeners and guards
 late callbacks. Multiple views share listeners by service/topic.
 
+When the deployment explicitly sets `Environment.enableMqtt=false` or the host
+runtime disables MQTT, the console reports `disabled` rather than claiming a
+connection failure. An enabled runtime with missing `appdata.mqtttopic` remains
+an explicit configuration error. No topic, token, broker connection or log data
+is fabricated. Console-owned labels follow the host Chinese/English locale;
+received logs and unknown broker diagnostics are preserved verbatim.
+
 The host MQTT client is never closed or unsubscribed: it is shared and other
 consumers' subscription ownership cannot be determined safely. Subscriptions
 remain until the host tears down its connection. This is a deliberate limitation,

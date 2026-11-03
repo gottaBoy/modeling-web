@@ -124,6 +124,50 @@ function observeConsole(service, topic, observer) {
         // subscribe without our knowledge, so never unsubscribe/end that client.
     };
 }
+function hostMqttAvailability(host, environment = {}) {
+    const enabled = environment?.enableMqtt !== false && host?.env?.enableMqtt === true;
+    const available = enabled && typeof host?.hub?.mqtt?.client?.subscribe === 'function' &&
+        typeof host?.hub?.mqtt?.evt?.on === 'function';
+    if (!enabled) {
+        return {
+            enabled: false,
+            available: false,
+            reason: 'MQTT is disabled in this deployment.',
+        };
+    }
+    if (typeof host?.appData?.mqtttopic !== 'string' || !host.appData.mqtttopic.trim()) {
+        return {
+            enabled: true,
+            available: false,
+            reason: 'Authenticated application data does not contain an MQTT topic.',
+        };
+    }
+    if (!available) {
+        return {
+            enabled: true,
+            available: false,
+            reason: 'Authenticated host MQTT service is unavailable.',
+        };
+    }
+    return { enabled: true, available: true, reason: '' };
+}
+function consoleLabel(value) {
+    const language = ibiz?.i18n?.getLang?.() || 'zh-CN';
+    if (/^en(?:[-_]|$)/i.test(language))
+        return value;
+    const labels = {
+        Console: '控制台', waiting: '等待中', connecting: '连接中', connected: '已连接',
+        disconnected: '已断开', disabled: '未启用', error: '错误', disposed: '已关闭',
+        'Filter logs': '筛选日志', Filter: '筛选', Resume: '继续', Pause: '暂停',
+        Follow: '跟随输出', 'Clear logs': '清空日志',
+        'MQTT is disabled in this deployment.': '当前部署未启用 MQTT，实时日志不可用。',
+        'Authenticated application data does not contain an MQTT topic.': '登录后的应用数据未配置 MQTT 主题。',
+        'Authenticated host MQTT service is unavailable.': '已登录的宿主 MQTT 服务不可用。',
+        'Host MQTT client changed while the console is active.': '控制台运行期间宿主 MQTT 客户端发生变化。',
+        'MQTT broker did not grant the exact console topic.': 'MQTT 服务未授权当前控制台主题。',
+    };
+    return Object.prototype.hasOwnProperty.call(labels, value) ? labels[value] : value;
+}
 class ConsoleController extends ViewController {
     constructor() {
         super(...arguments);
@@ -144,6 +188,14 @@ class ConsoleController extends ViewController {
             return;
         try {
             this.state.consoleTopic = consoleTopic(this.context);
+            const availability = hostMqttAvailability(ibiz, globalThis.Environment);
+            if (!availability.available) {
+                Object.assign(this.state, {
+                    consoleStatus: availability.enabled ? 'error' : 'disabled',
+                    consoleError: availability.reason,
+                });
+                return;
+            }
             this.disposeStream = observeConsole(ibiz?.hub?.mqtt, this.state.consoleTopic, {
                 status: (status, error) => {
                     if (this.disposed)
@@ -203,26 +255,28 @@ const ConsoleBody = defineComponent({
         });
         return () => h('section', { class: 'aibiz-console', 'data-console-status': state.consoleStatus }, [
             h('header', { class: 'aibiz-console__toolbar' }, [
-                h('strong', state.consoleTopic || 'Console'),
-                h('span', { role: 'status' }, state.consoleStatus),
+                h('strong', state.consoleTopic || consoleLabel('Console')),
+                h('span', { role: 'status' }, consoleLabel(state.consoleStatus)),
                 h('input', {
-                    type: 'search', 'aria-label': 'Filter logs', placeholder: 'Filter', value: state.consoleFilter,
+                    type: 'search', 'aria-label': consoleLabel('Filter logs'), placeholder: consoleLabel('Filter'), value: state.consoleFilter,
                     onInput: (event) => { state.consoleFilter = event.target.value; },
                 }),
-                iconButton(state.consolePaused ? 'play' : 'pause', state.consolePaused ? 'Resume' : 'Pause', () => { state.consolePaused = !state.consolePaused; }, { 'aria-pressed': state.consolePaused }),
+                iconButton(state.consolePaused ? 'play' : 'pause', consoleLabel(state.consolePaused ? 'Resume' : 'Pause'), () => { state.consolePaused = !state.consolePaused; }, { 'aria-pressed': state.consolePaused }),
                 h('label', [
                     h('input', { type: 'checkbox', checked: state.consoleFollow,
-                        onChange: (event) => { state.consoleFollow = event.target.checked; } }), 'Follow',
+                        onChange: (event) => { state.consoleFollow = event.target.checked; } }), consoleLabel('Follow'),
                 ]),
-                iconButton('trash', 'Clear logs', () => controller.clear()),
+                iconButton('trash', consoleLabel('Clear logs'), () => controller.clear()),
             ]),
-            state.consoleError ? h('p', { role: 'alert' }, state.consoleError) : null,
+            state.consoleError ? h('p', { role: state.consoleStatus === 'disabled' ? 'status' : 'alert' }, consoleLabel(state.consoleError)) : null,
             h('div', { class: 'aibiz-console__output', ref: output, role: 'log', 'aria-live': 'off' }, (state.consoleEntries || []).filter((entry) => `${entry.sender} ${entry.text}`.toLowerCase().includes((state.consoleFilter || '').toLowerCase()))
                 .map((entry) => h('pre', { key: entry.id }, [
                 entry.sender ? h('span', { class: 'aibiz-console__sender' }, `[${entry.sender}] `) : null,
                 entry.text,
             ]))),
-            h('footer', `${state.consoleEntries?.length || 0} entries / ${state.consoleDropped || 0} discarded`),
+            h('footer', /^en(?:[-_]|$)/i.test(ibiz?.i18n?.getLang?.() || '')
+                ? `${state.consoleEntries?.length || 0} entries / ${state.consoleDropped || 0} discarded`
+                : `${state.consoleEntries?.length || 0} 条日志 / ${state.consoleDropped || 0} 条已丢弃`),
         ]);
     },
 });
@@ -243,4 +297,4 @@ var console = {
     },
 };
 
-export { ConsoleBody, ConsoleController, ConsoleProvider, consoleTopic, console as default, plainConsoleText, supportedPluginCodes };
+export { ConsoleBody, ConsoleController, ConsoleProvider, consoleLabel, consoleTopic, console as default, hostMqttAvailability, plainConsoleText, supportedPluginCodes };
