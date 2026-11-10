@@ -422,6 +422,18 @@ test('provider uses navigation, its own component, fresh domain, early dismissal
   assert.deepEqual(fixture.messages, []);
 });
 
+test('provider preserves base params and lets configured navigation params override them', async () => {
+  const withoutNavigation = providerFixture();
+  delete withoutNavigation.action.navigateParams;
+  await withoutNavigation.provider.execAction(withoutNavigation.action, withoutNavigation.args);
+  assert.deepEqual(normalize(withoutNavigation.vnode.props.params), { query: 'navigation' });
+
+  const withOverride = providerFixture();
+  withOverride.action.navigateParams = [{ key: 'query', value: 'configured', rawValue: true }];
+  await withOverride.provider.execAction(withOverride.action, withOverride.args);
+  assert.deepEqual(normalize(withOverride.vnode.props.params), { query: 'configured' });
+});
+
 test('provider never refreshes on cancel or false/absent/nonboolean save evidence', async t => {
   for (const result of [
     { ok: false, params: { isSave: true } }, { ok: true }, { ok: true, params: { isSave: false } },

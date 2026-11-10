@@ -518,7 +518,9 @@ describe.sequential('independent LOCAL bilingual dictionaries and source contrac
     const main = readFileSync(resolve(dirname(sourceRoot), 'main.ts'), 'utf8');
     const register = readFileSync(resolve(dirname(sourceRoot), 'user-register.ts'), 'utf8');
     expect(main).toContain('UserRegister');
-    expect(main).toContain('runApp([VueTextFormat, gridLayout, UserRegister])');
+    expect(main).toContain('runApp([VueTextFormat, gridLayout, UserRegister], {');
+    expect(main).toContain('environmentOverrides');
+    expect(main).toContain('nativeEnvironment?.enableMqtt');
     expect(register).toContain("'VIEW_HtmlView'");
     expect(register).toContain("'VIEW_DEHTMLVIEW'");
     expect(register).toContain('new ViewEngineBase(c)');

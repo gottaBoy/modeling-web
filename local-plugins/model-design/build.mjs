@@ -18,7 +18,7 @@ import {
 import { verifyRuntimeModelSourceBuild } from '../../../scripts/harness-runtime-model-source-build.mjs';
 import {
   candidateManifest, CANDIDATE_NAME, CANDIDATE_VERSION, patchCandidateSources,
-  RUNTIME_NAME, RUNTIME_SOURCES,
+  RUNTIME_NAME, RUNTIME_SOURCES, modelEditEnhancementInputs,
 } from './patches.mjs';
 import {
   planDependencyLock, stageDependencyLock, verifyDependencyLock,
@@ -52,10 +52,10 @@ function localPath(path) {
 }
 
 function builderInputs() {
-  return ['build.mjs', 'dependency-lock.mjs', 'deterministic-css.mjs', 'package.json', 'patches.mjs'].map(path => {
+  return [...['build.mjs', 'dependency-lock.mjs', 'deterministic-css.mjs', 'package.json', 'patches.mjs'].map(path => {
     const data = read(join(pluginRoot, path));
     return { path, bytes: data.length, sha256: hash(data) };
-  });
+  }), ...modelEditEnhancementInputs()];
 }
 
 function outputInventory(packageRoot) {
@@ -105,9 +105,31 @@ function candidatePlan(probe, runtime) {
   assert.deepEqual(entriesOnly(files), probe.report.inputInventory.entries);
   const { contents, patches, indexDiagnosticsAddressed } = patchCandidateSources(files);
   const runtimeLink = validateRuntimeEvidence(runtime);
-  const dependencies = [...probe.report.dependencies.links, runtimeLink];
-  assert.deepEqual(probe.report.dependencies.missing.map(item => item.name), [RUNTIME_NAME],
-    'Unexpected baseline dependency blocker');
+  const existingRuntimeLinks = probe.report.dependencies.links.filter(
+    item => item.name === RUNTIME_NAME,
+  );
+  let dependencies;
+  if (existingRuntimeLinks.length > 0) {
+    assert.equal(existingRuntimeLinks.length, 1, 'Duplicate baseline runtime-model link');
+    const runtimeIdentity = value => ({
+      name: value.name, version: value.version, target: value.target,
+      role: value.role, sourceReport: value.sourceReport,
+      sourceReportSha256: value.sourceReportSha256,
+      sourceFingerprint: value.sourceFingerprint,
+      outputFingerprint: value.outputFingerprint,
+      nativeAccepted: value.nativeAccepted,
+      originalSourceRecovered: value.originalSourceRecovered,
+    });
+    assert.deepEqual(runtimeIdentity(existingRuntimeLinks[0]), runtimeIdentity(runtimeLink),
+      'Baseline runtime-model link differs from the verified runtime receipt');
+    assert.deepEqual(probe.report.dependencies.missing, [],
+      'Baseline dependency set contains missing entries despite a runtime link');
+    dependencies = [...probe.report.dependencies.links];
+  } else {
+    assert.deepEqual(probe.report.dependencies.missing.map(item => item.name), [RUNTIME_NAME],
+      'Unexpected baseline dependency blocker');
+    dependencies = [...probe.report.dependencies.links, runtimeLink];
+  }
   const manifestFile = contents.find(file => file.path === 'package.json');
   const originalManifest = JSON.parse(manifestFile.data);
   const manifest = candidateManifest(originalManifest, dependencies);

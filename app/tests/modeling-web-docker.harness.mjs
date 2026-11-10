@@ -253,6 +253,11 @@ async function verifyStartupInjection() {
       expected: { AppTitle: 'default', dev: false, untouched: 'keep' },
     },
     {
+      label: 'native model root is serialized as an exact environment value',
+      env: { NATIVE_MODELING_SYSTEM_ID: 'nf_5d3585516a77_root_a' },
+      expected: { nativeModelingSystemId: 'nf_5d3585516a77_root_a' },
+    },
+    {
       label: 'single-line environment object',
       source: 'window.Environment = { AppTitle: "default", untouched: "keep" };',
       env: { APPTITLE: specialValue },

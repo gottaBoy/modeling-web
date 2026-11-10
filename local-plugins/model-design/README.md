@@ -14,6 +14,24 @@ the document base, synchronizes readonly changes without recreating the editor,
 and disposes only component-owned editors, models and providers. Generation
 guards reject late loader results after recreation or unmount.
 
+## IDE Editing
+
+The maintained `enhancements/` modules extend the native model editor with
+JSON-object validation, formatting, bounded undo/redo, structured baseline
+changes, JSON download, unsaved-dismissal protection and Chinese/English UI.
+Save performs a fresh native export comparison and a post-import readback.
+Conflicts block import; a committed but unverified import stays visibly
+unverified and does not automatically close. The preflight is not an atomic
+server-side compare-and-set, and JSON validity is not model/schema validity.
+
+These modules are copied into the source candidate with explicit builder
+input hashes. All eleven native action registrations remain intact.
+The boolean/string native readonly action flag is honored by the provider;
+view mutation guards remain active after asynchronous transitions.
+
+Details and actual evidence:
+`scripts/docs/MODELING-IDE-ENHANCEMENT-20261110.md`.
+
 ## Runtime Inputs
 
 Only these reconstructed, source-built runtime identities are supported:

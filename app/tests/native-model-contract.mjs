@@ -1,3 +1,4 @@
+import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import { collectPluginReferences } from '../../../scripts/harness-plugin-audit.mjs';
@@ -301,15 +302,20 @@ export function readCentralNavigationDOM(selectors) {
   };
 }
 
-export async function verifyCentralNavigation(page, expected, { timeout = 20_000 } = {}) {
+export async function verifyCentralNavigation(page, expected, {
+  timeout = 20_000, preexistingResponse = null,
+} = {}) {
   const evidence = { expectedRequest: expected, response: null, rendering: null };
-  // Register before devops: the selected child grid can fetch during automatic navigation.
-  const received = page.waitForResponse(response => {
-    const url = new URL(response.url());
-    return matchesCentralNavigationRequest({
-      origin: url.origin, path: url.pathname, method: response.request().method(),
-    }, expected);
-  }, { timeout }).then(response => ({ response }), error => ({ error }));
+  let received = Promise.resolve(preexistingResponse ? { response: preexistingResponse } : null);
+  if (!preexistingResponse) {
+    // Register before devops: the selected child grid can fetch during automatic navigation.
+    received = page.waitForResponse(response => {
+      const url = new URL(response.url());
+      return matchesCentralNavigationRequest({
+        origin: url.origin, path: url.pathname, method: response.request().method(),
+      }, expected);
+    }, { timeout }).then(response => ({ response }), error => ({ error }));
+  }
   try {
     await page.getByText('devops', { exact: true }).first().click();
     await page.waitForURL(/psdevcentercentraltreeexpview/, { timeout });
@@ -325,6 +331,7 @@ export async function verifyCentralNavigation(page, expected, { timeout = 20_000
     if (result.error) {
       throw new Error(`Central navigation did not receive ${expected.method} ${expected.path}: ${result.error}`);
     }
+    assert.ok(result?.response, 'Central navigation dataset response is missing');
     const response = result.response;
     const url = new URL(response.url());
     evidence.response = {
@@ -384,21 +391,23 @@ export function inspectNativeAppModel(model, application) {
 export function expectedAuthenticationEvent(event, applicationId) {
   if (event.authenticated) return false;
   const appDataPath = `/api/${applicationId}/appdata`;
+  const organizationPath = `/api/${applicationId}/uaa/getbydcsystem/ibizmodeling`;
+  const requiresLogin = event.path === appDataPath || event.path === organizationPath;
   if (event.kind === 'response') {
-    return event.status === 401 && event.path === appDataPath;
+    return event.status === 401 && requiresLogin;
   }
   if (event.kind !== 'console') return false;
   if (
     event.text.includes('responded with a status of 401') &&
-    event.path === appDataPath
+    requiresLogin
   ) {
     return true;
   }
-  return /Navigation aborted from "\/" to "(?:\/-\/index\/-|\/psdevslnsys=[^"\\]+\/modelingindex\/-)" via a navigation guard/
-    .test(event.text);
+  return /Navigation aborted from "\/" to "\/(?:-\/index|psdevslnsys=[^/]+\/modelingindex)\/[^"]*" via a navigation guard\./
+    .test(event.text.trim());
 }
 
-export function summarizeNativeBrowserReport(applications) {
+export function summarizeNativeBrowserReport(applications, { fullAcceptance = false } = {}) {
   const checks = Object.values(applications).flatMap(app => Object.values(app.stages));
   const required = [
     'model', 'plugin-assets', 'login', 'home', 'theme-rendering',
@@ -409,6 +418,10 @@ export function summarizeNativeBrowserReport(applications) {
     checks.every(check => check.status === 'PASS');
   const startupVerified = name => applications[name]?.stages.home?.status === 'PASS' &&
     applications[name]?.stages.model?.status === 'PASS';
+  const editorSaveVerified = applications.ModelDesign?.stages['editor-save']?.status === 'PASS';
+  const freshSessionReadbackVerified =
+    applications.ModelDesign?.stages['fresh-session-readback']?.status === 'PASS';
+  const editorFlowVerified = fullAcceptance && editorSaveVerified && freshSessionReadbackVerified;
   return {
     prerequisiteChecksPassed: passed,
     centralStartupVerified: Boolean(startupVerified('Central')),
@@ -416,7 +429,14 @@ export function summarizeNativeBrowserReport(applications) {
     pluginAssetsVerified: ['Central', 'ModelDesign'].every(name =>
       applications[name]?.stages['plugin-assets']?.status === 'PASS'),
     failures: checks.filter(check => check.status !== 'PASS').length,
-    coverage: 'native model, plugin assets, authentication, home, theme rendering, navigation and reload',
-    remainingAcceptance: ['native editor operations', 'model save', 'fresh-session model readback'],
+    coverage: editorFlowVerified
+      ? 'native model, plugin assets, authentication, home, theme rendering, navigation, reload, authenticated model HTTP save and fresh-session readback'
+      : 'native model, plugin assets, authentication, home, theme rendering, navigation and reload',
+    remainingAcceptance: editorFlowVerified
+      ? ['native editor operations']
+      : ['native editor operations', 'model save', 'fresh-session model readback'],
+    browserEditorInteractionVerified: false,
+    modelDesignEditorSaveVerified: fullAcceptance ? editorSaveVerified : null,
+    freshSessionReadbackVerified: fullAcceptance ? freshSessionReadbackVerified : null,
   };
 }

@@ -6,6 +6,12 @@ export const requiredControlNames = Object.freeze([
   'appmenu', ...sideMenuNames, 'captionbar',
 ]);
 
+export function classifyTodoCounterError(error: unknown): 'unavailable' | 'error' {
+  const status = (error as any)?.status;
+  return typeof status === 'number' && (status === 404 || status === 405)
+    ? 'unavailable' : 'error';
+}
+
 export function copyModel<T>(value: T): T {
   if (Array.isArray(value)) return value.map(item => copyModel(item)) as T;
   if (value && typeof value === 'object') {
@@ -104,12 +110,20 @@ export function flattenMenus(items: any[] = [], ancestors: any[] = []): any[] {
   ]);
 }
 
+function menuId(item: any): string | undefined {
+  return typeof item?.id === 'string' && item.id ? item.id : undefined;
+}
+
 export function permittedMenu(menu: any, item: any): boolean {
-  const found = flattenMenus(menu.appMenu?.appMenuItems ?? []).find(entry => entry.item === item);
+  const id = menuId(item);
+  if (!id) return false;
+  const entries = flattenMenus(menu.appMenu?.appMenuItems ?? []);
+  if (entries.filter(entry => menuId(entry.item) === id).length !== 1) return false;
+  const found = entries.find(entry => menuId(entry.item) === id);
   if (!found) return false;
-  return [...found.ancestors, item].every(entry => {
+  return [...found.ancestors, found.item].every(entry => {
     const status = menu.state.menuItemsState?.[entry.id];
-    return !entry.hidden && !entry.disabled && status?.visible === true && status.permitted !== false;
+    return !entry.hidden && !entry.disabled && status?.visible === true && status.permitted === true;
   });
 }
 

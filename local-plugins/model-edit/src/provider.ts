@@ -39,13 +39,14 @@ export class ModelEditProvider extends UIActionProviderBase {
         contexts.unshift({ key: deName, value: 'srfkey', rawValue: false });
       }
       Object.assign(resultContext, convertNavData(contexts, data[0] || {}, params, context));
-      const resultParams = convertNavData(
+      const configuredParams = convertNavData(
         action.navigateParams,
         ['MULTIKEY', 'MULTIDATA'].includes(action.actionTarget!) && data.length > 0
           ? formatMultiData(action.navigateParams, data)
           : data[0] || {},
         params, resultContext,
       );
+      const resultParams = { ...params, ...configuredParams };
       const entity = await ibiz.hub.getAppDataEntity(entityId, view.model.appId);
       if (!entity?.codeName || !entity.id) throw new Error('Missing entity metadata.');
       const domain = ibiz.uiDomainManager.create(undefined, entity.id);
@@ -53,7 +54,7 @@ export class ModelEditProvider extends UIActionProviderBase {
       resultContext.srfsessionid = domain.id;
       overlay = ibiz.overlay.createDrawer(
         modal => h(ModelEditView, {
-          modal, context: resultContext, params: resultParams, codeName: entity.codeName,
+        modal, context: resultContext, params: resultParams, codeName: entity.codeName,
           caption: view.model.caption || action.caption || 'Model', readonly,
         }),
         undefined,

@@ -16,7 +16,7 @@ function passingApplications() {
   }]));
 }
 
-test('all native prerequisites pass without claiming editor save or readback acceptance', () => {
+test('native probe prerequisites pass while editor acceptance remains unclaimed', () => {
   const report = summarizeNativeBrowserReport(passingApplications());
   assert.equal(report.prerequisiteChecksPassed, true);
   assert.equal(report.failures, 0);
@@ -25,6 +25,30 @@ test('all native prerequisites pass without claiming editor save or readback acc
   ]);
   assert.equal('nativeAccepted' in report, false);
   assert.equal('fullFlowVerified' in report, false);
+});
+
+test('model HTTP roundtrip does not claim browser editor interaction', () => {
+  const input = passingApplications();
+  input.ModelDesign.stages['editor-save'] = { status: 'PASS' };
+  input.ModelDesign.stages['fresh-session-readback'] = { status: 'PASS' };
+  const report = summarizeNativeBrowserReport(input, { fullAcceptance: true });
+  assert.equal(report.prerequisiteChecksPassed, true);
+  assert.equal(report.modelDesignEditorSaveVerified, true);
+  assert.equal(report.freshSessionReadbackVerified, true);
+  assert.deepEqual(report.remainingAcceptance, ['native editor operations']);
+  assert.equal(report.browserEditorInteractionVerified, false);
+  assert.match(report.coverage, /authenticated model HTTP save and fresh-session readback/);
+});
+
+test('full native acceptance does not claim editor flow when readback is missing', () => {
+  const input = passingApplications();
+  input.ModelDesign.stages['editor-save'] = { status: 'PASS' };
+  const report = summarizeNativeBrowserReport(input, { fullAcceptance: true });
+  assert.equal(report.modelDesignEditorSaveVerified, true);
+  assert.equal(report.freshSessionReadbackVerified, false);
+  assert.deepEqual(report.remainingAcceptance, [
+    'native editor operations', 'model save', 'fresh-session model readback',
+  ]);
 });
 
 test('native index navigation aborts during authentication are expected, not browser errors', () => {

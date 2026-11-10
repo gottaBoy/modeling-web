@@ -48,8 +48,15 @@ export async function runApp(
   opts?: {
     getAuthGuard?: () => AuthGuard;
     userRoutes?: RouteRecordRaw[];
+    environmentOverrides?: { enableMqtt?: boolean };
   },
 ): Promise<void> {
+  const environmentOverrides = AuthGuard.validateEnvironmentOverrides(
+    opts?.environmentOverrides,
+  );
+  if (environmentOverrides !== undefined && opts?.getAuthGuard !== undefined) {
+    throw new Error('environmentOverrides cannot be combined with getAuthGuard');
+  }
   AppHooks.createApp.tap((_, app) => {
     if (plugins) {
       plugins.forEach(plugin => {
@@ -112,7 +119,9 @@ export async function runApp(
   if (opts?.getAuthGuard) {
     authGuard = opts.getAuthGuard();
   } else {
-    authGuard = new DynaAuthGuard();
+    authGuard = new DynaAuthGuard({
+      environmentOverrides,
+    });
   }
   AppRouter.setAuthGuard((context: IParams, notLogin?: boolean) =>
     authGuard.verify(context, notLogin),

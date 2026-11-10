@@ -23,8 +23,54 @@ const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const workspace = resolve(appRoot, '../..');
 const require = createRequire(join(appRoot, 'package.json'));
 const hubRequire = createRequire(join(workspace, 'ibiz-app-hub/package.json'));
+const viteRequire = createRequire(require.resolve('vite/package.json'));
 const json = async path => JSON.parse(await readFile(path, 'utf8'));
 const local = path => relative(workspace, path);
+const toolTreeExclusions = new Set(['node_modules', '.git', '.artifacts', 'target']);
+
+export async function frontendAssemblerToolchain() {
+  return Promise.all([
+    ['vite', require],
+    ['esbuild', viteRequire],
+    ['typescript', require],
+    ['vue-tsc', require],
+    ['@rollup/plugin-node-resolve', hubRequire],
+  ].map(async ([name, resolver]) => {
+    let root = dirname(resolver.resolve(name));
+    let manifest;
+    let manifestPath;
+    for (let depth = 0; depth < 12; depth += 1) {
+      const candidate = join(root, 'package.json');
+      try {
+        const value = await json(candidate);
+        if (value.name === name) { manifest = value; manifestPath = candidate; break; }
+      } catch (error) { if (error.code !== 'ENOENT') throw error; }
+      const parent = dirname(root);
+      if (parent === root) break;
+      root = parent;
+    }
+    if (!manifestPath) throw new Error(`Assembler tool manifest unavailable: ${name}`);
+    return { name, version: manifest.version, root: local(root),
+      manifest: await fingerprint(manifestPath),
+      tree: await treeFingerprint(root, { exclude: toolTreeExclusions }) };
+  }));
+}
+
+export function candidateHostFiles(template, { nativeModeling = false } = {}) {
+  if (typeof nativeModeling !== 'boolean') throw new Error('Explicit boolean candidate profile required');
+  if (!nativeModeling) {
+    return {
+      html: template,
+      environment: "Object.assign(window.Environment, { pluginBaseUrl: '/modeldesign/plugins' });\n",
+    };
+  }
+  const base = '<base href="/modeldesign/" />';
+  if (template.split(base).length !== 2) throw new Error('Native candidate base template changed');
+  return {
+    html: template.replace(base, '<base href="./" />'),
+    environment: '// Native plugin URLs are supplied by the bound deployment environment.\n',
+  };
+}
 
 export function relativeAsset(dist, path) {
   return relative(join(dist, 'extras/json'), path).split('\\').join('/');
@@ -96,7 +142,9 @@ export async function assembleCandidate({
   frameworkBuild,
   typeReport,
   baseline,
+  nativeModeling = false,
 }) {
+  if (typeof nativeModeling !== 'boolean') throw new Error('Explicit boolean candidate profile required');
   frameworkBuild = await containedFile(
     join(workspace, '.artifacts/frontend-source'),
     resolve(frameworkBuild),
@@ -120,11 +168,15 @@ export async function assembleCandidate({
   const dist = join(run, 'dist');
   const report = {
     schemaVersion: 1,
+    contract: 'isolated-frontend-source-candidate-v1',
+    profile: nativeModeling ? 'native-modeling' : 'candidate-preview',
     generatedAt: new Date().toISOString(),
     status: 'assembling',
     productionModified: false,
     deployable: false,
     browserVerified: false,
+    nativeAccepted: false,
+    acceptedForProduction: false,
     frameworkBuild: local(frameworkBuild),
     types,
     framework: [],
@@ -139,7 +191,27 @@ export async function assembleCandidate({
       path: local(fileURLToPath(import.meta.url)),
       ...(await fingerprint(fileURLToPath(import.meta.url))),
     };
+    report.compilerOptions = sourceCompilerOptions;
+    report.node = { executable: process.execPath, version: process.version,
+      ...(await fingerprint(process.execPath)) };
+    report.toolchain = await frontendAssemblerToolchain();
+    report.frameworkReceipt = {
+      path: local(join(frameworkBuild, 'report.json')),
+      ...(await fingerprint(join(frameworkBuild, 'report.json'))),
+    };
+    report.hostSource = {
+      path: local(join(appRoot, 'src')),
+      before: await treeFingerprint(join(appRoot, 'src')),
+    };
+    report.inputs.push({
+      path: local(join(workspace, 'modelingweb/environment.config')),
+      ...(await fingerprint(join(workspace, 'modelingweb/environment.config'))),
+    });
     const capture = await json(join(baseline, 'capture-verification.json'));
+    report.captureReceipt = {
+      path: local(join(baseline, 'capture-verification.json')),
+      ...(await fingerprint(join(baseline, 'capture-verification.json'))),
+    };
     const originalDist = join(baseline, 'modelingweb-dist');
     const original = await treeFingerprint(originalDist, {
       exclude: new Set(),
@@ -407,12 +479,12 @@ export async function assembleCandidate({
       join(originalDist, 'assets', polyfills[0]),
       join(dist, 'source-app/polyfills.js'),
     );
-    await writeFile(
-      join(dist, 'source-app/environment.js'),
-      "Object.assign(window.Environment, { pluginBaseUrl: '/modeldesign/plugins' });\n",
-      { flag: 'wx' },
+    const host = candidateHostFiles(
+      await readFile(join(appRoot, 'source-candidate.html'), 'utf8'),
+      { nativeModeling },
     );
-    await cp(join(appRoot, 'source-candidate.html'), join(dist, 'index.html'));
+    await writeFile(join(dist, 'source-app/environment.js'), host.environment, { flag: 'wx' });
+    await writeFile(join(dist, 'index.html'), host.html);
     await cp(
       join(appRoot, 'source-candidate.css'),
       join(dist, 'source-app/candidate.css'),
@@ -431,6 +503,11 @@ export async function assembleCandidate({
       path: local(dist),
       ...(await treeFingerprint(dist, { exclude: new Set() })),
     };
+    report.hostSource.after = await treeFingerprint(join(appRoot, 'src'));
+    if (JSON.stringify(report.hostSource.before) !== JSON.stringify(report.hostSource.after))
+      throw new Error('Host source changed while assembling');
+    if (JSON.stringify(report.toolchain) !== JSON.stringify(await frontendAssemblerToolchain()))
+      throw new Error('Assembler toolchain changed while assembling');
     report.status = 'assembled-not-deployed';
     report.warnings.push(
       'Retained baseline third-party assets and polyfills are not compiled framework source.',
@@ -465,6 +542,7 @@ if (
       'framework-build': { type: 'string' },
       'type-report': { type: 'string' },
       baseline: { type: 'string' },
+      'native-modeling': { type: 'boolean' },
     },
   });
   if (!values['framework-build'] || !values['type-report'] || !values.baseline)
@@ -473,6 +551,7 @@ if (
     frameworkBuild: values['framework-build'],
     typeReport: values['type-report'],
     baseline: values.baseline,
+    nativeModeling: values['native-modeling'],
   });
   if (report.status === 'failed') process.exitCode = 1;
 }

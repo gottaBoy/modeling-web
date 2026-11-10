@@ -8,7 +8,8 @@
   "system": "dist/index.system.js",
   "styles": ["dist/style.css"],
   "scripts": {
-    "build": "node build.mjs"
+    "build": "node build.mjs",
+    "test": "node build.mjs && node --experimental-strip-types --test tests/permitted-menu.test.mjs tests/todo-counter.test.mjs"
   },
   "peerDependencies": {
     "@ibiz-template/runtime": "*",

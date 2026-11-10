@@ -41,6 +41,19 @@ This is a first-stage implementation, not production or whole-package acceptance
   owns rendering, minimized-view restoration and subscription cleanup.
 - Disposal removes local listeners and restores only methods still owned by this
   controller. No global framework prototype/provider is patched.
+- The optional PLM todo counter begins with `state.myTodoCountStatus = 'pending'`
+  and an undefined count. Only an actual numeric 2xx response containing a safe
+  nonnegative integer (or decimal integer string) publishes a count and `ready`.
+  Actual numeric 404/405 alone set `unavailable`, with the original failure kept
+  in the warning log. Strings such as `"404"` are not coerced to HTTP status.
+  400/401/403, other server/network failures, missing response schema or invalid
+  counts set `error` and remain visible in `state.designIndexErrors` and the
+  error log. Resolved non-success responses retain the complete response on the
+  logged failure. No unavailable/error path invents zero or removes the request.
+  The counter never blocks host side-menu binding/default target dispatch.
+- After disposal, late counter resolution/rejection cannot publish a count,
+  change its status or append warnings/errors. The already issued network
+  request remains evidence; it is not cancelled or erased.
 
 ## Boundaries Still Requiring Native Validation
 
@@ -56,6 +69,9 @@ This is a first-stage implementation, not production or whole-package acceptance
   it cannot cancel a platform request already in flight.
 - No original layout implementation, Swagger/schema API, custom search service
   or console transport is fabricated.
+- A 404/405 counter result only describes that optional endpoint's response;
+  it does not prove which service is installed or close the M02 native
+  application/menu capability gate.
 
 ## Local Contract Evidence
 
@@ -74,6 +90,10 @@ Editable host sources used to establish the interfaces:
 The focused tests inspect both local host SystemJS export sets and execute
 both source side-menu controllers with controlled external boundaries. These are
 local interface evidence, not proof of the candidate container's deployed bytes.
+The built ESM and SystemJS counter tests exercise pending/ready, numeric
+404/405 unavailable, authorization/client/server/transport errors, malformed
+counts and late resolve/reject disposal behavior, while keeping the real
+host-side menu binding workflow active.
 
 ## Build
 

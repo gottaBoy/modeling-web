@@ -6,6 +6,7 @@ import path from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import { resolveNativeModelDesignTarget } from './modeldesign-target.mjs';
+import { nativeFieldRoundtrip, readNativeBrowserToken } from './native-field-roundtrip.mjs';
 import {
   expectedAuthenticationEvent,
   captureNativeLogin,
@@ -15,6 +16,37 @@ import {
   summarizeNativeBrowserReport,
   verifyCentralNavigation,
 } from './native-model-contract.mjs';
+
+export function nativeLoginLocale(locale) {
+  assert.ok(typeof locale === 'string' && /^[A-Za-z]{2}(?:[-_][A-Za-z0-9]{2,8}){0,3}$/.test(locale),
+    'Native browser locale must select supported Chinese or English');
+  const language = locale.split(/[-_]/)[0].toLowerCase();
+  assert.ok(language === 'en' || language === 'zh',
+    'Native browser locale must select supported Chinese or English');
+  return language === 'en'
+    ? { language: 'en', buttonName: 'Login' }
+    : { language: 'zh-CN', buttonName: '\u767b\u5f55' };
+}
+
+export async function configureNativeBrowserLanguage(context, locale) {
+  const selected = nativeLoginLocale(locale);
+  // The application reads its normal saved language preference, not navigator.language.
+  await context.addInitScript(language => window.localStorage.setItem('language', language), selected.language);
+  return selected;
+}
+
+export async function submitNativeLogin(page, locale) {
+  const selected = nativeLoginLocale(locale);
+  const runtime = await page.evaluate(() => ({
+    htmlLanguage: document.documentElement.lang,
+    applicationLanguage: window.ibiz?.i18n?.getLang?.() ?? null,
+  }));
+  assert.equal(runtime.htmlLanguage, selected.language, 'Native login HTML language must match the selected locale');
+  assert.equal(runtime.applicationLanguage, selected.language,
+    'Native login application language must match the selected locale');
+  await page.getByRole('button', { name: selected.buttonName, exact: true }).click();
+  return { ...selected, ...runtime };
+}
 
 // This callback uses the public host registry, not Vue's private DOM instance fields.
 export function collectNativeIndexEvidence({ application, applicationId, indexPath }) {
@@ -147,7 +179,7 @@ export function collectNativeIndexEvidence({ application, applicationId, indexPa
     defaultOpens: { ...(controller?.state?.designIndexDefaultOpens ?? {}) },
     menus,
     views: [...document.querySelectorAll('.ibiz-view')].map(viewEvidence),
-    modelErrorVisible: document.body.innerText.includes('\u6a21\u578b\u914d\u7f6e\u7f3a\u5931'),
+    modelErrorVisible: Boolean(document.body?.innerText.includes('\u6a21\u578b\u914d\u7f6e\u7f3a\u5931')),
   };
 }
 
@@ -222,6 +254,24 @@ export async function waitForNativeIndexReady(page, options) {
   return pollNativeIndex(page, options, inspectNativeIndexReadiness);
 }
 
+function nativeHomeRoutePattern(application, entry) {
+  if (application === 'Central') return /#\/-\/index\//;
+  return /#\/psdevslnsys=[^/]+\/modelingindex\//;
+}
+
+async function waitForNativeHomeRoute(page, route, options = {}) {
+  const timeout = options.timeout ?? 30_000;
+  const interval = 100;
+  const deadline = Date.now() + timeout;
+  do {
+    if (route.test(page.url())) return page.url();
+    await delay(interval);
+  } while (Date.now() < deadline);
+  const error = new Error(`Native home route timed out: ${page.url()}`);
+  error.evidence = { expected: String(route), actual: page.url() };
+  throw error;
+}
+
 export async function verifyModelDesignMenuNavigation(page, options) {
   assert.equal(options.application, 'ModelDesign');
   let before;
@@ -251,6 +301,10 @@ export async function verifyModelDesignMenuNavigation(page, options) {
       result.dispose = () => element.removeEventListener('click', listener, { capture: true });
       return result;
     });
+    if (await page.locator('.ibiz-drawer.open').count()) {
+      await page.keyboard.press('Escape');
+    }
+
     // A real Playwright click must produce a newly mounted model-linked target, not just a URL change.
     await locator.click({ timeout: options.timeout ?? 20_000 });
     click.event = await observation.evaluate(result => result.event);
@@ -287,6 +341,7 @@ export async function runNativeModelDesignBrowser() {
   assert.ok(process.argv.length === 2 || (process.argv.length === 3 && probeOnly),
     'Usage: node tests/native-modeldesign.browser.mjs [--probe-only]');
   const locale = process.env.MODEL_DESIGN_BROWSER_LOCALE || 'zh-CN';
+  const selectedLocale = nativeLoginLocale(locale);
   const target = resolveNativeModelDesignTarget(process.env, workspace);
   const { nativeCandidateRoot, modelRoot, composeFiles, entries } = target;
   const output = path.resolve(process.env.MODEL_DESIGN_ARTIFACT_DIR || path.join(workspace,
@@ -295,7 +350,10 @@ export async function runNativeModelDesignBrowser() {
     schemaVersion: 1,
     contract: 'native-modeling-browser-prerequisites',
     mode: probeOnly ? 'probe-only' : 'acceptance',
+    nativeAcceptance: false,
+    releaseAcceptance: false,
     locale,
+    language: selectedLocale.language,
     nativeCandidateRoot,
     nativeServiceCandidateRoot: target.nativeServiceCandidateRoot,
     nativeAiCodeRuntimeRoot: target.nativeAiCodeRuntimeRoot,
@@ -324,10 +382,22 @@ export async function runNativeModelDesignBrowser() {
       const code = application.toLowerCase();
       const applicationId = `ibizmodeling__${code}`;
       const context = await browser.newContext({ locale, viewport: { width: 1440, height: 900 } });
+      await configureNativeBrowserLanguage(context, locale);
       const page = await context.newPage();
       const app = { entry, applicationId, stages: {}, requests: [], errors: [], expectedAuthEvents: [] };
       report.applications[application] = app;
+      const homeRoute = nativeHomeRoutePattern(application, entry);
+      const centralDatasetResponses = [];
       let authenticated = false;
+      if (application === 'Central') {
+        page.on('response', response => {
+          const url = new URL(response.url());
+          if (url.origin === new URL(entry).origin &&
+            url.pathname === '/api/ibizmodeling__central/psdevslns/fetchcurdcslnuser') {
+            centralDatasetResponses.push(response);
+          }
+        });
+      }
       page.on('response', response => {
         const url = new URL(response.url());
         const event = {
@@ -358,8 +428,9 @@ export async function runNativeModelDesignBrowser() {
       }));
       const stage = async (name, run) => {
         try {
-          app.stages[name] = { status: 'PASS', evidence: await run() };
-          return true;
+          const evidence = await run();
+          app.stages[name] = { status: 'PASS', evidence };
+          return evidence;
         } catch (error) {
           app.stages[name] = {
             status: 'FAIL', error: String(error),
@@ -432,14 +503,15 @@ export async function runNativeModelDesignBrowser() {
         await capture('login');
         await page.locator('input[type="text"]').first().fill(process.env.MODEL_DESIGN_USER || 'aibizhi');
         await page.locator('input[type="password"]').first().fill(process.env.MODEL_DESIGN_PASSWORD || '123456');
+        let localeEvidence;
         const evidence = await captureNativeLogin(page, { entry, applicationId },
-          () => page.getByRole('button', { name: '登录', exact: true }).click());
+          async () => { localeEvidence = await submitNativeLogin(page, locale); });
         authenticated = true;
-        return { account: process.env.MODEL_DESIGN_USER || 'aibizhi', ...evidence };
+        return { account: process.env.MODEL_DESIGN_USER || 'aibizhi', ...evidence, locale: localeEvidence };
       });
       const home = await stage('home', async () => {
         assert.ok(login, 'Native login failed');
-        await page.waitForURL(/#\/-\/index\/-/, { timeout: 30_000 });
+        await waitForNativeHomeRoute(page, homeRoute);
         const runtime = await waitForNativeIndexReady(page, {
           application, applicationId, indexPath: app.model?.indexPath,
         });
@@ -496,7 +568,9 @@ export async function runNativeModelDesignBrowser() {
             const expected = inspectCentralNavigationRequest(entity, entry, view);
             const service = await servedModel('service', 'PSSYSSERVICEAPIS/ModelAPI.json');
             const serviceDeclaration = inspectCentralNavigationService(service, entity, expected);
-            const navigation = await verifyCentralNavigation(page, expected);
+            const navigation = await verifyCentralNavigation(page, expected, {
+              preexistingResponse: centralDatasetResponses[0],
+            });
             return { ...await capture('navigation'), models, serviceDeclaration, ...navigation };
           } catch (error) {
             error.evidence = { models, ...error.evidence };
@@ -512,14 +586,37 @@ export async function runNativeModelDesignBrowser() {
       await stage('reload', async () => {
         assert.ok(home, 'Native home did not initialize');
         await page.goto(entry, { waitUntil: 'domcontentloaded' });
-        await page.waitForURL(/#\/-\/index\/-/, { timeout: 30_000 });
+        await waitForNativeHomeRoute(page, homeRoute);
         const runtime = await waitForNativeIndexReady(page, {
           application, applicationId, indexPath: app.model?.indexPath,
         });
         assert.equal(await page.locator('input[type="password"]').count(), 0,
-          'Reload must retain the authenticated session');
+        'Reload must retain the authenticated session');
         return { ...await capture('reload'), runtime };
       });
+      if (!probeOnly && application === 'ModelDesign') {
+        const roundtrip = nativeFieldRoundtrip({
+          request: page.request, entry, applicationId,
+          basePath: `/api/${applicationId}/psdevslnsys/28F7326A-7C72-4C2D-A497-A16372ABBADC/psdataentities/123d50d7b350ff6951b4a31c4de5b5d0/psdefields`,
+          fieldId: '0288c6d945e39aabfa7028fa58ab3896',
+          readToken: () => readNativeBrowserToken(page),
+          credentials: {
+            loginname: process.env.MODEL_DESIGN_USER || 'aibizhi',
+            password: process.env.MODEL_DESIGN_PASSWORD || '123456',
+          },
+        });
+        await stage('editor-save', async () => {
+          assert.ok(home, 'Native editor did not reach its home route');
+          assert.ok(login?.tokenPersisted, 'Native model save requires verified browser authentication');
+          return roundtrip.save();
+        });
+        await stage('fresh-session-readback', () => roundtrip.readback());
+        await stage('editor-restore', async () => {
+          const cleanup = await roundtrip.restore();
+          app.editorRestored = cleanup.restored;
+          return cleanup;
+        });
+      }
       await capture('final').catch(error => app.errors.push({ kind: 'screenshot', text: String(error) }));
       await stage('browser-errors', async () => {
         assert.equal(app.errors.length, 0, `Unexplained browser errors: ${app.errors.length}`);
@@ -527,13 +624,18 @@ export async function runNativeModelDesignBrowser() {
       });
       await context.close();
     }
-    report.verdict = summarizeNativeBrowserReport(report.applications);
+    report.verdict = summarizeNativeBrowserReport(report.applications, {
+      fullAcceptance: !probeOnly,
+    });
     if (!probeOnly) {
-      report.acceptanceFailure = report.verdict.prerequisiteChecksPassed
-        ? 'Native editor operations/save/fresh-session readback have no verified workflow evidence yet'
-        : 'Native browser prerequisites failed; editor save/readback cannot be accepted';
+      report.editorRestored = report.applications.ModelDesign?.editorRestored === true;
+      report.acceptanceFailure = !report.verdict.prerequisiteChecksPassed
+        ? 'Native browser prerequisites failed; editor save/readback cannot be accepted'
+        : report.editorRestored ? null
+          : 'Native editor save/readback did not complete restoration';
     }
-    if (!report.verdict.prerequisiteChecksPassed || !probeOnly) process.exitCode = 1;
+    if (!report.verdict.prerequisiteChecksPassed ||
+      (!probeOnly && (report.acceptanceFailure || !report.editorRestored))) process.exitCode = 1;
   } catch (error) {
     report.fatalError = String(error);
     process.exitCode = 1;

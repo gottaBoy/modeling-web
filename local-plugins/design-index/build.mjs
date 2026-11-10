@@ -124,7 +124,8 @@ function writeArtifacts(output, artifacts) {
 }
 
 async function readInputs() {
-  const names = ['build.mjs', 'package.json'];
+  const names = ['build.mjs', 'package.json', 'tests/permitted-menu.test.mjs',
+    'tests/todo-counter.test.mjs'];
   const walk = async prefix => {
     const directory = join(pluginRoot, prefix);
     const info = lstatSync(directory);

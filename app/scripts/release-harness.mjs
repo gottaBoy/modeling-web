@@ -503,10 +503,10 @@ async function verifyServedSourceAssets(importMapPath, importMap) {
         if (installedPath && (await exists(installedPath))) {
           const installedBytes = await readFile(installedPath);
           if (
-            (componentAssetTransforms[packageName] ?? ((_p, s) => s))(
-              installedPath,
-              installedBytes,
-            ).equals(bytes)
+            (packageName === '@ibiz-template/runtime'
+              ? normalizeRuntimeAsset
+              : componentAssetTransforms[packageName] ?? ((_p, s) => s)
+            )(installedPath, installedBytes).equals(bytes)
           ) {
             checked.push(`${packageName} ${cleanPath} (installed release asset)`);
             continue;

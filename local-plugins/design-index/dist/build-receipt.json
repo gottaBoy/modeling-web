@@ -14,15 +14,15 @@
   "inputs": [
     {
       "path": "build.mjs",
-      "sha256": "a79a36d577a04e84c6efd814b8a48d5cfc32054bf1fcbbc22c8ea7e50aa72f8b"
+      "sha256": "99404c058245e7e8b6840d15e9c362690b5d1c00d79226178bcd969d11f83f1b"
     },
     {
       "path": "package.json",
-      "sha256": "83527e64bbd2bdb46f12a8b293914f27840bf8de1f436261f0992e12e25112af"
+      "sha256": "de4e92e65d951540cae0bfc2073329b0e7eb4f7db1ef34fcc6cbd3d339b99857"
     },
     {
       "path": "src/controller.ts",
-      "sha256": "987cb9ed5e1a95d37d32814a85bc8b4e7a86c6d337fa6290ac7cef2c3bda8b2b"
+      "sha256": "ee3a36ac709e92949bfe0436e84e8da515fad2500994744d698a91d9f9eab16f"
     },
     {
       "path": "src/index.ts",
@@ -30,21 +30,29 @@
     },
     {
       "path": "src/model.ts",
-      "sha256": "08bb9c646ba0eac93c30aaa1fb0e9ed8ed2352a8f51927db721bd0a0608cf448"
+      "sha256": "a53874cfb6d62c87783c79bba2283937090667e4946062755217125f55c20435"
     },
     {
       "path": "src/style.css",
       "sha256": "4aa97cbcdf0c211b4bbbcb18d3a4f53d8a934f5c2fdeb4d636226f9d008237f0"
+    },
+    {
+      "path": "tests/permitted-menu.test.mjs",
+      "sha256": "6d076a93a74e42e10d5a722c71a383ace8c110ee3fbc1eb41bc0af1c92ab8a1b"
+    },
+    {
+      "path": "tests/todo-counter.test.mjs",
+      "sha256": "3b00b6b42236d5b765f813b174b12f8c50f9eeab23a55c23337d08b2fa8fd57d"
     }
   ],
   "outputs": [
     {
       "path": "index.mjs",
-      "sha256": "68262db2961612932745225483ada39a3f11a70d5100aa9764a6753a4dd39da3"
+      "sha256": "1c69daa722b6d8630f970ca36bbf3eb02e29abae90ccdaf28fe5e3d73fcd722a"
     },
     {
       "path": "index.system.js",
-      "sha256": "f8169e48d499e86dd0d1a7c9ead920a10814e0a86c0f4e97ae36bacee594e461"
+      "sha256": "2ed1a4c88910567b4290b16059cbab384a264de78c8e27446dd385167779b4d1"
     },
     {
       "path": "style.css",

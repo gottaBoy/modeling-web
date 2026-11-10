@@ -1,0 +1,98 @@
+/* stylelint-disable selector-class-pattern */
+@include b(model-edit-view) {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+@include b(model-edit-view-header) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: getCssVar(color, fill, 1);
+}
+@include b(model-edit-view-header-caption) {
+  flex: 1 1 120px;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@include b(model-edit-view-status) {
+  font-size: 12px;
+}
+@include b(model-edit-view-header-toolbar) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+@include b(model-edit-view-tool) {
+  display: inline-flex;
+  flex: 0 0 30px;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 4px;
+  color: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  &:hover:not(:disabled), &[aria-pressed='true'] {
+    background: getCssVar(color, fill, 2);
+    border-color: getCssVar(color, primary);
+  }
+  &:disabled { cursor: default; opacity: 0.45; }
+  ion-icon { width: 17px; height: 17px; }
+}
+@include b(model-edit-view-workspace) {
+  display: flex;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+@include b(model-edit-view-content) {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+}
+@include b(model-edit-view-changes) {
+  flex: 0 1 42%;
+  min-width: 220px;
+  padding: 10px;
+  overflow: auto;
+  border-left: 1px solid getCssVar(color, border);
+  h3 { margin: 0 0 10px; font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { padding: 7px; overflow-wrap: anywhere; text-align: left; vertical-align: top;
+    border-bottom: 1px solid getCssVar(color, border); }
+  td { font-family: monospace; white-space: pre-wrap; }
+}
+@include b(model-edit-view-error) {
+  padding: 8px 12px;
+  color: getCssVar(color, danger);
+  overflow-wrap: anywhere;
+}
+@include b(model-edit-view-validation) {
+  padding: 4px 12px;
+  font-size: 12px;
+  border-top: 1px solid getCssVar(color, border);
+}
+@media (max-width: 600px) {
+  @include b(model-edit-view-header-toolbar) { flex: 1 1 100%; }
+  @include b(model-edit-view-workspace) { flex-direction: column; }
+  @include b(model-edit-view-changes) {
+    flex: 0 1 40%;
+    min-width: 0;
+    border-top: 1px solid getCssVar(color, border);
+    border-left: 0;
+  }
+}

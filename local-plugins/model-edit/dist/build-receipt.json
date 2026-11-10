@@ -65,7 +65,7 @@
     },
     {
       "path": "src/provider.ts",
-      "sha256": "b64eccc01af47e1758d2317aab2ce776751fea36668ad7520328616de7f4efcd"
+      "sha256": "449e07a693af812fe09a18d0aecf55762b9df022eba6b625d89c93230083555c"
     },
     {
       "path": "src/session.ts",
@@ -98,11 +98,11 @@
   "outputs": [
     {
       "path": "index.mjs",
-      "sha256": "10284e1550c5213685d3cfcb413bb16d6ab1b28211f50a60e7bd5ec649c2d7fe"
+      "sha256": "e2f57e62829ef74625f87714e8c380676119fbff27b86f652a55c43ac2264f2d"
     },
     {
       "path": "index.system.js",
-      "sha256": "8bde8cc71a6158bc28161e91cb4b0ee679490a5214cf947d8844de707857d2f7"
+      "sha256": "be096271349475efe4d2c98976a21ff57fe5254c6b0ad382e035436e6aaf765b"
     },
     {
       "path": "style.css",

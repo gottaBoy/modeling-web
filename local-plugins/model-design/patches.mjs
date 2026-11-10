@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 export const CANDIDATE_NAME = '@aibiz/model-design-candidate';
 export const CANDIDATE_VERSION = '0.1.0';
@@ -9,8 +11,30 @@ export const RUNTIME_SOURCES = Object.freeze({
   '0.2.2-local.2': 'modelingweb/local-plugins/runtime-model-next',
 });
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
+const ideEnhancements = [
+  ['model-edit-view.tsx', 'model-edit-readonly-and-save-lifecycle'],
+  ['model-edit-document.ts', 'ide-document-history-diff'],
+  ['model-edit-messages.ts', 'ide-bilingual-messages'],
+  ['model-edit-view.scss', 'ide-workbench-style'],
+];
+
+export function modelEditEnhancementInputs() {
+  return ideEnhancements.map(([name]) => {
+    const path = `enhancements/${name}`;
+    const data = readFileSync(fileURLToPath(new URL(`./${path}`, import.meta.url)));
+    return { path, bytes: data.length, sha256: hash(data) };
+  });
+}
 
 const fixes = [
+  {
+    path: 'src/ui-action/model-edit-provider.ts',
+    kind: 'ide-model-edit-readonly',
+    changes: [[
+      "    const readonly = action.uiactionParamJO?.readonly === 'true';",
+      "    const readonly = action.uiactionParamJO?.readonly === 'true' || action.uiactionParamJO?.readonly === true;",
+    ]],
+  },
   {
     path: 'src/components/model-clipboard-item/model-clipboard-item.tsx',
     diagnostics: 1,
@@ -279,6 +303,21 @@ export function patchCandidateSources(files) {
     return { ...file, data, bytes: data.length, sha256: hash(data) };
   });
   assert.equal(patches.length, fixes.length, 'Required source adaptation missing');
+  for (const [name, kind] of ideEnhancements) {
+    const path = `src/components/model-edit-view/${name}`;
+    const data = readFileSync(fileURLToPath(new URL(`./enhancements/${name}`, import.meta.url)));
+    const original = files.find(file => file.path === path);
+    const index = contents.findIndex(file => file.path === path);
+    const enhancement = { path: `enhancements/${name}`, bytes: data.length, sha256: hash(data) };
+    const patch = patches.find(item => item.path === path);
+    if (patch) Object.assign(patch, { candidateSha256: hash(data), enhancement });
+    else patches.push({ path, kind, originalSha256: original ? hash(original.data) : null,
+      candidateSha256: hash(data), enhancement });
+    const file = { path, data, bytes: data.length, sha256: hash(data) };
+    if (index >= 0) contents[index] = file;
+    else contents.push(file);
+  }
+  contents.sort((left, right) => left.path.localeCompare(right.path));
   patches.sort((a, b) => a.path.localeCompare(b.path));
   return { contents, patches, indexDiagnosticsAddressed: 22 };
 }

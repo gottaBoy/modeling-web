@@ -29,7 +29,7 @@ import {
 
 const pluginRoot = fileURLToPath(new URL('..', import.meta.url));
 const probeReport = '../../../../.artifacts/native-model-design-build/' +
-  'build-c8c3e614-c829-40ae-8ee4-52ddb75b7f8e/report.json';
+  'owned-source-20261109-r2/report.json';
 const runtimeReport = '../../../../.artifacts/runtime-model-source-build/' +
   'build-20261006-model-design-input-implementation-pins/report.json';
 const runtime2Report = '../../../../.artifacts/runtime-model-source-build/' +
@@ -76,9 +76,11 @@ test('pins all original source and applies exactly the 22 TS7053 fixes', () => {
   const before = files.map(file => [file.path, file.sha256]);
   const plan = patchCandidateSources(files);
   assert.equal(plan.patches.filter(patch => patch.diagnosticCode === 'TS7053').length, 7);
-  assert.equal(plan.patches.length, 9);
+  assert.equal(plan.patches.length, 13);
   assert.deepEqual(plan.patches.filter(patch => patch.kind).map(patch => patch.kind).sort(), [
-    'editor-owned-lifecycle-and-readonly', 'model-edit-readonly-and-save-lifecycle',
+    'editor-owned-lifecycle-and-readonly', 'ide-bilingual-messages',
+    'ide-document-history-diff', 'ide-model-edit-readonly', 'ide-workbench-style',
+    'model-edit-readonly-and-save-lifecycle',
   ]);
   assert.equal(plan.indexDiagnosticsAddressed, 22);
   assert.deepEqual(files.map(file => [file.path, file.sha256]), before);
@@ -90,13 +92,13 @@ test('pins all original source and applies exactly the 22 TS7053 fixes', () => {
   assert.match(index, /@ibiz-template-plugin\/runtime-model\/loader/);
 });
 
-function modelEditFixture(t, { readonly = false, exec, getService } = {}) {
+function modelEditFixture(t, { readonly = false, exec, getService, confirm, language = 'en', withHooks = false } = {}) {
   const probe = verifiedProbe();
   const link = name => probe.report.dependencies.links.find(item => item.name === name).target;
   const ts = createRequire(join(link('typescript'), 'package.json'))(link('typescript'));
   const vue = createRequire(join(link('vue'), 'package.json'))(link('vue'));
-  const source = patchCandidateSources(sourceFiles(probe.report.packageRoot, { names: ['src'] }))
-    .contents.find(file => file.path === 'src/components/model-edit-view/model-edit-view.tsx');
+  const plan = patchCandidateSources(sourceFiles(probe.report.packageRoot, { names: ['src'] }));
+  const source = plan.contents.find(file => file.path === 'src/components/model-edit-view/model-edit-view.tsx');
   const compiled = ts.transpileModule(source.data.toString(), {
     fileName: source.path,
     compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.CommonJS,
@@ -112,6 +114,16 @@ function modelEditFixture(t, { readonly = false, exec, getService } = {}) {
       return exec ? exec(...args) : { status: 200, data: { model: { name: 'existing' } } };
     },
   };
+  const helper = name => {
+    const file = plan.contents.find(item => item.path.endsWith(`/model-edit-view/${name}.ts`));
+    assert.ok(file);
+    const code = ts.transpileModule(file.data.toString(), {
+      fileName: file.path, compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.CommonJS },
+    }).outputText;
+    const exports = {};
+    runInNewContext(code, { exports }, { filename: file.path });
+    return exports;
+  };
   const module = { exports: {} };
   runInNewContext(compiled, {
     exports: module.exports, module,
@@ -119,6 +131,8 @@ function modelEditFixture(t, { readonly = false, exec, getService } = {}) {
     require(name) {
       if (name === 'vue') return { ...vue, onUnmounted: callback => unmounted.push(callback) };
       if (name === '@ibiz-template/vue3-util') return { useNamespace: () => ({ b: value => value }) };
+      if (name === './model-edit-document') return helper('model-edit-document');
+      if (name === './model-edit-messages') return helper('model-edit-messages');
       if (name.endsWith('.scss')) return {};
       throw new Error(`Unexpected model-edit runtime dependency: ${name}`);
     },
@@ -128,12 +142,27 @@ function modelEditFixture(t, { readonly = false, exec, getService } = {}) {
         getApp: () => ({ deService: { getService: getService ?? (async () => service) } }),
       },
       message: { error: message => errors.push(message) },
-      i18n: { t: value => value },
+      i18n: { t: value => value, getLang: () => language },
+      confirm: { warning: confirm ?? (async () => true) },
     },
   });
+  const hookSets = { shouldDismiss: new Set(), beforeDismiss: new Set() };
+  const modal = withHooks ? {
+    hooks: Object.fromEntries(Object.entries(hookSets).map(([name, callbacks]) => [name, {
+      tapPromise: callback => callbacks.add(callback), removeTapPromise: callback => callbacks.delete(callback),
+    }])),
+    dismiss: async result => {
+      const context = { allowClose: true };
+      for (const callback of hookSets.shouldDismiss) await callback(context);
+      if (!context.allowClose) return false;
+      for (const callback of hookSets.beforeDismiss) await callback(result);
+      dismissals.push(result);
+      return true;
+    },
+  } : { dismiss: value => dismissals.push(value) };
   const props = vue.reactive({
     readonly, codeName: 'PSTest', context: { srfappid: 'fixture-app', pstest: 'fixture-only-key' },
-    params: {}, modal: { dismiss: value => dismissals.push(value) },
+    params: {}, modal,
   });
   const scope = vue.effectScope();
   const state = scope.run(() => module.exports.default.setup(props));
@@ -146,12 +175,12 @@ function modelEditFixture(t, { readonly = false, exec, getService } = {}) {
   };
   t.after(unmount);
   const flush = async () => {
-    for (let i = 0; i < 8; i++) await Promise.resolve();
+    for (let i = 0; i < 32; i++) await Promise.resolve();
     await vue.nextTick();
   };
   const render = () => module.exports.default.render.call(vue.proxyRefs({ ...props, ...state,
     get readonly() { return props.readonly; } }));
-  return { props, state, calls, errors, dismissals, service, flush, unmount, render };
+  return { props, state, calls, errors, dismissals, service, flush, unmount, render, hookSets };
 }
 
 const deferred = () => {
@@ -160,6 +189,46 @@ const deferred = () => {
   const promise = new Promise((done, fail) => { resolve = done; reject = fail; });
   return { promise, resolve, reject };
 };
+
+for (const [configured, expected] of [[true, true], ['true', true], [false, false], ['false', false], [undefined, false]]) {
+  test(`MODEL_EDIT native action preserves readonly=${String(configured)} as ${expected}`, async () => {
+    const probe = verifiedProbe();
+    const link = name => probe.report.dependencies.links.find(item => item.name === name).target;
+    const ts = createRequire(join(link('typescript'), 'package.json'))(link('typescript'));
+    const source = patchCandidateSources(sourceFiles(probe.report.packageRoot, { names: ['src'] }))
+      .contents.find(file => file.path === 'src/ui-action/model-edit-provider.ts');
+    const code = ts.transpileModule(source.data.toString(), {
+      compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.CommonJS },
+    }).outputText;
+    let props;
+    let saved = 0;
+    const exports = {};
+    runInNewContext(code, { exports, require: name => ({
+      vue: { h: (_component, data) => data, resolveComponent: value => value },
+      '@ibiz-template/runtime': {
+        UIActionProviderBase: class {}, SysUIActionTag: { SAVE: 'SAVE' },
+        calcDeCodeNameById: () => 'pstest', convertNavData: () => ({}), formatMultiData: value => value,
+      },
+      'qx-util': { createUUID: () => 'fixture-domain', notNilEmpty: value => Boolean(value?.length) },
+    }[name]), ibiz: {
+      uiDomainManager: {
+        get: () => ({ dataModification: true }), create: id => ({ id }), destroy() {},
+      },
+      hub: { getAppDataEntity: async () => ({ codeName: 'PSTest' }) },
+      overlay: { createDrawer: factory => {
+        props = factory({});
+        return { present: async () => {}, onWillDismiss: async () => ({ ok: false }) };
+      } },
+    } });
+    await new exports.ModelEditProvider().execAction({ uiactionParamJO: { readonly: configured }, actionTarget: 'SINGLEKEY' }, {
+      context: { clone: () => ({}) }, params: {}, data: [{}],
+      view: { context: { srfsessionid: 'original' }, model: { appDataEntityId: 'fixture.entity' },
+        call: async () => { saved++; return true; } },
+    });
+    assert.equal(props.readonly, expected);
+    assert.equal(saved, expected ? 0 : 1);
+  });
+}
 
 test('MODEL_EDIT forwards its live readonly prop and blocks direct saves, not just toolbar buttons', async t => {
   const fixture = modelEditFixture(t, { readonly: true });
@@ -184,10 +253,14 @@ for (const failure of ['HTTP failure', 'rejected request']) {
       },
     });
     await fixture.flush();
+    assert.equal(fixture.state.loaded.value, true);
+    assert.equal(fixture.state.loading.value, false);
+    fixture.state.value.value = '{"changed":true}';
+    assert.equal(fixture.state.draft.dirty, true);
     await fixture.state.save(true);
     assert.equal(fixture.errors.length, 1);
     assert.equal(fixture.dismissals.length, 0);
-    fixture.state.closeView();
+    await fixture.state.closeView();
     assert.equal(fixture.dismissals[0].params.isSave, false);
     assert.equal(fixture.state.loading.value, false);
   });
@@ -195,11 +268,16 @@ for (const failure of ['HTTP failure', 'rejected request']) {
 
 test('MODEL_EDIT reports successful save only after HTTP 200 and suppresses concurrent saves', async t => {
   const pending = deferred();
+  let serverModel = {};
   const fixture = modelEditFixture(t, {
-    exec: action => action === 'ExportModelV2'
-      ? { status: 200, data: { model: {} } } : pending.promise,
+    exec: (action, _context, input) => action === 'ExportModelV2'
+      ? { status: 200, data: { model: serverModel } } : pending.promise.then(response => {
+        serverModel = input.model;
+        return response;
+      }),
   });
   await fixture.flush();
+  fixture.state.value.value = '{"changed":true}';
   const saving = fixture.state.save(true);
   await fixture.flush();
   await fixture.state.save(true);
@@ -219,6 +297,7 @@ for (const transition of ['readonly', 'unmount']) {
       getService: async () => ++lookups === 1 ? fixture.service : lookup.promise,
     });
     await fixture.flush();
+    fixture.state.value.value = '{"changed":true}';
     const saving = fixture.state.save(true);
     await fixture.flush();
     if (transition === 'readonly') fixture.props.readonly = true;
@@ -252,14 +331,194 @@ test('MODEL_EDIT does not dismiss or notify from an in-flight save after unmount
       ? { status: 200, data: { model: {} } } : pending.promise,
   });
   await fixture.flush();
+  fixture.state.value.value = '{"changed":true}';
   const saving = fixture.state.save(true);
   await fixture.flush();
   fixture.unmount();
   pending.resolve({ status: 200 });
   await saving;
-  fixture.state.closeView();
+  await fixture.state.closeView();
   assert.equal(fixture.dismissals.length, 0);
   assert.equal(fixture.errors.length, 0);
+});
+
+for (const invalid of ['[1]', 'null', 'true', '{"name":', '{"n":1e999}']) {
+  test(`MODEL_EDIT rejects invalid object draft ${invalid} before any save HTTP`, async t => {
+    const fixture = modelEditFixture(t);
+    await fixture.flush();
+    fixture.state.value.value = invalid;
+    await fixture.state.save();
+    assert.equal(fixture.state.valid.value, false);
+    assert.deepEqual(fixture.calls.map(row => row[0]), ['ExportModelV2']);
+    assert.equal(fixture.state.isSave.value, false);
+    assert.match(fixture.errors[0], /valid JSON object/);
+  });
+}
+
+test('MODEL_EDIT supports edit, format, undo, redo and structured changes on the actual view', async t => {
+  const fixture = modelEditFixture(t);
+  await fixture.flush();
+  fixture.state.value.value = '{"name":"updated"}';
+  fixture.state.edit('format');
+  assert.match(fixture.state.value.value, /\n/);
+  assert.equal(fixture.state.comparison.value.entries[0].path, '/name');
+  fixture.state.edit('undo');
+  assert.equal(fixture.state.value.value, '{"name":"updated"}');
+  fixture.state.edit('undo');
+  assert.equal(fixture.state.draft.dirty, false);
+  fixture.state.edit('redo');
+  assert.equal(fixture.state.draft.dirty, true);
+  assert.deepEqual(fixture.calls.map(row => row[0]), ['ExportModelV2']);
+});
+
+test('MODEL_EDIT detects a changed server baseline without importing or discarding local edits', async t => {
+  let exports = 0;
+  const fixture = modelEditFixture(t, {
+    exec: async () => ({ status: 200, data: { model: { version: ++exports } } }),
+  });
+  await fixture.flush();
+  fixture.state.value.value = '{"version":3}';
+  await fixture.state.save(true);
+  assert.deepEqual(fixture.calls.map(row => row[0]), ['ExportModelV2', 'ExportModelV2']);
+  assert.equal(fixture.state.value.value, '{"version":3}');
+  assert.equal(fixture.state.draft.dirty, true);
+  assert.equal(fixture.state.isSave.value, false);
+  assert.equal(fixture.dismissals.length, 0);
+  assert.match(fixture.errors[0], /server model changed/);
+});
+
+for (const mode of ['mismatch', 'readback-http', 'readback-throw']) {
+  test(`MODEL_EDIT keeps a committed but ${mode} import explicitly unverified`, async t => {
+    let committed = false;
+    const fixture = modelEditFixture(t, {
+      exec: async action => {
+        if (action === 'ImportModelV2') { committed = true; return { status: 200 }; }
+        if (committed && mode === 'readback-throw') throw new Error('unavailable');
+        if (committed && mode === 'readback-http') return { status: 500 };
+        return { status: 200, data: { model: { name: 'old' } } };
+      },
+    });
+    await fixture.flush();
+    fixture.state.value.value = '{"name":"changed"}';
+    await fixture.state.save(true);
+    assert.equal(fixture.calls.filter(row => row[0] === 'ImportModelV2').length, 1);
+    assert.equal(fixture.state.isSave.value, true);
+    assert.equal(fixture.state.verifiedSave.value, false);
+    assert.equal(fixture.state.draft.dirty, true);
+    assert.equal(fixture.dismissals.length, 0);
+    assert.match(fixture.errors[0], /readback could not be verified/);
+    await fixture.state.closeView();
+    assert.equal(fixture.dismissals[0].params.isSave, true);
+  });
+}
+
+test('MODEL_EDIT preserves scope/key and verifies persisted data despite JSON property reordering', async t => {
+  let stored = { name: 'old', enabled: true };
+  const fixture = modelEditFixture(t, {
+    exec: async (action, _context, data) => {
+      if (action === 'ImportModelV2') {
+        assert.equal(data.id, 'fixture-only-key');
+        assert.equal(data.srfmodelv2scope, 'CURRENT');
+        stored = JSON.parse(JSON.stringify(data.model));
+        return { status: 200 };
+      }
+      return { status: 200, data: { model: { enabled: stored.enabled, name: stored.name } } };
+    },
+  });
+  fixture.props.context.srfmodelv2scope = 'CURRENT';
+  await fixture.flush();
+  fixture.state.value.value = '{"name":"updated","enabled":true}';
+  await fixture.state.save();
+  assert.deepEqual(fixture.calls.map(row => row[0]), [
+    'ExportModelV2', 'ExportModelV2', 'ImportModelV2', 'ExportModelV2',
+  ]);
+  assert.equal(fixture.state.draft.dirty, false);
+  assert.equal(fixture.state.verifiedSave.value, true);
+  assert.equal(fixture.errors.length, 0);
+});
+
+test('MODEL_EDIT server reload cannot retain an earlier saved-and-verified status', async t => {
+  let server = { name: 'original' };
+  const fixture = modelEditFixture(t, {
+    exec: async (action, _context, data) => {
+      if (action === 'ImportModelV2') {
+        server = JSON.parse(JSON.stringify(data.model));
+        return { status: 200 };
+      }
+      return { status: 200, data: { model: server } };
+    },
+  });
+  await fixture.flush();
+  fixture.state.value.value = '{"name":"my edit"}';
+  await fixture.state.save();
+  assert.equal(fixture.state.verifiedSave.value, true);
+  server = { name: 'external edit' };
+  await fixture.state.load();
+  assert.equal(fixture.state.verifiedSave.value, false);
+  assert.equal(fixture.state.isSave.value, true);
+  assert.equal(fixture.state.draft.dirty, false);
+  assert.equal(JSON.parse(fixture.state.value.value).name, 'external edit');
+});
+
+for (const locale of ['en', 'zh-CN']) {
+  test(`MODEL_EDIT ${locale} discard cancellation protects draft on reload and close`, async t => {
+    const fixture = modelEditFixture(t, { language: locale, confirm: async () => false });
+    await fixture.flush();
+    fixture.state.value.value = '{"draft":true}';
+    await fixture.state.load();
+    await fixture.state.closeView();
+    assert.equal(fixture.state.value.value, '{"draft":true}');
+    assert.equal(fixture.dismissals.length, 0);
+    assert.deepEqual(fixture.calls.map(row => row[0]), ['ExportModelV2']);
+  });
+}
+
+test('MODEL_EDIT readonly edits and history commands cannot change the loaded draft', async t => {
+  const fixture = modelEditFixture(t, { readonly: true });
+  await fixture.flush();
+  const initial = fixture.state.value.value;
+  fixture.state.value.value = '{"attempt":true}';
+  for (const command of ['format', 'undo', 'redo']) fixture.state.edit(command);
+  await fixture.state.save();
+  assert.equal(fixture.state.value.value, initial);
+  assert.equal(fixture.state.draft.dirty, false);
+  assert.deepEqual(fixture.calls.map(row => row[0]), ['ExportModelV2']);
+});
+
+test('MODEL_EDIT modal hooks protect external dismissals and are removed on unmount', async t => {
+  const fixture = modelEditFixture(t, { withHooks: true, confirm: async () => false });
+  await fixture.flush();
+  fixture.state.value.value = '{"draft":true}';
+  assert.equal(await fixture.props.modal.dismiss({ ok: true }), false);
+  assert.equal(fixture.dismissals.length, 0);
+  fixture.unmount();
+  assert.equal(fixture.hookSets.shouldDismiss.size, 0);
+  assert.equal(fixture.hookSets.beforeDismiss.size, 0);
+});
+
+test('MODEL_EDIT failed discard confirmation cannot close or reload and stays handled', async t => {
+  const fixture = modelEditFixture(t, { confirm: async () => { throw new Error('confirmation unavailable'); } });
+  await fixture.flush();
+  fixture.state.value.value = '{"draft":true}';
+  await fixture.state.closeView();
+  await fixture.state.load();
+  assert.equal(fixture.dismissals.length, 0);
+  assert.deepEqual(fixture.calls.map(row => row[0]), ['ExportModelV2']);
+  assert.equal(fixture.state.draft.dirty, true);
+  assert.equal(fixture.errors.length, 2);
+});
+
+test('MODEL_EDIT unmount while confirming cannot complete a late modal close', async t => {
+  const confirmation = deferred();
+  const fixture = modelEditFixture(t, { withHooks: true, confirm: () => confirmation.promise });
+  await fixture.flush();
+  fixture.state.value.value = '{"draft":true}';
+  const closing = fixture.state.closeView();
+  await fixture.flush();
+  fixture.unmount();
+  confirmation.resolve(true);
+  await closing;
+  assert.equal(fixture.dismissals.length, 0);
 });
 
 function editorFixture(t, { delayedLoader = false } = {}) {

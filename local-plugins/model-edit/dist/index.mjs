@@ -397,9 +397,10 @@ class ModelEditProvider extends UIActionProviderBase {
                 contexts.unshift({ key: deName, value: 'srfkey', rawValue: false });
             }
             Object.assign(resultContext, convertNavData(contexts, data[0] || {}, params, context));
-            const resultParams = convertNavData(action.navigateParams, ['MULTIKEY', 'MULTIDATA'].includes(action.actionTarget) && data.length > 0
+            const configuredParams = convertNavData(action.navigateParams, ['MULTIKEY', 'MULTIDATA'].includes(action.actionTarget) && data.length > 0
                 ? formatMultiData(action.navigateParams, data)
                 : data[0] || {}, params, resultContext);
+            const resultParams = { ...params, ...configuredParams };
             const entity = await ibiz.hub.getAppDataEntity(entityId, view.model.appId);
             if (!entity?.codeName || !entity.id)
                 throw new Error('Missing entity metadata.');
