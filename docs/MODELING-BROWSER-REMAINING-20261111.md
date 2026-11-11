@@ -57,7 +57,139 @@ Static receipt:
 `.artifacts/owned-five-dataset-browser/static-contract-20261111-r1/report.json`
 
 Status is `STATIC-CONTRACT-VERIFIED-NOT-RUN`. No browser, Docker, SQL, or
-shared-port operation was performed in this task.
+shared-port operation was performed in that initial static-only phase.
+
+## Live Follow-up: November 12
+
+The config-r6 backend was rechecked against its real deployment receipt:
+
+```text
+.artifacts/native-nonadmin-fixtures/25dd6a7232c7/backend-runtime-registry-backend-config-r6/deployment-input.private.json
+SHA-256: 9a772586ded08da8b17b053cba6a450774dddc38e5f601527500d9542ac34453
+```
+
+The old registry frontend launch was stale: its two frontend containers no
+longer existed, its deployment referenced backend-r1, and its loopback entries
+returned HTTP 502. It was not accepted as current config-r6 evidence.
+
+A fresh owned input and two new owned frontends were prepared and launched
+through the unchanged source-bound tools:
+
+```text
+.artifacts/native-model-design-owned-backend/registry-config6-owned-20261111-r1/input.json
+SHA-256: a2b16c171fe41a99fd2935f845182994da6e19d0ce90e6daea83f3a7855c6d6b
+
+.artifacts/owned-native-modeldesign-launch/registry-config6-owned-20261111-r1/report.json
+SHA-256: 439071c54453fe797eb5e922aba14c7b55eb09d677bcd5e9e2ec33cb82d681c7
+```
+
+The two new frontends are healthy, bind-mounted read-only, and unpublished by
+Docker. Their owned loopback bridges reuse now-unused 32458/32459; shared
+32008/32009 and PLM 30250 were not modified. No SQL, model save, native seed
+creation, backend restart, or production-source change was performed.
+
+### Actual Browser Results
+
+The new source-bound diagnostic runner is:
+
+`modelingweb/app/tests/owned-modeling-bootstrap.browser.mjs`
+
+It uses normal UI login and real application-generated token/org headers,
+verifies ordinary-user appdata, and repeats the original owned bridge/runtime
+inspector before and after execution. It neither injects identity nor invokes
+controller actions.
+
+Two actual four-case runs were executed for editor A on root A:
+
+| Run | zh desktop | zh mobile | en desktop | en mobile |
+| --- | --- | --- | --- | --- |
+| r1 | pointer intercepted | pointer intercepted | pointer intercepted | pointer intercepted |
+| r2 | bootstrap/home and natural menu click observed | same | same | same |
+
+First-run strict failure receipt, preserving the original interception:
+
+```text
+.artifacts/owned-modeling-bootstrap-browser/config6-editor-a-matrix-20261112-r1/report.private.json
+SHA-256: cc0e54922e8ca9233a0003b884a1f3328abf9268b4abdb4e822e226e55428528
+status: FAILED-LIVE-BROWSER-REMAINING-BLOCKERS
+```
+
+Second-run evidence:
+
+```text
+.artifacts/owned-modeling-bootstrap-browser/config6-editor-a-matrix-20261112-r2/report.private.json
+SHA-256: 5e47775c880bec73f49efd3bab1b9d5356a41ff1c34bc1c9f2e558f30a7860d0
+status: OBSERVED-BOOTSTRAP-NATURAL-CLICK-NOT-FULL-ACCEPTANCE
+```
+
+All four real runs have verified normal login, real appdata identity, naturally
+supplied `srfsystemid=ibizmodeling` and actor organization, and mounted native
+home controllers. Each observed only the normal pre-login catalog 401, with no
+post-login 401.
+
+The pointer blocker was the automatically opened Console drawer covering the
+System menu. Its center hit-test resolved to the Console's `DETABEXPVIEW`
+content, not the menu. In r2 the runner used normal keyboard Escape, as the
+existing native navigation harness already does. In all four cases the open
+drawer count changed from one to zero and the menu could be clicked naturally.
+No `force`, CSS visibility edit, overlay removal, or controller injection was
+used. This is a normal dismiss operation, not a production layout fix.
+
+The following remain genuine blockers and are retained in the reports:
+
+- authenticated optional extension-manifest 404, not generally allowlisted;
+- authenticated `work_items/count_my_todo` 404;
+- the newly opened System page is visually empty at the captured stage;
+- the mobile layout keeps wide desktop navigation/content outside its
+  390-pixel viewport; mobile navigation is not accepted;
+- the observation establishes a click, not completion of five rendered
+  dataset/list flows.
+
+### M03 Strict Seed Failure
+
+No complete config-r6 native-create seed receipt exists in this run. The newest
+historical receipt has eight records, lacks `PSSysApp`, reports
+`partial-native-create-seeds-app-config-blocked`, and binds backend-r1.
+The strict five-dataset browser gate was actually executed against that receipt
+and correctly rejected it before opening a browser or sending dataset traffic:
+
+```text
+.artifacts/owned-five-dataset-browser/config6-editor-a-seed-gate-20261112-r1/report.private.json
+SHA-256: c28f51fcbe2006e6b28efe45e650edeb528ce7b731800cb4bf90d3450b550caf
+status: FAILED
+nativeAcceptance: false
+permissionAcceptance: false
+datasets: []
+```
+
+The missing native-create precondition was not replaced with SQL, fake IDs,
+empty HTTP 200, historical record relabeling, or direct HTTP editor writes.
+Native editor save, readback, fresh-session readback, and restoration therefore
+remain unexecuted and unaccepted.
+
+### M04 Matrix Skeleton
+
+`owned-modeling-bootstrap.browser.mjs` enumerates all six real actors, both
+target roots, both languages and both viewports: 48 unique rows. Four editor-A
+own-root observations ran; the remaining 44 rows explicitly remain
+`NOT-EXECUTED-NOT-ACCEPTED`. Own-root editor/viewer read expectations and all
+cross-root/no-access denials are separate expectations, not inferred successes.
+Only the editor own-root execution mode is currently enabled.
+
+The dedicated skeleton and existing strict dataset contracts passed together:
+
+```text
+node --test modelingweb/app/tests/owned-modeling-bootstrap.test.mjs \
+  scripts/tests/owned-five-dataset-browser.test.mjs
+30 tests, 30 pass, 0 fail, 0 skipped
+
+.artifacts/owned-modeling-bootstrap-browser/config6-editor-a-matrix-20261112-r2/helper-tests.tap
+SHA-256: 62424b43b4cce4ea987b89e913920b6d795d1a71f7fe8151bade7a82974c0fe2
+```
+
+Both live runs keep native, permission, editor-save, fresh-session-readback and
+production acceptance false. The healthy owned frontends remain available for
+the next source-bound browser run; the diagnostic browser processes have closed.
 
 ## Required Runtime Matrix
 
