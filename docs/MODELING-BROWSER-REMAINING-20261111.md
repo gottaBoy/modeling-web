@@ -191,6 +191,73 @@ Both live runs keep native, permission, editor-save, fresh-session-readback and
 production acceptance false. The healthy owned frontends remain available for
 the next source-bound browser run; the diagnostic browser processes have closed.
 
+## M01/M04 Live Receipts: November 12
+
+The config-r6 owned frontend launch remained bound to:
+
+```text
+launch report:
+.artifacts/owned-native-modeldesign-launch/registry-config6-owned-20261111-r1/report.json
+SHA-256: 439071c54453fe797eb5e922aba14c7b55eb09d677bcd5e9e2ec33cb82d681c7
+
+launch state:
+.artifacts/owned-native-modeldesign-launch/registry-config6-owned-20261111-r1/launch-state.private.json
+SHA-256: 9f0616e90fb7f77d8d9574f57b2122c321caeda6004dc52026dbcd0f01922d5a
+```
+
+### M01 Central Route
+
+The real probe used normal login and the owned frontend at port `32458`.
+Central model, plugin assets, login, theme and home all passed. The exact
+published dataset request failed:
+
+```text
+POST /api/ibizmodeling__central/psdevslns/fetchcurdcslnuser -> HTTP 404
+```
+
+The compact receipt is:
+
+`.artifacts/owned-modeling-bootstrap-browser/config6-m01-route-20261112-r1/report.private.json`
+
+SHA-256:
+`0667ddb52591bef4461f0b91f98efec89249824a7db805e03d0d83ed793a0af5`
+
+Pre-login organization catalog `401` remains the expected unauthenticated
+transition. This is not the same event as the authenticated Central dataset
+`404`. No shared route, backend container, SQL, or deployment was changed.
+The next repair must publish this exact owned route and rerun the real browser
+request; an empty result, route rewrite that bypasses the reviewed query, or a
+status-only pass is not acceptance.
+
+### M04 Read-Only Matrix
+
+The actual viewer/no-access/cross-root read-only run executed six cases:
+
+- viewer own-root A, viewer own-root B;
+- no-access own-root A, no-access own-root B;
+- editor cross-root A to B, editor cross-root B to A.
+
+Every case used normal UI login. No identity/header/controller injection and no
+write method were allowed. The run receipt is:
+
+`.artifacts/owned-modeling-permission-browser/config6-readonly-matrix-20261112-r1/report.private.json`
+
+SHA-256:
+`1b2b774dc66bc13d85b6cfb55103e1cd77ff2b23bcd21c223740cb1a23e35d88`
+
+Observed boundary:
+
+- all six logins completed;
+- no-access and cross-root cases produced real `403` fetch observations;
+- viewer cases did not reach a ready ModelDesign root/list controller and remain
+  unaccepted rather than being inferred from login success;
+- pre-login `401`, optional extension `404`, and todo-count `404` remain visible;
+- no model write, editor save, fresh-session readback, or physical snapshot ran.
+
+The permission browser script is source-bound and remains scoped to
+read-only observation. It records status differences as evidence; it does not
+turn `401`, `403`, `404`, empty pages, or missing controllers into success.
+
 ## Required Runtime Matrix
 
 Each case requires a new output directory and the exact launch/deployment/seed
