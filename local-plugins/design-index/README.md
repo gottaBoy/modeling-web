@@ -22,6 +22,15 @@ This is a first-stage implementation, not production or whole-package acceptance
   Existing nested routes are retained for route-opening defaults. Dispatch errors
   are retained in `state.designIndexErrors` and rejected tasks, not reported as PASS.
   A pending command is not proof that its target rendered.
+- The original terminal `openDefault` is retained. Only the declared bottom-menu
+  APPVIEW whose exact target is `PSSysDevBKTaskTabExpView` in `DRAWER_BOTTOM` mode
+  receives missing defaults for a 45% drawer, standard header/close control,
+  localized menu title and Escape support. Explicit target height/modal options
+  win. Commands still use the host AppFunc/OpenView chain and its normal modal
+  dismissal. A scoped `aibiz-console-drawer` style fixes the host header's
+  absolute-positioned title/close overlap; other drawers are unchanged.
+  Menu visibility, enabled state, permission and controller lifetime are checked
+  again after asynchronous configuration reads and before command dispatch.
 - Unbound side menus resolve their original model from layout controls. Host
   flattening, item providers and permission calculation run on staged state;
   disposal prevents publishing late results. Prior visibility/permission
@@ -59,6 +68,9 @@ This is a first-stage implementation, not production or whole-package acceptance
 
 - Native rendering, terminal/console functionality, all menu target plugins,
   permissions against the real platform and browser lifecycle are not accepted.
+- The source Console drawer regression is described in
+  [CONSOLE-DRAWER-20261114.md](../../docs/CONSOLE-DRAWER-20261114.md). Its real Vue/Element Plus
+  DOM and source command-chain fixture does not replace current-runtime verification.
 - Menus without a corresponding host side-menu placeholder are preserved and
   reported in `designIndexErrors`; no invented render destination is claimed.
 - Host tabs retain their original close affordance; a protected close is refused

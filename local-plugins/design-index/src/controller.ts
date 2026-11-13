@@ -3,6 +3,7 @@ import * as HostRuntime from '@ibiz-template/runtime';
 import {
   flattenMenus, panelRole, permittedMenu, prepareIndexModel, sideMenuName, sideMenuNames, viewIdentity,
   classifyTodoCounterError,
+  consoleDrawerOptions,
 } from './model';
 
 type Cleanup = () => void;
@@ -250,6 +251,13 @@ export class DesignIndexController extends ViewController {
     if (!view.state?.isCreated) this.listen(view, 'onCreated', protect);
   }
 
+  private requireMenuAccess(menu: any, item: any): void {
+    if (!this.live) throw new Error('Design index is destroyed.');
+    if (!permittedMenu(menu, item)) {
+      throw new Error('Index menu is hidden, disabled or not permitted.');
+    }
+  }
+
   private clickMenu(
     menu: any, item: any, event: MouseEvent, useDepth: boolean, original: Function,
   ): Promise<unknown> {
@@ -260,7 +268,7 @@ export class DesignIndexController extends ViewController {
     if (pending) return pending;
     // The entry is queued before execution so reentrant/default clicks share one request.
     const task = Promise.resolve().then(async () => {
-      if (!this.live) throw new Error('Design index is destroyed.');
+      this.requireMenuAccess(menu, item);
       this.rememberProtected(item, menu);
       const runtime = (globalThis as any).ibiz;
       if (!item.appFuncId && (item.id || item.name)?.toLowerCase() === 'debug' &&
@@ -270,14 +278,31 @@ export class DesignIndexController extends ViewController {
         }
         return runtime.devTool.triggerVisible();
       }
-      if (!item.disableClose || menu.itemProviders?.[item.id]?.onClick) {
+      let drawerOptions: Record<string, unknown> | undefined;
+      if (menu.appMenu.name === 'bottomsidemenu' &&
+          (item.id || item.name)?.toLowerCase() === 'terminal' &&
+          item.appFuncId && !menu.itemProviders?.[item.id]?.onClick) {
+        const app = await runtime.hub.getApp(item.appId || menu.context.srfappid);
+        this.requireMenuAccess(menu, item);
+        const func = app.getAppFunc(item.appFuncId);
+        if (func?.appFuncType === 'APPVIEW') {
+          const config = await runtime.hub.config.view.get(func.appViewId);
+          this.requireMenuAccess(menu, item);
+          drawerOptions = consoleDrawerOptions(func, config, item.caption);
+        }
+      }
+      this.requireMenuAccess(menu, item);
+      if ((!item.disableClose && !drawerOptions) || menu.itemProviders?.[item.id]?.onClick) {
         return original.call(menu, item, event, useDepth);
       }
       const context = menu.context.clone();
       context.srfappid = item.appId || menu.context.srfappid || runtime.env.appId;
       if (menu.routeDepth && useDepth) context.toRouteDepth = menu.routeDepth + 1;
       return runtime.commands.execute(AppFuncCommand.TAG, item.appFuncId,
-        context, { ...menu.params }, { view: this, event, ctx: this.ctx });
+        context, { ...menu.params }, {
+          view: this, event, ctx: this.ctx,
+          ...(drawerOptions ? { modalOption: drawerOptions } : {}),
+        });
     });
     this.pendingMenus.set(key, task);
     const clear = (): void => {

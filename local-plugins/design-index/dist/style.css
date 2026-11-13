@@ -13,3 +13,39 @@
 .aibiz-design-index .ibiz-common-extend-menu {
   max-width: 100%;
 }
+.ibiz-drawer.aibiz-console-drawer .el-drawer__header {
+  position: static;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--ibiz-color-border, #d9dde0);
+  color: var(--ibiz-color-text-0, #202124);
+  background: var(--ibiz-color-bg-0, #fff);
+}
+
+.ibiz-drawer.aibiz-console-drawer .el-drawer__title {
+  min-width: 0;
+  align-self: center;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+
+.ibiz-drawer.aibiz-console-drawer .el-drawer__header .el-drawer__close-btn {
+  position: static;
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  color: var(--ibiz-color-text-0, #202124);
+}
+
+.ibiz-drawer.aibiz-console-drawer .el-drawer__body {
+  min-height: 0;
+  padding: 0;
+}

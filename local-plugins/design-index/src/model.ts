@@ -12,6 +12,25 @@ export function classifyTodoCounterError(error: unknown): 'unavailable' | 'error
     ? 'unavailable' : 'error';
 }
 
+export function consoleDrawerOptions(
+  appFunc: any, viewConfig: any, caption: string,
+): Record<string, unknown> | undefined {
+  const target = 'pssysdevbktasktabexpview';
+  const viewId = String(appFunc?.appViewId ?? '').toLowerCase();
+  if (appFunc?.appFuncType !== 'APPVIEW' || viewId.split('.').at(-1) !== target ||
+      String(viewConfig?.id ?? '').toLowerCase() !== viewId ||
+      viewConfig?.openMode !== 'DRAWER_BOTTOM') return undefined;
+  return {
+    height: viewConfig.height ?? 45,
+    withHeader: true,
+    showClose: true,
+    title: caption,
+    closeOnPressEscape: true,
+    class: 'ibiz-drawer aibiz-console-drawer',
+    ...viewConfig.modalOption,
+  };
+}
+
 export function copyModel<T>(value: T): T {
   if (Array.isArray(value)) return value.map(item => copyModel(item)) as T;
   if (value && typeof value === 'object') {

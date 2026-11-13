@@ -14,6 +14,23 @@ function classifyTodoCounterError(error) {
     return typeof status === 'number' && (status === 404 || status === 405)
         ? 'unavailable' : 'error';
 }
+function consoleDrawerOptions(appFunc, viewConfig, caption) {
+    const target = 'pssysdevbktasktabexpview';
+    const viewId = String(appFunc?.appViewId ?? '').toLowerCase();
+    if (appFunc?.appFuncType !== 'APPVIEW' || viewId.split('.').at(-1) !== target ||
+        String(viewConfig?.id ?? '').toLowerCase() !== viewId ||
+        viewConfig?.openMode !== 'DRAWER_BOTTOM')
+        return undefined;
+    return {
+        height: viewConfig.height ?? 45,
+        withHeader: true,
+        showClose: true,
+        title: caption,
+        closeOnPressEscape: true,
+        class: 'ibiz-drawer aibiz-console-drawer',
+        ...viewConfig.modalOption,
+    };
+}
 function copyModel(value) {
     if (Array.isArray(value))
         return value.map(item => copyModel(item));
@@ -414,6 +431,13 @@ class DesignIndexController extends ViewController {
         if (!view.state?.isCreated)
             this.listen(view, 'onCreated', protect);
     }
+    requireMenuAccess(menu, item) {
+        if (!this.live)
+            throw new Error('Design index is destroyed.');
+        if (!permittedMenu(menu, item)) {
+            throw new Error('Index menu is hidden, disabled or not permitted.');
+        }
+    }
     clickMenu(menu, item, event, useDepth, original) {
         if (!this.live)
             return Promise.reject(new Error('Design index is destroyed.'));
@@ -425,8 +449,7 @@ class DesignIndexController extends ViewController {
             return pending;
         // The entry is queued before execution so reentrant/default clicks share one request.
         const task = Promise.resolve().then(async () => {
-            if (!this.live)
-                throw new Error('Design index is destroyed.');
+            this.requireMenuAccess(menu, item);
             this.rememberProtected(item, menu);
             const runtime = globalThis.ibiz;
             if (!item.appFuncId && (item.id || item.name)?.toLowerCase() === 'debug' &&
@@ -436,14 +459,31 @@ class DesignIndexController extends ViewController {
                 }
                 return runtime.devTool.triggerVisible();
             }
-            if (!item.disableClose || menu.itemProviders?.[item.id]?.onClick) {
+            let drawerOptions;
+            if (menu.appMenu.name === 'bottomsidemenu' &&
+                (item.id || item.name)?.toLowerCase() === 'terminal' &&
+                item.appFuncId && !menu.itemProviders?.[item.id]?.onClick) {
+                const app = await runtime.hub.getApp(item.appId || menu.context.srfappid);
+                this.requireMenuAccess(menu, item);
+                const func = app.getAppFunc(item.appFuncId);
+                if (func?.appFuncType === 'APPVIEW') {
+                    const config = await runtime.hub.config.view.get(func.appViewId);
+                    this.requireMenuAccess(menu, item);
+                    drawerOptions = consoleDrawerOptions(func, config, item.caption);
+                }
+            }
+            this.requireMenuAccess(menu, item);
+            if ((!item.disableClose && !drawerOptions) || menu.itemProviders?.[item.id]?.onClick) {
                 return original.call(menu, item, event, useDepth);
             }
             const context = menu.context.clone();
             context.srfappid = item.appId || menu.context.srfappid || runtime.env.appId;
             if (menu.routeDepth && useDepth)
                 context.toRouteDepth = menu.routeDepth + 1;
-            return runtime.commands.execute(AppFuncCommand.TAG, item.appFuncId, context, { ...menu.params }, { view: this, event, ctx: this.ctx });
+            return runtime.commands.execute(AppFuncCommand.TAG, item.appFuncId, context, { ...menu.params }, {
+                view: this, event, ctx: this.ctx,
+                ...(drawerOptions ? { modalOption: drawerOptions } : {}),
+            });
         });
         this.pendingMenus.set(key, task);
         const clear = () => {
