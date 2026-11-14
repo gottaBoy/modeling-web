@@ -1,4 +1,4 @@
-import { cp, mkdir, readFile, realpath, stat } from 'node:fs/promises';
+import { cp, mkdir, readFile, realpath, stat, writeFile } from 'node:fs/promises';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import {
   basename,
@@ -32,9 +32,29 @@ function within(root: string, target: string): boolean {
   return path !== '..' && !path.startsWith(`..${sep}`) && !isAbsolute(path);
 }
 
+type GeneratedDocumentation = () => Promise<Map<string, Buffer>>;
+
+async function generatedDocumentation(
+  generate?: GeneratedDocumentation,
+): Promise<Map<string, Buffer>> {
+  const files = generate ? await generate() : new Map<string, Buffer>();
+  if (!(files instanceof Map)) throw new Error('Generated documentation must be a Map');
+  for (const [path, bytes] of files) {
+    if (
+      typeof path !== 'string' ||
+      !/^api-reference\/(?:manifest\.json|(?:en|zh-CN)\/(?:ServiceAPI\.md|_sidebar\.md|search\.json|entities\/[a-zA-Z_][a-zA-Z0-9_-]*\.md))$/.test(path) ||
+      path.includes('\\') || path.includes('\0') ||
+      path.split('/').some(part => !part || part.startsWith('.')) ||
+      !/\.(?:md|json)$/.test(path) || !Buffer.isBuffer(bytes)
+    ) throw new Error('Unsafe generated documentation entry');
+  }
+  return files;
+}
+
 export function documentationMiddleware(
   sourceDirectory: string,
   mountPaths: string[],
+  generate?: GeneratedDocumentation,
 ) {
   const root = resolve(sourceDirectory);
   const mounts = mountPaths.map(path => path.replace(/\/$/, ''));
@@ -84,6 +104,21 @@ export function documentationMiddleware(
     }
     const file = resolve(root, path || 'index.html');
     try {
+      if (generate && path.startsWith('api-reference/')) {
+        const generated = await generatedDocumentation(generate);
+        const bytes = generated.get(path);
+        if (!bytes) {
+          res.statusCode = 404;
+          res.end('Documentation file not found');
+          return;
+        }
+        res.statusCode = 200;
+        res.setHeader('Content-Type', contentTypes[extname(path)]);
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.end(req.method === 'HEAD' ? undefined : bytes);
+        return;
+      }
       const [realRoot, realFile] = await Promise.all([
         realpath(root),
         realpath(file),
@@ -131,6 +166,7 @@ async function canonicalOutput(path: string): Promise<string> {
 export async function publishDocumentation(
   sourceDirectory: string,
   targetDirectory: string,
+  generate?: GeneratedDocumentation,
 ): Promise<void> {
   const source = await realpath(sourceDirectory);
   const target = await canonicalOutput(resolve(targetDirectory));
@@ -139,6 +175,7 @@ export async function publishDocumentation(
   }
   await stat(join(source, 'index.html'));
   await stat(join(source, 'script/docsify.js'));
+  const generated = await generatedDocumentation(generate);
   await mkdir(target, { recursive: true });
   await cp(source, target, {
     recursive: true,
@@ -148,11 +185,18 @@ export async function publishDocumentation(
         .split(sep)
         .some(part => part.startsWith('.')),
   });
+  for (const [path, bytes] of generated) {
+    const file = await canonicalOutput(resolve(target, path));
+    if (!within(target, file)) throw new Error('Generated documentation output escapes snapshot');
+    await mkdir(dirname(file), { recursive: true });
+    await writeFile(file, bytes);
+  }
 }
 
 export function localDocumentationPlugin(options: {
   sourceDirectory: string;
   mountPaths?: string[];
+  generatedFiles?: GeneratedDocumentation;
 }): Plugin {
   const mounts = options.mountPaths || ['/doc/'];
   let outputDirectory: string;
@@ -165,7 +209,7 @@ export function localDocumentationPlugin(options: {
     },
     configureServer(server) {
       server.middlewares.use(
-        documentationMiddleware(options.sourceDirectory, mounts),
+        documentationMiddleware(options.sourceDirectory, mounts, options.generatedFiles),
       );
     },
     configurePreviewServer(server) {
@@ -173,7 +217,7 @@ export function localDocumentationPlugin(options: {
     },
     async closeBundle() {
       if (build)
-        await publishDocumentation(options.sourceDirectory, outputDirectory);
+        await publishDocumentation(options.sourceDirectory, outputDirectory, options.generatedFiles);
     },
   };
 }

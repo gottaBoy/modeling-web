@@ -33,6 +33,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { HtmlTagDescriptor, Plugin } from 'vite';
 import cpy from 'cpy';
 import { localDocumentationPlugin } from './local-documentation';
+import { buildApiReferenceFiles } from '../../../plm/doc/tools/api-reference.mjs';
 
 type PluginManifest = {
   name?: string;
@@ -845,6 +846,9 @@ function IBizVitePlugin(): Plugin[] {
     localDocumentationPlugin({
       sourceDirectory: resolve(__dirname, '../../../plm/doc/docsify'),
       mountPaths: ['/doc/', '/modeldesign/doc/'],
+      generatedFiles: () => buildApiReferenceFiles({
+        sourceDirectory: resolve(__dirname, '../../../plm/doc/docsify'),
+      }),
     }),
   ];
 }
