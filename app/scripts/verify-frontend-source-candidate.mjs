@@ -9,7 +9,8 @@ import { fingerprint, treeFingerprint } from '../../../scripts/localization-base
 import { sourceCompilerOptions, sourcePackages } from './build-source-runtime.mjs';
 import { verifySourceRuntime } from './verify-source-runtime.mjs';
 import {
-  candidateHostFiles, frontendAssemblerToolchain, relativeAsset, validateTypeEvidence, verifyCandidateImportMap,
+  candidateBuildEnvironment, candidateHostFiles, frontendAssemblerToolchain, relativeAsset,
+  validateTypeEvidence, verifyCandidateImportMap,
 } from './assemble-source-candidate.mjs';
 import { frontendDistPaths as paths, validateFrontendDistBinding } from './frontend-source-dist.mjs';
 export { validateFrontendDistBinding, verifyFrontendSourceCandidateSync } from './frontend-source-dist.mjs';
@@ -79,6 +80,7 @@ export async function verifyFrontendSourceCandidate(options, {
     assert.equal(report.assembler.path, assembler);
     sameFile(report.assembler);
     assert.deepEqual(report.compilerOptions, sourceCompilerOptions);
+    assert.deepEqual(report.buildEnvironment, candidateBuildEnvironment);
     assert.deepEqual(report.node, {
       executable: process.execPath, version: process.version, ...(await fingerprint(process.execPath)),
     });

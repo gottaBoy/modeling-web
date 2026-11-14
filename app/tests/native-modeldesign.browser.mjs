@@ -74,6 +74,7 @@ export function collectNativeIndexEvidence({ application, applicationId, indexPa
       domId: element.id, controllerId: controller?.id ?? null,
       id: controller?.model?.id ?? null, codeName: controller?.model?.codeName ?? null,
       appId: controller?.model?.appId ?? controller?.context?.srfappid ?? null,
+      context: { psdevslnsys: controller?.context?.psdevslnsys ?? null },
       viewType: controller?.model?.viewType ?? null,
       lifecycle: lifecycle(controller), visible: visible(element),
     };

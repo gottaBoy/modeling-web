@@ -11,7 +11,7 @@ type Cleanup = () => void;
 export class DesignIndexController extends ViewController {
   public readonly sourceStatus = 'independent-local-implementation';
   public readonly myTodoCount?: number;
-  public readonly myTodoCountStatus?: 'pending' | 'ready' | 'unavailable' | 'error';
+  public readonly myTodoCountStatus?: 'disabled' | 'pending' | 'ready' | 'unavailable' | 'error';
   public readonly defaultOpenTasks = new Map<string, Promise<unknown>>();
   private readonly cleanups: Cleanup[] = [];
   private readonly menus = new Map<string, any>();
@@ -33,25 +33,31 @@ export class DesignIndexController extends ViewController {
     if (!this.live) return;
     if (!this.engines.length) throw new Error('Host APPINDEXVIEW engine is not installed.');
     this.state.presetClassList.push('aibiz-design-index');
+    // Older hosts copy only predefined environment keys into ibiz.env.
+    const deployedTodoCounter = (globalThis as any).window?.Environment?.enableNativePlmTodoCounter;
+    const todoCounterEnabled = (typeof deployedTodoCounter === 'boolean'
+      ? deployedTodoCounter : (globalThis as any).ibiz.env?.enableNativePlmTodoCounter) !== false;
     Object.assign(this.state, {
       designIndexDefaultOpens: {},
       designIndexErrors: [],
       myTodoCount: undefined,
-      myTodoCountStatus: 'pending',
+      myTodoCountStatus: todoCounterEnabled ? 'pending' : 'disabled',
     });
-    this.loadMyTodoCount().catch(error => {
-      if (!this.live) return;
-      if (classifyTodoCounterError(error) === 'unavailable') {
-        (this.state as any).myTodoCountStatus = 'unavailable';
-        (globalThis as any).ibiz.log.warn(error);
-        return;
-      }
-      (this.state as any).myTodoCountStatus = 'error';
-      (this.state as any).designIndexErrors.push({
-        phase: 'my-todo-counter', message: String(error),
+    if (todoCounterEnabled) {
+      this.loadMyTodoCount().catch(error => {
+        if (!this.live) return;
+        if (classifyTodoCounterError(error) === 'unavailable') {
+          (this.state as any).myTodoCountStatus = 'unavailable';
+          (globalThis as any).ibiz.log.warn(error);
+          return;
+        }
+        (this.state as any).myTodoCountStatus = 'error';
+        (this.state as any).designIndexErrors.push({
+          phase: 'my-todo-counter', message: String(error),
+        });
+        (globalThis as any).ibiz.log.error(error);
       });
-      (globalThis as any).ibiz.log.error(error);
-    });
+    }
     const registered = (_name: string, controller: any): void => {
       if (controller !== this && controller?.model?.viewType) this.observeChild(controller);
     };

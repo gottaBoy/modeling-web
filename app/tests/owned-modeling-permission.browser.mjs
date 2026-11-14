@@ -10,6 +10,7 @@ import { verifyBridgeProcess, verifyOwnedBridgeRuntime } from '../../../scripts/
 import { verifyModelingAppData } from '../../../scripts/run-owned-native-permission-http.mjs';
 import { launchChromium } from '../../../scripts/browser-launch.mjs';
 import { captureNativeLogin } from './native-model-contract.mjs';
+import { nativeReadCollections, readOnlyBrowserRequestAllowed } from './owned-five-dataset.browser.mjs';
 import {
   collectNativeIndexEvidence, configureNativeBrowserLanguage, submitNativeLogin,
 } from './native-modeldesign.browser.mjs';
@@ -35,24 +36,48 @@ export const permissionCases = Object.freeze([
   { id: 'editor-cross-b-to-a-en-mobile', actorRole: 'editor', actorSide: 'b', rootSide: 'a', locale: 'en-US', viewport: 'mobile' },
 ]);
 
-function publicRootReady(evidence, rootId) {
+export function permissionCaseTargets(manifest, spec) {
+  const actorRoot = manifest.roots.find(value => value.side === spec.actorSide);
+  const root = manifest.roots.find(value => value.side === spec.rootSide);
+  assert.ok(actorRoot && root, 'Both actor and target roots must exist');
+  const actors = manifest.users.filter(user =>
+    user.role === spec.actorRole && user.rootId === actorRoot.rootId);
+  assert.equal(actors.length, 1, 'Each actor root must have exactly one user of the requested role');
+  const [actor] = actors;
+  assert.ok(actor && root);
+  return { actor, root };
+}
+
+export function publicRootReady(evidence, rootId) {
   const view = evidence?.index;
-  return evidence?.matchingIndexCount === 1 && view?.controllerId === view?.domId &&
+  return Boolean(view && evidence?.matchingIndexCount === 1 &&
+    Array.isArray(evidence.visibleOverlays) && evidence.visibleOverlays.length === 0 &&
+    view.visible === true && view.viewType === 'APPINDEXVIEW' && view.controllerId === view.domId &&
     view.appId === appId && view.lifecycle?.isCreated === true &&
     view.lifecycle?.isMounted === true && view.lifecycle?.isLoading === false &&
     view.lifecycle?.isDestroyed === false && view.lifecycle?.hasError === false &&
-    (view.context?.psdevslnsys === rootId || view.model?.context?.psdevslnsys === rootId);
+    view.context?.psdevslnsys === rootId);
+}
+
+export function postLoginUnauthorized(responses) {
+  return responses.filter(row => row.status === 401 &&
+    row.requestPhase === 'authenticated' && row.responsePhase === 'authenticated');
 }
 
 async function waitRoot(page, options) {
   const deadline = Date.now() + 35_000;
   let evidence;
+  let readySince;
   while (Date.now() < deadline) {
     try {
       evidence = await page.evaluate(collectNativeIndexEvidence, options);
-      if (publicRootReady(evidence, options.rootId)) return evidence;
+      if (publicRootReady(evidence, options.rootId)) {
+        readySince ??= Date.now();
+        if (Date.now() - readySince >= 200) return evidence;
+      } else readySince = undefined;
     } catch (error) {
       if (!/Execution context was destroyed|Cannot find context with specified id/.test(error.message)) throw error;
+      readySince = undefined;
     }
     await page.waitForTimeout(100);
   }
@@ -61,14 +86,10 @@ async function waitRoot(page, options) {
   throw error;
 }
 
-function allApiReadOrLogin(request, origin) {
+function allApiReadOrLogin(request, origin, policy) {
   const url = new URL(request.url());
   if (url.origin !== origin) return false;
-  if (['GET', 'HEAD'].includes(request.method())) return true;
-  if (request.method() !== 'POST') return false;
-  return url.pathname === `/api/${appId}/v7/login` ||
-    url.pathname === `/api/${appId}/work_items/count_my_todo` ||
-    /\/fetch[a-z0-9_]+$/.test(url.pathname);
+  return readOnlyBrowserRequestAllowed({ method: request.method(), path: url.pathname }, policy);
 }
 
 export async function runPermissionBrowser(options) {
@@ -112,6 +133,17 @@ export async function runPermissionBrowser(options) {
     assert.equal(deployment.runId, options.runId);
     const manifest = read(input.ownedBackend.manifest.path, input.ownedBackend.manifest.sha256);
     const credentials = read(join(dirname(input.ownedBackend.manifest.path), 'credentials.private.json'), undefined, true);
+    const api = read(join(workspace,
+      'vendor-upstream/ibizmodeling-standard/modelapi-core/src/main/resources/model/net/ibizsys/modeling/PSSYSSERVICEAPIS/ModelAPI.json'));
+    const readPolicy = {
+      rootIds: manifest.roots.map(root => root.rootId),
+      readCollections: nativeReadCollections(api),
+      readRecordKeys: new Set(manifest.roots.flatMap(root => [root.sentinelId, root.logicalSystemId])),
+      readFetchPaths: new Set(api.getPSDEServiceAPIs.flatMap(entity =>
+        (entity.getPSDEServiceAPIMethods ?? []).filter(method => method.methodType === 'FETCH' &&
+          method.dataAccessAction === 'READ' && method.requestMethod === 'POST')
+          .map(method => `${entity.codeName2.toLowerCase()}/${method.codeName.toLowerCase()}`))),
+    };
     const specs = state.bridges.map(bridge => ({
       bridge, spec: read(bridge.specPath, bridge.specSha256, true),
     }));
@@ -133,9 +165,7 @@ export async function runPermissionBrowser(options) {
     const require = createRequire(join(workspace, 'ibiz-app-hub/package.json'));
     browser = await launchChromium(require('playwright').chromium, { args: ['--no-sandbox'] });
     for (const spec of permissionCases) {
-      const actor = manifest.users.find(user => user.role === spec.actorRole && user.centerId.endsWith(`_${spec.actorSide}`));
-      const root = manifest.roots.find(value => value.side === spec.rootSide);
-      assert.ok(actor && root);
+      const { actor, root } = permissionCaseTargets(manifest, spec);
       const row = {
         ...spec, actor: actor.loginname, rootId: root.rootId, expectedOwnRootRead: actor.rootId === root.rootId &&
           ['editor', 'viewer'].includes(actor.role), status: 'FAILED', responses: [], blocked: [], errors: [],
@@ -148,16 +178,26 @@ export async function runPermissionBrowser(options) {
       await configureNativeBrowserLanguage(context, spec.locale);
       const page = await context.newPage();
       page.setDefaultTimeout(20_000);
+      let phase = 'before-login';
+      const requestPhases = new WeakMap();
+      page.on('request', request => requestPhases.set(request, phase));
       page.on('response', response => {
         const url = new URL(response.url());
         if (url.origin === origin && url.pathname.startsWith(`/api/${appId}/`)) row.responses.push({
           path: clean(url.pathname), status: response.status(), method: response.request().method(),
+          requestPhase: requestPhases.get(response.request()) ?? 'unknown', responsePhase: phase,
         });
       });
       page.on('console', message => { if (message.type() === 'error') row.errors.push(clean(message.text())); });
       page.on('pageerror', error => row.errors.push(clean(error.message)));
+      row.failedRequests = [];
+      page.on('requestfailed', request => row.failedRequests.push({
+        method: request.method(), path: clean(new URL(request.url()).pathname),
+        phase: requestPhases.get(request) ?? 'unknown',
+        failure: clean(request.failure()?.errorText ?? 'unknown'),
+      }));
       await context.route('**/*', route => {
-        if (allApiReadOrLogin(route.request(), origin)) return route.continue();
+        if (allApiReadOrLogin(route.request(), origin, readPolicy)) return route.continue();
         row.blocked.push({ method: route.request().method(), path: clean(new URL(route.request().url()).pathname) });
         return route.abort('blockedbyclient');
       });
@@ -169,29 +209,37 @@ export async function runPermissionBrowser(options) {
         await page.locator('input[type="text"]').first().fill(actor.loginname);
         await page.locator('input[type="password"]').first().fill(credentials.users[actor.loginname]);
         await captureNativeLogin(page, { entry: app.entry, applicationId: appId },
-          () => submitNativeLogin(page, spec.locale));
+          () => {
+            phase = 'login-submitted';
+            return submitNativeLogin(page, spec.locale);
+          });
+        phase = 'authenticated';
         row.login = 'PASS';
         const evidence = await waitRoot(page, {
           application: 'ModelDesign', applicationId: appId,
           indexPath: 'PSSYSAPPS/ModelDesign/PSAPPINDEXVIEWS/ModelingIndex.json', rootId: root.rootId,
         });
-        row.home = 'PASS';
+        row.home = 'CONTROLLER-AND-LOADER-READY-NOT-ACCEPTED';
+        row.runtimeIndex = evidence.index;
+        row.visibleOverlays = evidence.visibleOverlays;
         row.menu = evidence.menus.filter(menu => menu.name === 'leftsidemenu').flatMap(menu =>
           menu.items.filter(item => item.visible === true).map(item => ({
             caption: item.caption, permitted: item.permitted, disabled: item.disabled,
             dom: item.dom.length,
           })));
         row.permittedMenuCount = row.menu.filter(item => item.permitted).length;
-        row.postLogin401 = row.responses.filter(item => item.status === 401);
-        row.readStatuses = row.responses.filter(item => /\/fetch[a-z0-9_]+$/.test(item.path))
-          .map(item => item.status);
         row.screenshot = `${spec.id}.png`;
         await page.screenshot({ path: join(output, row.screenshot), fullPage: true });
         row.status = 'OBSERVED-READONLY-MATRIX-NOT-ACCEPTED';
       } catch (error) {
         row.error = clean(error.message);
         await page.screenshot({ path: join(output, `${spec.id}-failure.png`), fullPage: true }).catch(() => {});
-      } finally { await context.close(); }
+      } finally {
+        await context.close();
+        row.postLogin401 = postLoginUnauthorized(row.responses);
+        row.readStatuses = row.responses.filter(item => /\/fetch[a-z0-9_]+$/.test(item.path))
+          .map(item => item.status);
+      }
     }
     guard(true);
     report.status = 'OBSERVED-READONLY-MATRIX-NOT-FULL-ACCEPTANCE';

@@ -27,6 +27,10 @@ const viteRequire = createRequire(require.resolve('vite/package.json'));
 const json = async path => JSON.parse(await readFile(path, 'utf8'));
 const local = path => relative(workspace, path);
 const toolTreeExclusions = new Set(['node_modules', '.git', '.artifacts', 'target']);
+export const candidateBuildEnvironment = Object.freeze({
+  mode: 'production',
+  define: Object.freeze({ 'process.env.NODE_ENV': '"production"' }),
+});
 
 export async function frontendAssemblerToolchain() {
   return Promise.all([
@@ -192,6 +196,7 @@ export async function assembleCandidate({
       ...(await fingerprint(fileURLToPath(import.meta.url))),
     };
     report.compilerOptions = sourceCompilerOptions;
+    report.buildEnvironment = candidateBuildEnvironment;
     report.node = { executable: process.execPath, version: process.version,
       ...(await fingerprint(process.execPath)) };
     report.toolchain = await frontendAssemblerToolchain();
@@ -275,6 +280,8 @@ export async function assembleCandidate({
       const dependencies = new Set();
       await build({
         configFile: false,
+        mode: candidateBuildEnvironment.mode,
+        define: { ...candidateBuildEnvironment.define },
         root: appRoot,
         publicDir: false,
         logLevel: 'warn',

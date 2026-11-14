@@ -13,7 +13,7 @@ import { captureNativeLogin } from './native-model-contract.mjs';
 import {
   collectNativeIndexEvidence, configureNativeBrowserLanguage, submitNativeLogin, waitForNativeIndexReady,
 } from './native-modeldesign.browser.mjs';
-import { readOnlyBrowserRequestAllowed } from './owned-five-dataset.browser.mjs';
+import { nativeReadCollections, readOnlyBrowserRequestAllowed } from './owned-five-dataset.browser.mjs';
 
 const workspace = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const hash = value => createHash('sha256').update(value).digest('hex');
@@ -35,6 +35,70 @@ export function browserReadMatrix(manifest) {
       expectedRead: actor.rootId === root.rootId && ['editor', 'viewer'].includes(actor.role),
       status: 'NOT-EXECUTED-NOT-ACCEPTED',
     })))));
+}
+
+export function expectedBootstrapPreAuth401(response, lifecycle, { origin } = {}) {
+  const paths = [`/api/${appId}/appdata`, `/api/${appId}/uaa/getbydcsystem/ibizmodeling`];
+  return Boolean(typeof origin === 'string' && response?.origin === origin &&
+    response.method === 'GET' && response.status === 401 && paths.includes(response.path) &&
+    response.authorizationPresent === false && response.phaseAtRequest === 'pre-auth' &&
+    response.phaseAtResponse === 'pre-auth' &&
+    Number.isSafeInteger(response.requestSequence) && response.requestSequence > 0 &&
+    Number.isSafeInteger(response.responseSequence) && response.responseSequence >= response.requestSequence &&
+    Number.isSafeInteger(lifecycle?.loginSubmittedSequence) &&
+    lifecycle.loginSubmittedSequence > response.responseSequence &&
+    Number.isSafeInteger(lifecycle?.loginVerifiedSequence) &&
+    lifecycle.loginVerifiedSequence > lifecycle.loginSubmittedSequence);
+}
+
+export function summarizeBootstrapCase(row, { origin } = {}) {
+  const blockers = [];
+  const expectedPreAuthResponses = [];
+  if (typeof origin !== 'string' || !/^http:\/\/127\.0\.0\.1:\d+$/.test(origin)) {
+    blockers.push({ type: 'missing-bound-loopback-origin' });
+  }
+  for (const name of ['responses', 'blocked', 'errors', 'failedRequests']) {
+    if (!Array.isArray(row?.[name])) blockers.push({ type: 'missing-evidence-array', name });
+  }
+  if (row?.error) blockers.push({ type: 'runner-error', message: row.error });
+  const login = row?.stages?.login;
+  const lifecycle = row?.authenticationLifecycle;
+  if (!(login?.status === 200 && login.tokenIssued === true && login.tokenPersisted === true &&
+      Number.isSafeInteger(lifecycle?.loginSubmittedSequence) && lifecycle.loginSubmittedSequence > 0 &&
+      Number.isSafeInteger(lifecycle?.loginVerifiedSequence) &&
+      lifecycle.loginVerifiedSequence > lifecycle.loginSubmittedSequence)) {
+    blockers.push({ type: 'native-login-not-verified' });
+  }
+  if (row?.stages?.bootstrap?.status !== 'PASS' ||
+      row.stages.bootstrap.naturallyAuthenticatedAppdata !== true) {
+    blockers.push({ type: 'native-appdata-not-verified' });
+  }
+  if (row?.stages?.home?.status !== 'PASS') blockers.push({ type: 'native-home-not-ready' });
+  if (row?.stages?.systemMenu?.status !== 'CLICKED-NOT-YET-NAVIGATION-ACCEPTED') {
+    blockers.push({ type: 'natural-menu-click-not-observed' });
+  }
+  for (const error of Array.isArray(row?.errors) ? row.errors : []) blockers.push({ type: 'browser-error', evidence: error });
+  for (const failure of Array.isArray(row?.failedRequests) ? row.failedRequests : []) {
+    blockers.push({ type: 'failed-network-request', evidence: failure });
+  }
+  for (const request of Array.isArray(row?.blocked) ? row.blocked : []) {
+    blockers.push({ type: 'locally-blocked-request', evidence: request });
+  }
+  for (const response of Array.isArray(row?.responses) ? row.responses : []) {
+    if (!Number.isInteger(response?.status) || response.status < 100 || response.status > 599) {
+      blockers.push({ type: 'invalid-http-response-evidence', evidence: response });
+    } else if (response.status >= 400) {
+      if (expectedBootstrapPreAuth401(response, row.authenticationLifecycle, { origin })) {
+        expectedPreAuthResponses.push(response);
+      } else blockers.push({ type: 'unexpected-http-error', evidence: response });
+    }
+  }
+  return {
+    status: blockers.length === 0
+      ? 'BOOTSTRAP-AND-NATURAL-CLICK-OBSERVED-NOT-NATIVE-ACCEPTED' : 'FAILED',
+    diagnosticOnly: true, nativeAcceptance: false, permissionAcceptance: false,
+    fullApplicationAcceptance: false, blockers, expectedPreAuthResponses,
+  };
 }
 
 export async function runBootstrapBrowser(options) {
@@ -116,17 +180,16 @@ export async function runBootstrapBrowser(options) {
         (entity.getPSDEServiceAPIMethods ?? []).filter(method =>
           method.methodType === 'FETCH' && method.dataAccessAction === 'READ')
           .map(method => `${entity.codeName2.toLowerCase()}/${method.codeName.toLowerCase()}`))),
-      readCollections: new Set(api.getPSDEServiceAPIs.filter(entity =>
-        entity.getPSDEServiceAPIMethods?.some(method => method.codeName === 'Get' &&
-          method.requestMethod === 'GET' && method.dataAccessAction === 'READ'))
-        .map(entity => entity.codeName2.toLowerCase())),
+      readCollections: nativeReadCollections(api),
+      readRecordKeys: new Set(manifest.roots.flatMap(row => [row.sentinelId, row.logicalSystemId])),
     };
     const require = createRequire(join(workspace, 'ibiz-app-hub/package.json'));
     browser = await launchChromium(require('playwright').chromium, { args: ['--no-sandbox'] });
     for (const locale of ['zh-CN', 'en-US']) for (const viewportName of ['desktop', 'mobile']) {
       guard(false);
       const row = { locale, viewport: viewportName, status: 'FAILED', stages: {},
-        responses: [], blocked: [], errors: [], startedAt: new Date().toISOString(),
+        responses: [], blocked: [], errors: [], failedRequests: [], startedAt: new Date().toISOString(),
+        authenticationLifecycle: { loginSubmittedSequence: null, loginVerifiedSequence: null },
         M03: { status: 'NOT-EXECUTED-NOT-ACCEPTED', reason: 'Requires successful native list/editor navigation and a complete config-r6 native seed receipt; no writes authorized by this probe' } };
       report.cases.push(row);
       const context = await browser.newContext({
@@ -141,26 +204,44 @@ export async function runBootstrapBrowser(options) {
         await page.screenshot({ path: join(output, name), fullPage: true });
         row[`${stage}Screenshot`] = name;
       };
-      let authenticated = false;
+      let phase = 'pre-auth';
+      let eventSequence = 0;
+      const requests = new WeakMap();
       let appdata;
       const pending = [];
+      page.on('request', request => requests.set(request, { phase, sequence: ++eventSequence }));
       page.on('response', response => {
         const url = new URL(response.url());
-        if (url.origin !== origin || !url.pathname.startsWith(`/api/${appId}/`)) return;
         const request = response.request();
-        row.responses.push({ path: clean(url.pathname), status: response.status(), method: request.method(), authenticated });
-        if (url.pathname === `/api/${appId}/appdata` && response.status() === 200) {
-          pending.push((async () => {
-            const headers = await request.allHeaders();
+        const requested = requests.get(request);
+        const observed = { origin: url.origin, path: clean(url.pathname), status: response.status(),
+          method: request.method(), phaseAtRequest: requested?.phase ?? 'unobserved',
+          phaseAtResponse: phase, requestSequence: requested?.sequence ?? null, responseSequence: ++eventSequence,
+          authorizationPresent: null };
+        row.responses.push(observed);
+        pending.push((async () => {
+          const headers = await request.allHeaders();
+          observed.authorizationPresent = Boolean(headers.authorization);
+          if (url.origin === origin && url.pathname === `/api/${appId}/appdata` && response.status() === 200) {
             appdata = { status: 200, error: null, data: await response.json() };
             row.appdataHeaders = { srforgid: headers.srforgid ?? null, srfsystemid: headers.srfsystemid ?? null,
               authorizationPresent: Boolean(headers.authorization) };
-          })().catch(error => row.errors.push({ type: 'appdata', message: clean(error.message) })));
-        }
+          }
+        })().catch(error => row.errors.push({ type: 'response-evidence', path: clean(url.pathname),
+          message: clean(error.message) })));
       });
-      page.on('pageerror', error => row.errors.push({ type: 'pageerror', message: clean(error.message) }));
+      page.on('pageerror', error => row.errors.push({ type: 'pageerror', phase,
+        sequence: ++eventSequence, message: clean(error.message) }));
       page.on('console', message => {
-        if (message.type() === 'error') row.errors.push({ type: 'console', authenticated, message: clean(message.text()) });
+        if (message.type() === 'error') row.errors.push({ type: 'console', phase,
+          sequence: ++eventSequence, message: clean(message.text()) });
+      });
+      page.on('requestfailed', request => {
+        const requested = requests.get(request);
+        row.failedRequests.push({ method: request.method(), path: clean(new URL(request.url()).pathname),
+          phaseAtRequest: requested?.phase ?? 'unobserved', phaseAtFailure: phase,
+          requestSequence: requested?.sequence ?? null, failureSequence: ++eventSequence,
+          failure: clean(request.failure()?.errorText ?? 'unknown-request-failure') });
       });
       await context.route('**/*', route => {
         const request = route.request();
@@ -185,8 +266,13 @@ export async function runBootstrapBrowser(options) {
         await page.locator('input[type="text"]').first().fill(actor.loginname);
         await page.locator('input[type="password"]').first().fill(credentials.users[actor.loginname]);
         row.stages.login = await captureNativeLogin(page, { entry: app.entry, applicationId: appId },
-          () => submitNativeLogin(page, locale));
-        authenticated = true;
+          () => {
+            phase = 'login-submitted';
+            row.authenticationLifecycle.loginSubmittedSequence = ++eventSequence;
+            return submitNativeLogin(page, locale);
+          });
+        phase = 'authenticated';
+        row.authenticationLifecycle.loginVerifiedSequence = ++eventSequence;
         const deadline = Date.now() + 30_000;
         while (!appdata && Date.now() < deadline) {
           await Promise.all(pending); await page.waitForTimeout(100);
@@ -236,18 +322,20 @@ export async function runBootstrapBrowser(options) {
           row.stages.systemMenu = { status: 'FAIL', error: clean(error.message) };
         }
         await screenshot('menu');
-        row.status = row.stages.home.status === 'PASS' && row.stages.systemMenu.status.startsWith('CLICKED')
-          && row.blocked.length === 0 ? 'BOOTSTRAP-AND-NATURAL-CLICK-OBSERVED-NOT-NATIVE-ACCEPTED' : 'FAILED';
       } catch (error) {
         row.error = clean(error.message);
         await screenshot('failure').catch(() => {});
       } finally {
         await Promise.all(pending);
+        phase = 'closing';
+        await context.close();
+        await Promise.all(pending);
+        row.summary = summarizeBootstrapCase(row, { origin });
+        row.status = row.summary.status;
         row.finishedAt = new Date().toISOString();
         const matrix = report.matrix.find(value => value.actor === actor.loginname && value.rootId === root.rootId &&
           value.locale === locale && value.viewport === viewportName);
         matrix.status = row.status;
-        await context.close();
         dirs.write(directory, `${locale}-${viewportName}.private.json`, json(row));
         console.log(JSON.stringify({ locale, viewport: viewportName, status: row.status,
           bootstrap: row.stages.bootstrap?.status, menu: row.stages.systemMenu?.status, error: row.error }));

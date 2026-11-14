@@ -198,26 +198,32 @@ class DesignIndexController extends ViewController {
         if (!this.engines.length)
             throw new Error('Host APPINDEXVIEW engine is not installed.');
         this.state.presetClassList.push('aibiz-design-index');
+        // Older hosts copy only predefined environment keys into ibiz.env.
+        const deployedTodoCounter = globalThis.window?.Environment?.enableNativePlmTodoCounter;
+        const todoCounterEnabled = (typeof deployedTodoCounter === 'boolean'
+            ? deployedTodoCounter : globalThis.ibiz.env?.enableNativePlmTodoCounter) !== false;
         Object.assign(this.state, {
             designIndexDefaultOpens: {},
             designIndexErrors: [],
             myTodoCount: undefined,
-            myTodoCountStatus: 'pending',
+            myTodoCountStatus: todoCounterEnabled ? 'pending' : 'disabled',
         });
-        this.loadMyTodoCount().catch(error => {
-            if (!this.live)
-                return;
-            if (classifyTodoCounterError(error) === 'unavailable') {
-                this.state.myTodoCountStatus = 'unavailable';
-                globalThis.ibiz.log.warn(error);
-                return;
-            }
-            this.state.myTodoCountStatus = 'error';
-            this.state.designIndexErrors.push({
-                phase: 'my-todo-counter', message: String(error),
+        if (todoCounterEnabled) {
+            this.loadMyTodoCount().catch(error => {
+                if (!this.live)
+                    return;
+                if (classifyTodoCounterError(error) === 'unavailable') {
+                    this.state.myTodoCountStatus = 'unavailable';
+                    globalThis.ibiz.log.warn(error);
+                    return;
+                }
+                this.state.myTodoCountStatus = 'error';
+                this.state.designIndexErrors.push({
+                    phase: 'my-todo-counter', message: String(error),
+                });
+                globalThis.ibiz.log.error(error);
             });
-            globalThis.ibiz.log.error(error);
-        });
+        }
         const registered = (_name, controller) => {
             if (controller !== this && controller?.model?.viewType)
                 this.observeChild(controller);

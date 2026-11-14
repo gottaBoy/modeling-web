@@ -22,7 +22,7 @@
     },
     {
       "path": "src/controller.ts",
-      "sha256": "a8e268ab07c2b1b19ed95ae0396c5bff63dae4f5d16b6cc23e70657df630063d"
+      "sha256": "b541004b863f235c36c13c9c79ee5d6117a4bcb94b7e3bf5d360f0713a1c267e"
     },
     {
       "path": "src/index.ts",
@@ -42,17 +42,17 @@
     },
     {
       "path": "tests/todo-counter.test.mjs",
-      "sha256": "3b00b6b42236d5b765f813b174b12f8c50f9eeab23a55c23337d08b2fa8fd57d"
+      "sha256": "ef22f4b09a8ffabcdd9e953203343c2cdee29f5530f056c5768941676d67bdc9"
     }
   ],
   "outputs": [
     {
       "path": "index.mjs",
-      "sha256": "e198c3a06774e6e9fe77923dbb3e446f15b899e9e273594b5f0a5cb80ed23b5a"
+      "sha256": "fec2cd88ded3c4eaa1dfff2b28673bfbd063e7fb5641201b2736e9256b21ec52"
     },
     {
       "path": "index.system.js",
-      "sha256": "7fb5ce7d6d3676fba069f8faf3eff974943307fcdaee6e672151f5fd6d991daa"
+      "sha256": "a3339745fb12a4847025d07769dd5aca24418e417140f8726cfcb7bdf4a10ff1"
     },
     {
       "path": "style.css",

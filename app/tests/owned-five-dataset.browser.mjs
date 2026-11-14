@@ -43,7 +43,9 @@ function inside(root, path) {
   return absolute;
 }
 
-export function observedDatasetRequest(request, { origin, dataset, root, organization }) {
+export function observedDatasetRequest(request, {
+  origin, dataset, root, organization, nativeModuleRootBinding = false,
+}) {
   const url = new URL(request.url);
   assert.equal(url.origin, origin, 'Dataset must use the selected same-origin owned frontend');
   assert.equal(url.pathname, dataset.fetchPath.replace('$ROOT_ID', root.rootId));
@@ -70,7 +72,21 @@ export function observedDatasetRequest(request, { origin, dataset, root, organiz
       assert.equal(String(body[key]), query[key], 'Query/body disagreement');
     }
   }
-  assert.equal(effective.pssystemid, root.logicalSystemId, 'UI filter must bind the real logical system');
+  assert.equal(typeof nativeModuleRootBinding, 'boolean');
+  if (nativeModuleRootBinding) {
+    assert.equal(dataset.entity, 'PSModule');
+    assert.equal(dataset.query, 'CurSys');
+    assert.equal(request.method, 'POST');
+    assert.equal(url.pathname,
+      `/api/${applicationId}/psdevslnsys/${root.rootId}/psmodules/fetchcursys`);
+    for (const key of Object.keys(effective).filter(key => key.startsWith('n_pssystemid_'))) {
+      assert.equal(key, 'n_pssystemid_eq', 'Unreviewed explicit system filter');
+      assert.equal(effective[key], root.logicalSystemId, 'Explicit system filter must match the owned root');
+    }
+  }
+  if (!nativeModuleRootBinding || Object.hasOwn(effective, 'pssystemid')) {
+    assert.equal(effective.pssystemid, root.logicalSystemId, 'UI filter must bind the real logical system');
+  }
   if (effective.page !== undefined) assert.ok(/^\d+$/.test(String(effective.page)));
   if (effective.size !== undefined) assert.ok(/^\d+$/.test(String(effective.size)) &&
     Number(effective.size) > 0 && Number(effective.size) <= 1000);
@@ -78,6 +94,7 @@ export function observedDatasetRequest(request, { origin, dataset, root, organiz
     publishedMethod: 'POST', observedMethod: request.method,
     getAliasObserved: request.method === 'GET', path: url.pathname, query, body,
     headers: request.headers,
+    ...(nativeModuleRootBinding ? { systemFilterBinding: 'native-authorized-parent-root' } : {}),
   };
 }
 
@@ -103,8 +120,18 @@ export function verifyBrowserSentinels(data, dataset, root, receipt) {
   return record;
 }
 
+export function nativeReadCollections(api) {
+  return new Set(api.getPSDEServiceAPIs.filter(entity =>
+    entity.getPSDEServiceAPIMethods?.some(method => (method.codeName ?? method.name) === 'Get' &&
+      method.methodType === 'DEACTION' && method.requestMethod === 'GET' &&
+      method.dataAccessAction === 'READ' && method.needResourceKey === true &&
+      method.noServiceCodeName === true &&
+      /\/PSDEACTIONS\/Get\.json$/.test(method.getPSDEAction?.path ?? '')))
+    .map(entity => entity.codeName2.toLowerCase()));
+}
+
 export function readOnlyBrowserRequestAllowed({ method, path }, {
-  rootIds, readFetchPaths, readCollections = new Set(),
+  rootIds, readFetchPaths, readCollections = new Set(), readRecordKeys = new Set(),
 }) {
   const prefix = `/api/${applicationId}/`;
   const suffix = path.split('/').slice(-2).join('/');
@@ -119,7 +146,9 @@ export function readOnlyBrowserRequestAllowed({ method, path }, {
     if (/^uaa\/refresh_token\/[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(local)) return true;
     if (fetch) return true;
     const parts = local.split('/');
-    const key = value => typeof value === 'string' && /^[A-Za-z0-9_-]+$/.test(value);
+    // Named GET actions (for example GetDraft) are not keyed READ requests.
+    const key = value => typeof value === 'string' && /^[A-Za-z0-9_-]+$/.test(value) &&
+      readRecordKeys.has(value);
     return (parts.length === 2 && readCollections.has(parts[0]) && key(parts[1])) ||
       (parts.length === 4 && parts[0] === 'psdevslnsys' && rootIds.includes(parts[1]) &&
         readCollections.has(parts[2]) && key(parts[3]));
@@ -393,10 +422,11 @@ export async function runOwnedFiveDatasetBrowser(options) {
       (entity.getPSDEServiceAPIMethods ?? []).filter(method =>
         method.methodType === 'FETCH' && method.dataAccessAction === 'READ' && method.requestMethod === 'POST')
         .map(method => `${entity.codeName2.toLowerCase()}/${method.codeName.toLowerCase()}`)));
-    const readCollections = new Set(api.getPSDEServiceAPIs.filter(entity =>
-      entity.getPSDEServiceAPIMethods?.some(method => method.codeName === 'Get' &&
-        method.requestMethod === 'GET' && method.dataAccessAction === 'READ'))
-      .map(entity => entity.codeName2.toLowerCase()));
+    const readCollections = nativeReadCollections(api);
+    const readRecordKeys = new Set([
+      ...manifest.roots.flatMap(row => [row.sentinelId, row.logicalSystemId]),
+      ...seed.records.map(row => row.key),
+    ]);
     const require = createRequire(join(workspace, 'ibiz-app-hub/package.json'));
     browser = await launchChromium(require('playwright').chromium, { args: ['--no-sandbox'] });
     const viewport = options.viewport === 'desktop' ? { width: 1440, height: 900 } : { width: 390, height: 844 };
@@ -407,7 +437,7 @@ export async function runOwnedFiveDatasetBrowser(options) {
       const url = new URL(request.url());
       if (url.origin !== appUrl.origin || !readOnlyBrowserRequestAllowed({
         method: request.method(), path: url.pathname,
-      }, { rootIds: manifest.roots.map(row => row.rootId), readFetchPaths, readCollections })) {
+      }, { rootIds: manifest.roots.map(row => row.rootId), readFetchPaths, readCollections, readRecordKeys })) {
         report.blockedRequests.push({ method: request.method(), origin: url.origin, path: url.pathname });
         return route.abort('blockedbyclient');
       }
