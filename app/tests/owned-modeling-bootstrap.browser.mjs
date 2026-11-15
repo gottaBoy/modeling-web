@@ -28,6 +28,95 @@ const pathInside = (root, value) => {
   return path;
 };
 
+export function createBootstrapEvidenceTracker({
+  row, phase = () => 'unknown', nextSequence = () => null,
+  now = Date.now, wait = ms => new Promise(done => setTimeout(done, ms)),
+}) {
+  const pending = new Set();
+  const inflight = new Set();
+  const routed = new WeakSet();
+  let lastActivity = now();
+  const activity = () => { lastActivity = now(); };
+  const error = (type, failure, details = {}) => {
+    row.errors.push({ type, phase: phase(), sequence: nextSequence(), ...details,
+      message: clean(failure?.message ?? failure) });
+    activity();
+  };
+  const track = (type, operation, details = {}) => {
+    activity();
+    const task = Promise.resolve().then(operation).catch(failure => {
+      error(type, failure, details);
+    }).finally(() => { pending.delete(task); activity(); });
+    pending.add(task);
+    return task;
+  };
+  const drain = async () => {
+    // A response/route callback may enqueue more work while an earlier batch settles.
+    let emptyTurns = 0;
+    while (emptyTurns < 2) {
+      if (pending.size) {
+        emptyTurns = 0;
+        await Promise.all([...pending]);
+      } else {
+        emptyTurns++;
+        await wait(0);
+      }
+    }
+    return { pendingTasks: pending.size, inflightRequests: inflight.size };
+  };
+  return {
+    activity, error, track, drain,
+    requestStarted(request) { inflight.add(request); activity(); },
+    requestSettled(request) { inflight.delete(request); activity(); },
+    route(route, operation) {
+      return track('route-handler', async () => {
+        const request = route.request();
+        assert.ok(!routed.has(request), 'A request route handler was invoked more than once');
+        routed.add(request);
+        await operation(route);
+      });
+    },
+    async waitForQuiet({ quietForMs = 500, timeoutMs = 10_000 } = {}) {
+      assert.ok(quietForMs >= 0 && timeoutMs > quietForMs);
+      const deadline = now() + timeoutMs;
+      while (now() < deadline) {
+        if (pending.size === 0 && inflight.size === 0 && now() - lastActivity >= quietForMs) {
+          return { networkQuietVerified: true, quietForMs, pendingTasks: 0, inflightRequests: 0 };
+        }
+        await wait(Math.min(25, Math.max(1, deadline - now())));
+      }
+      throw new Error(`Network/evidence did not become quiet; pending=${pending.size}, inflight=${inflight.size}`);
+    },
+  };
+}
+
+export async function finishBootstrapContext({ context, tracker, setPhase }) {
+  const evidence = { networkQuietVerified: false, contextClosed: false,
+    evidenceDrainVerified: false, routeGuardRetainedUntilClose: true };
+  try { Object.assign(evidence, await tracker.waitForQuiet()); }
+  catch (error) { tracker.error('network-quiet-before-close', error); }
+  setPhase('closing');
+  try { await context.close(); evidence.contextClosed = true; }
+  catch (error) { tracker.error('context-close', error); }
+  const drained = await tracker.drain();
+  evidence.evidenceDrainVerified = drained.pendingTasks === 0;
+  if (drained.inflightRequests !== 0) {
+    tracker.error('unsettled-requests-after-close',
+      new Error(`Closed context retained ${drained.inflightRequests} unfinished request observations`));
+  }
+  evidence.inflightRequestsAfterClose = drained.inflightRequests;
+  return evidence;
+}
+
+export async function runBootstrapScopeAction({ row, requireOwnedModelContext, menuAction }) {
+  if (requireOwnedModelContext) {
+    row.stages.systemMenu = { status: 'NOT-EXECUTED-APPINDEX-ONLY' };
+    row.stages.navigation = { status: 'NOT-EXECUTED-APPINDEX-ONLY' };
+    return;
+  }
+  await menuAction();
+}
+
 export function browserReadMatrix(manifest) {
   return manifest.users.flatMap(actor => manifest.roots.flatMap(root =>
     ['zh-CN', 'en-US'].flatMap(locale => ['desktop', 'mobile'].map(viewport => ({
@@ -191,7 +280,18 @@ export function summarizeBootstrapCase(row, {
     blockers.push({ type: 'native-appdata-not-verified' });
   }
   if (row?.stages?.home?.status !== 'PASS') blockers.push({ type: 'native-home-not-ready' });
-  if (row?.stages?.systemMenu?.status !== 'CLICKED-NOT-YET-NAVIGATION-ACCEPTED') {
+  if (requireOwnedModelContext) {
+    if (row?.scope !== 'MODELINGINDEX-BOOTSTRAP-ONLY' ||
+        row?.stages?.systemMenu?.status !== 'NOT-EXECUTED-APPINDEX-ONLY' ||
+        row?.stages?.navigation?.status !== 'NOT-EXECUTED-APPINDEX-ONLY') {
+      blockers.push({ type: 'appindex-only-scope-not-verified' });
+    }
+    if (!(row?.teardown?.networkQuietVerified === true && row.teardown.contextClosed === true &&
+        row.teardown.evidenceDrainVerified === true && row.teardown.routeGuardRetainedUntilClose === true &&
+        row.teardown.inflightRequestsAfterClose === 0)) {
+      blockers.push({ type: 'appindex-evidence-teardown-not-verified' });
+    }
+  } else if (row?.stages?.systemMenu?.status !== 'CLICKED-NOT-YET-NAVIGATION-ACCEPTED') {
     blockers.push({ type: 'natural-menu-click-not-observed' });
   }
   let ownedModelContextVerified = false;
@@ -221,8 +321,11 @@ export function summarizeBootstrapCase(row, {
   }
   return {
     status: blockers.length === 0
-      ? 'BOOTSTRAP-AND-NATURAL-CLICK-OBSERVED-NOT-NATIVE-ACCEPTED' : 'FAILED',
+      ? requireOwnedModelContext ? 'BOOTSTRAP-APPINDEX-ONLY-OBSERVED-NOT-NATIVE-ACCEPTED'
+        : 'BOOTSTRAP-AND-NATURAL-CLICK-OBSERVED-NOT-NATIVE-ACCEPTED' : 'FAILED',
     diagnosticOnly: true, nativeAcceptance: false, permissionAcceptance: false,
+    scope: requireOwnedModelContext ? 'MODELINGINDEX-BOOTSTRAP-ONLY' : 'BOOTSTRAP-AND-MENU-CLICK-DIAGNOSTIC',
+    navigationAcceptance: false,
     fullApplicationAcceptance: false, blockers, expectedPreAuthResponses,
     ownedModelContext: { required: requireOwnedModelContext, verified: ownedModelContextVerified,
       appdataProjectionVerified: ownedModelContextVerified,
@@ -260,6 +363,8 @@ export async function runBootstrapBrowser(options) {
     freshSessionReadbackAcceptance: false, modelWritesRequested: false,
     identityOrHeaderInjection: false, acceptedForProduction: false,
     requireOwnedModelContext, ownedModelContextVerified: false,
+    scope: requireOwnedModelContext ? 'MODELINGINDEX-BOOTSTRAP-ONLY' : 'BOOTSTRAP-AND-MENU-CLICK-DIAGNOSTIC',
+    navigationAcceptance: false,
     startedAt: new Date().toISOString(), cases: [],
     source: { path: fileURLToPath(import.meta.url), sha256: hash(fs.readFileSync(fileURLToPath(import.meta.url))) },
   };
@@ -322,6 +427,7 @@ export async function runBootstrapBrowser(options) {
     for (const locale of ['zh-CN', 'en-US']) for (const viewportName of ['desktop', 'mobile']) {
       guard(false);
       const row = { locale, viewport: viewportName, status: 'FAILED', stages: {},
+        scope: report.scope,
         responses: [], blocked: [], errors: [], failedRequests: [], startedAt: new Date().toISOString(),
         authenticationLifecycle: { loginSubmittedSequence: null, loginVerifiedSequence: null },
         M03: { status: 'NOT-EXECUTED-NOT-ACCEPTED', reason: 'Requires successful native list/editor navigation and a complete config-r6 native seed receipt; no writes authorized by this probe' } };
@@ -345,18 +451,28 @@ export async function runBootstrapBrowser(options) {
       let eventSequence = 0;
       const requests = new WeakMap();
       let appdata;
-      const pending = [];
-      page.on('request', request => requests.set(request, { phase, sequence: ++eventSequence }));
+      const tracker = createBootstrapEvidenceTracker({ row, phase: () => phase,
+        nextSequence: () => ++eventSequence });
+      page.on('request', request => {
+        requests.set(request, { phase, sequence: ++eventSequence });
+        tracker.requestStarted(request);
+      });
+      page.on('requestfinished', request => tracker.requestSettled(request));
       page.on('response', response => {
-        const url = new URL(response.url());
-        const request = response.request();
-        const requested = requests.get(request);
-        const observed = { origin: url.origin, path: clean(url.pathname), status: response.status(),
-          method: request.method(), phaseAtRequest: requested?.phase ?? 'unobserved',
-          phaseAtResponse: phase, requestSequence: requested?.sequence ?? null, responseSequence: ++eventSequence,
-          authorizationPresent: null };
-        row.responses.push(observed);
-        pending.push((async () => {
+        const phaseAtResponse = phase;
+        const responseSequence = ++eventSequence;
+        const details = {};
+        tracker.activity();
+        tracker.track('response-evidence', async () => {
+          const url = new URL(response.url());
+          const request = response.request();
+          const requested = requests.get(request);
+          const observed = { origin: url.origin, path: clean(url.pathname), status: response.status(),
+            method: request.method(), phaseAtRequest: requested?.phase ?? 'unobserved',
+            phaseAtResponse, requestSequence: requested?.sequence ?? null, responseSequence,
+            authorizationPresent: null };
+          Object.assign(details, { path: clean(url.pathname), method: request.method(), responseSequence });
+          row.responses.push(observed);
           const headers = await request.allHeaders();
           observed.authorizationPresent = Boolean(headers.authorization);
           if (url.origin === origin && url.pathname === `/api/${appId}/appdata` && response.status() === 200) {
@@ -370,8 +486,7 @@ export async function runBootstrapBrowser(options) {
             row.appdataHeaders = { srforgid: headers.srforgid ?? null, srfsystemid: headers.srfsystemid ?? null,
               authorizationPresent: Boolean(headers.authorization) };
           }
-        })().catch(error => row.errors.push({ type: 'response-evidence', path: clean(url.pathname),
-          message: clean(error.message) })));
+        }, details);
       });
       page.on('pageerror', error => row.errors.push({ type: 'pageerror', phase,
         sequence: ++eventSequence, message: clean(error.message) }));
@@ -380,27 +495,41 @@ export async function runBootstrapBrowser(options) {
           sequence: ++eventSequence, message: clean(message.text()) });
       });
       page.on('requestfailed', request => {
-        const requested = requests.get(request);
-        row.failedRequests.push({ method: request.method(), path: clean(new URL(request.url()).pathname),
-          phaseAtRequest: requested?.phase ?? 'unobserved', phaseAtFailure: phase,
-          requestSequence: requested?.sequence ?? null, failureSequence: ++eventSequence,
-          failure: clean(request.failure()?.errorText ?? 'unknown-request-failure') });
+        const phaseAtFailure = phase;
+        const failureSequence = ++eventSequence;
+        tracker.requestSettled(request);
+        tracker.track('request-failure-evidence', async () => {
+          const requested = requests.get(request);
+          row.failedRequests.push({ method: request.method(), path: clean(new URL(request.url()).pathname),
+            phaseAtRequest: requested?.phase ?? 'unobserved', phaseAtFailure,
+            requestSequence: requested?.sequence ?? null, failureSequence,
+            failure: clean(request.failure()?.errorText ?? 'unknown-request-failure') });
+        });
       });
-      await context.route('**/*', route => {
+      const handleRoute = route => tracker.route(route, async () => {
         const request = route.request();
         const url = new URL(request.url());
         const method = request.method();
+        if (phase === 'closing') {
+          tracker.error('request-during-context-close',
+            new Error('A request arrived after the normal network-quiet boundary'),
+            { method, path: clean(url.pathname) });
+          await route.abort('blockedbyclient');
+          return;
+        }
         const sessionRefresh = method === 'GET' &&
           new RegExp(`^/api/${appId}/uaa/refresh_token/[A-Za-z0-9-]+$`).test(url.pathname);
         const counterRead = method === 'POST' && url.pathname === `/api/${appId}/work_items/count_my_todo`;
         if (url.origin === origin && (sessionRefresh || counterRead ||
           readOnlyBrowserRequestAllowed({ method, path: url.pathname }, readPolicy))) {
-          return route.continue();
+          await route.continue();
+          return;
         }
         row.blocked.push({ method, path: clean(url.pathname), origin: url.origin });
-        return route.abort('blockedbyclient');
+        await route.abort('blockedbyclient');
       });
       try {
+        await context.route('**/*', handleRoute);
         const entry = new URL(app.entry);
         entry.hash = `/psdevslnsys=${root.rootId}/modelingindex/-`;
         await page.goto(entry.href, { waitUntil: 'domcontentloaded' });
@@ -418,7 +547,7 @@ export async function runBootstrapBrowser(options) {
         row.authenticationLifecycle.loginVerifiedSequence = ++eventSequence;
         const deadline = Date.now() + 30_000;
         while (!appdata && Date.now() < deadline) {
-          await Promise.all(pending); await page.waitForTimeout(100);
+          await page.waitForTimeout(100);
         }
         assert.ok(appdata, 'Normal login did not produce authenticated appdata');
         verifyModelingAppData(appdata, actor, { system: 'ibizmodeling', organization: `${actor.centerId}_org` });
@@ -442,43 +571,44 @@ export async function runBootstrapBrowser(options) {
         });
         if (requireOwnedModelContext) row.ownedModelContext.index =
           verifyOwnedBootstrapIndexContext(index, expectedModelContext);
-        const items = index.menus.filter(menu => menu.name === 'leftsidemenu').flatMap(menu => menu.items)
-          .filter(item => item.target?.viewId?.toLowerCase().endsWith('pssystemmainsidebartreeview') &&
-            item.visible === true && item.permitted === true && item.dom.length === 1 && !item.dom[0].disabled);
-        assert.equal(items.length, 1, 'System menu must resolve uniquely from its actual model');
-        const locator = page.locator(items[0].dom[0].selector);
-        row.pointer = await locator.evaluate(element => {
-          const rect = element.getBoundingClientRect();
-          const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
-          return { rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
-            hit: hit ? { tag: hit.tagName, className: hit.className, text: hit.textContent?.slice(0, 180) } : null,
-            targetReceivesPointer: Boolean(hit && (hit === element || element.contains(hit))) };
-        });
-        row.openDrawers = await page.locator('.ibiz-drawer.open').count();
-        if (!row.pointer.targetReceivesPointer && row.openDrawers > 0) {
-          await page.keyboard.press('Escape');
-          await page.waitForTimeout(200);
-          row.normalDrawerDismissal = {
-            operation: 'trusted-keyboard-Escape', before: row.openDrawers,
-            after: await page.locator('.ibiz-drawer.open').count(),
-          };
-          await screenshot('after-escape');
-        }
-        try {
-          await locator.click();
-          row.stages.systemMenu = { status: 'CLICKED-NOT-YET-NAVIGATION-ACCEPTED' };
-        } catch (error) {
-          row.stages.systemMenu = { status: 'FAIL', error: clean(error.message) };
-        }
-        await screenshot('menu');
+        await runBootstrapScopeAction({ row, requireOwnedModelContext, menuAction: async () => {
+          const items = index.menus.filter(menu => menu.name === 'leftsidemenu').flatMap(menu => menu.items)
+            .filter(item => item.target?.viewId?.toLowerCase().endsWith('pssystemmainsidebartreeview') &&
+              item.visible === true && item.permitted === true && item.dom.length === 1 && !item.dom[0].disabled);
+          assert.equal(items.length, 1, 'System menu must resolve uniquely from its actual model');
+          const locator = page.locator(items[0].dom[0].selector);
+          row.pointer = await locator.evaluate(element => {
+            const rect = element.getBoundingClientRect();
+            const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
+            return { rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+              hit: hit ? { tag: hit.tagName, className: hit.className, text: hit.textContent?.slice(0, 180) } : null,
+              targetReceivesPointer: Boolean(hit && (hit === element || element.contains(hit))) };
+          });
+          row.openDrawers = await page.locator('.ibiz-drawer.open').count();
+          if (!row.pointer.targetReceivesPointer && row.openDrawers > 0) {
+            await page.keyboard.press('Escape');
+            await page.waitForTimeout(200);
+            row.normalDrawerDismissal = {
+              operation: 'trusted-keyboard-Escape', before: row.openDrawers,
+              after: await page.locator('.ibiz-drawer.open').count(),
+            };
+            await screenshot('after-escape');
+          }
+          try {
+            await locator.click();
+            row.stages.systemMenu = { status: 'CLICKED-NOT-YET-NAVIGATION-ACCEPTED' };
+          } catch (error) {
+            row.stages.systemMenu = { status: 'FAIL', error: clean(error.message) };
+          }
+          await screenshot('menu');
+        } });
       } catch (error) {
         row.error = clean(error.message);
-        await screenshot('failure').catch(() => {});
+        try { await screenshot('failure'); }
+        catch (failure) { tracker.error('failure-screenshot', failure); }
       } finally {
-        await Promise.all(pending);
-        phase = 'closing';
-        await context.close();
-        await Promise.all(pending);
+        row.teardown = await finishBootstrapContext({ context, tracker,
+          setPhase: value => { phase = value; } });
         row.summary = summarizeBootstrapCase(row, { origin, requireOwnedModelContext, expectedModelContext });
         row.status = row.summary.status;
         row.finishedAt = new Date().toISOString();
@@ -492,12 +622,14 @@ export async function runBootstrapBrowser(options) {
     }
     guard(true);
     report.status = report.cases.every(row => row.status.startsWith('BOOTSTRAP'))
-      ? 'OBSERVED-BOOTSTRAP-NATURAL-CLICK-NOT-FULL-ACCEPTANCE' : 'FAILED-LIVE-BROWSER-REMAINING-BLOCKERS';
+      ? requireOwnedModelContext ? 'OBSERVED-APPINDEX-BOOTSTRAP-NOT-FULL-ACCEPTANCE'
+        : 'OBSERVED-BOOTSTRAP-NATURAL-CLICK-NOT-FULL-ACCEPTANCE' : 'FAILED-LIVE-BROWSER-REMAINING-BLOCKERS';
     report.ownedModelContextVerified = requireOwnedModelContext && report.cases.length === 4 &&
       report.cases.every(row => row.summary?.ownedModelContext.verified === true);
   } catch (error) { report.error = clean(error.message); }
   finally {
-    await browser?.close();
+    try { await browser?.close(); }
+    catch (error) { report.error = clean(error.message); report.status = 'FAILED-LIVE-BROWSER-REMAINING-BLOCKERS'; }
     report.finishedAt = new Date().toISOString();
     report.inputs = bound;
     dirs.write(directory, 'report.private.json', json(report));

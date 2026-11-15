@@ -4,6 +4,7 @@ import test from 'node:test';
 import {
   browserReadMatrix, expectedBootstrapPreAuth401, runBootstrapBrowser, summarizeBootstrapCase,
   ownedBootstrapContextExpectation, verifyOwnedBootstrapIndexContext, verifyOwnedBootstrapProjection,
+  createBootstrapEvidenceTracker, finishBootstrapContext, runBootstrapScopeAction,
 } from './owned-modeling-bootstrap.browser.mjs';
 
 const manifest = {
@@ -167,7 +168,7 @@ test('response classification cannot promote an unbound origin or unsuccessful a
 
 test('runner source captures request lifecycle, all HTTP responses and requestfailed before final summary', () => {
   const source = readFileSync(new URL('./owned-modeling-bootstrap.browser.mjs', import.meta.url), 'utf8');
-  assert.match(source, /page\.on\('request', request => requests\.set/);
+  assert.match(source, /page\.on\('request', request => \{[\s\S]*?requests\.set/);
   assert.match(source, /page\.on\('requestfailed'/);
   assert.match(source, /authorizationPresent = Boolean\(headers\.authorization\)/);
   assert.match(source, /phaseAtRequest: requested\?\.phase \?\? 'unobserved'/);
@@ -205,6 +206,11 @@ const ownedIndex = () => ({
 });
 function ownedRow() {
   const row = validRow();
+  row.scope = 'MODELINGINDEX-BOOTSTRAP-ONLY';
+  row.stages.systemMenu = { status: 'NOT-EXECUTED-APPINDEX-ONLY' };
+  row.stages.navigation = { status: 'NOT-EXECUTED-APPINDEX-ONLY' };
+  row.teardown = { networkQuietVerified: true, contextClosed: true, evidenceDrainVerified: true,
+    routeGuardRetainedUntilClose: true, inflightRequestsAfterClose: 0 };
   const observation = ownedResponse();
   row.responses.push(observation);
   row.ownedModelContext = {
@@ -227,12 +233,14 @@ for (const locale of ['zh-CN', 'en-US']) for (const viewport of ['desktop', 'mob
     const row = { ...ownedRow(), locale, viewport };
     const before = structuredClone(row);
     const result = ownedSummary(row);
-    assert.equal(result.status, 'BOOTSTRAP-AND-NATURAL-CLICK-OBSERVED-NOT-NATIVE-ACCEPTED');
+    assert.equal(result.status, 'BOOTSTRAP-APPINDEX-ONLY-OBSERVED-NOT-NATIVE-ACCEPTED');
     assert.deepEqual(result.ownedModelContext, {
       required: true, verified: true, appdataProjectionVerified: true,
       sameActorAndOrganizationVerified: true, appindexRootAndLogicalSystemConsumed: true,
     });
-    assert.equal(row.stages.systemMenu.status, 'CLICKED-NOT-YET-NAVIGATION-ACCEPTED');
+    assert.equal(row.stages.systemMenu.status, 'NOT-EXECUTED-APPINDEX-ONLY');
+    assert.equal(result.scope, 'MODELINGINDEX-BOOTSTRAP-ONLY');
+    assert.equal(result.navigationAcceptance, false);
     assert.equal(result.nativeAcceptance, false);
     assert.equal(result.permissionAcceptance, false);
     assert.equal(result.fullApplicationAcceptance, false);
@@ -328,4 +336,207 @@ test('required context mode observes existing UI responses and public APPINDEX s
   assert.match(source, /verifyOwnedBootstrapIndexContext\(index, expectedModelContext\)/);
   assert.match(source, /report\.cases\.length === 4/);
   assert.doesNotMatch(source, /page\.request|context\.request|\bfetch\(|route\.fulfill|force:\s*true|addView|setView/);
+});
+
+function trackerFixture({ onWait = () => {} } = {}) {
+  const row = ownedRow();
+  let clock = 0;
+  let phase = 'authenticated';
+  let sequence = 30;
+  const tracker = createBootstrapEvidenceTracker({
+    row, now: () => clock, phase: () => phase, nextSequence: () => ++sequence,
+    wait: async ms => { clock += Math.max(1, ms); await onWait(clock); },
+  });
+  return { row, tracker, now: () => clock, phase: () => phase, setPhase: value => { phase = value; } };
+}
+const deferred = () => {
+  let resolve;
+  let reject;
+  const promise = new Promise((yes, no) => { resolve = yes; reject = no; });
+  return { promise, resolve, reject };
+};
+
+test('drain follows work queued by a settling response instead of awaiting only an old Promise.all snapshot', async () => {
+  const { tracker, row } = trackerFixture();
+  const events = [];
+  tracker.track('first', async () => {
+    events.push('first');
+    tracker.track('second', async () => {
+      await Promise.resolve();
+      tracker.track('third', async () => { events.push('third'); });
+      events.push('second');
+    });
+  });
+  assert.deepEqual(await tracker.drain(), { pendingTasks: 0, inflightRequests: 0 });
+  assert.deepEqual(events, ['first', 'second', 'third']);
+  assert.deepEqual(row.errors, []);
+});
+
+test('route continue rejection is evidence, not an unhandled rejection that interrupts later cells', async () => {
+  const rows = [];
+  for (const locale of ['zh-CN', 'en-US']) for (const viewport of ['desktop', 'mobile']) {
+    const state = trackerFixture();
+    state.row.locale = locale;
+    state.row.viewport = viewport;
+    await state.tracker.route({ request: () => ({}) }, async () => {
+      throw new Error('route.continue: Route is already handled!');
+    });
+    await runBootstrapScopeAction({ row: state.row, requireOwnedModelContext: true,
+      menuAction: () => assert.fail('APPINDEX-only mode must not initiate menu navigation') });
+    state.row.teardown = await finishBootstrapContext({
+      context: { close: async () => {} }, tracker: state.tracker, setPhase: state.setPhase,
+    });
+    state.row.summary = ownedSummary(state.row);
+    rows.push(state.row);
+  }
+  assert.equal(rows.length, 4);
+  assert.ok(rows.every(row => row.summary.status === 'FAILED'));
+  assert.ok(rows.every(row => row.errors.some(error => error.type === 'route-handler'
+    && error.message.includes('Route is already handled'))));
+});
+
+test('duplicate route delivery never invokes a second continue/abort and remains a failed observation', async () => {
+  const { tracker, row } = trackerFixture();
+  const request = {};
+  const route = { request: () => request };
+  let calls = 0;
+  await Promise.all([
+    tracker.route(route, async () => { calls++; }),
+    tracker.route(route, async () => { calls++; }),
+  ]);
+  assert.equal(calls, 1);
+  assert.ok(row.errors.some(error => error.type === 'route-handler' && error.message.includes('more than once')));
+});
+
+test('normal network quiet waits for the response body and its finished request before context close', async () => {
+  const body = deferred();
+  const request = {};
+  let release;
+  const events = [];
+  const state = trackerFixture({ onWait: async time => {
+    if (time >= 100 && release) { release(); release = null; }
+  } });
+  state.tracker.requestStarted(request);
+  state.tracker.track('response-evidence', async () => {
+    await body.promise;
+    events.push('body-finished');
+    state.tracker.requestSettled(request);
+  });
+  release = () => body.resolve();
+  const teardown = await finishBootstrapContext({
+    tracker: state.tracker, setPhase: state.setPhase,
+    context: { close: async () => {
+      assert.ok(state.now() >= 600);
+      assert.equal(state.phase(), 'closing');
+      events.push('context-close');
+    } },
+  });
+  assert.deepEqual(events, ['body-finished', 'context-close']);
+  assert.equal(teardown.networkQuietVerified, true);
+  assert.equal(teardown.evidenceDrainVerified, true);
+  assert.equal(teardown.inflightRequestsAfterClose, 0);
+  assert.deepEqual(state.row.errors, []);
+});
+
+test('tasks created during context close are also drained and their failures are retained before summarizing', async () => {
+  const state = trackerFixture();
+  const request = {};
+  const events = [];
+  const teardown = await finishBootstrapContext({
+    tracker: state.tracker, setPhase: state.setPhase,
+    context: { close: async () => {
+      events.push('closing');
+      state.tracker.requestStarted(request);
+      state.tracker.track('response-evidence', async () => {
+        await Promise.resolve();
+        state.tracker.track('late-route', async () => {
+          events.push('late-route');
+          throw new Error('late route failed');
+        });
+        state.tracker.requestSettled(request);
+        events.push('body-failed');
+        throw new Error('response.body: Target page, context or browser has been closed');
+      });
+    } },
+  });
+  state.row.teardown = teardown;
+  const summary = ownedSummary(state.row);
+  assert.deepEqual(events, ['closing', 'body-failed', 'late-route']);
+  assert.equal(teardown.evidenceDrainVerified, true);
+  assert.ok(state.row.errors.some(error => error.type === 'response-evidence'));
+  assert.ok(state.row.errors.some(error => error.type === 'late-route'));
+  assert.equal(summary.status, 'FAILED');
+});
+
+test('quiet timeout is retained and close releases a pending response-body failure without claiming a pass', async () => {
+  const state = trackerFixture();
+  const body = deferred();
+  const request = {};
+  state.tracker.requestStarted(request);
+  state.tracker.track('response-evidence', async () => { await body.promise; });
+  const teardown = await finishBootstrapContext({
+    tracker: state.tracker, setPhase: state.setPhase,
+    context: { close: async () => {
+      state.tracker.requestSettled(request);
+      body.reject(new Error('response.body: Target closed'));
+    } },
+  });
+  state.row.teardown = teardown;
+  assert.equal(teardown.networkQuietVerified, false);
+  assert.equal(teardown.contextClosed, true);
+  assert.equal(teardown.evidenceDrainVerified, true);
+  assert.ok(state.row.errors.some(error => error.type === 'network-quiet-before-close'));
+  assert.ok(state.row.errors.some(error => error.type === 'response-evidence'));
+  assert.equal(ownedSummary(state.row).status, 'FAILED');
+});
+
+test('context close errors remain explicit failures, not silently discarded cleanup exceptions', async () => {
+  const state = trackerFixture();
+  const teardown = await finishBootstrapContext({ tracker: state.tracker, setPhase: state.setPhase,
+    context: { close: async () => { throw new Error('context close failed'); } } });
+  state.row.teardown = teardown;
+  assert.equal(teardown.contextClosed, false);
+  assert.ok(state.row.errors.some(error => error.type === 'context-close'));
+  assert.equal(ownedSummary(state.row).status, 'FAILED');
+});
+
+test('APPINDEX-only action selection never clicks a menu; legacy diagnostic mode still executes it once', async () => {
+  const row = ownedRow();
+  let menuActions = 0;
+  const menuAction = async () => {
+    menuActions++;
+    row.stages.systemMenu = { status: 'CLICKED-NOT-YET-NAVIGATION-ACCEPTED' };
+  };
+  await runBootstrapScopeAction({ row, requireOwnedModelContext: true, menuAction });
+  assert.equal(menuActions, 0);
+  assert.equal(row.stages.navigation.status, 'NOT-EXECUTED-APPINDEX-ONLY');
+  assert.equal(ownedSummary(row).status, 'BOOTSTRAP-APPINDEX-ONLY-OBSERVED-NOT-NATIVE-ACCEPTED');
+  await runBootstrapScopeAction({ row, requireOwnedModelContext: false, menuAction });
+  assert.equal(menuActions, 1);
+  assert.equal(summarizeBootstrapCase(row, { origin }).status,
+    'BOOTSTRAP-AND-NATURAL-CLICK-OBSERVED-NOT-NATIVE-ACCEPTED');
+  assert.equal(ownedSummary(row).status, 'FAILED', 'A menu click cannot masquerade as APPINDEX-only evidence');
+});
+
+test('APPINDEX-only mode still rejects existing HTTP 403 rather than deleting or excusing the navigation failure', () => {
+  const row = ownedRow();
+  row.responses.push({ origin, path: `${appPrefix}/psmodules/fetchcursys`, method: 'POST', status: 403,
+    authorizationPresent: true, phaseAtRequest: 'authenticated', phaseAtResponse: 'authenticated' });
+  const summary = ownedSummary(row);
+  assert.equal(summary.status, 'FAILED');
+  assert.ok(summary.blockers.some(blocker => blocker.type === 'unexpected-http-error'
+    && blocker.evidence.status === 403));
+  assert.equal(row.responses.at(-1).status, 403);
+});
+
+test('runner retains route policy until close and finalizes each row only after tracked evidence draining', () => {
+  const source = readFileSync(new URL('./owned-modeling-bootstrap.browser.mjs', import.meta.url), 'utf8');
+  assert.match(source, /const handleRoute = route => tracker\.route/);
+  assert.match(source, /tracker\.track\('response-evidence'/);
+  assert.match(source, /page\.on\('requestfinished', request => tracker\.requestSettled/);
+  assert.match(source, /await tracker\.waitForQuiet\(\)/);
+  assert.match(source, /await tracker\.drain\(\)/);
+  assert.match(source, /row\.teardown = await finishBootstrapContext/);
+  assert.match(source, /await runBootstrapScopeAction\(\{ row, requireOwnedModelContext, menuAction:/);
+  assert.doesNotMatch(source, /unrouteAll|removeAllListeners|catch\(\(\) => \{\}\)|Promise\.all\(pending\)/);
 });
