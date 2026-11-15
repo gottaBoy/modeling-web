@@ -33,12 +33,34 @@ export function createBootstrapEvidenceTracker({
   now = Date.now, wait = ms => new Promise(done => setTimeout(done, ms)),
 }) {
   const pending = new Set();
-  const inflight = new Set();
+  const inflight = new Map();
+  const requestIds = new WeakMap();
   const routed = new WeakSet();
+  let requestSerial = 0;
   let lastActivity = now();
   const activity = () => { lastActivity = now(); };
+  const describeRequest = request => {
+    if (!requestIds.has(request)) requestIds.set(request, `request-${++requestSerial}`);
+    let method = 'unknown';
+    let path = '[unavailable]';
+    let resourceType = 'unknown';
+    let navigationRequest = false;
+    let metadataUnavailable = false;
+    try {
+      method = String(request.method?.() ?? method).slice(0, 16);
+      path = clean(new URL(request.url?.()).pathname).slice(0, 2048);
+      resourceType = String(request.resourceType?.() ?? resourceType).slice(0, 32);
+      navigationRequest = request.isNavigationRequest?.() === true;
+    } catch { metadataUnavailable = true; }
+    return { requestId: requestIds.get(request), method, path, resourceType, navigationRequest,
+      ...(metadataUnavailable ? { metadataUnavailable: true } : {}) };
+  };
+  const unfinishedRequests = () => [...inflight.values()].slice(0, 20).map(request => ({
+    ...request, ageMs: Math.max(0, now() - request.startedAtMs),
+  }));
   const error = (type, failure, details = {}) => {
     row.errors.push({ type, phase: phase(), sequence: nextSequence(), ...details,
+      ...(Array.isArray(failure?.unfinishedRequests) ? { unfinishedRequests: failure.unfinishedRequests } : {}),
       message: clean(failure?.message ?? failure) });
     activity();
   };
@@ -62,19 +84,25 @@ export function createBootstrapEvidenceTracker({
         await wait(0);
       }
     }
-    return { pendingTasks: pending.size, inflightRequests: inflight.size };
+    return { pendingTasks: pending.size, inflightRequests: inflight.size,
+      ...(inflight.size ? { unfinishedRequests: unfinishedRequests() } : {}) };
   };
   return {
     activity, error, track, drain,
-    requestStarted(request) { inflight.add(request); activity(); },
+    requestStarted(request) {
+      inflight.set(request, { ...describeRequest(request), startedAtMs: now() });
+      activity();
+    },
     requestSettled(request) { inflight.delete(request); activity(); },
     route(route, operation) {
+      const details = {};
       return track('route-handler', async () => {
         const request = route.request();
+        Object.assign(details, describeRequest(request));
         assert.ok(!routed.has(request), 'A request route handler was invoked more than once');
         routed.add(request);
         await operation(route);
-      });
+      }, details);
     },
     async waitForQuiet({ quietForMs = 500, timeoutMs = 10_000 } = {}) {
       assert.ok(quietForMs >= 0 && timeoutMs > quietForMs);
@@ -85,7 +113,9 @@ export function createBootstrapEvidenceTracker({
         }
         await wait(Math.min(25, Math.max(1, deadline - now())));
       }
-      throw new Error(`Network/evidence did not become quiet; pending=${pending.size}, inflight=${inflight.size}`);
+      const failure = new Error(`Network/evidence did not become quiet; pending=${pending.size}, inflight=${inflight.size}`);
+      failure.unfinishedRequests = unfinishedRequests();
+      throw failure;
     },
   };
 }
@@ -102,9 +132,11 @@ export async function finishBootstrapContext({ context, tracker, setPhase }) {
   evidence.evidenceDrainVerified = drained.pendingTasks === 0;
   if (drained.inflightRequests !== 0) {
     tracker.error('unsettled-requests-after-close',
-      new Error(`Closed context retained ${drained.inflightRequests} unfinished request observations`));
+      new Error(`Closed context retained ${drained.inflightRequests} unfinished request observations`),
+      { unfinishedRequests: drained.unfinishedRequests });
   }
   evidence.inflightRequestsAfterClose = drained.inflightRequests;
+  evidence.unfinishedRequestsAfterClose = drained.unfinishedRequests ?? [];
   return evidence;
 }
 

@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { createServer } from 'node:http';
+import { createRequire } from 'node:module';
 import test from 'node:test';
+import { launchChromium } from '../../../scripts/browser-launch.mjs';
+import { captureNativeLogin } from './native-model-contract.mjs';
 import {
   browserReadMatrix, expectedBootstrapPreAuth401, runBootstrapBrowser, summarizeBootstrapCase,
   ownedBootstrapContextExpectation, verifyOwnedBootstrapIndexContext, verifyOwnedBootstrapProjection,
@@ -500,6 +504,37 @@ test('context close errors remain explicit failures, not silently discarded clea
   assert.equal(ownedSummary(state.row).status, 'FAILED');
 });
 
+test('unfinished request diagnostics identify the exact request without query, headers or token material', async () => {
+  const state = trackerFixture();
+  const request = {
+    method: () => 'POST',
+    url: () => `${origin}${appPrefix}/v7/login?token=must-not-be-recorded`,
+    resourceType: () => 'fetch', isNavigationRequest: () => false,
+  };
+  state.tracker.requestStarted(request);
+  await state.tracker.route({ request: () => request }, async () => {
+    throw new Error('route.continue: Route is already handled!');
+  });
+  const teardown = await finishBootstrapContext({
+    tracker: state.tracker, setPhase: state.setPhase, context: { close: async () => {} },
+  });
+  assert.equal(teardown.unfinishedRequestsAfterClose.length, 1);
+  const pending = teardown.unfinishedRequestsAfterClose[0];
+  assert.equal(pending.requestId, 'request-1');
+  assert.equal(pending.method, 'POST');
+  assert.equal(pending.path, `${appPrefix}/v7/login`);
+  assert.equal(pending.resourceType, 'fetch');
+  const routed = state.row.errors.find(error => error.type === 'route-handler');
+  assert.equal(routed.requestId, pending.requestId);
+  assert.equal(routed.path, pending.path);
+  assert.equal(state.row.errors.find(error => error.type === 'network-quiet-before-close')
+    .unfinishedRequests[0].requestId, pending.requestId);
+  assert.equal(JSON.stringify({ errors: state.row.errors, teardown }).includes('must-not-be-recorded'), false);
+  assert.equal(teardown.networkQuietVerified, false);
+  state.row.teardown = teardown;
+  assert.equal(ownedSummary(state.row).status, 'FAILED');
+});
+
 test('APPINDEX-only action selection never clicks a menu; legacy diagnostic mode still executes it once', async () => {
   const row = ownedRow();
   let menuActions = 0;
@@ -539,4 +574,86 @@ test('runner retains route policy until close and finalizes each row only after 
   assert.match(source, /row\.teardown = await finishBootstrapContext/);
   assert.match(source, /await runBootstrapScopeAction\(\{ row, requireOwnedModelContext, menuAction:/);
   assert.doesNotMatch(source, /unrouteAll|removeAllListeners|catch\(\(\) => \{\}\)|Promise\.all\(pending\)/);
+});
+
+test('real login capture plus context routing and a document reload accounts for every request in a controlled loopback fixture', async t => {
+  const loginPath = `${appPrefix}/v7/login`;
+  const appdataPath = `${appPrefix}/appdata`;
+  const server = createServer((request, response) => {
+    if (request.url === loginPath) {
+      request.resume();
+      response.writeHead(200, { 'content-type': 'application/json' });
+      response.end(JSON.stringify({ token: 'controlled-login-token' }));
+    } else if (request.url === appdataPath) {
+      response.writeHead(200, { 'content-type': 'application/json' });
+      response.end('{"context":{"controlledFixtureOnly":true}}');
+    } else if (request.url === '/slow.svg') {
+      setTimeout(() => {
+        response.writeHead(200, { 'content-type': 'image/svg+xml' });
+        response.end('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>');
+      }, 150);
+    } else if (request.url === '/') {
+      response.writeHead(200, { 'content-type': 'text/html' });
+      response.end(`<!doctype html><html><body><script>
+        window.ibiz = {};
+        window.System = { import: async () => ({ getToken: () => localStorage.getItem('controlled-token') }) };
+        if (localStorage.getItem('controlled-token')) {
+          document.body.innerHTML = '<main id="ready">Controlled index</main>';
+          fetch('${appdataPath}');
+        } else {
+          document.body.innerHTML = '<button id="login">Login</button><img src="/slow.svg">';
+          document.querySelector('#login').onclick = async () => {
+            const response = await fetch('${loginPath}', { method: 'POST',
+              headers: { 'content-type': 'application/json' }, body: '{"loginname":"controlled"}' });
+            const data = await response.json();
+            localStorage.setItem('controlled-token', data.token);
+            location.reload();
+          };
+        }
+      </script></body></html>`);
+    } else {
+      response.writeHead(404); response.end();
+    }
+  });
+  await new Promise(done => server.listen(0, '127.0.0.1', done));
+  t.after(() => new Promise(done => { server.closeAllConnections(); server.close(done); }));
+  const require = createRequire(new URL('../../../ibiz-app-hub/package.json', import.meta.url));
+  const browser = await launchChromium(require('playwright').chromium, { args: ['--no-sandbox'] });
+  t.after(() => browser.close());
+  const entry = `http://127.0.0.1:${server.address().port}/`;
+  const context = await browser.newContext({ serviceWorkers: 'block' });
+  t.after(() => context.close());
+  const page = await context.newPage();
+  const row = validRow();
+  let phase = 'pre-auth';
+  const tracker = createBootstrapEvidenceTracker({ row, phase: () => phase });
+  const unfinished = new Map();
+  let serial = 0;
+  const events = [];
+  page.on('request', request => {
+    const identity = { id: ++serial, method: request.method(), path: new URL(request.url()).pathname };
+    unfinished.set(request, identity);
+    events.push({ event: 'request', ...identity });
+    tracker.requestStarted(request);
+  });
+  for (const event of ['requestfinished', 'requestfailed']) page.on(event, request => {
+    events.push({ event, ...(unfinished.get(request) ?? { path: new URL(request.url()).pathname, unknown: true }) });
+    unfinished.delete(request);
+    tracker.requestSettled(request);
+  });
+  await context.route('**/*', route => tracker.route(route, async () => { await route.continue(); }));
+  await page.goto(entry, { waitUntil: 'domcontentloaded' });
+  await tracker.waitForQuiet({ quietForMs: 20, timeoutMs: 2000 });
+  const login = await captureNativeLogin(page, { entry, applicationId: 'ibizmodeling__modeldesign', timeout: 3000 },
+    async () => { phase = 'login-submitted'; await page.locator('#login').click(); });
+  assert.equal(login.tokenPersisted, true);
+  phase = 'authenticated';
+  await page.locator('#ready').waitFor();
+  await tracker.drain();
+  try { await tracker.waitForQuiet({ quietForMs: 20, timeoutMs: 1000 }); }
+  catch (error) {
+    assert.fail(JSON.stringify({ error: error.message, unfinished: [...unfinished.values()], events, errors: row.errors }));
+  }
+  assert.equal(unfinished.size, 0);
+  assert.deepEqual(row.errors, []);
 });
