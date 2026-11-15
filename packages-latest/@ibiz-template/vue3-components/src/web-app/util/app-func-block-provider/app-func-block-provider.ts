@@ -38,9 +38,10 @@ export class AppFuncBlockProvider implements IAppFuncBlockProvider {
       const match = hash.match(regex);
       const ru = match ? decodeURIComponent(match[1]) : null;
       const redirect = ru && !ru.startsWith('/login') ? ru : '/';
-      window.location.hash = redirect;
+      const target = new URL(window.location.href);
+      target.hash = redirect;
       // 重置会话记录state,防止直接返回到登录页
-      window.history.pushState({}, '');
+      window.history.pushState({}, '', target.href);
       if (loginFailed) {
         const path = window.location.href.replace(
           '?srfthird_auth_success=false',
