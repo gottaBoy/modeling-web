@@ -60,8 +60,13 @@ export async function frontendAssemblerToolchain() {
   }));
 }
 
-export function candidateHostFiles(template, { nativeModeling = false } = {}) {
+export function candidateHostFiles(template, {
+  nativeModeling = false, enableExtensionPlugin,
+} = {}) {
   if (typeof nativeModeling !== 'boolean') throw new Error('Explicit boolean candidate profile required');
+  if (enableExtensionPlugin !== undefined &&
+      (typeof enableExtensionPlugin !== 'boolean' || !nativeModeling))
+    throw new Error('Extension capability requires an explicit native boolean');
   if (!nativeModeling) {
     return {
       html: template,
@@ -72,7 +77,9 @@ export function candidateHostFiles(template, { nativeModeling = false } = {}) {
   if (template.split(base).length !== 2) throw new Error('Native candidate base template changed');
   return {
     html: template.replace(base, '<base href="./" />'),
-    environment: '// Native plugin URLs are supplied by the bound deployment environment.\n',
+    environment: '// Native plugin URLs are supplied by the bound deployment environment.\n' +
+      (enableExtensionPlugin === undefined ? '' :
+        `Object.assign(window.Environment, { enableExtensionPlugin: ${enableExtensionPlugin} });\n`),
   };
 }
 
@@ -147,8 +154,10 @@ export async function assembleCandidate({
   typeReport,
   baseline,
   nativeModeling = false,
+  enableExtensionPlugin,
 }) {
   if (typeof nativeModeling !== 'boolean') throw new Error('Explicit boolean candidate profile required');
+  candidateHostFiles('<base href="/modeldesign/" />', { nativeModeling, enableExtensionPlugin });
   frameworkBuild = await containedFile(
     join(workspace, '.artifacts/frontend-source'),
     resolve(frameworkBuild),
@@ -174,6 +183,7 @@ export async function assembleCandidate({
     schemaVersion: 1,
     contract: 'isolated-frontend-source-candidate-v1',
     profile: nativeModeling ? 'native-modeling' : 'candidate-preview',
+    ...(enableExtensionPlugin === undefined ? {} : { capabilities: { enableExtensionPlugin } }),
     generatedAt: new Date().toISOString(),
     status: 'assembling',
     productionModified: false,
@@ -488,7 +498,7 @@ export async function assembleCandidate({
     );
     const host = candidateHostFiles(
       await readFile(join(appRoot, 'source-candidate.html'), 'utf8'),
-      { nativeModeling },
+      { nativeModeling, enableExtensionPlugin },
     );
     await writeFile(join(dist, 'source-app/environment.js'), host.environment, { flag: 'wx' });
     await writeFile(join(dist, 'index.html'), host.html);
@@ -550,6 +560,7 @@ if (
       'type-report': { type: 'string' },
       baseline: { type: 'string' },
       'native-modeling': { type: 'boolean' },
+      'disable-extension-plugin': { type: 'boolean' },
     },
   });
   if (!values['framework-build'] || !values['type-report'] || !values.baseline)
@@ -559,6 +570,7 @@ if (
     typeReport: values['type-report'],
     baseline: values.baseline,
     nativeModeling: values['native-modeling'],
+    enableExtensionPlugin: values['disable-extension-plugin'] ? false : undefined,
   });
   if (report.status === 'failed') process.exitCode = 1;
 }

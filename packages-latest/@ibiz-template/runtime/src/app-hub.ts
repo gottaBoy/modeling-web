@@ -857,6 +857,27 @@ export class AppHub implements IAppHubService {
    * @memberof AppHub
    */
   public async loadExtensionPlugin(appId: string): Promise<void> {
+    const deployment =
+      typeof window === 'undefined'
+        ? undefined
+        : Object.getOwnPropertyDescriptor(
+          window.Environment || {},
+          'enableExtensionPlugin',
+        );
+    const setting =
+      deployment ||
+      Object.getOwnPropertyDescriptor(
+        ibiz.env,
+        'enableExtensionPlugin',
+      );
+    if (
+      setting &&
+      (!Object.prototype.hasOwnProperty.call(setting, 'value') ||
+        typeof setting.value !== 'boolean')
+    ) {
+      throw new TypeError('enableExtensionPlugin must be a boolean data property');
+    }
+    if (setting?.value === false) return;
     try {
       await ibiz.plugin.loadPlugin({
         runtimeObject: true,
@@ -864,11 +885,7 @@ export class AppHub implements IAppHubService {
         rtobjectRepo: `${ibiz.env.baseUrl}/${appId}${ibiz.env.remoteModelUrl}/ext`,
       } as IAppPFPluginRef);
     } catch (error) {
-      ibiz.log.warn(
-        ibiz.i18n.t('runtime.application.noExtensionPlugin', {
-          appId: ibiz.env.appId,
-        }),
-      );
+      ibiz.log.warn(ibiz.i18n.t('runtime.hub.noExtensionPlugin', { appId }));
     }
   }
 

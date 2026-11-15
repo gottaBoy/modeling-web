@@ -200,9 +200,13 @@ export async function verifyFrontendSourceCandidate(options, {
     assert.deepEqual(await verifyCandidateImportMap(dist), report.importMapAssets);
     assert.deepEqual(JSON.parse(read(join(dist, 'extras/json/system-import.json')).data), expectedImportMap,
       'Frontend import map differs from the complete reviewed assembly recipe');
+    if (report.capabilities !== undefined) {
+      assert.deepEqual(Object.keys(report.capabilities), ['enableExtensionPlugin']);
+      assert.equal(typeof report.capabilities.enableExtensionPlugin, 'boolean');
+    }
     const expectedHost = candidateHostFiles(
       read(join(workspace, 'modelingweb/app/source-candidate.html')).data.toString('utf8'),
-      { nativeModeling: true },
+      { nativeModeling: true, enableExtensionPlugin: report.capabilities?.enableExtensionPlugin },
     );
     assert.equal(read(join(dist, 'index.html')).data.toString('utf8'), expectedHost.html);
     assert.equal(read(join(dist, 'source-app/environment.js')).data.toString('utf8'), expectedHost.environment);
