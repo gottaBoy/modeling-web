@@ -149,6 +149,18 @@ export async function runBootstrapScopeAction({ row, requireOwnedModelContext, m
   await menuAction();
 }
 
+export async function waitForBootstrapLoginReady({ row, tracker }) {
+  try {
+    const evidence = await tracker.waitForQuiet();
+    row.stages.preLoginNetworkQuiet = { status: 'PASS', ...evidence };
+    return evidence;
+  } catch (error) {
+    row.stages.preLoginNetworkQuiet = { status: 'FAIL' };
+    tracker.error('network-quiet-before-login', error);
+    throw error;
+  }
+}
+
 export function browserReadMatrix(manifest) {
   return manifest.users.flatMap(actor => manifest.roots.flatMap(root =>
     ['zh-CN', 'en-US'].flatMap(locale => ['desktop', 'mobile'].map(viewport => ({
@@ -313,6 +325,10 @@ export function summarizeBootstrapCase(row, {
   }
   if (row?.stages?.home?.status !== 'PASS') blockers.push({ type: 'native-home-not-ready' });
   if (requireOwnedModelContext) {
+    if (!(row?.stages?.preLoginNetworkQuiet?.status === 'PASS' &&
+        row.stages.preLoginNetworkQuiet.networkQuietVerified === true)) {
+      blockers.push({ type: 'prelogin-network-quiet-not-verified' });
+    }
     if (row?.scope !== 'MODELINGINDEX-BOOTSTRAP-ONLY' ||
         row?.stages?.systemMenu?.status !== 'NOT-EXECUTED-APPINDEX-ONLY' ||
         row?.stages?.navigation?.status !== 'NOT-EXECUTED-APPINDEX-ONLY') {
@@ -569,6 +585,7 @@ export async function runBootstrapBrowser(options) {
         await screenshot('login');
         await page.locator('input[type="text"]').first().fill(actor.loginname);
         await page.locator('input[type="password"]').first().fill(credentials.users[actor.loginname]);
+        await waitForBootstrapLoginReady({ row, tracker });
         row.stages.login = await captureNativeLogin(page, { entry: app.entry, applicationId: appId },
           () => {
             phase = 'login-submitted';

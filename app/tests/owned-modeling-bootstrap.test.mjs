@@ -9,6 +9,7 @@ import {
   browserReadMatrix, expectedBootstrapPreAuth401, runBootstrapBrowser, summarizeBootstrapCase,
   ownedBootstrapContextExpectation, verifyOwnedBootstrapIndexContext, verifyOwnedBootstrapProjection,
   createBootstrapEvidenceTracker, finishBootstrapContext, runBootstrapScopeAction,
+  waitForBootstrapLoginReady,
 } from './owned-modeling-bootstrap.browser.mjs';
 
 const manifest = {
@@ -213,6 +214,7 @@ function ownedRow() {
   row.scope = 'MODELINGINDEX-BOOTSTRAP-ONLY';
   row.stages.systemMenu = { status: 'NOT-EXECUTED-APPINDEX-ONLY' };
   row.stages.navigation = { status: 'NOT-EXECUTED-APPINDEX-ONLY' };
+  row.stages.preLoginNetworkQuiet = { status: 'PASS', networkQuietVerified: true };
   row.teardown = { networkQuietVerified: true, contextClosed: true, evidenceDrainVerified: true,
     routeGuardRetainedUntilClose: true, inflightRequestsAfterClose: 0 };
   const observation = ownedResponse();
@@ -576,32 +578,44 @@ test('runner retains route policy until close and finalizes each row only after 
   assert.doesNotMatch(source, /unrouteAll|removeAllListeners|catch\(\(\) => \{\}\)|Promise\.all\(pending\)/);
 });
 
-test('real login capture plus context routing and a document reload accounts for every request in a controlled loopback fixture', async t => {
+async function orgBootstrapReloadFixture(t, { hang = false } = {}) {
   const loginPath = `${appPrefix}/v7/login`;
   const appdataPath = `${appPrefix}/appdata`;
+  const orgPath = `${appPrefix}/uaa/getbydcsystem/ibizmodeling`;
+  const upstreamOrg = [];
+  let loginRequests = 0;
   const server = createServer((request, response) => {
     if (request.url === loginPath) {
+      loginRequests++;
       request.resume();
       response.writeHead(200, { 'content-type': 'application/json' });
       response.end(JSON.stringify({ token: 'controlled-login-token' }));
     } else if (request.url === appdataPath) {
       response.writeHead(200, { 'content-type': 'application/json' });
       response.end('{"context":{"controlledFixtureOnly":true}}');
-    } else if (request.url === '/slow.svg') {
-      setTimeout(() => {
-        response.writeHead(200, { 'content-type': 'image/svg+xml' });
-        response.end('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>');
-      }, 150);
+    } else if (request.url === orgPath) {
+      const observation = { status: null };
+      upstreamOrg.push(observation);
+      if (!hang) setTimeout(() => {
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end('{"controlledFixtureOnly":true}');
+        observation.status = 200;
+      }, 500);
+    } else if (request.url === '/favicon.ico') {
+      response.writeHead(204); response.end();
     } else if (request.url === '/') {
       response.writeHead(200, { 'content-type': 'text/html' });
       response.end(`<!doctype html><html><body><script>
         window.ibiz = {};
         window.System = { import: async () => ({ getToken: () => localStorage.getItem('controlled-token') }) };
+        const org = new XMLHttpRequest();
+        org.open('GET', '${orgPath}');
+        org.send();
         if (localStorage.getItem('controlled-token')) {
           document.body.innerHTML = '<main id="ready">Controlled index</main>';
           fetch('${appdataPath}');
         } else {
-          document.body.innerHTML = '<button id="login">Login</button><img src="/slow.svg">';
+          document.body.innerHTML = '<button id="login">Login</button>';
           document.querySelector('#login').onclick = async () => {
             const response = await fetch('${loginPath}', { method: 'POST',
               headers: { 'content-type': 'application/json' }, body: '{"loginname":"controlled"}' });
@@ -643,17 +657,69 @@ test('real login capture plus context routing and a document reload accounts for
   });
   await context.route('**/*', route => tracker.route(route, async () => { await route.continue(); }));
   await page.goto(entry, { waitUntil: 'domcontentloaded' });
-  await tracker.waitForQuiet({ quietForMs: 20, timeoutMs: 2000 });
-  const login = await captureNativeLogin(page, { entry, applicationId: 'ibizmodeling__modeldesign', timeout: 3000 },
-    async () => { phase = 'login-submitted'; await page.locator('#login').click(); });
-  assert.equal(login.tokenPersisted, true);
-  phase = 'authenticated';
-  await page.locator('#ready').waitFor();
-  await tracker.drain();
-  try { await tracker.waitForQuiet({ quietForMs: 20, timeoutMs: 1000 }); }
-  catch (error) {
-    assert.fail(JSON.stringify({ error: error.message, unfinished: [...unfinished.values()], events, errors: row.errors }));
-  }
-  assert.equal(unfinished.size, 0);
-  assert.deepEqual(row.errors, []);
+  return {
+    row, tracker, unfinished, events, upstreamOrg, orgPath, loginRequests: () => loginRequests,
+    async login({ waitBeforeSubmit = false, gateTracker = tracker } = {}) {
+      if (waitBeforeSubmit) await waitForBootstrapLoginReady({ row, tracker: gateTracker });
+      const login = await captureNativeLogin(page,
+        { entry, applicationId: 'ibizmodeling__modeldesign', timeout: 3000 },
+        async () => { phase = 'login-submitted'; await page.locator('#login').click(); });
+      assert.equal(login.tokenPersisted, true);
+      phase = 'authenticated';
+      await page.locator('#ready').waitFor();
+      await tracker.drain();
+      return login;
+    },
+  };
+}
+
+test('controlled reload during the normal org GET reproduces its missing terminal event, never an invented successful quiet', async t => {
+  const fixture = await orgBootstrapReloadFixture(t);
+  await fixture.login();
+  await assert.rejects(fixture.tracker.waitForQuiet({ quietForMs: 20, timeoutMs: 1500 }), error => {
+    assert.equal(error.unfinishedRequests.length, 1);
+    assert.equal(error.unfinishedRequests[0].path, fixture.orgPath);
+    assert.equal(error.unfinishedRequests[0].resourceType, 'xhr');
+    assert.equal(error.unfinishedRequests[0].method, 'GET');
+    return true;
+  });
+  assert.equal(fixture.upstreamOrg.length, 2);
+  assert.ok(fixture.upstreamOrg.every(observation => observation.status === 200),
+    'Both real upstream GETs replied; the old document lost its terminal event');
+  assert.equal(fixture.unfinished.size, 1);
+});
+
+test('prelogin network quiet preserves real captureNativeLogin, reload and both normally completed org GETs', async t => {
+  const fixture = await orgBootstrapReloadFixture(t);
+  await fixture.login({ waitBeforeSubmit: true });
+  await fixture.tracker.waitForQuiet({ quietForMs: 20, timeoutMs: 2000 });
+  assert.equal(fixture.row.stages.preLoginNetworkQuiet.status, 'PASS');
+  assert.equal(fixture.row.stages.preLoginNetworkQuiet.networkQuietVerified, true);
+  assert.equal(fixture.upstreamOrg.length, 2);
+  assert.ok(fixture.upstreamOrg.every(observation => observation.status === 200));
+  assert.equal(fixture.unfinished.size, 0);
+  assert.equal(fixture.loginRequests(), 1);
+  assert.deepEqual(fixture.row.errors, []);
+});
+
+test('a genuinely hanging org GET fails the prelogin quiet gate and never submits credentials', async t => {
+  const fixture = await orgBootstrapReloadFixture(t, { hang: true });
+  const gateTracker = { ...fixture.tracker,
+    waitForQuiet: () => fixture.tracker.waitForQuiet({ quietForMs: 20, timeoutMs: 200 }) };
+  await assert.rejects(fixture.login({ waitBeforeSubmit: true, gateTracker }), /did not become quiet/);
+  assert.equal(fixture.row.stages.preLoginNetworkQuiet.status, 'FAIL');
+  assert.equal(fixture.loginRequests(), 0);
+  assert.equal(fixture.row.errors.some(error => error.type === 'network-quiet-before-login'
+    && error.unfinishedRequests.some(request => request.path === fixture.orgPath)), true);
+  assert.equal(fixture.upstreamOrg.length, 1);
+  assert.equal(fixture.upstreamOrg[0].status, null);
+});
+
+test('the live submit path waits on the real quiet gate without excluding or force-settling org requests', () => {
+  const source = readFileSync(new URL('./owned-modeling-bootstrap.browser.mjs', import.meta.url), 'utf8');
+  const gate = source.indexOf('await waitForBootstrapLoginReady({ row, tracker });');
+  const capture = source.indexOf('row.stages.login = await captureNativeLogin');
+  assert.ok(gate > 0 && gate < capture);
+  assert.match(source, /tracker\.error\('network-quiet-before-login', error\)/);
+  assert.doesNotMatch(source, /requestSettled\(.*login|inflight\.clear\(|\.delete\(.*getbydcsystem/);
 });
