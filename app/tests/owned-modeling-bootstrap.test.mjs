@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import {
   browserReadMatrix, expectedBootstrapPreAuth401, runBootstrapBrowser, summarizeBootstrapCase,
+  ownedBootstrapContextExpectation, verifyOwnedBootstrapIndexContext, verifyOwnedBootstrapProjection,
 } from './owned-modeling-bootstrap.browser.mjs';
 
 const manifest = {
@@ -170,9 +171,161 @@ test('runner source captures request lifecycle, all HTTP responses and requestfa
   assert.match(source, /page\.on\('requestfailed'/);
   assert.match(source, /authorizationPresent = Boolean\(headers\.authorization\)/);
   assert.match(source, /phaseAtRequest: requested\?\.phase \?\? 'unobserved'/);
-  assert.match(source, /row\.summary = summarizeBootstrapCase\(row, \{ origin \}\)/);
+  assert.match(source, /row\.summary = summarizeBootstrapCase\(row, \{ origin, requireOwnedModelContext, expectedModelContext \}\)/);
   assert.match(source, /row\.status = row\.summary\.status/);
   assert.ok(source.indexOf('await context.close();') < source.indexOf('row.summary = summarizeBootstrapCase'));
   assert.doesNotMatch(source, /if \(url\.origin !== origin \|\| !url\.pathname\.startsWith/);
   assert.doesNotMatch(source, /expectedAuthenticationEvent|responded with a status of 401|Navigation aborted/);
+});
+
+const ownedActor = {
+  loginname: 'owned_a_editor', role: 'editor', rootId: 'owned_a',
+  personId: 'owned_a_person', centerId: 'owned_a_center',
+};
+const ownedRoot = { rootId: 'owned_a', logicalSystemId: 'owned_logical_a' };
+const expectedContext = ownedBootstrapContextExpectation(ownedActor, ownedRoot);
+const ownedContext = () => ({
+  srfsystemid: 'ibizmodeling', srforgid: 'owned_a_center_org',
+  srfuserid: 'owned_a_person', srfpersonid: 'owned_a_person', srfdcid: 'owned_a_center',
+});
+const ownProjection = () => ({ psdevslnsys: 'owned_a', pssystemid: 'owned_logical_a' });
+const ownedResponse = () => ({
+  origin, path: `${appPrefix}/appdata`, status: 200, method: 'GET', authorizationPresent: true,
+  phaseAtRequest: 'login-submitted', phaseAtResponse: 'authenticated',
+  requestSequence: 15, responseSequence: 22, bodySha256: 'a'.repeat(64),
+});
+const ownedIndex = () => ({
+  matchingIndexCount: 1,
+  index: {
+    domId: 'native-owned-index', controllerId: 'native-owned-index', codeName: 'ModelingIndex',
+    viewType: 'APPINDEXVIEW', appId: 'ibizmodeling__modeldesign', visible: true,
+    lifecycle: { isCreated: true, isMounted: true, isLoading: false, isDestroyed: false, hasError: false },
+    context: { psdevslnsys: 'owned_a', pssystemid: 'owned_logical_a', ...ownedContext() },
+  },
+});
+function ownedRow() {
+  const row = validRow();
+  const observation = ownedResponse();
+  row.responses.push(observation);
+  row.ownedModelContext = {
+    required: true, expected: expectedContext,
+    appdata: verifyOwnedBootstrapProjection({
+      status: 200, error: null, data: { context: ownedContext(), srfmodelcontext: ownProjection() },
+    }, { expected: expectedContext, origin, headers: {
+      srforgid: 'owned_a_center_org', srfsystemid: 'ibizmodeling', authorizationPresent: true,
+    }, observation, loginSubmittedSequence: row.authenticationLifecycle.loginSubmittedSequence }),
+    index: verifyOwnedBootstrapIndexContext(ownedIndex(), expectedContext),
+  };
+  return row;
+}
+const ownedSummary = row => summarizeBootstrapCase(row, {
+  origin, requireOwnedModelContext: true, expectedModelContext: expectedContext,
+});
+
+for (const locale of ['zh-CN', 'en-US']) for (const viewport of ['desktop', 'mobile']) {
+  test(`${locale}/${viewport}: required bootstrap binds exact natural appdata projection and actual APPINDEX consumption, not deep navigation`, () => {
+    const row = { ...ownedRow(), locale, viewport };
+    const before = structuredClone(row);
+    const result = ownedSummary(row);
+    assert.equal(result.status, 'BOOTSTRAP-AND-NATURAL-CLICK-OBSERVED-NOT-NATIVE-ACCEPTED');
+    assert.deepEqual(result.ownedModelContext, {
+      required: true, verified: true, appdataProjectionVerified: true,
+      sameActorAndOrganizationVerified: true, appindexRootAndLogicalSystemConsumed: true,
+    });
+    assert.equal(row.stages.systemMenu.status, 'CLICKED-NOT-YET-NAVIGATION-ACCEPTED');
+    assert.equal(result.nativeAcceptance, false);
+    assert.equal(result.permissionAcceptance, false);
+    assert.equal(result.fullApplicationAcceptance, false);
+    assert.deepEqual(row, before);
+  });
+}
+
+for (const [name, mutate] of [
+  ['no projection proof', row => { delete row.ownedModelContext; }],
+  ['missing projection', row => { delete row.ownedModelContext.appdata.projection; }],
+  ['extra projection field', row => { row.ownedModelContext.appdata.projection.admin = true; }],
+  ['foreign root', row => { row.ownedModelContext.appdata.projection.psdevslnsys = 'owned_b'; }],
+  ['wrong logical system', row => { row.ownedModelContext.appdata.projection.pssystemid = 'other-system'; }],
+  ['another actor', row => { row.ownedModelContext.appdata.context.srfuserid = 'another-person'; }],
+  ['another person', row => { row.ownedModelContext.appdata.context.srfpersonid = 'another-person'; }],
+  ['another center', row => { row.ownedModelContext.appdata.context.srfdcid = 'another-center'; }],
+  ['another organization', row => { row.ownedModelContext.appdata.context.srforgid = 'another-org'; }],
+  ['header org mismatch', row => { row.ownedModelContext.appdata.headers.srforgid = 'another-org'; }],
+  ['unbound appdata response', row => { row.responses = []; }],
+  ['body hash mismatch', row => { row.ownedModelContext.appdata.bodySha256 = 'b'.repeat(64); }],
+  ['unauthenticated response', row => { row.responses[0].authorizationPresent = false; }],
+  ['pre-auth request phase', row => { row.responses[0].phaseAtRequest = 'pre-auth'; }],
+  ['pre-auth response phase', row => { row.responses[0].phaseAtResponse = 'pre-auth'; }],
+  ['closing response phase', row => { row.responses[0].phaseAtResponse = 'closing'; }],
+  ['pre-login response', row => { row.responses[0].requestSequence = 9; row.ownedModelContext.appdata.requestSequence = 9; }],
+  ['not real APPINDEX proof', row => { row.ownedModelContext.index.source = 'static-view-model'; }],
+  ['another view type', row => { row.ownedModelContext.index.viewType = 'DEEDITVIEW'; }],
+  ['another index', row => { row.ownedModelContext.index.codeName = 'OtherIndex'; }],
+  ['another app', row => { row.ownedModelContext.index.appId = 'ibizmodeling__central'; }],
+  ['mismatched controller DOM', row => { row.ownedModelContext.index.controllerId = 'another-controller'; }],
+  ['unbounded controller ID', row => {
+    row.ownedModelContext.index.controllerId = 'x'.repeat(257);
+    row.ownedModelContext.index.domId = row.ownedModelContext.index.controllerId;
+  }],
+  ['two indices', row => { row.ownedModelContext.index.matchingIndexCount = 2; }],
+  ['missing consumed logical ID', row => { delete row.ownedModelContext.index.context.pssystemid; }],
+  ['wrong consumed logical ID', row => { row.ownedModelContext.index.context.pssystemid = 'another-system'; }],
+  ['wrong consumed root', row => { row.ownedModelContext.index.context.psdevslnsys = 'owned_b'; }],
+  ['another consumed actor', row => { row.ownedModelContext.index.context.srfuserid = 'another-person'; }],
+  ['another consumed organization', row => { row.ownedModelContext.index.context.srforgid = 'another-org'; }],
+  ['destroyed controller', row => { row.ownedModelContext.index.lifecycle.isDestroyed = true; }],
+]) {
+  test(`required owned bootstrap refuses ${name}`, () => {
+    const row = ownedRow();
+    mutate(row);
+    const result = ownedSummary(row);
+    assert.equal(result.status, 'FAILED');
+    assert.equal(result.ownedModelContext.verified, false);
+    assert.ok(result.blockers.some(blocker => blocker.type === 'owned-model-context-not-verified'));
+    assert.equal(result.nativeAcceptance, false);
+  });
+}
+
+test('projection verification rejects accessors without reading their values and records no unrelated appdata', () => {
+  let invoked = 0;
+  const projection = ownProjection();
+  Object.defineProperty(projection, 'pssystemid', { get() { invoked++; return 'owned_logical_a'; } });
+  const response = { status: 200, error: null,
+    data: { context: ownedContext(), srfmodelcontext: projection, secret: 'must-not-be-recorded' } };
+  const options = { expected: expectedContext, origin, headers: {
+    srforgid: 'owned_a_center_org', srfsystemid: 'ibizmodeling', authorizationPresent: true,
+  }, observation: ownedResponse(), loginSubmittedSequence: 10 };
+  assert.throws(() => verifyOwnedBootstrapProjection(response, options));
+  assert.equal(invoked, 0);
+  response.data.srfmodelcontext = ownProjection();
+  const result = verifyOwnedBootstrapProjection(response, options);
+  assert.equal(JSON.stringify(result).includes('must-not-be-recorded'), false);
+  Object.defineProperty(response.data, 'srfmodelcontext', { get() { invoked++; return ownProjection(); } });
+  assert.throws(() => verifyOwnedBootstrapProjection(response, options));
+  assert.equal(invoked, 0);
+});
+
+test('default bootstrap remains diagnostic-compatible while malformed explicit context requirements fail closed', async () => {
+  assert.equal(summarizeBootstrapCase(validRow(), { origin }).ownedModelContext.required, false);
+  assert.equal(summarizeBootstrapCase(validRow(), { origin }).ownedModelContext.verified, false);
+  assert.equal(summarizeBootstrapCase(ownedRow(), {
+    origin, requireOwnedModelContext: true,
+  }).status, 'FAILED');
+  assert.throws(() => summarizeBootstrapCase(validRow(), { origin, requireOwnedModelContext: 'true' }));
+  await assert.rejects(runBootstrapBrowser({
+    runReadonlyBrowser: true, requireOwnedModelContext: 'true',
+  }));
+  assert.throws(() => ownedBootstrapContextExpectation({ ...ownedActor, role: 'viewer' }, ownedRoot));
+  assert.throws(() => ownedBootstrapContextExpectation(ownedActor, { ...ownedRoot, rootId: 'owned_b' }));
+  assert.throws(() => ownedBootstrapContextExpectation(ownedActor, { rootId: 'owned_a' }));
+});
+
+test('required context mode observes existing UI responses and public APPINDEX state without extra API or controller writes', () => {
+  const source = readFileSync(new URL('./owned-modeling-bootstrap.browser.mjs', import.meta.url), 'utf8');
+  assert.match(source, /'require-owned-model-context': \{ type: 'boolean' \}/);
+  assert.match(source, /observed\.bodySha256 = hash\(body\)/);
+  assert.match(source, /row\.ownedModelContext\.appdata = verifyOwnedBootstrapProjection/);
+  assert.match(source, /verifyOwnedBootstrapIndexContext\(index, expectedModelContext\)/);
+  assert.match(source, /report\.cases\.length === 4/);
+  assert.doesNotMatch(source, /page\.request|context\.request|\bfetch\(|route\.fulfill|force:\s*true|addView|setView/);
 });

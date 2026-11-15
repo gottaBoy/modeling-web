@@ -51,7 +51,124 @@ export function expectedBootstrapPreAuth401(response, lifecycle, { origin } = {}
     lifecycle.loginVerifiedSequence > lifecycle.loginSubmittedSequence);
 }
 
-export function summarizeBootstrapCase(row, { origin } = {}) {
+export function ownedBootstrapContextExpectation(actor, root) {
+  assert.ok(actor && root && actor.rootId === root.rootId && actor.role === 'editor');
+  const expected = { rootId: root.rootId, logicalSystemId: root.logicalSystemId,
+    personId: actor.personId, centerId: actor.centerId,
+    organizationId: `${actor.centerId}_org`, systemId: 'ibizmodeling' };
+  validateOwnedBootstrapExpectation(expected);
+  return expected;
+}
+
+function validateOwnedBootstrapExpectation(expected) {
+  assert.deepEqual(Object.keys(expected ?? {}).sort(),
+    ['centerId', 'logicalSystemId', 'organizationId', 'personId', 'rootId', 'systemId']);
+  for (const value of Object.values(expected)) {
+    assert.ok(typeof value === 'string' && value.length > 0 && value.length <= 256 && !/[\s\u0000-\u001f\u007f]/.test(value));
+  }
+  assert.equal(expected.organizationId, `${expected.centerId}_org`);
+  assert.equal(expected.systemId, 'ibizmodeling');
+}
+
+const expectedAppdataContext = expected => ({
+  srfsystemid: expected.systemId, srforgid: expected.organizationId,
+  srfuserid: expected.personId, srfpersonid: expected.personId, srfdcid: expected.centerId,
+});
+
+export function verifyOwnedBootstrapProjection(appdata, {
+  expected, origin, headers, observation, loginSubmittedSequence,
+}) {
+  validateOwnedBootstrapExpectation(expected);
+  assert.equal(appdata.status, 200);
+  assert.equal(appdata.error, null);
+  const context = expectedAppdataContext(expected);
+  for (const [key, value] of Object.entries(context)) assert.equal(appdata.data?.context?.[key], value);
+  assert.deepEqual(headers, { srforgid: expected.organizationId,
+    srfsystemid: expected.systemId, authorizationPresent: true });
+  assert.match(origin ?? '', /^http:\/\/127\.0\.0\.1:\d+$/);
+  assert.equal(observation?.origin, origin);
+  assert.equal(observation.path, `/api/${appId}/appdata`);
+  assert.equal(observation.method, 'GET');
+  assert.equal(observation.status, 200);
+  assert.equal(observation.authorizationPresent, true);
+  assert.ok(['login-submitted', 'authenticated'].includes(observation.phaseAtRequest));
+  assert.ok(['login-submitted', 'authenticated'].includes(observation.phaseAtResponse));
+  assert.ok(Number.isSafeInteger(loginSubmittedSequence) && loginSubmittedSequence > 0);
+  assert.ok(Number.isSafeInteger(observation.requestSequence) && observation.requestSequence > loginSubmittedSequence);
+  assert.ok(Number.isSafeInteger(observation.responseSequence) &&
+    observation.responseSequence >= observation.requestSequence);
+  assert.match(observation.bodySha256 ?? '', /^[a-f0-9]{64}$/);
+  const field = Object.getOwnPropertyDescriptor(appdata.data, 'srfmodelcontext');
+  assert.ok(field && 'value' in field, 'Normal owned appdata requires a top-level model-context projection');
+  const projection = field.value;
+  assert.ok(projection && typeof projection === 'object' && !Array.isArray(projection));
+  assert.deepEqual(Reflect.ownKeys(projection).sort(), ['psdevslnsys', 'pssystemid']);
+  for (const [key, value] of [['psdevslnsys', expected.rootId], ['pssystemid', expected.logicalSystemId]]) {
+    const descriptor = Object.getOwnPropertyDescriptor(projection, key);
+    assert.ok(descriptor && 'value' in descriptor && typeof descriptor.value === 'string');
+    assert.equal(descriptor.value, value);
+  }
+  return {
+    source: 'normal-authenticated-ui-appdata', context,
+    projection: { psdevslnsys: projection.psdevslnsys, pssystemid: projection.pssystemid },
+    headers: { ...headers }, requestSequence: observation.requestSequence,
+    responseSequence: observation.responseSequence, bodySha256: observation.bodySha256,
+  };
+}
+
+export function verifyOwnedBootstrapIndexContext(evidence, expected) {
+  validateOwnedBootstrapExpectation(expected);
+  assert.equal(evidence?.matchingIndexCount, 1);
+  const index = evidence.index;
+  assert.ok(typeof index?.controllerId === 'string' && index.controllerId.length > 0 &&
+    index.controllerId.length <= 256 && !/[\s\u0000-\u001f\u007f]/.test(index.controllerId));
+  assert.equal(index.controllerId, index.domId);
+  assert.equal(index.codeName?.toLowerCase(), 'modelingindex');
+  assert.equal(index.viewType, 'APPINDEXVIEW');
+  assert.equal(index.appId, appId);
+  assert.equal(index.visible, true);
+  assert.deepEqual(index.lifecycle, {
+    isCreated: true, isMounted: true, isLoading: false, isDestroyed: false, hasError: false,
+  });
+  const context = { psdevslnsys: expected.rootId, pssystemid: expected.logicalSystemId,
+    ...expectedAppdataContext(expected) };
+  assert.deepEqual(index.context, context, 'The actual APPINDEX context must consume this actor/root/logical system');
+  return { source: 'public-appindex-view-stack', matchingIndexCount: 1,
+    domId: index.domId, controllerId: index.controllerId, codeName: index.codeName,
+    viewType: index.viewType, appId: index.appId, visible: true,
+    lifecycle: { ...index.lifecycle }, context };
+}
+
+function verifyOwnedBootstrapContextRow(row, { origin, expected }) {
+  const evidence = row.ownedModelContext;
+  assert.equal(evidence?.required, true);
+  assert.deepEqual(evidence.expected, expected);
+  assert.equal(evidence.appdata?.source, 'normal-authenticated-ui-appdata');
+  const observed = row.responses.find(response =>
+    response.requestSequence === evidence.appdata.requestSequence &&
+    response.responseSequence === evidence.appdata.responseSequence &&
+    response.bodySha256 === evidence.appdata.bodySha256);
+  assert.ok(observed, 'Projection proof must bind the actually observed appdata response');
+  const actor = { personId: expected.personId, centerId: expected.centerId };
+  verifyModelingAppData({ status: 200, error: null, data: { context: evidence.appdata.context } },
+    actor, { system: expected.systemId, organization: expected.organizationId });
+  assert.deepEqual(verifyOwnedBootstrapProjection({
+    status: observed.status, error: null, data: {
+      context: evidence.appdata.context, srfmodelcontext: evidence.appdata.projection,
+    },
+  }, { expected, origin, headers: evidence.appdata.headers, observation: observed,
+    loginSubmittedSequence: row.authenticationLifecycle.loginSubmittedSequence }), evidence.appdata);
+  assert.equal(evidence.index?.source, 'public-appindex-view-stack');
+  assert.deepEqual(verifyOwnedBootstrapIndexContext({
+    matchingIndexCount: evidence.index.matchingIndexCount, index: evidence.index,
+  }, expected), evidence.index);
+  return true;
+}
+
+export function summarizeBootstrapCase(row, {
+  origin, requireOwnedModelContext = false, expectedModelContext,
+} = {}) {
+  assert.equal(typeof requireOwnedModelContext, 'boolean');
   const blockers = [];
   const expectedPreAuthResponses = [];
   if (typeof origin !== 'string' || !/^http:\/\/127\.0\.0\.1:\d+$/.test(origin)) {
@@ -77,6 +194,15 @@ export function summarizeBootstrapCase(row, { origin } = {}) {
   if (row?.stages?.systemMenu?.status !== 'CLICKED-NOT-YET-NAVIGATION-ACCEPTED') {
     blockers.push({ type: 'natural-menu-click-not-observed' });
   }
+  let ownedModelContextVerified = false;
+  if (requireOwnedModelContext) {
+    try {
+      assert.ok(expectedModelContext);
+      ownedModelContextVerified = verifyOwnedBootstrapContextRow(row, { origin, expected: expectedModelContext });
+    } catch {
+      blockers.push({ type: 'owned-model-context-not-verified' });
+    }
+  }
   for (const error of Array.isArray(row?.errors) ? row.errors : []) blockers.push({ type: 'browser-error', evidence: error });
   for (const failure of Array.isArray(row?.failedRequests) ? row.failedRequests : []) {
     blockers.push({ type: 'failed-network-request', evidence: failure });
@@ -98,11 +224,17 @@ export function summarizeBootstrapCase(row, { origin } = {}) {
       ? 'BOOTSTRAP-AND-NATURAL-CLICK-OBSERVED-NOT-NATIVE-ACCEPTED' : 'FAILED',
     diagnosticOnly: true, nativeAcceptance: false, permissionAcceptance: false,
     fullApplicationAcceptance: false, blockers, expectedPreAuthResponses,
+    ownedModelContext: { required: requireOwnedModelContext, verified: ownedModelContextVerified,
+      appdataProjectionVerified: ownedModelContextVerified,
+      sameActorAndOrganizationVerified: ownedModelContextVerified,
+      appindexRootAndLogicalSystemConsumed: ownedModelContextVerified },
   };
 }
 
 export async function runBootstrapBrowser(options) {
   assert.equal(options.runReadonlyBrowser, true);
+  const requireOwnedModelContext = options.requireOwnedModelContext ?? false;
+  assert.equal(typeof requireOwnedModelContext, 'boolean');
   for (const key of ['launchSha256', 'stateSha256', 'deploymentSha256']) assert.match(options[key] ?? '', /^[a-f0-9]{64}$/);
   assert.match(options.runId ?? '', /^[a-f0-9]{12}$/);
   const output = pathInside(join(workspace, '.artifacts/owned-modeling-bootstrap-browser'), options.output);
@@ -127,6 +259,7 @@ export async function runBootstrapBrowser(options) {
     nativeAcceptance: false, permissionAcceptance: false, editorSaveAcceptance: false,
     freshSessionReadbackAcceptance: false, modelWritesRequested: false,
     identityOrHeaderInjection: false, acceptedForProduction: false,
+    requireOwnedModelContext, ownedModelContextVerified: false,
     startedAt: new Date().toISOString(), cases: [],
     source: { path: fileURLToPath(import.meta.url), sha256: hash(fs.readFileSync(fileURLToPath(import.meta.url))) },
   };
@@ -151,6 +284,7 @@ export async function runBootstrapBrowser(options) {
     const root = manifest.roots.find(value => value.side === options.rootSide);
     assert.ok(actor && root && actor.role === 'editor' && actor.rootId === root.rootId,
       'Only editor own-root probes are enabled; other matrix rows stay unexecuted');
+    const expectedModelContext = requireOwnedModelContext ? ownedBootstrapContextExpectation(actor, root) : undefined;
     report.matrix = browserReadMatrix(manifest);
     report.runId = manifest.runId;
     report.actor = { loginname: actor.loginname, role: actor.role, rootId: actor.rootId };
@@ -191,6 +325,9 @@ export async function runBootstrapBrowser(options) {
         responses: [], blocked: [], errors: [], failedRequests: [], startedAt: new Date().toISOString(),
         authenticationLifecycle: { loginSubmittedSequence: null, loginVerifiedSequence: null },
         M03: { status: 'NOT-EXECUTED-NOT-ACCEPTED', reason: 'Requires successful native list/editor navigation and a complete config-r6 native seed receipt; no writes authorized by this probe' } };
+      if (requireOwnedModelContext) row.ownedModelContext = {
+        required: true, expected: expectedModelContext, appdata: null, index: null,
+      };
       report.cases.push(row);
       const context = await browser.newContext({
         locale, serviceWorkers: 'block', viewport: viewportName === 'desktop'
@@ -223,7 +360,13 @@ export async function runBootstrapBrowser(options) {
           const headers = await request.allHeaders();
           observed.authorizationPresent = Boolean(headers.authorization);
           if (url.origin === origin && url.pathname === `/api/${appId}/appdata` && response.status() === 200) {
-            appdata = { status: 200, error: null, data: await response.json() };
+            let data;
+            if (requireOwnedModelContext) {
+              const body = await response.body();
+              observed.bodySha256 = hash(body);
+              data = JSON.parse(body.toString('utf8'));
+            } else data = await response.json();
+            appdata = { status: 200, error: null, data, observation: observed };
             row.appdataHeaders = { srforgid: headers.srforgid ?? null, srfsystemid: headers.srfsystemid ?? null,
               authorizationPresent: Boolean(headers.authorization) };
           }
@@ -282,6 +425,10 @@ export async function runBootstrapBrowser(options) {
         assert.deepEqual(row.appdataHeaders, { srforgid: `${actor.centerId}_org`,
           srfsystemid: 'ibizmodeling', authorizationPresent: true });
         row.stages.bootstrap = { status: 'PASS', naturallyAuthenticatedAppdata: true };
+        if (requireOwnedModelContext) row.ownedModelContext.appdata = verifyOwnedBootstrapProjection(appdata, {
+          expected: expectedModelContext, origin, headers: row.appdataHeaders, observation: appdata.observation,
+          loginSubmittedSequence: row.authenticationLifecycle.loginSubmittedSequence,
+        });
         try {
           row.stages.home = { status: 'PASS', evidence: await waitForNativeIndexReady(page, {
             application: 'ModelDesign', applicationId: appId,
@@ -293,6 +440,8 @@ export async function runBootstrapBrowser(options) {
           application: 'ModelDesign', applicationId: appId,
           indexPath: 'PSSYSAPPS/ModelDesign/PSAPPINDEXVIEWS/ModelingIndex.json',
         });
+        if (requireOwnedModelContext) row.ownedModelContext.index =
+          verifyOwnedBootstrapIndexContext(index, expectedModelContext);
         const items = index.menus.filter(menu => menu.name === 'leftsidemenu').flatMap(menu => menu.items)
           .filter(item => item.target?.viewId?.toLowerCase().endsWith('pssystemmainsidebartreeview') &&
             item.visible === true && item.permitted === true && item.dom.length === 1 && !item.dom[0].disabled);
@@ -330,7 +479,7 @@ export async function runBootstrapBrowser(options) {
         phase = 'closing';
         await context.close();
         await Promise.all(pending);
-        row.summary = summarizeBootstrapCase(row, { origin });
+        row.summary = summarizeBootstrapCase(row, { origin, requireOwnedModelContext, expectedModelContext });
         row.status = row.summary.status;
         row.finishedAt = new Date().toISOString();
         const matrix = report.matrix.find(value => value.actor === actor.loginname && value.rootId === root.rootId &&
@@ -344,6 +493,8 @@ export async function runBootstrapBrowser(options) {
     guard(true);
     report.status = report.cases.every(row => row.status.startsWith('BOOTSTRAP'))
       ? 'OBSERVED-BOOTSTRAP-NATURAL-CLICK-NOT-FULL-ACCEPTANCE' : 'FAILED-LIVE-BROWSER-REMAINING-BLOCKERS';
+    report.ownedModelContextVerified = requireOwnedModelContext && report.cases.length === 4 &&
+      report.cases.every(row => row.summary?.ownedModelContext.verified === true);
   } catch (error) { report.error = clean(error.message); }
   finally {
     await browser?.close();
@@ -363,12 +514,14 @@ export async function main(argv = process.argv.slice(2)) {
     deployment: { type: 'string' }, 'deployment-sha256': { type: 'string' },
     'run-id': { type: 'string' }, actor: { type: 'string' }, 'root-side': { type: 'string' },
     output: { type: 'string' }, 'run-readonly-browser': { type: 'boolean' },
+    'require-owned-model-context': { type: 'boolean' },
   } });
   return runBootstrapBrowser({
     launch: values.launch, launchSha256: values['launch-sha256'], stateSha256: values['state-sha256'],
     deployment: values.deployment, deploymentSha256: values['deployment-sha256'],
     runId: values['run-id'], actor: values.actor, rootSide: values['root-side'],
     output: values.output, runReadonlyBrowser: values['run-readonly-browser'],
+    requireOwnedModelContext: values['require-owned-model-context'],
   });
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

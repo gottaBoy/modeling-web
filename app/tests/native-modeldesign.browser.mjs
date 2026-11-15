@@ -74,7 +74,12 @@ export function collectNativeIndexEvidence({ application, applicationId, indexPa
       domId: element.id, controllerId: controller?.id ?? null,
       id: controller?.model?.id ?? null, codeName: controller?.model?.codeName ?? null,
       appId: controller?.model?.appId ?? controller?.context?.srfappid ?? null,
-      context: { psdevslnsys: controller?.context?.psdevslnsys ?? null },
+      context: Object.fromEntries([
+        'psdevslnsys', 'pssystemid', 'srfuserid', 'srfpersonid', 'srfdcid', 'srforgid', 'srfsystemid',
+      ].map(key => {
+        const value = controller?.context?.[key];
+        return [key, typeof value === 'string' ? value : null];
+      })),
       viewType: controller?.model?.viewType ?? null,
       lifecycle: lifecycle(controller), visible: visible(element),
     };
