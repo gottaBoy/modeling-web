@@ -110,6 +110,20 @@ export function collectEmbeddedWorkspaceDom({ indexId, menuSelector }) {
     y: Math.max(0, Math.min(innerHeight - 1, workspaceRect.y + workspaceRect.height / 3)),
   };
   const workspaceHit = workspacePoint && document.elementFromPoint(workspacePoint.x, workspacePoint.y);
+  const ancestorLayouts = [];
+  for (let node = menu, depth = 0; node instanceof Element && depth < 8; node = node.parentElement, depth++) {
+    const style = getComputedStyle(node);
+    const properties = [
+      'display', 'width', 'minWidth', 'maxWidth', 'gridTemplateColumns', 'gridTemplateRows',
+      'gridAutoFlow', 'flexDirection', 'flex', 'flexWrap', 'overflowX', 'overflowY', 'position',
+    ];
+    ancestorLayouts.push({
+      depth, tag: node.tagName, className: String(node.className).slice(0, 256),
+      bounds: bounds(node),
+      computed: Object.fromEntries(properties.map(key => [key, String(style[key]).slice(0, 256)])),
+      inline: Object.fromEntries(properties.map(key => [key, String(node.style[key]).slice(0, 256)])),
+    });
+  }
   return {
     embedded: window.parent !== window,
     viewport: { width: innerWidth, height: innerHeight },
@@ -119,9 +133,71 @@ export function collectEmbeddedWorkspaceDom({ indexId, menuSelector }) {
     menu: { visible: visible(menu), bounds: bounds(menu),
       insideViewport: Boolean(rect && rect.x >= 0 && rect.y >= 0 &&
         rect.right <= innerWidth && rect.bottom <= innerHeight),
-      receivesPointer: Boolean(hit && menu && (hit === menu || menu.contains(hit))) },
+      receivesPointer: Boolean(hit && menu && (hit === menu || menu.contains(hit))), ancestorLayouts },
     openConsoleDrawers: [...document.querySelectorAll('.aibiz-console-drawer.open, .ibiz-drawer.open')].filter(visible).length,
+    visibleConsoleDrawers: [...document.querySelectorAll('.aibiz-console-drawer')].filter(visible).length,
+    visibleDrawerOverlays: [...document.querySelectorAll('.el-overlay')].filter(visible).length,
     horizontalOverflow: document.documentElement.scrollWidth > innerWidth,
+  };
+}
+
+function verifyWorkspaceDomState(state) {
+  assert.equal(state?.embedded, true);
+  assert.equal(state.workspace?.visible, true);
+  assert.equal(state.workspace?.receivesPointer, true);
+  assert.equal(state.openConsoleDrawers, 0);
+  assert.equal(state.visibleConsoleDrawers, 0);
+  assert.equal(state.visibleDrawerOverlays, 0);
+  assert.equal(state.menu?.visible, true);
+  assert.equal(state.menu?.insideViewport, true);
+  assert.equal(state.menu?.receivesPointer, true);
+  assert.equal(state.horizontalOverflow, false);
+  assert.deepEqual(state.scroll, { x: 0, y: 0 });
+}
+
+export async function waitForEmbeddedDomStable({
+  appPage, collect, options, read = () => appPage.evaluate(collect, options), verify, timeoutMs = 20_000,
+}) {
+  assert.ok(Number.isFinite(timeoutMs) && timeoutMs > 0);
+  const deadline = Date.now() + timeoutMs;
+  let previous;
+  let stableFrames = 0;
+  let observation;
+  let failure;
+  while (Date.now() < deadline) {
+    observation = await read();
+    try {
+      verify(observation);
+      const signature = JSON.stringify(observation);
+      stableFrames = signature === previous ? stableFrames + 1 : 1;
+      previous = signature;
+      if (stableFrames >= 3) return observation;
+    } catch (error) {
+      failure = error;
+      previous = undefined;
+      stableFrames = 0;
+    }
+    await appPage.evaluate(() => new Promise(done => requestAnimationFrame(() => done())));
+  }
+  const error = new Error(`Embedded DOM did not reach stable verified readiness: ${failure?.message ?? 'geometry still changing'}`);
+  error.evidence = observation;
+  throw error;
+}
+
+function collectEmbeddedCloseButton(element) {
+  const rect = element.getBoundingClientRect();
+  const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
+  const animations = new Set();
+  for (let node = element; node && node !== document.body; node = node.parentElement) {
+    for (const animation of node.getAnimations()) {
+      if (animation.playState === 'running' || animation.pending) animations.add(animation);
+    }
+  }
+  return {
+    bounds: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+    insideViewport: rect.x >= 0 && rect.y >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight,
+    receivesPointer: Boolean(hit && (hit === element || element.contains(hit))),
+    activeAncestorAnimations: animations.size,
   };
 }
 
@@ -143,19 +219,11 @@ export function verifyEmbeddedWorkspaceEvidence(evidence) {
   assert.equal(evidence.closeOperation, 'ordinary-drawer-close-button-click');
   assert.equal(evidence.openedConsoleDrawers, 1);
   for (const name of ['initial', 'afterClose']) {
-    const state = evidence[name];
-    assert.equal(state?.embedded, true);
-    assert.equal(state.workspace?.visible, true);
-    assert.equal(state.workspace?.receivesPointer, true);
-    assert.equal(state.openConsoleDrawers, 0);
-    assert.equal(state.menu?.visible, true);
-    assert.equal(state.menu?.insideViewport, true);
-    assert.equal(state.menu?.receivesPointer, true);
-    assert.equal(state.horizontalOverflow, false);
-    assert.deepEqual(state.scroll, { x: 0, y: 0 });
+    verifyWorkspaceDomState(evidence[name]);
   }
   assert.equal(evidence.closeButton?.insideViewport, true);
   assert.equal(evidence.closeButton?.receivesPointer, true);
+  assert.equal(evidence.closeButton?.activeAncestorAnimations, 0);
   assert.ok(typeof evidence.menu?.id === 'string' && evidence.menu.id.length > 0);
   assert.ok(evidence.menu.target?.viewId?.toLowerCase().endsWith('pssysdevbktasktabexpview'));
   return true;
@@ -183,28 +251,34 @@ export async function verifyEmbeddedWorkspaceUi({
   assert.equal(evidence.initial.menu.insideViewport, true, 'Bottom console menu must be in the initial viewport');
   assert.equal(evidence.initial.menu.receivesPointer, true, 'Bottom console menu must receive a normal pointer');
   assert.equal(evidence.initial.workspace.receivesPointer, true, 'Initial workspace must not be obscured');
+  verifyWorkspaceDomState(evidence.initial);
   await screenshot('embedded-initial');
   await appPage.locator(items[0].dom[0].selector).click();
   evidence.openOperation = 'ordinary-bottom-console-menu-click';
-  const drawer = appPage.locator('.aibiz-console-drawer.open');
+  const drawer = appPage.locator('.aibiz-console-drawer');
   await drawer.waitFor({ state: 'visible' });
-  evidence.openedConsoleDrawers = await drawer.count();
   const close = drawer.locator('.el-drawer__close-btn');
   await close.waitFor({ state: 'visible' });
-  evidence.closeButton = await close.evaluate(element => {
-    const rect = element.getBoundingClientRect();
-    const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
-    return { insideViewport: rect.x >= 0 && rect.y >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight,
-      receivesPointer: Boolean(hit && (hit === element || element.contains(hit))) };
+  await close.click({ trial: true });
+  evidence.closeButton = await waitForEmbeddedDomStable({
+    appPage, read: () => close.evaluate(collectEmbeddedCloseButton),
+    verify: state => {
+      assert.equal(state.insideViewport, true);
+      assert.equal(state.receivesPointer, true);
+      assert.equal(state.activeAncestorAnimations, 0);
+    },
   });
+  evidence.openedConsoleDrawers = await appPage.locator('.aibiz-console-drawer.open').count();
   await screenshot('embedded-console-open');
   await close.click();
   evidence.closeOperation = 'ordinary-drawer-close-button-click';
   await drawer.waitFor({ state: 'hidden' });
-  evidence.afterClose = await appPage.evaluate(collectEmbeddedWorkspaceDom, options);
+  evidence.afterClose = await waitForEmbeddedDomStable({
+    appPage, collect: collectEmbeddedWorkspaceDom, options, verify: verifyWorkspaceDomState,
+  });
   await screenshot('embedded-console-closed');
+  verifyEmbeddedWorkspaceEvidence({ ...evidence, status: 'PASS' });
   evidence.status = 'PASS';
-  verifyEmbeddedWorkspaceEvidence(evidence);
   return evidence;
 }
 

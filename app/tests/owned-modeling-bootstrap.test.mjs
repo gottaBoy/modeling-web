@@ -10,7 +10,7 @@ import {
   ownedBootstrapContextExpectation, verifyOwnedBootstrapIndexContext, verifyOwnedBootstrapProjection,
   createBootstrapEvidenceTracker, finishBootstrapContext, runBootstrapScopeAction,
   waitForBootstrapLoginReady, startEmbeddedWorkspaceWrapper, applicationFramePage,
-  verifyEmbeddedWorkspaceEvidence, verifyEmbeddedWorkspaceUi,
+  verifyEmbeddedWorkspaceEvidence, verifyEmbeddedWorkspaceUi, waitForEmbeddedDomStable,
 } from './owned-modeling-bootstrap.browser.mjs';
 
 const manifest = {
@@ -747,7 +747,7 @@ function embeddedEvidence() {
     embedded: true, viewport: { width: 390, height: 844 }, scroll: { x: 0, y: 0 },
     workspace: { visible: true, receivesPointer: true },
     menu: { visible: true, insideViewport: true, receivesPointer: true },
-    openConsoleDrawers: 0, horizontalOverflow: false,
+    openConsoleDrawers: 0, visibleConsoleDrawers: 0, visibleDrawerOverlays: 0, horizontalOverflow: false,
   });
   return {
     status: 'PASS',
@@ -761,7 +761,7 @@ function embeddedEvidence() {
     initial: state(), afterClose: state(), openedConsoleDrawers: 1,
     openOperation: 'ordinary-bottom-console-menu-click',
     closeOperation: 'ordinary-drawer-close-button-click',
-    closeButton: { insideViewport: true, receivesPointer: true },
+    closeButton: { insideViewport: true, receivesPointer: true, activeAncestorAnimations: 0 },
     menu: { id: 'terminal', target: { viewId: 'modeldesign.pssysdevbktasktabexpview' } },
   };
 }
@@ -814,10 +814,13 @@ for (const [name, mutate] of [
   ['two consoles opened', row => { row.stages.workspace.openedConsoleDrawers = 2; }],
   ['close outside viewport', row => { row.stages.workspace.closeButton.insideViewport = false; }],
   ['close covered', row => { row.stages.workspace.closeButton.receivesPointer = false; }],
+  ['close still entering', row => { row.stages.workspace.closeButton.activeAncestorAnimations = 1; }],
   ['synthetic close', row => { row.stages.workspace.closeOperation = 'controller-close'; }],
   ['wrong menu target', row => { row.stages.workspace.menu.target.viewId = 'another-view'; }],
   ['closed workspace missing', row => { row.stages.workspace.afterClose.workspace.visible = false; }],
   ['drawer remains open', row => { row.stages.workspace.afterClose.openConsoleDrawers = 1; }],
+  ['drawer closing after open class removal', row => { row.stages.workspace.afterClose.visibleConsoleDrawers = 1; }],
+  ['overlay exiting after drawer hidden', row => { row.stages.workspace.afterClose.visibleDrawerOverlays = 1; }],
   ['menu moved after close', row => { row.stages.workspace.afterClose.menu.insideViewport = false; }],
 ]) test(`embedded workspace fails closed for ${name}`, () => {
   const row = embeddedRow();
@@ -855,6 +858,21 @@ test('embedded flag requires explicit owned context and a real boolean before an
   }));
 });
 
+test('stable DOM polling cannot promote persistent obstruction and retains the last real observation', async () => {
+  const obstruction = { workspace: { receivesPointer: false } };
+  let frames = 0;
+  const appPage = { evaluate: async () => { frames++; } };
+  await assert.rejects(waitForEmbeddedDomStable({
+    appPage, read: async () => obstruction, timeoutMs: 5,
+    verify: observation => assert.equal(observation.workspace.receivesPointer, true),
+  }), error => {
+    assert.equal(error.evidence, obstruction);
+    assert.match(error.message, /did not reach stable verified readiness/);
+    return true;
+  });
+  assert.ok(frames > 0);
+});
+
 const readHttp = url => new Promise((done, reject) => {
   get(url, { agent: false }, response => {
     const chunks = [];
@@ -885,21 +903,42 @@ test('temporary wrapper serves only its simple exact-loopback iframe and always 
   }
 });
 
-test('controlled embedded DOM verifies ordinary console open/close in both languages and viewports', async t => {
+test('controlled CSS transitions wait for real close geometry and exiting drawer/overlay in all four cells', async t => {
   const server = createServer((request, response) => {
     response.writeHead(200, { 'Content-Type': 'text/html' });
     response.end(`<!doctype html><html><head><link rel="icon" href="data:,"><style>
       html,body{margin:0;height:100%;overflow:hidden}#controlled-index{height:100%;position:relative}
       #terminal{position:absolute;bottom:0;left:0;width:100px;height:44px}
-      .aibiz-console-drawer{display:none;position:absolute;bottom:0;width:100%;height:45%;background:white}
-      .aibiz-console-drawer.open{display:block}.el-drawer__close-btn{position:absolute;top:8px;right:8px;width:40px;height:40px}
+      [hidden]{display:none!important}
+      .el-overlay{position:absolute;inset:0;background:#0004;opacity:0;transition:opacity 320ms linear}
+      .el-overlay.shown{opacity:1}
+      .aibiz-console-drawer{position:absolute;bottom:0;width:100%;height:45%;background:white;transform:translateY(100%);transition:transform 180ms linear}
+      .aibiz-console-drawer.open{transform:translateY(0)}.el-drawer__close-btn{position:absolute;top:8px;right:8px;width:40px;height:40px}
       </style></head><body><main id="controlled-index">Controlled workspace
       <button id="terminal">Console</button>
-      <section class="aibiz-console-drawer"><button class="el-drawer__close-btn">Close</button></section>
-      </main><script>
+      </main><div class="el-overlay" hidden></div>
+      <section class="aibiz-console-drawer" hidden><button class="el-drawer__close-btn">Close</button></section><script>
       const drawer=document.querySelector('.aibiz-console-drawer');
-      document.querySelector('#terminal').onclick=()=>drawer.classList.add('open');
-      document.querySelector('.el-drawer__close-btn').onclick=()=>drawer.classList.remove('open');
+      const overlay=document.querySelector('.el-overlay');
+      window.fixture={entered:0,exited:0,overlayExited:0,classGoneButDrawerVisible:false,overlayOutlivedDrawer:false};
+      let closing=false;
+      document.querySelector('#terminal').onclick=()=>{
+        closing=false;drawer.hidden=false;overlay.hidden=false;
+        drawer.getBoundingClientRect();overlay.getBoundingClientRect();
+        requestAnimationFrame(()=>{drawer.classList.add('open');overlay.classList.add('shown');});
+      };
+      document.querySelector('.el-drawer__close-btn').onclick=()=>{
+        closing=true;drawer.classList.remove('open');overlay.classList.remove('shown');
+        window.fixture.classGoneButDrawerVisible=!drawer.classList.contains('open')&&drawer.getClientRects().length>0;
+      };
+      drawer.addEventListener('transitionend',event=>{
+        if(event.propertyName!=='transform')return;
+        if(closing){drawer.hidden=true;window.fixture.exited++;window.fixture.overlayOutlivedDrawer=!overlay.hidden;}
+        else window.fixture.entered++;
+      });
+      overlay.addEventListener('transitionend',event=>{
+        if(event.propertyName==='opacity'&&closing){overlay.hidden=true;window.fixture.overlayExited++;}
+      });
       </script></body></html>`);
   });
   await new Promise(done => server.listen(0, '127.0.0.1', done));
@@ -929,6 +968,28 @@ test('controlled embedded DOM verifies ordinary console open/close in both langu
       assert.equal(verifyEmbeddedWorkspaceEvidence(evidence), true);
       assert.deepEqual(stages, ['embedded-initial', 'embedded-console-open', 'embedded-console-closed']);
       assert.deepEqual(evidence.initial.scroll, { x: 0, y: 0 });
+      const transitions = await appPage.evaluate(() => window.fixture);
+      assert.deepEqual(transitions, { entered: 1, exited: 1, overlayExited: 1,
+        classGoneButDrawerVisible: true, overlayOutlivedDrawer: true });
+      assert.equal(evidence.closeButton.activeAncestorAnimations, 0);
+      assert.equal(evidence.afterClose.visibleConsoleDrawers, 0);
+      assert.equal(evidence.afterClose.visibleDrawerOverlays, 0);
+      assert.ok(evidence.initial.menu.ancestorLayouts.length > 0 &&
+        evidence.initial.menu.ancestorLayouts.length <= 8);
+      assert.equal(JSON.stringify(evidence.initial.menu.ancestorLayouts).includes('Controlled workspace'), false);
+      if (locale === 'en-US' && viewport.width === 390) {
+        const failedEvidence = {};
+        await assert.rejects(verifyEmbeddedWorkspaceUi({ page, appPage, wrapper,
+          screenshot: async stage => {
+            if (stage === 'embedded-console-closed') failedEvidence.closeButton.insideViewport = false;
+          }, evidence: failedEvidence,
+          index: { index: { domId: 'controlled-index' }, menus: [{ name: 'bottomsidemenu', items: [{
+            id: 'terminal', caption: 'Console', visible: true, permitted: true,
+            target: { viewId: 'modeldesign.pssysdevbktasktabexpview' }, dom: [{ selector: '#terminal', disabled: false }],
+          }] }] },
+        }));
+        assert.equal(failedEvidence.status, 'FAIL', 'A final evidence assertion must not leave a premature PASS');
+      }
     } finally { await context.close(); }
   }
 });
