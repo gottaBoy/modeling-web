@@ -110,6 +110,21 @@ System.register(['@ibiz-template/runtime', '@ibiz-template/vue3-util'], (functio
                         }],
                 });
             }
+            function fitHostBottomMenu(model) {
+                const bottoms = panelItems(model.viewLayoutPanel.rootPanelItems).filter(item => item.predefinedType === 'CONTAINER_SCROLL_BOTTOM' &&
+                    item.layoutPos?.layout === 'BORDER' && item.layoutPos?.layoutPos === 'SOUTH' &&
+                    item.layoutPos?.heightMode === 'PX' &&
+                    panelItems(item.panelItems).some(child => child.itemType === 'RAWITEM' && child.rawItem?.predefinedType === 'BOTTOM_SIDE_MENU'));
+                if (bottoms.length !== 1)
+                    return;
+                const [bottom] = bottoms;
+                if (bottom.height !== 21 || bottom.contentHeight !== 21 || bottom.layoutPos.height !== 21)
+                    return;
+                // The host menu uses 42px buttons plus 4px padding on each edge.
+                bottom.height = 50;
+                bottom.contentHeight = 50;
+                bottom.layoutPos.height = 50;
+            }
             // Runtime receives the model-helper result, not the getPS* transport model.
             function prepareIndexModel(model) {
                 if (!model || model.viewType !== 'APPINDEXVIEW' || !model.viewLayoutPanel) {
@@ -128,6 +143,7 @@ System.register(['@ibiz-template/runtime', '@ibiz-template/vue3-util'], (functio
                     throw new Error('The independent index provider does not implement Swagger.');
                 }
                 restoreRightMenuPlaceholder(result, controls);
+                fitHostBottomMenu(result);
                 return result;
             }
             function flattenMenus(items = [], ancestors = []) {
@@ -535,7 +551,8 @@ System.register(['@ibiz-template/runtime', '@ibiz-template/vue3-util'], (functio
                             status[key] = 'pending';
                             const task = this.openDefault(menu, item).then(result => {
                                 if (this.live)
-                                    status[key] = result === 'existing-route' ? 'existing-route' : 'settled';
+                                    status[key] = result === 'existing-route' ||
+                                        result === 'deferred-embedded-console' ? result : 'settled';
                                 return result;
                             }, error => {
                                 if (this.live) {
@@ -565,6 +582,13 @@ System.register(['@ibiz-template/runtime', '@ibiz-template/vue3-util'], (functio
                             throw new Error(`Default menu target configuration is missing: ${item.appFuncId}.`);
                         if (!this.live)
                             throw new Error('Design index is destroyed.');
+                        const hostWindow = globalThis.window;
+                        if (hostWindow && hostWindow.self !== hostWindow.top &&
+                            menu.appMenu.name === 'bottomsidemenu' &&
+                            (item.id || item.name)?.toLowerCase() === 'terminal' &&
+                            consoleDrawerOptions(func, config, item.caption)) {
+                            return 'deferred-embedded-console';
+                        }
                         const nav = Object.values(this.layoutPanel.panelItems)
                             .find(entry => panelRole(entry) === 'NAV_POS_INDEX');
                         if ((!config.openMode || config.openMode.startsWith('INDEXVIEWTAB')) && nav?.state.currentKey) {

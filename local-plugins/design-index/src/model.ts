@@ -102,6 +102,22 @@ function restoreRightMenuPlaceholder(model: any, controls: any[]): void {
   });
 }
 
+function fitHostBottomMenu(model: any): void {
+  const bottoms = panelItems(model.viewLayoutPanel.rootPanelItems).filter(item =>
+    item.predefinedType === 'CONTAINER_SCROLL_BOTTOM' &&
+    item.layoutPos?.layout === 'BORDER' && item.layoutPos?.layoutPos === 'SOUTH' &&
+    item.layoutPos?.heightMode === 'PX' &&
+    panelItems(item.panelItems).some(child =>
+      child.itemType === 'RAWITEM' && child.rawItem?.predefinedType === 'BOTTOM_SIDE_MENU'));
+  if (bottoms.length !== 1) return;
+  const [bottom] = bottoms;
+  if (bottom.height !== 21 || bottom.contentHeight !== 21 || bottom.layoutPos.height !== 21) return;
+  // The host menu uses 42px buttons plus 4px padding on each edge.
+  bottom.height = 50;
+  bottom.contentHeight = 50;
+  bottom.layoutPos.height = 50;
+}
+
 // Runtime receives the model-helper result, not the getPS* transport model.
 export function prepareIndexModel(model: any): any {
   if (!model || model.viewType !== 'APPINDEXVIEW' || !model.viewLayoutPanel) {
@@ -119,6 +135,7 @@ export function prepareIndexModel(model: any): any {
     throw new Error('The independent index provider does not implement Swagger.');
   }
   restoreRightMenuPlaceholder(result, controls);
+  fitHostBottomMenu(result);
   return result;
 }
 

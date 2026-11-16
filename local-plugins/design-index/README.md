@@ -18,11 +18,15 @@ This is a first-stage implementation, not production or whole-package acceptance
   controls), and preserves the original model, menu functions, visibility and
   permission states. It does not replace the model with a new generic layout.
 - Existing side-menu controller instances receive local adapters. Visible,
-  permitted `openDefault` items dispatch independently, including the terminal.
+  permitted `openDefault` items dispatch independently. In an embedded iframe,
+  the exact bottom-console default is deferred so it cannot cover the editor;
+  its authorized menu remains available for normal manual opening.
   Existing nested routes are retained for route-opening defaults. Dispatch errors
   are retained in `state.designIndexErrors` and rejected tasks, not reported as PASS.
   A pending command is not proof that its target rendered.
-- The original terminal `openDefault` is retained. Only the declared bottom-menu
+- The original terminal `openDefault` model flag is retained. A direct IDE still
+  opens it by default; an embedded IDE records `deferred-embedded-console`
+  without mutating the model or hiding its menu. Only the declared bottom-menu
   APPVIEW whose exact target is `PSSysDevBKTaskTabExpView` in `DRAWER_BOTTOM` mode
   receives missing defaults for a 45% drawer, standard header/close control,
   localized menu title and Escape support. Explicit target height/modal options
@@ -31,6 +35,13 @@ This is a first-stage implementation, not production or whole-package acceptance
   absolute-positioned title/close overlap; other drawers are unchanged.
   Menu visibility, enabled state, permission and controller lifetime are checked
   again after asynchronous configuration reads and before command dispatch.
+- Only the recognized native 21px `CONTAINER_SCROLL_BOTTOM` containing the
+  bottom-menu placeholder is cloned to 50px, matching the host's 42px buttons
+  plus padding. Custom dimensions and ambiguous layouts are unchanged; the
+  original model and its persistence are never rewritten.
+  The index viewport and layout content have bounded heights so a long entity
+  tree scrolls inside its center region instead of pushing the footer outside
+  the iframe. These rules are scoped to this index, not global host layouts.
 - Unbound side menus resolve their original model from layout controls. Host
   flattening, item providers and permission calculation run on staged state;
   disposal prevents publishing late results. Prior visibility/permission

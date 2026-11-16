@@ -1,6 +1,12 @@
 .aibiz-design-index {
   min-width: 0;
   min-height: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.aibiz-design-index .ibiz-control-viewlayoutpanel-content {
+  height: 100%;
 }
 
 .aibiz-design-index .ibiz-nav-pos-index,

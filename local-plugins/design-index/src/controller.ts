@@ -338,7 +338,8 @@ export class DesignIndexController extends ViewController {
         const status = (this.state as any).designIndexDefaultOpens;
         status[key] = 'pending';
         const task = this.openDefault(menu, item).then(result => {
-          if (this.live) status[key] = result === 'existing-route' ? 'existing-route' : 'settled';
+          if (this.live) status[key] = result === 'existing-route' ||
+            result === 'deferred-embedded-console' ? result : 'settled';
           return result;
         }, error => {
           if (this.live) {
@@ -367,6 +368,13 @@ export class DesignIndexController extends ViewController {
       const config = await runtime.hub.config.view.get(func.appViewId);
       if (!config) throw new Error(`Default menu target configuration is missing: ${item.appFuncId}.`);
       if (!this.live) throw new Error('Design index is destroyed.');
+      const hostWindow = (globalThis as any).window;
+      if (hostWindow && hostWindow.self !== hostWindow.top &&
+          menu.appMenu.name === 'bottomsidemenu' &&
+          (item.id || item.name)?.toLowerCase() === 'terminal' &&
+          consoleDrawerOptions(func, config, item.caption)) {
+        return 'deferred-embedded-console';
+      }
       const nav = (Object.values(this.layoutPanel!.panelItems) as any[])
         .find(entry => panelRole(entry) === 'NAV_POS_INDEX');
       if ((!config.openMode || config.openMode.startsWith('INDEXVIEWTAB')) && nav?.state.currentKey) {

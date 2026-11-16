@@ -182,7 +182,8 @@ const panel={state:{isCreated:true},providers:{shortcut:{component:'IBizShortCut
   shortcut:{model:{id:'shortcut',rawItem:{predefinedType:'SHORTCUT'}}},menu
  }};
 const overlays=reactive([]);const mainClicks=ref(0);
-window.demo={ready:false,records,mainClicks,modelOpenDefault:menuItem.openDefault};
+window.demo={ready:false,records,mainClicks,modelOpenDefault:menuItem.openDefault,
+ get defaultOpens(){return c.state.designIndexDefaultOpens}};
 window.openFixtureDrawer=(id,ctx,params,options)=>new Promise(resolve=>{
  overlays.push({id,context:ctx,params,options,resolve})
 });
@@ -206,7 +207,7 @@ const Root=defineComponent({setup(){
 const app=createApp(Root);app.use(ElementPlus,{locale:english?en:zh});app.use(consolePlugin);app.mount('#app');
 </script></body></html>`;
 
-test('console defaults use the real command chain and host drawer with normal close/reopen in both languages and viewports',
+test('embedded console defers its default while direct IDE retains normal close/reopen through the real host chain',
   { timeout: 120_000 }, async t => {
     const { resources, receipts } = await fixtureResources();
     const report = { contract: 'design-console-drawer-source-browser-v1', status: 'FAILED',
@@ -215,7 +216,7 @@ test('console defaults use the real command chain and host drawer with normal cl
       receipts, cases: [] };
     await mkdir(output, { recursive: true });
     t.after(async () => {
-      report.status = report.cases.length === 4 && report.cases.every(row => row.status === 'PASS') ? 'PASS' : 'FAILED';
+      report.status = report.cases.length === 8 && report.cases.every(row => row.status === 'PASS') ? 'PASS' : 'FAILED';
       await writeFile(resolve(output, 'report.json'), `${JSON.stringify(report, null, 2)}\n`);
       console.log(`Console drawer browser report: ${output}/report.json`);
     });
@@ -238,11 +239,12 @@ test('console defaults use the real command chain and host drawer with normal cl
     const origin = `http://127.0.0.1:${server.address().port}`;
     const browser = await launchChromium(chromium);
     t.after(() => browser.close());
-    for (const locale of ['zh-CN', 'en-US']) for (const [name, viewport] of [
+    for (const embedded of [true, false]) for (const locale of ['zh-CN', 'en-US']) for (const [name, viewport] of [
       ['desktop', { width: 1144, height: 856 }], ['mobile', { width: 390, height: 844 }],
     ]) {
-      await t.test(`${locale}/${name}`, async () => {
-        const row = { locale, viewport: name, status: 'FAILED', errors: [], outsideRequests: [] };
+      await t.test(`${embedded ? 'embedded' : 'direct'}/${locale}/${name}`, async () => {
+        const mode = embedded ? 'embedded' : 'direct';
+        const row = { embedded, locale, viewport: name, status: 'FAILED', errors: [], outsideRequests: [] };
         report.cases.push(row);
         const context = await browser.newContext({ viewport, locale, serviceWorkers: 'block' });
         try {
@@ -253,11 +255,21 @@ test('console defaults use the real command chain and host drawer with normal cl
           const page = await context.newPage();
           page.on('pageerror', error => row.errors.push({ type: 'pageerror', message: error.message }));
           page.on('console', message => { if (message.type() === 'error') row.errors.push({ type: 'console', message: message.text() }); });
-          await page.goto(`${origin}/?locale=${locale}`);
+          await page.goto(`${origin}/${embedded ? '' : 'frame'}?locale=${locale}`);
           const frame = page.frames().find(item => item.url().startsWith(`${origin}/frame`));
           assert.ok(frame);
           await frame.waitForFunction(() => window.demo?.ready);
           const drawer = frame.locator('.ibiz-drawer.open');
+          if (embedded) {
+            await frame.waitForFunction(() =>
+              window.demo.defaultOpens['bottomsidemenu:terminal'] === 'deferred-embedded-console');
+            assert.equal(await drawer.count(), 0, 'An embedded editor must not be covered on first load');
+            assert.deepEqual(await frame.evaluate(() => window.demo.records.commands), []);
+            await frame.locator('[data-main-action="inspect"]').click();
+            assert.equal(await frame.evaluate(() => window.demo.mainClicks.value), 1);
+            await page.screenshot({ path: resolve(output, `${mode}-${locale}-${name}-initial.png`) });
+            await frame.locator('[data-open-console="true"]').click();
+          }
           await drawer.waitFor({ state: 'visible' });
           const close = drawer.locator('.el-drawer__close-btn');
           await close.waitFor({ state: 'visible' });
@@ -285,11 +297,11 @@ test('console defaults use the real command chain and host drawer with normal cl
           assert.equal(row.open.closeColor, 'rgb(32, 33, 36)');
           assert.ok(row.open.closeLabel);
           assert.match(await drawer.innerText(), locale === 'en-US' ? /MQTT is disabled/ : /当前部署未启用 MQTT/);
-          await page.screenshot({ path: resolve(output, `${locale}-${name}-open.png`) });
+          await page.screenshot({ path: resolve(output, `${mode}-${locale}-${name}-open.png`) });
           await close.click();
           await drawer.waitFor({ state: 'detached' });
           await frame.locator('[data-main-action="inspect"]').click();
-          assert.equal(await frame.evaluate(() => window.demo.mainClicks.value), 1);
+          assert.equal(await frame.evaluate(() => window.demo.mainClicks.value), embedded ? 2 : 1);
           await frame.locator('[data-open-console="true"]').click();
           await drawer.waitFor({ state: 'visible' });
           await drawer.locator('.el-drawer__close-btn').click();
@@ -303,7 +315,7 @@ test('console defaults use the real command chain and host drawer with normal cl
             errors: window.demo.records.errors,
             horizontalOverflow: document.documentElement.scrollWidth > innerWidth,
           }));
-          assert.equal(row.commands.mainClicks, 2);
+          assert.equal(row.commands.mainClicks, embedded ? 3 : 2);
           assert.equal(row.commands.modelOpenDefault, true);
           assert.deepEqual(row.commands.keys, [
             'ibiz.app-func.exec', 'ibiz.app-view.open', 'ibiz.app-func.exec', 'ibiz.app-view.open',
@@ -318,7 +330,7 @@ test('console defaults use the real command chain and host drawer with normal cl
           assert.deepEqual(row.commands.errors, []);
           assert.deepEqual(row.errors, []);
           assert.deepEqual(row.outsideRequests, []);
-          await page.screenshot({ path: resolve(output, `${locale}-${name}-closed.png`) });
+          await page.screenshot({ path: resolve(output, `${mode}-${locale}-${name}-closed.png`) });
           row.status = 'PASS';
         } finally { await context.close(); }
       });
