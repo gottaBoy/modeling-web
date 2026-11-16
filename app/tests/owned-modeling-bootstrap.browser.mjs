@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
+import { createServer } from 'node:http';
 import { createRequire } from 'node:module';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -27,6 +28,185 @@ const pathInside = (root, value) => {
   assert.ok(child && !child.startsWith('../') && !child.startsWith('/'));
   return path;
 };
+
+export async function startEmbeddedWorkspaceWrapper(entry) {
+  const application = new URL(entry);
+  assert.match(application.origin, /^http:\/\/127\.0\.0\.1:\d+$/);
+  assert.equal(application.username, '');
+  assert.equal(application.password, '');
+  const attribute = value => value.replace(/[&"<>]/g, character =>
+    ({ '&': '&amp;', '"': '&quot;', '<': '&lt;', '>': '&gt;' })[character]);
+  const html = `<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"><style>html,body{margin:0;width:100%;height:100%;overflow:hidden}iframe{display:block;border:0;width:100%;height:100%}</style></head><body><iframe id="owned-modeldesign-workspace" title="Owned ModelDesign workspace" src="${attribute(application.href)}"></iframe></body></html>`;
+  const evidence = {
+    kind: 'controlled-loopback-iframe-wrapper', wrapperOnly: true, nativePlmEmbedding: false,
+    applicationModelOrResourcesChanged: false, tokenOrContextInjected: false,
+    listenHost: '127.0.0.1', applicationOrigin: application.origin,
+    applicationEntrySha256: hash(application.href), htmlSha256: hash(html),
+    requests: [], errors: [], closed: false,
+  };
+  const server = createServer((request, response) => {
+    evidence.requests.push({ method: request.method, path: new URL(request.url, 'http://127.0.0.1').pathname });
+    response.setHeader('Cache-Control', 'no-store');
+    if (request.method === 'GET' && request.url === '/') {
+      response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8',
+        'Content-Security-Policy': `default-src 'none'; style-src 'unsafe-inline'; frame-src ${application.origin}; img-src data:` });
+      response.end(html);
+    } else { response.writeHead(404); response.end(); }
+  });
+  server.on('error', error => { evidence.errors.push(clean(error.message)); });
+  try {
+    await new Promise((done, reject) => {
+      server.once('error', reject);
+      server.listen(0, '127.0.0.1', done);
+    });
+  } catch (error) {
+    server.closeAllConnections();
+    server.close();
+    throw error;
+  }
+  const url = `http://127.0.0.1:${server.address().port}/`;
+  return {
+    url, evidence,
+    async close() {
+      await new Promise((done, reject) => {
+        server.close(error => error ? reject(error) : done());
+        server.closeAllConnections();
+      });
+      evidence.closed = true;
+    },
+  };
+}
+
+export function applicationFramePage(page, frame) {
+  return {
+    evaluate: frame.evaluate.bind(frame), locator: frame.locator.bind(frame),
+    getByRole: frame.getByRole.bind(frame), url: frame.url.bind(frame),
+    route: page.route.bind(page), unroute: page.unroute.bind(page),
+    waitForTimeout: page.waitForTimeout.bind(page), keyboard: page.keyboard,
+  };
+}
+
+export function collectEmbeddedWorkspaceDom({ indexId, menuSelector }) {
+  const visible = element => {
+    if (!element || !element.getClientRects().length) return false;
+    const style = getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) !== 0 &&
+      rect.width > 0 && rect.height > 0;
+  };
+  const bounds = element => {
+    if (!element) return null;
+    const rect = element.getBoundingClientRect();
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height,
+      right: rect.right, bottom: rect.bottom };
+  };
+  const root = document.getElementById(indexId);
+  const menu = document.querySelector(menuSelector);
+  const rect = menu?.getBoundingClientRect();
+  const hit = rect && document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
+  const workspaceRect = root?.getBoundingClientRect();
+  const workspacePoint = workspaceRect && {
+    x: Math.max(0, Math.min(innerWidth - 1, workspaceRect.x + workspaceRect.width / 2)),
+    y: Math.max(0, Math.min(innerHeight - 1, workspaceRect.y + workspaceRect.height / 3)),
+  };
+  const workspaceHit = workspacePoint && document.elementFromPoint(workspacePoint.x, workspacePoint.y);
+  return {
+    embedded: window.parent !== window,
+    viewport: { width: innerWidth, height: innerHeight },
+    scroll: { x: scrollX, y: scrollY },
+    workspace: { visible: visible(root), bounds: bounds(root),
+      receivesPointer: Boolean(workspaceHit && root?.contains(workspaceHit)) },
+    menu: { visible: visible(menu), bounds: bounds(menu),
+      insideViewport: Boolean(rect && rect.x >= 0 && rect.y >= 0 &&
+        rect.right <= innerWidth && rect.bottom <= innerHeight),
+      receivesPointer: Boolean(hit && menu && (hit === menu || menu.contains(hit))) },
+    openConsoleDrawers: [...document.querySelectorAll('.aibiz-console-drawer.open, .ibiz-drawer.open')].filter(visible).length,
+    horizontalOverflow: document.documentElement.scrollWidth > innerWidth,
+  };
+}
+
+export function verifyEmbeddedWorkspaceEvidence(evidence) {
+  assert.equal(evidence?.wrapper?.kind, 'controlled-loopback-iframe-wrapper');
+  assert.equal(evidence.wrapper.wrapperOnly, true);
+  assert.equal(evidence.wrapper.nativePlmEmbedding, false);
+  assert.equal(evidence.wrapper.applicationModelOrResourcesChanged, false);
+  assert.equal(evidence.wrapper.tokenOrContextInjected, false);
+  assert.equal(evidence.wrapper.listenHost, '127.0.0.1');
+  assert.deepEqual(evidence.wrapper.errors, []);
+  assert.match(evidence.wrapper.applicationOrigin ?? '', /^http:\/\/127\.0\.0\.1:\d+$/);
+  assert.match(evidence.wrapper.applicationEntrySha256 ?? '', /^[a-f0-9]{64}$/);
+  assert.equal(evidence.frame?.source, 'actual-owned-ModelDesign-entry');
+  assert.equal(evidence.frame.applicationOrigin, evidence.wrapper.applicationOrigin);
+  assert.equal(evidence.frame.fullViewport, true);
+  assert.equal(evidence.status, 'PASS');
+  assert.equal(evidence.openOperation, 'ordinary-bottom-console-menu-click');
+  assert.equal(evidence.closeOperation, 'ordinary-drawer-close-button-click');
+  assert.equal(evidence.openedConsoleDrawers, 1);
+  for (const name of ['initial', 'afterClose']) {
+    const state = evidence[name];
+    assert.equal(state?.embedded, true);
+    assert.equal(state.workspace?.visible, true);
+    assert.equal(state.workspace?.receivesPointer, true);
+    assert.equal(state.openConsoleDrawers, 0);
+    assert.equal(state.menu?.visible, true);
+    assert.equal(state.menu?.insideViewport, true);
+    assert.equal(state.menu?.receivesPointer, true);
+    assert.equal(state.horizontalOverflow, false);
+    assert.deepEqual(state.scroll, { x: 0, y: 0 });
+  }
+  assert.equal(evidence.closeButton?.insideViewport, true);
+  assert.equal(evidence.closeButton?.receivesPointer, true);
+  assert.ok(typeof evidence.menu?.id === 'string' && evidence.menu.id.length > 0);
+  assert.ok(evidence.menu.target?.viewId?.toLowerCase().endsWith('pssysdevbktasktabexpview'));
+  return true;
+}
+
+export async function verifyEmbeddedWorkspaceUi({
+  page, appPage, index, wrapper, screenshot, evidence = {},
+}) {
+  Object.assign(evidence, { status: 'FAIL', wrapper: { ...wrapper.evidence } });
+  const frame = await page.locator('#owned-modeldesign-workspace').evaluate(element => {
+    const rect = element.getBoundingClientRect();
+    return { fullViewport: rect.x === 0 && rect.y === 0 && rect.width === innerWidth &&
+      rect.height === innerHeight, width: rect.width, height: rect.height };
+  });
+  evidence.frame = { source: 'actual-owned-ModelDesign-entry',
+    applicationOrigin: new URL(appPage.url()).origin, ...frame };
+  const items = index.menus.filter(menu => menu.name === 'bottomsidemenu').flatMap(menu => menu.items)
+    .filter(item => item.target?.viewId?.toLowerCase().endsWith('pssysdevbktasktabexpview') &&
+      item.visible === true && item.permitted === true && item.dom.length === 1 && !item.dom[0].disabled);
+  assert.equal(items.length, 1, 'The actual bottom console menu must resolve uniquely');
+  evidence.menu = { id: items[0].id, caption: items[0].caption, target: items[0].target };
+  const options = { indexId: index.index.domId, menuSelector: items[0].dom[0].selector };
+  evidence.initial = await appPage.evaluate(collectEmbeddedWorkspaceDom, options);
+  assert.equal(evidence.initial.openConsoleDrawers, 0, 'Embedded workspace must start without a console overlay');
+  assert.equal(evidence.initial.menu.insideViewport, true, 'Bottom console menu must be in the initial viewport');
+  assert.equal(evidence.initial.menu.receivesPointer, true, 'Bottom console menu must receive a normal pointer');
+  assert.equal(evidence.initial.workspace.receivesPointer, true, 'Initial workspace must not be obscured');
+  await screenshot('embedded-initial');
+  await appPage.locator(items[0].dom[0].selector).click();
+  evidence.openOperation = 'ordinary-bottom-console-menu-click';
+  const drawer = appPage.locator('.aibiz-console-drawer.open');
+  await drawer.waitFor({ state: 'visible' });
+  evidence.openedConsoleDrawers = await drawer.count();
+  const close = drawer.locator('.el-drawer__close-btn');
+  await close.waitFor({ state: 'visible' });
+  evidence.closeButton = await close.evaluate(element => {
+    const rect = element.getBoundingClientRect();
+    const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
+    return { insideViewport: rect.x >= 0 && rect.y >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight,
+      receivesPointer: Boolean(hit && (hit === element || element.contains(hit))) };
+  });
+  await screenshot('embedded-console-open');
+  await close.click();
+  evidence.closeOperation = 'ordinary-drawer-close-button-click';
+  await drawer.waitFor({ state: 'hidden' });
+  evidence.afterClose = await appPage.evaluate(collectEmbeddedWorkspaceDom, options);
+  await screenshot('embedded-console-closed');
+  evidence.status = 'PASS';
+  verifyEmbeddedWorkspaceEvidence(evidence);
+  return evidence;
+}
 
 export function createBootstrapEvidenceTracker({
   row, phase = () => 'unknown', nextSequence = () => null,
@@ -299,9 +479,10 @@ function verifyOwnedBootstrapContextRow(row, { origin, expected }) {
 }
 
 export function summarizeBootstrapCase(row, {
-  origin, requireOwnedModelContext = false, expectedModelContext,
+  origin, requireOwnedModelContext = false, expectedModelContext, embeddedWorkspace = false,
 } = {}) {
   assert.equal(typeof requireOwnedModelContext, 'boolean');
+  assert.equal(typeof embeddedWorkspace, 'boolean');
   const blockers = [];
   const expectedPreAuthResponses = [];
   if (typeof origin !== 'string' || !/^http:\/\/127\.0\.0\.1:\d+$/.test(origin)) {
@@ -329,7 +510,8 @@ export function summarizeBootstrapCase(row, {
         row.stages.preLoginNetworkQuiet.networkQuietVerified === true)) {
       blockers.push({ type: 'prelogin-network-quiet-not-verified' });
     }
-    if (row?.scope !== 'MODELINGINDEX-BOOTSTRAP-ONLY' ||
+    if (row?.scope !== (embeddedWorkspace
+      ? 'MODELINGINDEX-EMBEDDED-WORKSPACE-ONLY' : 'MODELINGINDEX-BOOTSTRAP-ONLY') ||
         row?.stages?.systemMenu?.status !== 'NOT-EXECUTED-APPINDEX-ONLY' ||
         row?.stages?.navigation?.status !== 'NOT-EXECUTED-APPINDEX-ONLY') {
       blockers.push({ type: 'appindex-only-scope-not-verified' });
@@ -341,6 +523,13 @@ export function summarizeBootstrapCase(row, {
     }
   } else if (row?.stages?.systemMenu?.status !== 'CLICKED-NOT-YET-NAVIGATION-ACCEPTED') {
     blockers.push({ type: 'natural-menu-click-not-observed' });
+  }
+  let embeddedWorkspaceVerified = false;
+  if (embeddedWorkspace) {
+    try {
+      assert.equal(requireOwnedModelContext, true);
+      embeddedWorkspaceVerified = verifyEmbeddedWorkspaceEvidence(row?.stages?.workspace);
+    } catch { blockers.push({ type: 'embedded-workspace-not-verified' }); }
   }
   let ownedModelContextVerified = false;
   if (requireOwnedModelContext) {
@@ -369,10 +558,14 @@ export function summarizeBootstrapCase(row, {
   }
   return {
     status: blockers.length === 0
-      ? requireOwnedModelContext ? 'BOOTSTRAP-APPINDEX-ONLY-OBSERVED-NOT-NATIVE-ACCEPTED'
+      ? embeddedWorkspace ? 'BOOTSTRAP-EMBEDDED-WORKSPACE-OBSERVED-NOT-NATIVE-ACCEPTED'
+        : requireOwnedModelContext ? 'BOOTSTRAP-APPINDEX-ONLY-OBSERVED-NOT-NATIVE-ACCEPTED'
         : 'BOOTSTRAP-AND-NATURAL-CLICK-OBSERVED-NOT-NATIVE-ACCEPTED' : 'FAILED',
     diagnosticOnly: true, nativeAcceptance: false, permissionAcceptance: false,
-    scope: requireOwnedModelContext ? 'MODELINGINDEX-BOOTSTRAP-ONLY' : 'BOOTSTRAP-AND-MENU-CLICK-DIAGNOSTIC',
+    scope: embeddedWorkspace ? 'MODELINGINDEX-EMBEDDED-WORKSPACE-ONLY'
+      : requireOwnedModelContext ? 'MODELINGINDEX-BOOTSTRAP-ONLY' : 'BOOTSTRAP-AND-MENU-CLICK-DIAGNOSTIC',
+    embeddedWorkspace: { required: embeddedWorkspace, verified: embeddedWorkspaceVerified,
+      wrapperOnly: true, nativePlmEmbedding: false },
     navigationAcceptance: false,
     fullApplicationAcceptance: false, blockers, expectedPreAuthResponses,
     ownedModelContext: { required: requireOwnedModelContext, verified: ownedModelContextVerified,
@@ -385,7 +578,11 @@ export function summarizeBootstrapCase(row, {
 export async function runBootstrapBrowser(options) {
   assert.equal(options.runReadonlyBrowser, true);
   const requireOwnedModelContext = options.requireOwnedModelContext ?? false;
+  const embeddedWorkspace = options.embeddedWorkspace ?? false;
   assert.equal(typeof requireOwnedModelContext, 'boolean');
+  assert.equal(typeof embeddedWorkspace, 'boolean');
+  assert.ok(!embeddedWorkspace || requireOwnedModelContext,
+    'Embedded workspace mode requires the explicit owned model-context gate');
   for (const key of ['launchSha256', 'stateSha256', 'deploymentSha256']) assert.match(options[key] ?? '', /^[a-f0-9]{64}$/);
   assert.match(options.runId ?? '', /^[a-f0-9]{12}$/);
   const output = pathInside(join(workspace, '.artifacts/owned-modeling-bootstrap-browser'), options.output);
@@ -411,12 +608,15 @@ export async function runBootstrapBrowser(options) {
     freshSessionReadbackAcceptance: false, modelWritesRequested: false,
     identityOrHeaderInjection: false, acceptedForProduction: false,
     requireOwnedModelContext, ownedModelContextVerified: false,
-    scope: requireOwnedModelContext ? 'MODELINGINDEX-BOOTSTRAP-ONLY' : 'BOOTSTRAP-AND-MENU-CLICK-DIAGNOSTIC',
+    embeddedWorkspace,
+    scope: embeddedWorkspace ? 'MODELINGINDEX-EMBEDDED-WORKSPACE-ONLY'
+      : requireOwnedModelContext ? 'MODELINGINDEX-BOOTSTRAP-ONLY' : 'BOOTSTRAP-AND-MENU-CLICK-DIAGNOSTIC',
     navigationAcceptance: false,
     startedAt: new Date().toISOString(), cases: [],
     source: { path: fileURLToPath(import.meta.url), sha256: hash(fs.readFileSync(fileURLToPath(import.meta.url))) },
   };
   let browser;
+  let wrapper;
   try {
     const launch = pathInside(join(workspace, '.artifacts/owned-native-modeldesign-launch'), options.launch);
     assert.equal(dirname(launch), join(workspace, '.artifacts/owned-native-modeldesign-launch'));
@@ -459,6 +659,12 @@ export async function runBootstrapBrowser(options) {
     guard(true);
     const app = input.applications.find(value => value.application === 'ModelDesign');
     const origin = new URL(app.entry).origin;
+    const entry = new URL(app.entry);
+    entry.hash = `/psdevslnsys=${root.rootId}/modelingindex/-`;
+    if (embeddedWorkspace) {
+      wrapper = await startEmbeddedWorkspaceWrapper(entry.href);
+      report.wrapper = wrapper.evidence;
+    }
     const api = read(join(workspace,
       'vendor-upstream/ibizmodeling-standard/modelapi-core/src/main/resources/model/net/ibizsys/modeling/PSSYSSERVICEAPIS/ModelAPI.json'));
     const readPolicy = {
@@ -488,6 +694,7 @@ export async function runBootstrapBrowser(options) {
           ? { width: 1440, height: 900 } : { width: 390, height: 844 },
       });
       const page = await context.newPage();
+      let appPage = page;
       page.setDefaultTimeout(20_000);
       await configureNativeBrowserLanguage(context, locale);
       const screenshot = async stage => {
@@ -565,6 +772,10 @@ export async function runBootstrapBrowser(options) {
           await route.abort('blockedbyclient');
           return;
         }
+        if (embeddedWorkspace && method === 'GET' && url.href === wrapper.url) {
+          await route.continue();
+          return;
+        }
         const sessionRefresh = method === 'GET' &&
           new RegExp(`^/api/${appId}/uaa/refresh_token/[A-Za-z0-9-]+$`).test(url.pathname);
         const counterRead = method === 'POST' && url.pathname === `/api/${appId}/work_items/count_my_todo`;
@@ -578,19 +789,23 @@ export async function runBootstrapBrowser(options) {
       });
       try {
         await context.route('**/*', handleRoute);
-        const entry = new URL(app.entry);
-        entry.hash = `/psdevslnsys=${root.rootId}/modelingindex/-`;
-        await page.goto(entry.href, { waitUntil: 'domcontentloaded' });
-        await page.locator('input[type="password"]').first().waitFor();
+        await page.goto(embeddedWorkspace ? wrapper.url : entry.href, { waitUntil: 'domcontentloaded' });
+        if (embeddedWorkspace) {
+          const element = await page.locator('#owned-modeldesign-workspace').elementHandle();
+          const frame = await element?.contentFrame();
+          assert.ok(frame, 'The controlled wrapper must contain the actual application frame');
+          appPage = applicationFramePage(page, frame);
+        }
+        await appPage.locator('input[type="password"]').first().waitFor();
         await screenshot('login');
-        await page.locator('input[type="text"]').first().fill(actor.loginname);
-        await page.locator('input[type="password"]').first().fill(credentials.users[actor.loginname]);
+        await appPage.locator('input[type="text"]').first().fill(actor.loginname);
+        await appPage.locator('input[type="password"]').first().fill(credentials.users[actor.loginname]);
         await waitForBootstrapLoginReady({ row, tracker });
-        row.stages.login = await captureNativeLogin(page, { entry: app.entry, applicationId: appId },
+        row.stages.login = await captureNativeLogin(appPage, { entry: app.entry, applicationId: appId },
           () => {
             phase = 'login-submitted';
             row.authenticationLifecycle.loginSubmittedSequence = ++eventSequence;
-            return submitNativeLogin(page, locale);
+            return submitNativeLogin(appPage, locale);
           });
         phase = 'authenticated';
         row.authenticationLifecycle.loginVerifiedSequence = ++eventSequence;
@@ -608,24 +823,29 @@ export async function runBootstrapBrowser(options) {
           loginSubmittedSequence: row.authenticationLifecycle.loginSubmittedSequence,
         });
         try {
-          row.stages.home = { status: 'PASS', evidence: await waitForNativeIndexReady(page, {
+          row.stages.home = { status: 'PASS', evidence: await waitForNativeIndexReady(appPage, {
             application: 'ModelDesign', applicationId: appId,
             indexPath: 'PSSYSAPPS/ModelDesign/PSAPPINDEXVIEWS/ModelingIndex.json',
           }) };
         } catch (error) { row.stages.home = { status: 'FAIL', error: clean(error.message), evidence: error.evidence }; }
         await screenshot('home');
-        const index = await page.evaluate(collectNativeIndexEvidence, {
+        const index = await appPage.evaluate(collectNativeIndexEvidence, {
           application: 'ModelDesign', applicationId: appId,
           indexPath: 'PSSYSAPPS/ModelDesign/PSAPPINDEXVIEWS/ModelingIndex.json',
         });
         if (requireOwnedModelContext) row.ownedModelContext.index =
           verifyOwnedBootstrapIndexContext(index, expectedModelContext);
+        if (embeddedWorkspace) {
+          row.stages.workspace = { status: 'FAIL' };
+          await verifyEmbeddedWorkspaceUi({ page, appPage, index, wrapper, screenshot,
+            evidence: row.stages.workspace });
+        }
         await runBootstrapScopeAction({ row, requireOwnedModelContext, menuAction: async () => {
           const items = index.menus.filter(menu => menu.name === 'leftsidemenu').flatMap(menu => menu.items)
             .filter(item => item.target?.viewId?.toLowerCase().endsWith('pssystemmainsidebartreeview') &&
               item.visible === true && item.permitted === true && item.dom.length === 1 && !item.dom[0].disabled);
           assert.equal(items.length, 1, 'System menu must resolve uniquely from its actual model');
-          const locator = page.locator(items[0].dom[0].selector);
+          const locator = appPage.locator(items[0].dom[0].selector);
           row.pointer = await locator.evaluate(element => {
             const rect = element.getBoundingClientRect();
             const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
@@ -633,13 +853,13 @@ export async function runBootstrapBrowser(options) {
               hit: hit ? { tag: hit.tagName, className: hit.className, text: hit.textContent?.slice(0, 180) } : null,
               targetReceivesPointer: Boolean(hit && (hit === element || element.contains(hit))) };
           });
-          row.openDrawers = await page.locator('.ibiz-drawer.open').count();
+          row.openDrawers = await appPage.locator('.ibiz-drawer.open').count();
           if (!row.pointer.targetReceivesPointer && row.openDrawers > 0) {
             await page.keyboard.press('Escape');
             await page.waitForTimeout(200);
             row.normalDrawerDismissal = {
               operation: 'trusted-keyboard-Escape', before: row.openDrawers,
-              after: await page.locator('.ibiz-drawer.open').count(),
+              after: await appPage.locator('.ibiz-drawer.open').count(),
             };
             await screenshot('after-escape');
           }
@@ -658,7 +878,9 @@ export async function runBootstrapBrowser(options) {
       } finally {
         row.teardown = await finishBootstrapContext({ context, tracker,
           setPhase: value => { phase = value; } });
-        row.summary = summarizeBootstrapCase(row, { origin, requireOwnedModelContext, expectedModelContext });
+        row.summary = summarizeBootstrapCase(row, {
+          origin, requireOwnedModelContext, expectedModelContext, embeddedWorkspace,
+        });
         row.status = row.summary.status;
         row.finishedAt = new Date().toISOString();
         const matrix = report.matrix.find(value => value.actor === actor.loginname && value.rootId === root.rootId &&
@@ -670,14 +892,22 @@ export async function runBootstrapBrowser(options) {
       }
     }
     guard(true);
-    report.status = report.cases.every(row => row.status.startsWith('BOOTSTRAP'))
-      ? requireOwnedModelContext ? 'OBSERVED-APPINDEX-BOOTSTRAP-NOT-FULL-ACCEPTANCE'
+    report.status = report.cases.length === 4 && report.cases.every(row => row.status.startsWith('BOOTSTRAP'))
+      ? embeddedWorkspace ? 'OBSERVED-EMBEDDED-WORKSPACE-NOT-FULL-ACCEPTANCE'
+        : requireOwnedModelContext ? 'OBSERVED-APPINDEX-BOOTSTRAP-NOT-FULL-ACCEPTANCE'
         : 'OBSERVED-BOOTSTRAP-NATURAL-CLICK-NOT-FULL-ACCEPTANCE' : 'FAILED-LIVE-BROWSER-REMAINING-BLOCKERS';
     report.ownedModelContextVerified = requireOwnedModelContext && report.cases.length === 4 &&
       report.cases.every(row => row.summary?.ownedModelContext.verified === true);
+    report.embeddedWorkspaceVerified = embeddedWorkspace && report.cases.length === 4 &&
+      report.cases.every(row => row.summary?.embeddedWorkspace.verified === true);
   } catch (error) { report.error = clean(error.message); }
   finally {
     try { await browser?.close(); }
+    catch (error) { report.error = clean(error.message); report.status = 'FAILED-LIVE-BROWSER-REMAINING-BLOCKERS'; }
+    try {
+      await wrapper?.close();
+      if (wrapper) assert.deepEqual(wrapper.evidence.errors, [], 'Temporary wrapper server errors must remain failures');
+    }
     catch (error) { report.error = clean(error.message); report.status = 'FAILED-LIVE-BROWSER-REMAINING-BLOCKERS'; }
     report.finishedAt = new Date().toISOString();
     report.inputs = bound;
@@ -696,6 +926,7 @@ export async function main(argv = process.argv.slice(2)) {
     'run-id': { type: 'string' }, actor: { type: 'string' }, 'root-side': { type: 'string' },
     output: { type: 'string' }, 'run-readonly-browser': { type: 'boolean' },
     'require-owned-model-context': { type: 'boolean' },
+    'embedded-workspace': { type: 'boolean' },
   } });
   return runBootstrapBrowser({
     launch: values.launch, launchSha256: values['launch-sha256'], stateSha256: values['state-sha256'],
@@ -703,6 +934,7 @@ export async function main(argv = process.argv.slice(2)) {
     runId: values['run-id'], actor: values.actor, rootSide: values['root-side'],
     output: values.output, runReadonlyBrowser: values['run-readonly-browser'],
     requireOwnedModelContext: values['require-owned-model-context'],
+    embeddedWorkspace: values['embedded-workspace'],
   });
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

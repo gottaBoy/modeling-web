@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { createServer } from 'node:http';
+import { createServer, get } from 'node:http';
 import { createRequire } from 'node:module';
 import test from 'node:test';
 import { launchChromium } from '../../../scripts/browser-launch.mjs';
@@ -9,7 +9,8 @@ import {
   browserReadMatrix, expectedBootstrapPreAuth401, runBootstrapBrowser, summarizeBootstrapCase,
   ownedBootstrapContextExpectation, verifyOwnedBootstrapIndexContext, verifyOwnedBootstrapProjection,
   createBootstrapEvidenceTracker, finishBootstrapContext, runBootstrapScopeAction,
-  waitForBootstrapLoginReady,
+  waitForBootstrapLoginReady, startEmbeddedWorkspaceWrapper, applicationFramePage,
+  verifyEmbeddedWorkspaceEvidence, verifyEmbeddedWorkspaceUi,
 } from './owned-modeling-bootstrap.browser.mjs';
 
 const manifest = {
@@ -177,7 +178,7 @@ test('runner source captures request lifecycle, all HTTP responses and requestfa
   assert.match(source, /page\.on\('requestfailed'/);
   assert.match(source, /authorizationPresent = Boolean\(headers\.authorization\)/);
   assert.match(source, /phaseAtRequest: requested\?\.phase \?\? 'unobserved'/);
-  assert.match(source, /row\.summary = summarizeBootstrapCase\(row, \{ origin, requireOwnedModelContext, expectedModelContext \}\)/);
+  assert.match(source, /row\.summary = summarizeBootstrapCase\(row, \{\s*origin, requireOwnedModelContext, expectedModelContext, embeddedWorkspace,/);
   assert.match(source, /row\.status = row\.summary\.status/);
   assert.ok(source.indexOf('await context.close();') < source.indexOf('row.summary = summarizeBootstrapCase'));
   assert.doesNotMatch(source, /if \(url\.origin !== origin \|\| !url\.pathname\.startsWith/);
@@ -578,7 +579,7 @@ test('runner retains route policy until close and finalizes each row only after 
   assert.doesNotMatch(source, /unrouteAll|removeAllListeners|catch\(\(\) => \{\}\)|Promise\.all\(pending\)/);
 });
 
-async function orgBootstrapReloadFixture(t, { hang = false } = {}) {
+async function orgBootstrapReloadFixture(t, { hang = false, embedded = false } = {}) {
   const loginPath = `${appPrefix}/v7/login`;
   const appdataPath = `${appPrefix}/appdata`;
   const orgPath = `${appPrefix}/uaa/getbydcsystem/ibizmodeling`;
@@ -638,6 +639,8 @@ async function orgBootstrapReloadFixture(t, { hang = false } = {}) {
   const context = await browser.newContext({ serviceWorkers: 'block' });
   t.after(() => context.close());
   const page = await context.newPage();
+  const wrapper = embedded ? await startEmbeddedWorkspaceWrapper(entry) : null;
+  if (wrapper) t.after(() => wrapper.close());
   const row = validRow();
   let phase = 'pre-auth';
   const tracker = createBootstrapEvidenceTracker({ row, phase: () => phase });
@@ -656,17 +659,21 @@ async function orgBootstrapReloadFixture(t, { hang = false } = {}) {
     tracker.requestSettled(request);
   });
   await context.route('**/*', route => tracker.route(route, async () => { await route.continue(); }));
-  await page.goto(entry, { waitUntil: 'domcontentloaded' });
+  await page.goto(wrapper?.url ?? entry, { waitUntil: 'domcontentloaded' });
+  const frame = wrapper
+    ? await (await page.locator('#owned-modeldesign-workspace').elementHandle()).contentFrame() : null;
+  const appPage = frame ? applicationFramePage(page, frame) : page;
+  await appPage.locator('#login').waitFor();
   return {
     row, tracker, unfinished, events, upstreamOrg, orgPath, loginRequests: () => loginRequests,
     async login({ waitBeforeSubmit = false, gateTracker = tracker } = {}) {
       if (waitBeforeSubmit) await waitForBootstrapLoginReady({ row, tracker: gateTracker });
-      const login = await captureNativeLogin(page,
+      const login = await captureNativeLogin(appPage,
         { entry, applicationId: 'ibizmodeling__modeldesign', timeout: 3000 },
-        async () => { phase = 'login-submitted'; await page.locator('#login').click(); });
+        async () => { phase = 'login-submitted'; await appPage.locator('#login').click(); });
       assert.equal(login.tokenPersisted, true);
       phase = 'authenticated';
-      await page.locator('#ready').waitFor();
+      await appPage.locator('#ready').waitFor();
       await tracker.drain();
       return login;
     },
@@ -702,6 +709,17 @@ test('prelogin network quiet preserves real captureNativeLogin, reload and both 
   assert.deepEqual(fixture.row.errors, []);
 });
 
+test('iframe facade preserves real login routing, inner token readback and reload evidence', async t => {
+  const fixture = await orgBootstrapReloadFixture(t, { embedded: true });
+  const login = await fixture.login({ waitBeforeSubmit: true });
+  assert.equal(login.tokenIssued, true);
+  assert.equal(login.tokenPersisted, true);
+  await fixture.tracker.waitForQuiet({ quietForMs: 20, timeoutMs: 2000 });
+  assert.equal(fixture.loginRequests(), 1);
+  assert.equal(fixture.unfinished.size, 0);
+  assert.deepEqual(fixture.row.errors, []);
+});
+
 test('a genuinely hanging org GET fails the prelogin quiet gate and never submits credentials', async t => {
   const fixture = await orgBootstrapReloadFixture(t, { hang: true });
   const gateTracker = { ...fixture.tracker,
@@ -722,4 +740,205 @@ test('the live submit path waits on the real quiet gate without excluding or for
   assert.ok(gate > 0 && gate < capture);
   assert.match(source, /tracker\.error\('network-quiet-before-login', error\)/);
   assert.doesNotMatch(source, /requestSettled\(.*login|inflight\.clear\(|\.delete\(.*getbydcsystem/);
+});
+
+function embeddedEvidence() {
+  const state = () => ({
+    embedded: true, viewport: { width: 390, height: 844 }, scroll: { x: 0, y: 0 },
+    workspace: { visible: true, receivesPointer: true },
+    menu: { visible: true, insideViewport: true, receivesPointer: true },
+    openConsoleDrawers: 0, horizontalOverflow: false,
+  });
+  return {
+    status: 'PASS',
+    wrapper: {
+      kind: 'controlled-loopback-iframe-wrapper', wrapperOnly: true, nativePlmEmbedding: false,
+      applicationModelOrResourcesChanged: false, tokenOrContextInjected: false,
+      listenHost: '127.0.0.1', applicationOrigin: origin,
+      applicationEntrySha256: 'a'.repeat(64), errors: [],
+    },
+    frame: { source: 'actual-owned-ModelDesign-entry', fullViewport: true, applicationOrigin: origin },
+    initial: state(), afterClose: state(), openedConsoleDrawers: 1,
+    openOperation: 'ordinary-bottom-console-menu-click',
+    closeOperation: 'ordinary-drawer-close-button-click',
+    closeButton: { insideViewport: true, receivesPointer: true },
+    menu: { id: 'terminal', target: { viewId: 'modeldesign.pssysdevbktasktabexpview' } },
+  };
+}
+function embeddedRow() {
+  const row = ownedRow();
+  row.scope = 'MODELINGINDEX-EMBEDDED-WORKSPACE-ONLY';
+  row.stages.workspace = embeddedEvidence();
+  return row;
+}
+const embeddedSummary = row => summarizeBootstrapCase(row, {
+  origin, requireOwnedModelContext: true, expectedModelContext: expectedContext, embeddedWorkspace: true,
+});
+
+test('embedded workspace has a separate bounded verdict and never claims actual PLM embedding or native CRUD', () => {
+  const row = embeddedRow();
+  const before = structuredClone(row);
+  const result = embeddedSummary(row);
+  assert.equal(result.status, 'BOOTSTRAP-EMBEDDED-WORKSPACE-OBSERVED-NOT-NATIVE-ACCEPTED');
+  assert.equal(result.scope, 'MODELINGINDEX-EMBEDDED-WORKSPACE-ONLY');
+  assert.deepEqual(result.embeddedWorkspace, {
+    required: true, verified: true, wrapperOnly: true, nativePlmEmbedding: false,
+  });
+  for (const flag of ['nativeAcceptance', 'permissionAcceptance', 'navigationAcceptance', 'fullApplicationAcceptance']) {
+    assert.equal(result[flag], false);
+  }
+  assert.deepEqual(row, before);
+  assert.equal(ownedSummary(row).status, 'FAILED', 'Embedded evidence cannot replace the APPINDEX baseline');
+  assert.equal(embeddedSummary(ownedRow()).status, 'FAILED', 'APPINDEX evidence cannot replace workspace evidence');
+});
+
+for (const [name, mutate] of [
+  ['missing workspace', row => { delete row.stages.workspace; }],
+  ['failed workspace', row => { row.stages.workspace.status = 'FAIL'; }],
+  ['fake native embedding', row => { row.stages.workspace.wrapper.nativePlmEmbedding = true; }],
+  ['application mutation', row => { row.stages.workspace.wrapper.applicationModelOrResourcesChanged = true; }],
+  ['context injection', row => { row.stages.workspace.wrapper.tokenOrContextInjected = true; }],
+  ['wrong wrapper host', row => { row.stages.workspace.wrapper.listenHost = '0.0.0.0'; }],
+  ['unbound application', row => { row.stages.workspace.frame.applicationOrigin = 'http://127.0.0.1:30250'; }],
+  ['server error', row => { row.stages.workspace.wrapper.errors.push('wrapper failed'); }],
+  ['partial frame', row => { row.stages.workspace.frame.fullViewport = false; }],
+  ['direct not embedded', row => { row.stages.workspace.initial.embedded = false; }],
+  ['initial console obstruction', row => { row.stages.workspace.initial.openConsoleDrawers = 1; }],
+  ['workspace covered', row => { row.stages.workspace.initial.workspace.receivesPointer = false; }],
+  ['bottom menu outside viewport', row => { row.stages.workspace.initial.menu.insideViewport = false; }],
+  ['menu covered', row => { row.stages.workspace.initial.menu.receivesPointer = false; }],
+  ['initial scroll', row => { row.stages.workspace.initial.scroll.y = 100; }],
+  ['initial horizontal overflow', row => { row.stages.workspace.initial.horizontalOverflow = true; }],
+  ['synthetic opening', row => { row.stages.workspace.openOperation = 'controller-open'; }],
+  ['no console opened', row => { row.stages.workspace.openedConsoleDrawers = 0; }],
+  ['two consoles opened', row => { row.stages.workspace.openedConsoleDrawers = 2; }],
+  ['close outside viewport', row => { row.stages.workspace.closeButton.insideViewport = false; }],
+  ['close covered', row => { row.stages.workspace.closeButton.receivesPointer = false; }],
+  ['synthetic close', row => { row.stages.workspace.closeOperation = 'controller-close'; }],
+  ['wrong menu target', row => { row.stages.workspace.menu.target.viewId = 'another-view'; }],
+  ['closed workspace missing', row => { row.stages.workspace.afterClose.workspace.visible = false; }],
+  ['drawer remains open', row => { row.stages.workspace.afterClose.openConsoleDrawers = 1; }],
+  ['menu moved after close', row => { row.stages.workspace.afterClose.menu.insideViewport = false; }],
+]) test(`embedded workspace fails closed for ${name}`, () => {
+  const row = embeddedRow();
+  mutate(row);
+  const result = embeddedSummary(row);
+  assert.equal(result.status, 'FAILED');
+  assert.equal(result.embeddedWorkspace.verified, false);
+  assert.ok(result.blockers.some(blocker => blocker.type === 'embedded-workspace-not-verified'));
+});
+
+test('embedded workspace keeps all native login, projection, network and teardown rejection gates', () => {
+  for (const mutate of [
+    row => { row.stages.login.tokenPersisted = false; },
+    row => { delete row.ownedModelContext; },
+    row => { row.errors.push({ type: 'console', message: 'actual application error' }); },
+    row => { row.failedRequests.push({ failure: 'net::ERR_ABORTED' }); },
+    row => { row.blocked.push({ method: 'PUT', path: '/unreviewed' }); },
+    row => { row.teardown.networkQuietVerified = false; },
+    row => { row.teardown.inflightRequestsAfterClose = 1; },
+  ]) {
+    const row = embeddedRow();
+    mutate(row);
+    assert.equal(embeddedSummary(row).status, 'FAILED');
+  }
+});
+
+test('embedded flag requires explicit owned context and a real boolean before any launch', async () => {
+  await assert.rejects(runBootstrapBrowser({ runReadonlyBrowser: true, embeddedWorkspace: true }),
+    /explicit owned model-context/);
+  await assert.rejects(runBootstrapBrowser({
+    runReadonlyBrowser: true, requireOwnedModelContext: true, embeddedWorkspace: 'true',
+  }));
+  assert.throws(() => summarizeBootstrapCase(embeddedRow(), {
+    origin, requireOwnedModelContext: true, embeddedWorkspace: 'true',
+  }));
+});
+
+const readHttp = url => new Promise((done, reject) => {
+  get(url, { agent: false }, response => {
+    const chunks = [];
+    response.on('data', chunk => chunks.push(chunk));
+    response.on('end', () => done({ status: response.statusCode, headers: response.headers,
+      body: Buffer.concat(chunks).toString('utf8') }));
+  }).on('error', reject);
+});
+
+test('temporary wrapper serves only its simple exact-loopback iframe and always closes', async () => {
+  const entry = `${origin}/ModelDesign/?literal=%22%3C#/-`;
+  const wrapper = await startEmbeddedWorkspaceWrapper(entry);
+  try {
+    const response = await readHttp(wrapper.url);
+    assert.equal(response.status, 200);
+    assert.match(response.body, /<iframe id="owned-modeldesign-workspace"/);
+    assert.match(response.body, /width:100%;height:100%/);
+    assert.doesNotMatch(response.body, /<script|token|context|controller/i);
+    assert.match(response.headers['content-security-policy'], /default-src 'none'/);
+    assert.equal((await readHttp(`${wrapper.url}not-a-resource`)).status, 404);
+    assert.equal(wrapper.evidence.nativePlmEmbedding, false);
+    assert.equal(wrapper.evidence.closed, false);
+  } finally { await wrapper.close(); }
+  assert.equal(wrapper.evidence.closed, true);
+  await assert.rejects(readHttp(wrapper.url), /ECONNREFUSED/);
+  for (const entry of ['http://localhost:1234/', 'https://127.0.0.1:1234/', 'http://user:secret@127.0.0.1:1234/']) {
+    await assert.rejects(startEmbeddedWorkspaceWrapper(entry));
+  }
+});
+
+test('controlled embedded DOM verifies ordinary console open/close in both languages and viewports', async t => {
+  const server = createServer((request, response) => {
+    response.writeHead(200, { 'Content-Type': 'text/html' });
+    response.end(`<!doctype html><html><head><link rel="icon" href="data:,"><style>
+      html,body{margin:0;height:100%;overflow:hidden}#controlled-index{height:100%;position:relative}
+      #terminal{position:absolute;bottom:0;left:0;width:100px;height:44px}
+      .aibiz-console-drawer{display:none;position:absolute;bottom:0;width:100%;height:45%;background:white}
+      .aibiz-console-drawer.open{display:block}.el-drawer__close-btn{position:absolute;top:8px;right:8px;width:40px;height:40px}
+      </style></head><body><main id="controlled-index">Controlled workspace
+      <button id="terminal">Console</button>
+      <section class="aibiz-console-drawer"><button class="el-drawer__close-btn">Close</button></section>
+      </main><script>
+      const drawer=document.querySelector('.aibiz-console-drawer');
+      document.querySelector('#terminal').onclick=()=>drawer.classList.add('open');
+      document.querySelector('.el-drawer__close-btn').onclick=()=>drawer.classList.remove('open');
+      </script></body></html>`);
+  });
+  await new Promise(done => server.listen(0, '127.0.0.1', done));
+  t.after(() => new Promise(done => { server.close(done); server.closeAllConnections(); }));
+  const wrapper = await startEmbeddedWorkspaceWrapper(`http://127.0.0.1:${server.address().port}/`);
+  t.after(() => wrapper.close());
+  const require = createRequire(new URL('../../../ibiz-app-hub/package.json', import.meta.url));
+  const browser = await launchChromium(require('playwright').chromium, { args: ['--no-sandbox'] });
+  t.after(() => browser.close());
+  for (const locale of ['zh-CN', 'en-US']) for (const viewport of [
+    { width: 1440, height: 900 }, { width: 390, height: 844 },
+  ]) {
+    const context = await browser.newContext({ locale, viewport, serviceWorkers: 'block' });
+    try {
+      const page = await context.newPage();
+      await page.goto(wrapper.url);
+      const frame = await (await page.locator('#owned-modeldesign-workspace').elementHandle()).contentFrame();
+      const appPage = applicationFramePage(page, frame);
+      const stages = [];
+      const evidence = await verifyEmbeddedWorkspaceUi({ page, appPage, wrapper,
+        screenshot: async stage => { stages.push(stage); },
+        index: { index: { domId: 'controlled-index' }, menus: [{ name: 'bottomsidemenu', items: [{
+          id: 'terminal', caption: 'Console', visible: true, permitted: true,
+          target: { viewId: 'modeldesign.pssysdevbktasktabexpview' }, dom: [{ selector: '#terminal', disabled: false }],
+        }] }] },
+      });
+      assert.equal(verifyEmbeddedWorkspaceEvidence(evidence), true);
+      assert.deepEqual(stages, ['embedded-initial', 'embedded-console-open', 'embedded-console-closed']);
+      assert.deepEqual(evidence.initial.scroll, { x: 0, y: 0 });
+    } finally { await context.close(); }
+  }
+});
+
+test('embedded runner preserves exact request guards and closes the wrapper after the browser', () => {
+  const source = readFileSync(new URL('./owned-modeling-bootstrap.browser.mjs', import.meta.url), 'utf8');
+  assert.match(source, /'embedded-workspace': \{ type: 'boolean' \}/);
+  assert.match(source, /method === 'GET' && url\.href === wrapper\.url/);
+  assert.match(source, /await captureNativeLogin\(appPage,/);
+  assert.match(source, /await verifyEmbeddedWorkspaceUi/);
+  assert.ok(source.indexOf('await browser?.close()') < source.indexOf('await wrapper?.close()'));
+  assert.doesNotMatch(source, /force:\s*true|srcdoc|setContent\(|inflight\.clear\(|\.contentWindow\./);
 });
