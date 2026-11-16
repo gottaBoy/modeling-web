@@ -17,6 +17,20 @@ import {
 import { ValueOP } from '../../../constant';
 
 /**
+ * Missing personal dashboard data is a valid first-use state.
+ */
+export function isMissingUtilDataError(error: unknown): boolean {
+  const data = (
+    error as {
+      response?: {
+        data?: IData;
+      };
+    }
+  )?.response?.data;
+  return data?.type === 'DataEntityRuntimeException' && Number(data.code) === 3;
+}
+
+/**
  * 过滤器条件转化为查询条件
  *
  * @author tony001
