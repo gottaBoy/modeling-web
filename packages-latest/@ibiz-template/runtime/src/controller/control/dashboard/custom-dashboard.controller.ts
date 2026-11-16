@@ -4,7 +4,11 @@ import { clone } from 'ramda';
 import { ConfigService, UtilService } from '../../../service';
 import { DashboardController } from './dashboard.controller';
 import { ICustomDesign } from '../../../interface';
-import { deepDeleteSubAppId, deepFillSubAppId } from './dashboard.util';
+import {
+  deepDeleteSubAppId,
+  deepFillSubAppId,
+  isMissingUtilDataError,
+} from './dashboard.util';
 
 /**
  * 自定义数据看板部件控制器
@@ -233,11 +237,20 @@ export class CustomDashboardController implements ICustomDesign {
     }
     let res;
     if (this.util) {
-      res = await this.util!.load(
-        this.getResourceTag(),
-        this.context,
-        this.params,
-      );
+      try {
+        res = await this.util!.load(
+          this.getResourceTag(),
+          this.context,
+          this.params,
+        );
+      } catch (error) {
+        if (isMissingUtilDataError(error)) {
+          // A missing personal layout is a valid first-use state. Do not
+          // write a row during view initialization; save only after editing.
+          return { model: this.customModelData, config: this.portletConfig };
+        }
+        throw error;
+      }
     } else {
       res = await this.config!.load();
     }
