@@ -34,7 +34,7 @@
     },
     {
       "path": "src/style.css",
-      "sha256": "26bb363505de382c86d4324fbe998b10562b2103fbb817048d789115edc9f7c4"
+      "sha256": "e414927847115c38f30cb7d99d0a02c13a1aa2775306778286eda32207c92a56"
     },
     {
       "path": "tests/permitted-menu.test.mjs",
@@ -56,7 +56,7 @@
     },
     {
       "path": "style.css",
-      "sha256": "26bb363505de382c86d4324fbe998b10562b2103fbb817048d789115edc9f7c4"
+      "sha256": "e414927847115c38f30cb7d99d0a02c13a1aa2775306778286eda32207c92a56"
     }
   ],
   "toolchain": {
