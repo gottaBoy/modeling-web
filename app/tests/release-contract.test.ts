@@ -25,6 +25,14 @@ const quickCreateViewPath = resolve(
   '..',
   'plm/model/PSSYSAPPS/plmweb/PSAPPDEVIEWS/idea_quick_create_view.json',
 );
+const runtimeAppHubPath = resolve(
+  appRoot,
+  '../packages-latest/@ibiz-template/runtime/src/app-hub.ts',
+);
+const extensionControllerPath = resolve(
+  appRoot,
+  '../../ibiz-service-hub/libs/ibiz-cloud-core/src/main/java/net/ibizsys/central/cloud/core/spring/controller/ExtensionGatewayRestController.java',
+);
 
 function readImportMap(): {
   imports?: Record<string, string | string[]>;
@@ -167,6 +175,39 @@ describe('release contract', () => {
     expect(nginx).toMatch(
       /location \^~ \/api\/ibizmodeling__modeldesign\/recents\/ \{[\s\S]*?rewrite \^\/api\/ibizmodeling__modeldesign\/\(\.\*\)\$ \/ibizservicerunner\/serviceapi\/\$1 break;[\s\S]*?proxy_pass \$plm_upstream;[\s\S]*?proxy_set_header Authorization\s+\$http_authorization;[\s\S]*?proxy_set_header srfsystemid\s+ibizplm;[\s\S]*?proxy_set_header srforgid\s+\$plm_srforgid;/,
     );
+  });
+
+  it('declares the extension manifest as an optional exact 404, while keeping extension files strict', () => {
+    const runtime = readFileSync(runtimeAppHubPath, 'utf8');
+    expect(runtime).toContain("setting?.value === false) return;");
+    expect(runtime).toContain(
+      '`${ibiz.env.baseUrl}/${appId}${ibiz.env.remoteModelUrl}/ext`',
+    );
+    expect(runtime).toMatch(
+      /catch \(error\) \{[\s\S]*?noExtensionPlugin[\s\S]*?\}/,
+    );
+
+    const controller = readFileSync(extensionControllerPath, 'utf8');
+    expect(controller).toContain(
+      '@GetMapping(value = "/{id}/extension/dynamodels/pssysapps/{app}/ext/**")',
+    );
+    expect(controller).toContain(
+      'if (configFile == null || !configFile.exists())',
+    );
+    expect(controller).toContain(
+      'response.sendError(HttpStatus.NOT_FOUND.value());',
+    );
+
+    for (const nginxPath of [
+      resolve(appRoot, '../nginx-local.conf'),
+      resolve(appRoot, '../nginx-native.conf'),
+    ]) {
+      const nginx = readFileSync(nginxPath, 'utf8');
+      expect(nginx).not.toMatch(
+        /remotemodel\/ext\/package\.json[\s\S]{0,400}return\s+200/,
+      );
+      expect(nginx).toContain('remotemodel/');
+    }
   });
 
   it('routes the PLM service entities without capturing or matching modeling entity prefixes', () => {
