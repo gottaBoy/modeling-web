@@ -1,0 +1,81 @@
+{
+  "AppStudio__CodeNameMode": {
+    "emptyText": "未定义",
+    "items": {
+      "LOWER_UNDERSCORE": "小写（下划线分隔）",
+      "UPPER_UNDERSCORE": "大写（下划线分隔）",
+      "LOWER_CAMEL": "驼峰（首字母小写）",
+      "UPPER_CAMEL": "驼峰（首字母大写）",
+      "LOWER": "小写（直接，不做转换）",
+      "UPPER": "大写（直接，不做转换）",
+      "LOWER_HYPHEN": "小写（中划线分隔）",
+      "NONE": "无转换"
+    }
+  },
+  "AppStudio__ModuleUtilType": {
+    "emptyText": "未定义",
+    "items": {
+      "ADMIN": "管理模块",
+      "EXTENSION": "扩展模块",
+      "EAI": "应用集成",
+      "BI": "智能报表",
+      "MAINSYSPROXY": "主系统代理",
+      "USER": "用户自定义",
+      "USER2": "用户自定义2",
+      "USER3": "用户自定义3",
+      "USER4": "用户自定义4"
+    }
+  },
+  "Config__YesNoColor8": {
+    "emptyText": "（否）",
+    "items": { "1": "是", "0": "否" }
+  },
+  "Config__YesNo": {
+    "emptyText": "未定义",
+    "items": { "1": "是", "0": "否" }
+  },
+  "Config__DynaInstMode3": {
+    "emptyText": "未定义",
+    "items": { "0": "不启用", "1": "启用", "2": "启用副本" }
+  },
+  "Config__ModelUserCat": {
+    "emptyText": "未定义",
+    "items": {
+      "CAT1": "类别1",
+      "CAT2": "类型2",
+      "CAT3": "类别3",
+      "CAT4": "类别4",
+      "CAT5": "类别5",
+      "CAT6": "类别6",
+      "CAT7": "类别7",
+      "CAT8": "类别8",
+      "CAT9": "类别9"
+    }
+  },
+  "Config__ServiceAPIType": {
+    "emptyText": "（RESTful API）",
+    "items": {
+      "RESTFUL": "RESTful API",
+      "JAXRS": "RESTful WebService",
+      "WEBSERVICE": "WebService",
+      "USER": "用户自定义",
+      "USER2": "用户自定义2"
+    }
+  },
+  "Config__ServiceAPIMode": {
+    "emptyText": "（指定实体）",
+    "items": {
+      "0": "实体服务接口（指定实体）（默认）",
+      "1": "实体服务接口（全部非子系统实体）",
+      "2": "平台预置服务接口",
+      "10": "自定义接口"
+    }
+  },
+  "Config__YesNoColor3": {
+    "items": { "1": "是", "0": "否" }
+  },
+  "Config__PSObjChangeType": {
+    "emptyText": "未定义",
+    "items": { "CREATE": "建立", "UPDATE": "更新", "DELETE": "删除", "OTHER": "其它" }
+  }
+}
