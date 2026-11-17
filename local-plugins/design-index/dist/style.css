@@ -21,6 +21,72 @@
 }
 
 @media (max-width: 767px) {
+  .aibiz-design-index .aibiz-design-shell > .ibiz-scroll-container__header {
+    min-height: 88px;
+    overflow: auto;
+  }
+
+  .aibiz-design-index .aibiz-design-shell .ibiz-scroll-container-item--container_scroll_header > .ibiz-col {
+    min-height: 100%;
+  }
+
+  .aibiz-design-index .aibiz-design-shell .ibiz-panel-container--app_header > .ibiz-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 32px 48px;
+    gap: 4px;
+  }
+
+  .aibiz-design-index .aibiz-design-shell .ibiz-panel-container--app_header_left,
+  .aibiz-design-index .aibiz-design-shell .ibiz-panel-container--app_header_right {
+    overflow-x: auto;
+  }
+
+  .aibiz-design-index .aibiz-design-shell > .ibiz-scroll-container-content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 104px minmax(0, 1fr) 50px;
+    min-height: 0;
+  }
+
+  .aibiz-design-index .aibiz-design-shell > .ibiz-scroll-container-content > .ibiz-scroll-container-content__left {
+    min-width: 100%;
+    max-width: 100%;
+    grid-row: 1;
+  }
+
+  .aibiz-design-index .aibiz-design-shell > .ibiz-scroll-container-content > .ibiz-scroll-container-content__center {
+    min-width: 0;
+    min-height: 0;
+    grid-row: 2;
+  }
+
+  .aibiz-design-index .aibiz-design-shell > .ibiz-scroll-container-content > .ibiz-scroll-container-content__right {
+    min-width: 100%;
+    max-width: 100%;
+    grid-row: 3;
+  }
+
+  .aibiz-design-index .aibiz-design-shell .ibiz-left-side-menu .ibiz-extend-menu-button__content {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: 42px;
+    gap: 4px;
+    padding: 4px;
+    box-sizing: border-box;
+  }
+
+  .aibiz-design-index .aibiz-design-shell .ibiz-left-side-menu .ibiz-extend-menu-button__content--item {
+    min-width: 0;
+    margin: 0;
+  }
+
+  .aibiz-design-index .aibiz-design-shell .ibiz-left-side-menu .ibiz-extend-menu-button__menuitem {
+    padding: 0 4px;
+    font-size: 12px;
+    white-space: normal;
+  }
+
   .aibiz-design-index .ibiz-bottom-side-menu .ibiz-extend-menu-button {
     --ibiz-extend-menu-button-item-horizontal-min-width: 0;
     --ibiz-extend-menu-button-icon-width: 16px;

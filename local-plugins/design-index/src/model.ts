@@ -118,6 +118,53 @@ function fitHostBottomMenu(model: any): void {
   bottom.layoutPos.height = 50;
 }
 
+function markHostResponsiveShell(model: any): void {
+  const containers = panelItems(model.viewLayoutPanel.rootPanelItems).filter(item =>
+    item.id === 'container_scroll1' && item.predefinedType === 'CONTAINER_SCROLL' &&
+    item.layout?.layout === 'BORDER');
+  if (containers.length !== 1) return;
+  const [container] = containers;
+  if (container.sysCss) return;
+  const children = container.panelItems ?? [];
+  const positions = children.map((item: any) => item.layoutPos?.layoutPos);
+  if (positions.some((position: string) =>
+    !['WEST', 'CENTER', 'NORTH', 'EAST', 'SOUTH'].includes(position) ||
+    positions.filter((value: string) => value === position).length !== 1)) return;
+  const region = (role: string, position: string, raw: string): any => {
+    const matches = children.filter((item: any) =>
+      item.predefinedType === role && item.layoutPos?.layoutPos === position &&
+      panelItems(item.panelItems).some(child => child.rawItem?.predefinedType === raw));
+    return matches.length === 1 ? matches[0] : undefined;
+  };
+  const left = region('CONTAINER_SCROLL_LEFT', 'WEST', 'LEFT_SIDE_MENU');
+  const main = region('CONTAINER_SCROLL_MAIN', 'CENTER', 'NAV_POS_INDEX');
+  const header = children.filter((item: any) =>
+    item.predefinedType === 'CONTAINER_SCROLL_HEADER' && item.layoutPos?.layoutPos === 'NORTH' &&
+    item.panelItems?.length === 1 && item.panelItems[0].id === 'app_header' &&
+    item.panelItems[0].layout?.layout === 'FLEX' && item.panelItems[0].layout?.dir === 'row');
+  const right = children.filter((item: any) => item.layoutPos?.layoutPos === 'EAST');
+  const headerPanel = header[0]?.panelItems[0];
+  const headerSides = headerPanel?.panelItems ?? [];
+  if (main?.id !== 'container_scroll_main' || left?.id !== 'container_scroll_left' ||
+    left.width !== 320 || left.layoutPos?.width !== 320 || left.layoutPos?.widthMode !== 'PX' ||
+    header.length !== 1 || header[0].id !== 'container_scroll_header' ||
+    header[0].height !== 40 || header[0].layoutPos?.height !== 40 || header[0].layoutPos?.heightMode !== 'PX' ||
+    headerSides.length !== 2 || headerSides.some((item: any, index: number) =>
+      item.id !== ['app_header_left', 'app_header_right'][index] ||
+      item.layout?.layout !== 'FLEX' || item.layout?.dir !== 'row' ||
+      item.layoutPos?.layout !== 'FLEX' || item.layoutPos?.heightMode !== 'FULL') ||
+    right.length > 1 || right.some((item: any) =>
+      item.id !== 'container_scroll_right' || item.predefinedType !== 'CONTAINER_SCROLL_RIGHT' ||
+      item.width !== 200 || item.layoutPos?.width !== 200 || item.layoutPos?.widthMode !== 'PX' ||
+      !panelItems(item.panelItems).some(child => child.rawItem?.predefinedType === 'RIGHT_SIDE_MENU'))) return;
+  if ([main, left, header[0], ...right].some(item =>
+    item.layout?.layout !== 'BORDER' || item.layoutPos?.layout !== 'BORDER') ||
+    panelItems([main, left, header[0], ...right]).some(item => item.sysCss &&
+      !(item === headerSides[0] && item.sysCss.cssName === 'ibiz-panel-item' &&
+        Object.keys(item.sysCss).length === 1))) return;
+  container.sysCss = { cssName: 'aibiz-design-shell' };
+}
+
 // Runtime receives the model-helper result, not the getPS* transport model.
 export function prepareIndexModel(model: any): any {
   if (!model || model.viewType !== 'APPINDEXVIEW' || !model.viewLayoutPanel) {
@@ -136,6 +183,7 @@ export function prepareIndexModel(model: any): any {
   }
   restoreRightMenuPlaceholder(result, controls);
   fitHostBottomMenu(result);
+  markHostResponsiveShell(result);
   return result;
 }
 

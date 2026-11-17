@@ -95,6 +95,92 @@ test('the exact native 21px footer fits host buttons without mutating source or 
   assert.deepEqual(modelHelpers.prepareIndexModel(ambiguous), ambiguous);
 });
 
+test('responsive shell marker applies only to the recognized native layout and preserves source/custom policy', () => {
+  const slot = (id, predefinedType, position, rawType, size = {}) => ({
+    id, predefinedType, itemType: 'CONTAINER', ...size,
+    layout: { layout: 'BORDER' },
+    layoutPos: { layout: 'BORDER', layoutPos: position, ...size,
+      ...(size.width ? { widthMode: 'PX' } : {}),
+      ...(size.height ? { heightMode: 'PX' } : {}) },
+    panelItems: [{ id: rawType === 'HEADER' ? 'app_header' : rawType,
+      itemType: 'RAWITEM', rawItem: { predefinedType: rawType } }],
+  });
+  const container = {
+    id: 'container_scroll1', predefinedType: 'CONTAINER_SCROLL', itemType: 'CONTAINER',
+    layout: { layout: 'BORDER' }, panelItems: [
+      slot('container_scroll_main', 'CONTAINER_SCROLL_MAIN', 'CENTER', 'NAV_POS_INDEX'),
+      slot('container_scroll_left', 'CONTAINER_SCROLL_LEFT', 'WEST', 'LEFT_SIDE_MENU', { width: 320 }),
+      {
+        ...slot('container_scroll_header', 'CONTAINER_SCROLL_HEADER', 'NORTH', 'HEADER', { height: 40 }),
+        panelItems: [{
+          id: 'app_header', itemType: 'CONTAINER', layout: { layout: 'FLEX', dir: 'row' },
+          panelItems: ['left', 'right'].map(side => ({
+            id: `app_header_${side}`, itemType: 'CONTAINER',
+            layout: { layout: 'FLEX', dir: 'row' }, layoutPos: { layout: 'FLEX', heightMode: 'FULL' },
+          })),
+        }],
+      },
+    ],
+  };
+  const model = {
+    viewType: 'APPINDEXVIEW',
+    controls: modelHelpers.requiredControlNames.map(name => ({ name, appMenuItems: [] })),
+    viewLayoutPanel: { rootPanelItems: [container] },
+  };
+  const before = structuredClone(model);
+  const prepared = modelHelpers.prepareIndexModel(model);
+  assert.deepEqual(prepared.viewLayoutPanel.rootPanelItems[0].sysCss, { cssName: 'aibiz-design-shell' });
+  delete prepared.viewLayoutPanel.rootPanelItems[0].sysCss;
+  assert.deepEqual(prepared, model);
+  assert.deepEqual(model, before);
+  for (const mutate of [
+    item => { item.sysCss = { cssName: 'user-layout' }; },
+    item => { item.id = 'other-scroll'; },
+    item => { item.panelItems[1].width = 240; },
+    item => { item.panelItems[1].layoutPos.width = 240; },
+    item => { item.panelItems[2].height = 60; },
+    item => { item.panelItems[2].layoutPos.height = 60; },
+    item => { item.panelItems[0].id = 'custom-center'; },
+    item => { item.panelItems[2].panelItems[0].layout.dir = 'column'; },
+    item => { item.panelItems[1].layoutPos.widthMode = 'PERCENTAGE'; },
+    item => { item.panelItems[2].layoutPos.heightMode = 'FULL'; },
+    item => { item.panelItems[0].layout.layout = 'FLEX'; },
+    item => { item.panelItems[1].sysCss = { cssName: 'custom-left' }; },
+    item => { item.panelItems[2].panelItems[0].sysCss = { cssName: 'custom-header' }; },
+    item => { item.panelItems[2].panelItems[0].panelItems.reverse(); },
+    item => { item.panelItems[2].panelItems[0].panelItems[0].layoutPos.heightMode = 'PX'; },
+    item => { item.panelItems.push(slot('custom-right', 'CONTAINER_SCROLL_RIGHT', 'EAST', 'RIGHT_SIDE_MENU', { width: 240 })); },
+    item => { item.panelItems.push(structuredClone(item.panelItems[2])); },
+    item => { item.panelItems[0].panelItems = []; },
+    ...['WEST', 'CENTER', 'NORTH', 'EAST', 'SOUTH'].map(position => item => {
+      const duplicate = slot(`custom-${position}`, 'CUSTOM', position, 'CUSTOM');
+      item.panelItems.push(duplicate);
+      if (position === 'EAST' || position === 'SOUTH') item.panelItems.push(structuredClone(duplicate));
+    }),
+  ]) {
+    const custom = structuredClone(model);
+    mutate(custom.viewLayoutPanel.rootPanelItems[0]);
+    assert.deepEqual(modelHelpers.prepareIndexModel(custom), custom);
+  }
+});
+
+test('authoritative ModelingIndex DSL receives the mobile marker without changing stored metadata', async () => {
+  const require = createRequire(new URL('../../../app/package.json', import.meta.url));
+  const { DSLHelper } = await import(require.resolve('@ibiz/rt-model-api'));
+  const source = JSON.parse(readFileSync(new URL(
+    '../../../../vendor-upstream/ibizmodeling-standard/modelapi-core/src/main/resources/model/net/ibizsys/modeling/PSSYSAPPS/ModelDesign/PSAPPINDEXVIEWS/ModelingIndex.json',
+    import.meta.url,
+  ), 'utf8'));
+  const original = JSON.stringify(source);
+  const model = new DSLHelper().appView(source);
+  const before = JSON.stringify(model);
+  const prepared = modelHelpers.prepareIndexModel(model);
+  const shell = prepared.viewLayoutPanel.rootPanelItems.find(item => item.id === 'container_scroll1');
+  assert.deepEqual(shell.sysCss, { cssName: 'aibiz-design-shell' });
+  assert.equal(JSON.stringify(model), before);
+  assert.equal(JSON.stringify(source), original);
+});
+
 test('only the console bottom drawer receives bounded and normally closable defaults', () => {
   const appFunc = { appFuncType: 'APPVIEW', appViewId: 'modeldesign.PSSysDevBKTaskTabExpView' };
   const config = { id: appFunc.appViewId, openMode: 'DRAWER_BOTTOM' };
