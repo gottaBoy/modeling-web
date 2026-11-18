@@ -82,8 +82,209 @@ export function applicationFramePage(page, frame) {
     evaluate: frame.evaluate.bind(frame), locator: frame.locator.bind(frame),
     getByRole: frame.getByRole.bind(frame), url: frame.url.bind(frame),
     route: page.route.bind(page), unroute: page.unroute.bind(page),
-    waitForTimeout: page.waitForTimeout.bind(page), keyboard: page.keyboard,
+    waitForTimeout: page.waitForTimeout.bind(page), keyboard: page.keyboard, mouse: page.mouse,
   };
+}
+
+export async function retainBootstrapPageRoute({ page, tracker }) {
+  // Removing the last page interceptor auto-continues its in-flight routes in
+  // Playwright. Keep this bridge until context close; the context guard decides.
+  await page.route('**/*', route => {
+    const request = route.request();
+    return tracker.track('page-route-fallback', () => route.fallback(), {
+      method: request.method(), path: clean(new URL(request.url()).pathname),
+    });
+  });
+}
+
+export function collectOwnedShellDom({ indexId, navigation = [] }) {
+  const root = document.getElementById(indexId);
+  const shell = root?.querySelector('.aibiz-design-shell');
+  const rect = element => {
+    if (!element) return null;
+    const value = element.getBoundingClientRect();
+    return { x: value.x, y: value.y, width: value.width, height: value.height,
+      right: value.right, bottom: value.bottom };
+  };
+  const inspect = element => {
+    const bounds = rect(element);
+    let visible = Boolean(element && bounds?.width > 0 && bounds?.height > 0);
+    let clipped = bounds && { ...bounds };
+    for (let node = element; node instanceof Element; node = node.parentElement) {
+      const style = getComputedStyle(node);
+      if (style.display === 'none' || ['hidden', 'collapse'].includes(style.visibility) ||
+          Number(style.opacity) === 0) visible = false;
+      const ancestor = node === element ? null : rect(node);
+      if (clipped && ancestor) {
+        if (['hidden', 'clip', 'auto', 'scroll'].includes(style.overflowX)) {
+          clipped.x = Math.max(clipped.x, ancestor.x);
+          clipped.right = Math.min(clipped.right, ancestor.right);
+        }
+        if (['hidden', 'clip', 'auto', 'scroll'].includes(style.overflowY)) {
+          clipped.y = Math.max(clipped.y, ancestor.y);
+          clipped.bottom = Math.min(clipped.bottom, ancestor.bottom);
+        }
+      }
+    }
+    const insideViewport = Boolean(bounds && bounds.x >= -1 && bounds.y >= -1 &&
+      bounds.right <= innerWidth + 1 && bounds.bottom <= innerHeight + 1);
+    const point = clipped && {
+      x: (Math.max(0, clipped.x) + Math.min(innerWidth, clipped.right)) / 2,
+      y: (Math.max(0, clipped.y) + Math.min(innerHeight, clipped.bottom)) / 2,
+    };
+    const hit = point && document.elementFromPoint(point.x, point.y);
+    return {
+      visible: visible && Boolean(clipped && clipped.right > clipped.x && clipped.bottom > clipped.y),
+      insideRoot: Boolean(root && element && root.contains(element)), bounds, insideViewport,
+      receivesPointer: Boolean(hit && element && (hit === element || element.contains(hit))),
+    };
+  };
+  const unique = selector => {
+    const matches = shell ? [...shell.querySelectorAll(selector)] : [];
+    return { count: matches.length, ...inspect(matches.length === 1 ? matches[0] : null) };
+  };
+  const headerRight = shell?.querySelector('.ibiz-panel-container--app_header_right');
+  return {
+    embedded: window.parent !== window, indexId,
+    viewport: { width: innerWidth, height: innerHeight }, documentScroll: { x: scrollX, y: scrollY },
+    horizontalDocumentOverflow: document.documentElement.scrollWidth > innerWidth + 1,
+    root: inspect(root),
+    shell: { count: root?.querySelectorAll('.aibiz-design-shell').length ?? 0, ...inspect(shell) },
+    header: unique(':scope > .ibiz-scroll-container__header'),
+    headerLeft: unique('.ibiz-panel-container--app_header_left'),
+    headerRight: unique('.ibiz-panel-container--app_header_right'),
+    left: unique(':scope > .ibiz-scroll-container-content > .ibiz-scroll-container-content__left'),
+    main: unique(':scope > .ibiz-scroll-container-content > .ibiz-scroll-container-content__center'),
+    right: unique(':scope > .ibiz-scroll-container-content > .ibiz-scroll-container-content__right'),
+    footer: unique(':scope > .ibiz-scroll-container__footer'),
+    headerScroll: headerRight ? { x: headerRight.scrollLeft, y: headerRight.scrollTop,
+      clientWidth: headerRight.clientWidth, scrollWidth: headerRight.scrollWidth,
+      overflowX: getComputedStyle(headerRight).overflowX } : null,
+    navigation: navigation.map(item => ({ id: item.id, side: item.side,
+      ...inspect(document.querySelector(item.selector)) })),
+  };
+}
+
+export function verifyOwnedShellDom(state) {
+  assert.equal(state?.embedded, true);
+  assert.ok(typeof state.indexId === 'string' && state.indexId);
+  assert.deepEqual(state.documentScroll, { x: 0, y: 0 });
+  assert.equal(state.horizontalDocumentOverflow, false);
+  for (const name of ['root', 'shell', 'header', 'headerLeft', 'headerRight', 'left', 'main', 'right', 'footer']) {
+    const region = state[name];
+    if (name !== 'root') assert.equal(region?.count, 1, `Exactly one ${name} region is required`);
+    assert.equal(region?.visible, true, `${name} must be visibly rendered, not only present`);
+    assert.equal(region.insideRoot, true, `${name} must belong to the bound APPINDEX`);
+    assert.equal(region.insideViewport, true, `${name} must fit inside the application iframe`);
+    assert.equal(region.receivesPointer, true, `${name} must not be covered or completely clipped`);
+  }
+  assert.ok(state.main.bounds.height >= 200, 'The APPINDEX main region must retain a usable height');
+  assert.ok(state.main.bounds.width >= (state.viewport.width < 768 ? state.viewport.width - 2 : 200),
+    'The mobile APPINDEX main region must retain the full available width');
+  assert.ok(state.main.bounds.y >= state.header.bounds.bottom - 1, 'Main content must not overlap the header');
+  assert.ok(state.main.bounds.bottom <= state.footer.bounds.y + 1, 'Main content must not overlap the footer');
+  assert.ok(state.navigation.length >= 2, 'Both declared navigation sides must be observed');
+  assert.ok(state.navigation.some(item => item.side === 'leftsidemenu'));
+  assert.ok(state.navigation.some(item => item.side === 'rightsidemenu'));
+  for (const item of state.navigation) {
+    assert.equal(item.visible, true, `${item.side}/${item.id} must be visible`);
+    assert.equal(item.insideRoot, true);
+    assert.equal(item.insideViewport, true, `${item.side}/${item.id} must be inside the iframe`);
+    assert.equal(item.receivesPointer, true, `${item.side}/${item.id} must receive an ordinary pointer`);
+  }
+  return true;
+}
+
+function collectOwnedHeaderTool(element) {
+  const bounds = element.getBoundingClientRect();
+  const hit = document.elementFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+  const scrollers = [];
+  for (let node = element.parentElement; node && node !== document.body; node = node.parentElement) {
+    const style = getComputedStyle(node);
+    if (['auto', 'scroll'].includes(style.overflowX)) scrollers.push({
+      className: String(node.className).slice(0, 160), x: node.scrollLeft,
+      clientWidth: node.clientWidth, scrollWidth: node.scrollWidth,
+    });
+  }
+  return { insideViewport: bounds.x >= -1 && bounds.y >= -1 &&
+    bounds.right <= innerWidth + 1 && bounds.bottom <= innerHeight + 1,
+  receivesPointer: Boolean(hit && (hit === element || element.contains(hit))),
+  focused: document.activeElement === element, documentScroll: { x: scrollX, y: scrollY }, scrollers };
+}
+
+export function verifyOwnedShellEvidence(evidence) {
+  assert.equal(evidence?.scope, 'APPINDEX-SHELL-ONLY');
+  assert.equal(evidence.navigationActionsExecuted, false);
+  assert.equal(evidence.modelWritesRequested, false);
+  assert.equal(evidence.requestPolicyChanged, false);
+  assert.equal(evidence.status, 'PASS');
+  for (const stage of ['initial', 'afterHeaderTools', 'afterConsoleClose']) verifyOwnedShellDom(evidence[stage]);
+  assert.equal(evidence.headerTools?.search?.operation, 'ordinary-search-input-click-without-query');
+  assert.equal(evidence.headerTools.search.insideViewport, true);
+  assert.equal(evidence.headerTools.search.receivesPointer, true);
+  assert.equal(evidence.headerTools.search.focused, true);
+  assert.deepEqual(evidence.headerTools.search.documentScroll, { x: 0, y: 0 });
+  assert.equal(evidence.headerTools?.account?.operation, 'ordinary-account-trigger-hover');
+  assert.equal(evidence.headerTools.account.insideViewport, true);
+  assert.equal(evidence.headerTools.account.receivesPointer, true);
+  assert.equal(evidence.headerTools.account.menuVisible, true);
+  assert.equal(evidence.headerTools.account.menuTriggerBound, true);
+  assert.deepEqual(evidence.headerTools.account.documentScroll, { x: 0, y: 0 });
+  assert.equal(evidence.headerTools.account.menuInsideViewport, true);
+  assert.equal(evidence.headerTools.account.closeOperation, 'ordinary-Escape-and-pointer-away');
+  assert.equal(evidence.headerTools.account.menuHiddenAfterClose, true);
+  return true;
+}
+
+export async function observeOwnedShellUi({ appPage, index, screenshot, evidence }) {
+  Object.assign(evidence, { status: 'FAIL', scope: 'APPINDEX-SHELL-ONLY',
+    navigationActionsExecuted: false, modelWritesRequested: false, requestPolicyChanged: false });
+  const navigation = index.menus.filter(menu => ['leftsidemenu', 'rightsidemenu'].includes(menu.name))
+    .flatMap(menu => menu.items.filter(item => item.visible === true && item.permitted === true &&
+      !item.hidden && !item.disabled).map(item => {
+      assert.equal(item.dom.length, 1, 'Every permitted shell navigation item must have one real DOM target');
+      assert.equal(item.dom[0].disabled, false);
+      return { id: item.id, side: menu.name, selector: item.dom[0].selector };
+    }));
+  const options = { indexId: index.index.domId, navigation };
+  evidence.initial = await waitForEmbeddedDomStable({
+    appPage, collect: collectOwnedShellDom, options, verify: verifyOwnedShellDom,
+  });
+  const root = appPage.locator(`[id=${JSON.stringify(index.index.domId)}]`);
+  const header = root.locator('.aibiz-design-shell > .ibiz-scroll-container__header');
+  const search = header.locator('.ibiz-global-search input');
+  const account = header.locator('.ibiz-user-info-info');
+  assert.equal(await search.count(), 1, 'The model search input must resolve within the bound header');
+  assert.equal(await account.count(), 1, 'The account trigger must resolve within the bound header');
+  await search.scrollIntoViewIfNeeded();
+  await search.click();
+  const searchState = await search.evaluate(collectOwnedHeaderTool);
+  assert.equal(searchState.focused, true, 'Ordinary click must focus the actual search input');
+  evidence.headerTools = { search: { operation: 'ordinary-search-input-click-without-query', ...searchState } };
+  await screenshot('owned-shell-search-focused');
+  await account.scrollIntoViewIfNeeded();
+  await account.hover();
+  const triggerId = await account.getAttribute('id');
+  assert.ok(triggerId, 'The actual account trigger must expose its native Element Plus identity');
+  const menus = appPage.locator(`.el-dropdown__popper:has([aria-labelledby=${JSON.stringify(triggerId)}])`);
+  await menus.waitFor({ state: 'visible' });
+  assert.equal(await menus.count(), 1, 'Account hover must reveal one ordinary dropdown');
+  evidence.headerTools.account = { operation: 'ordinary-account-trigger-hover',
+    ...await account.evaluate(collectOwnedHeaderTool), menuVisible: true, menuTriggerBound: true,
+    menuInsideViewport: (await menus.evaluate(collectOwnedHeaderTool)).insideViewport };
+  await screenshot('owned-shell-account-menu');
+  await appPage.keyboard.press('Escape');
+  await root.locator('.aibiz-design-shell > .ibiz-scroll-container-content > .ibiz-scroll-container-content__center')
+    .hover();
+  await menus.waitFor({ state: 'hidden' });
+  Object.assign(evidence.headerTools.account, {
+    closeOperation: 'ordinary-Escape-and-pointer-away', menuHiddenAfterClose: true,
+  });
+  evidence.afterHeaderTools = await waitForEmbeddedDomStable({
+    appPage, collect: collectOwnedShellDom, options, verify: verifyOwnedShellDom,
+  });
+  await screenshot('owned-shell-header-tools-closed');
+  return options;
 }
 
 export function collectEmbeddedWorkspaceDom({ indexId, menuSelector }) {
@@ -201,7 +402,8 @@ function collectEmbeddedCloseButton(element) {
   };
 }
 
-export function verifyEmbeddedWorkspaceEvidence(evidence) {
+export function verifyEmbeddedWorkspaceEvidence(evidence, { ownedShell = false } = {}) {
+  assert.equal(typeof ownedShell, 'boolean');
   assert.equal(evidence?.wrapper?.kind, 'controlled-loopback-iframe-wrapper');
   assert.equal(evidence.wrapper.wrapperOnly, true);
   assert.equal(evidence.wrapper.nativePlmEmbedding, false);
@@ -226,11 +428,12 @@ export function verifyEmbeddedWorkspaceEvidence(evidence) {
   assert.equal(evidence.closeButton?.activeAncestorAnimations, 0);
   assert.ok(typeof evidence.menu?.id === 'string' && evidence.menu.id.length > 0);
   assert.ok(evidence.menu.target?.viewId?.toLowerCase().endsWith('pssysdevbktasktabexpview'));
+  if (ownedShell) verifyOwnedShellEvidence(evidence.shell);
   return true;
 }
 
 export async function verifyEmbeddedWorkspaceUi({
-  page, appPage, index, wrapper, screenshot, evidence = {},
+  page, appPage, index, wrapper, screenshot, evidence = {}, ownedShell = false,
 }) {
   Object.assign(evidence, { status: 'FAIL', wrapper: { ...wrapper.evidence } });
   const frame = await page.locator('#owned-modeldesign-workspace').evaluate(element => {
@@ -253,6 +456,13 @@ export async function verifyEmbeddedWorkspaceUi({
   assert.equal(evidence.initial.workspace.receivesPointer, true, 'Initial workspace must not be obscured');
   verifyWorkspaceDomState(evidence.initial);
   await screenshot('embedded-initial');
+  let shellOptions;
+  if (ownedShell) {
+    evidence.shell = { status: 'FAIL' };
+    shellOptions = await observeOwnedShellUi({
+      appPage, index, screenshot, evidence: evidence.shell,
+    });
+  }
   await appPage.locator(items[0].dom[0].selector).click();
   evidence.openOperation = 'ordinary-bottom-console-menu-click';
   const drawer = appPage.locator('.aibiz-console-drawer');
@@ -277,7 +487,14 @@ export async function verifyEmbeddedWorkspaceUi({
     appPage, collect: collectEmbeddedWorkspaceDom, options, verify: verifyWorkspaceDomState,
   });
   await screenshot('embedded-console-closed');
-  verifyEmbeddedWorkspaceEvidence({ ...evidence, status: 'PASS' });
+  if (ownedShell) {
+    evidence.shell.afterConsoleClose = await waitForEmbeddedDomStable({
+      appPage, collect: collectOwnedShellDom, options: shellOptions, verify: verifyOwnedShellDom,
+    });
+    verifyOwnedShellEvidence({ ...evidence.shell, status: 'PASS' });
+    evidence.shell.status = 'PASS';
+  }
+  verifyEmbeddedWorkspaceEvidence({ ...evidence, status: 'PASS' }, { ownedShell });
   evidence.status = 'PASS';
   return evidence;
 }
@@ -553,10 +770,11 @@ function verifyOwnedBootstrapContextRow(row, { origin, expected }) {
 }
 
 export function summarizeBootstrapCase(row, {
-  origin, requireOwnedModelContext = false, expectedModelContext, embeddedWorkspace = false,
+  origin, requireOwnedModelContext = false, expectedModelContext, embeddedWorkspace = false, ownedShell = false,
 } = {}) {
   assert.equal(typeof requireOwnedModelContext, 'boolean');
   assert.equal(typeof embeddedWorkspace, 'boolean');
+  assert.equal(typeof ownedShell, 'boolean');
   const blockers = [];
   const expectedPreAuthResponses = [];
   if (typeof origin !== 'string' || !/^http:\/\/127\.0\.0\.1:\d+$/.test(origin)) {
@@ -602,9 +820,10 @@ export function summarizeBootstrapCase(row, {
   if (embeddedWorkspace) {
     try {
       assert.equal(requireOwnedModelContext, true);
-      embeddedWorkspaceVerified = verifyEmbeddedWorkspaceEvidence(row?.stages?.workspace);
+      embeddedWorkspaceVerified = verifyEmbeddedWorkspaceEvidence(row?.stages?.workspace, { ownedShell });
     } catch { blockers.push({ type: 'embedded-workspace-not-verified' }); }
   }
+  if (ownedShell && !embeddedWorkspace) blockers.push({ type: 'owned-shell-requires-embedded-workspace' });
   let ownedModelContextVerified = false;
   if (requireOwnedModelContext) {
     try {
@@ -640,6 +859,8 @@ export function summarizeBootstrapCase(row, {
       : requireOwnedModelContext ? 'MODELINGINDEX-BOOTSTRAP-ONLY' : 'BOOTSTRAP-AND-MENU-CLICK-DIAGNOSTIC',
     embeddedWorkspace: { required: embeddedWorkspace, verified: embeddedWorkspaceVerified,
       wrapperOnly: true, nativePlmEmbedding: false },
+    ownedShell: { required: ownedShell, verified: ownedShell && embeddedWorkspaceVerified,
+      scope: 'APPINDEX-SHELL-ONLY', navigationAcceptance: false, crudAcceptance: false },
     navigationAcceptance: false,
     fullApplicationAcceptance: false, blockers, expectedPreAuthResponses,
     ownedModelContext: { required: requireOwnedModelContext, verified: ownedModelContextVerified,
@@ -653,10 +874,14 @@ export async function runBootstrapBrowser(options) {
   assert.equal(options.runReadonlyBrowser, true);
   const requireOwnedModelContext = options.requireOwnedModelContext ?? false;
   const embeddedWorkspace = options.embeddedWorkspace ?? false;
+  const ownedShell = options.ownedShell ?? false;
   assert.equal(typeof requireOwnedModelContext, 'boolean');
   assert.equal(typeof embeddedWorkspace, 'boolean');
+  assert.equal(typeof ownedShell, 'boolean');
   assert.ok(!embeddedWorkspace || requireOwnedModelContext,
     'Embedded workspace mode requires the explicit owned model-context gate');
+  assert.ok(!ownedShell || (embeddedWorkspace && requireOwnedModelContext),
+    'Owned shell mode requires explicit embedded workspace and owned model-context gates');
   for (const key of ['launchSha256', 'stateSha256', 'deploymentSha256']) assert.match(options[key] ?? '', /^[a-f0-9]{64}$/);
   assert.match(options.runId ?? '', /^[a-f0-9]{12}$/);
   const output = pathInside(join(workspace, '.artifacts/owned-modeling-bootstrap-browser'), options.output);
@@ -682,7 +907,7 @@ export async function runBootstrapBrowser(options) {
     freshSessionReadbackAcceptance: false, modelWritesRequested: false,
     identityOrHeaderInjection: false, acceptedForProduction: false,
     requireOwnedModelContext, ownedModelContextVerified: false,
-    embeddedWorkspace,
+    embeddedWorkspace, ownedShell,
     scope: embeddedWorkspace ? 'MODELINGINDEX-EMBEDDED-WORKSPACE-ONLY'
       : requireOwnedModelContext ? 'MODELINGINDEX-BOOTSTRAP-ONLY' : 'BOOTSTRAP-AND-MENU-CLICK-DIAGNOSTIC',
     navigationAcceptance: false,
@@ -863,6 +1088,7 @@ export async function runBootstrapBrowser(options) {
       });
       try {
         await context.route('**/*', handleRoute);
+        await retainBootstrapPageRoute({ page, tracker });
         await page.goto(embeddedWorkspace ? wrapper.url : entry.href, { waitUntil: 'domcontentloaded' });
         if (embeddedWorkspace) {
           const element = await page.locator('#owned-modeldesign-workspace').elementHandle();
@@ -912,7 +1138,7 @@ export async function runBootstrapBrowser(options) {
         if (embeddedWorkspace) {
           row.stages.workspace = { status: 'FAIL' };
           await verifyEmbeddedWorkspaceUi({ page, appPage, index, wrapper, screenshot,
-            evidence: row.stages.workspace });
+            evidence: row.stages.workspace, ownedShell });
         }
         await runBootstrapScopeAction({ row, requireOwnedModelContext, menuAction: async () => {
           const items = index.menus.filter(menu => menu.name === 'leftsidemenu').flatMap(menu => menu.items)
@@ -953,7 +1179,7 @@ export async function runBootstrapBrowser(options) {
         row.teardown = await finishBootstrapContext({ context, tracker,
           setPhase: value => { phase = value; } });
         row.summary = summarizeBootstrapCase(row, {
-          origin, requireOwnedModelContext, expectedModelContext, embeddedWorkspace,
+          origin, requireOwnedModelContext, expectedModelContext, embeddedWorkspace, ownedShell,
         });
         row.status = row.summary.status;
         row.finishedAt = new Date().toISOString();
@@ -974,6 +1200,8 @@ export async function runBootstrapBrowser(options) {
       report.cases.every(row => row.summary?.ownedModelContext.verified === true);
     report.embeddedWorkspaceVerified = embeddedWorkspace && report.cases.length === 4 &&
       report.cases.every(row => row.summary?.embeddedWorkspace.verified === true);
+    report.ownedShellVerified = ownedShell && report.cases.length === 4 &&
+      report.cases.every(row => row.summary?.ownedShell.verified === true);
   } catch (error) { report.error = clean(error.message); }
   finally {
     try { await browser?.close(); }
@@ -1001,6 +1229,7 @@ export async function main(argv = process.argv.slice(2)) {
     output: { type: 'string' }, 'run-readonly-browser': { type: 'boolean' },
     'require-owned-model-context': { type: 'boolean' },
     'embedded-workspace': { type: 'boolean' },
+    'owned-shell': { type: 'boolean' },
   } });
   return runBootstrapBrowser({
     launch: values.launch, launchSha256: values['launch-sha256'], stateSha256: values['state-sha256'],
@@ -1009,6 +1238,7 @@ export async function main(argv = process.argv.slice(2)) {
     output: values.output, runReadonlyBrowser: values['run-readonly-browser'],
     requireOwnedModelContext: values['require-owned-model-context'],
     embeddedWorkspace: values['embedded-workspace'],
+    ownedShell: values['owned-shell'],
   });
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

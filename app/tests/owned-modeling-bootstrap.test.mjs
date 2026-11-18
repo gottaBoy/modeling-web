@@ -11,6 +11,8 @@ import {
   createBootstrapEvidenceTracker, finishBootstrapContext, runBootstrapScopeAction,
   waitForBootstrapLoginReady, startEmbeddedWorkspaceWrapper, applicationFramePage,
   verifyEmbeddedWorkspaceEvidence, verifyEmbeddedWorkspaceUi, waitForEmbeddedDomStable,
+  collectOwnedShellDom, verifyOwnedShellDom, verifyOwnedShellEvidence,
+  retainBootstrapPageRoute,
 } from './owned-modeling-bootstrap.browser.mjs';
 
 const manifest = {
@@ -415,6 +417,28 @@ test('duplicate route delivery never invokes a second continue/abort and remains
   assert.ok(row.errors.some(error => error.type === 'route-handler' && error.message.includes('more than once')));
 });
 
+test('the retained page bridge only falls back and its failures remain tracked rejection evidence', async () => {
+  const state = trackerFixture();
+  let bridge;
+  let fallbacks = 0;
+  await retainBootstrapPageRoute({
+    tracker: state.tracker,
+    page: { async route(pattern, handler) { assert.equal(pattern, '**/*'); bridge = handler; } },
+  });
+  const request = { method: () => 'GET', url: () => `${origin}/private?token=must-not-be-recorded` };
+  await bridge({
+    request: () => request,
+    fallback: async () => { fallbacks++; throw new Error('controlled fallback failure'); },
+    continue: () => assert.fail('The page bridge cannot continue around the context policy'),
+  });
+  await state.tracker.drain();
+  assert.equal(fallbacks, 1);
+  assert.ok(state.row.errors.some(error => error.type === 'page-route-fallback' &&
+    error.message === 'controlled fallback failure' && error.path === '/private'));
+  assert.equal(JSON.stringify(state.row.errors).includes('must-not-be-recorded'), false);
+  assert.equal(ownedSummary(state.row).status, 'FAILED');
+});
+
 test('normal network quiet waits for the response body and its finished request before context close', async () => {
   const body = deferred();
   const request = {};
@@ -579,7 +603,7 @@ test('runner retains route policy until close and finalizes each row only after 
   assert.doesNotMatch(source, /unrouteAll|removeAllListeners|catch\(\(\) => \{\}\)|Promise\.all\(pending\)/);
 });
 
-async function orgBootstrapReloadFixture(t, { hang = false, embedded = false } = {}) {
+async function orgBootstrapReloadFixture(t, { hang = false, embedded = false, holdReloadUntilUnroute = false } = {}) {
   const loginPath = `${appPrefix}/v7/login`;
   const appdataPath = `${appPrefix}/appdata`;
   const orgPath = `${appPrefix}/uaa/getbydcsystem/ibizmodeling`;
@@ -644,6 +668,10 @@ async function orgBootstrapReloadFixture(t, { hang = false, embedded = false } =
   const row = validRow();
   let phase = 'pre-auth';
   const tracker = createBootstrapEvidenceTracker({ row, phase: () => phase });
+  const reloadRouteEntered = deferred();
+  const releaseReloadRoute = deferred();
+  t.after(() => releaseReloadRoute.resolve());
+  let routedDocuments = 0;
   const unfinished = new Map();
   let serial = 0;
   const events = [];
@@ -658,14 +686,39 @@ async function orgBootstrapReloadFixture(t, { hang = false, embedded = false } =
     unfinished.delete(request);
     tracker.requestSettled(request);
   });
-  await context.route('**/*', route => tracker.route(route, async () => { await route.continue(); }));
+  await context.route('**/*', route => tracker.route(route, async () => {
+    const request = route.request();
+    if (request.isNavigationRequest() && request.url() === entry) {
+      routedDocuments++;
+      if (holdReloadUntilUnroute && routedDocuments === 2) {
+        reloadRouteEntered.resolve();
+        await releaseReloadRoute.promise;
+      }
+    }
+    await route.continue();
+  }));
+  await retainBootstrapPageRoute({ page, tracker });
   await page.goto(wrapper?.url ?? entry, { waitUntil: 'domcontentloaded' });
   const frame = wrapper
     ? await (await page.locator('#owned-modeldesign-workspace').elementHandle()).contentFrame() : null;
-  const appPage = frame ? applicationFramePage(page, frame) : page;
+  const appPage = applicationFramePage(page, frame ?? page);
+  if (holdReloadUntilUnroute) {
+    const unroute = appPage.unroute;
+    appPage.unroute = async (...args) => {
+      const timeout = setTimeout(() => reloadRouteEntered.reject(new Error('Controlled reload route did not start')), 3000);
+      try {
+        await reloadRouteEntered.promise;
+        await unroute(...args);
+      } finally {
+        clearTimeout(timeout);
+        releaseReloadRoute.resolve();
+      }
+    };
+  }
   await appPage.locator('#login').waitFor();
   return {
     row, tracker, unfinished, events, upstreamOrg, orgPath, loginRequests: () => loginRequests,
+    routedDocuments: () => routedDocuments,
     async login({ waitBeforeSubmit = false, gateTracker = tracker } = {}) {
       if (waitBeforeSubmit) await waitForBootstrapLoginReady({ row, tracker: gateTracker });
       const login = await captureNativeLogin(appPage,
@@ -713,6 +766,30 @@ test('iframe facade preserves real login routing, inner token readback and reloa
   const fixture = await orgBootstrapReloadFixture(t, { embedded: true });
   const login = await fixture.login({ waitBeforeSubmit: true });
   assert.equal(login.tokenIssued, true);
+  assert.equal(login.tokenPersisted, true);
+  await fixture.tracker.waitForQuiet({ quietForMs: 20, timeoutMs: 2000 });
+  assert.equal(fixture.loginRequests(), 1);
+  assert.equal(fixture.routedDocuments(), 2, 'Exactly the initial and reloaded application documents hit the context guard');
+  assert.equal(fixture.unfinished.size, 0);
+  assert.deepEqual(fixture.row.errors, []);
+});
+
+test('the live runner retains its fallback bridge before navigation without replacing the context guard', () => {
+  const source = readFileSync(new URL('./owned-modeling-bootstrap.browser.mjs', import.meta.url), 'utf8');
+  const context = source.indexOf("await context.route('**/*', handleRoute)");
+  const bridge = source.indexOf('await retainBootstrapPageRoute({ page, tracker })', context);
+  const navigation = source.indexOf('await page.goto(', bridge);
+  assert.ok(context > 0 && bridge > context && navigation > bridge);
+  const body = source.slice(source.indexOf('export async function retainBootstrapPageRoute'),
+    source.indexOf('export function collectOwnedShellDom'));
+  assert.match(body, /tracker\.track\('page-route-fallback'/);
+  assert.match(body, /route\.fallback\(\)/);
+  assert.doesNotMatch(body, /\.continue\(|\.fulfill\(|\.abort\(|\.unroute|ignoreErrors/);
+});
+
+test('login route cleanup cannot auto-continue an iframe reload still owned by the context guard', async t => {
+  const fixture = await orgBootstrapReloadFixture(t, { embedded: true, holdReloadUntilUnroute: true });
+  const login = await fixture.login({ waitBeforeSubmit: true });
   assert.equal(login.tokenPersisted, true);
   await fixture.tracker.waitForQuiet({ quietForMs: 20, timeoutMs: 2000 });
   assert.equal(fixture.loginRequests(), 1);
@@ -1002,4 +1079,191 @@ test('embedded runner preserves exact request guards and closes the wrapper afte
   assert.match(source, /await verifyEmbeddedWorkspaceUi/);
   assert.ok(source.indexOf('await browser?.close()') < source.indexOf('await wrapper?.close()'));
   assert.doesNotMatch(source, /force:\s*true|srcdoc|setContent\(|inflight\.clear\(|\.contentWindow\./);
+});
+
+function ownedShellEvidence() {
+  const region = () => ({ count: 1, visible: true, insideRoot: true, insideViewport: true,
+    receivesPointer: true, bounds: { x: 0, y: 0, width: 390, height: 844, right: 390, bottom: 844 } });
+  const state = () => ({
+    embedded: true, indexId: 'owned-index', viewport: { width: 390, height: 844 },
+    documentScroll: { x: 0, y: 0 }, horizontalDocumentOverflow: false,
+    root: region(), shell: region(), header: { ...region(), bounds: { bottom: 88 } },
+    headerLeft: region(), headerRight: region(), left: region(), right: region(),
+    main: { ...region(), bounds: { x: 0, y: 192, width: 390, height: 552, bottom: 744 } },
+    footer: { ...region(), bounds: { y: 794 } },
+    navigation: ['leftsidemenu', 'rightsidemenu'].map(side => ({ id: side, side, ...region() })),
+  });
+  return { status: 'PASS', scope: 'APPINDEX-SHELL-ONLY', navigationActionsExecuted: false,
+    modelWritesRequested: false, requestPolicyChanged: false,
+    initial: state(), afterHeaderTools: state(), afterConsoleClose: state(),
+    headerTools: {
+      search: { operation: 'ordinary-search-input-click-without-query', insideViewport: true,
+        receivesPointer: true, focused: true, documentScroll: { x: 0, y: 0 } },
+      account: { operation: 'ordinary-account-trigger-hover', insideViewport: true,
+        receivesPointer: true, documentScroll: { x: 0, y: 0 }, menuVisible: true, menuInsideViewport: true,
+        menuTriggerBound: true,
+        closeOperation: 'ordinary-Escape-and-pointer-away', menuHiddenAfterClose: true },
+    } };
+}
+
+test('owned-shell is an explicit embedded APPINDEX-only gate and never promotes native CRUD', async () => {
+  const row = embeddedRow();
+  row.stages.workspace.shell = ownedShellEvidence();
+  const options = { origin, requireOwnedModelContext: true, expectedModelContext: expectedContext,
+    embeddedWorkspace: true, ownedShell: true };
+  const result = summarizeBootstrapCase(row, options);
+  assert.ok(result.status.startsWith('BOOTSTRAP'));
+  assert.deepEqual(result.ownedShell, { required: true, verified: true, scope: 'APPINDEX-SHELL-ONLY',
+    navigationAcceptance: false, crudAcceptance: false });
+  assert.equal(result.nativeAcceptance, false);
+  assert.equal(result.fullApplicationAcceptance, false);
+  for (const mutate of [
+    value => { value.errors.push({ type: 'console', message: 'Native console failure' }); },
+    value => { value.failedRequests.push({ failure: 'net::ERR_NETWORK_CHANGED' }); },
+    value => { value.responses.push({ origin, method: 'GET', status: 403, path: '/native-denied' }); },
+    value => { value.blocked.push({ origin, method: 'POST', path: '/new-api-not-allowed' }); },
+    value => { value.ownedModelContext.index.context.psdevslnsys = 'another-root'; },
+    value => { value.teardown.evidenceDrainVerified = false; },
+  ]) {
+    const failed = structuredClone(row);
+    mutate(failed);
+    assert.equal(summarizeBootstrapCase(failed, options).status, 'FAILED',
+      'Shell geometry cannot override native projection, errors, requests or teardown failures');
+  }
+  delete row.stages.workspace.shell;
+  assert.equal(summarizeBootstrapCase(row, options).status, 'FAILED');
+  assert.equal(summarizeBootstrapCase(row, { ...options, embeddedWorkspace: false }).status, 'FAILED');
+  await assert.rejects(runBootstrapBrowser({ runReadonlyBrowser: true, ownedShell: true }),
+    /Owned shell mode requires explicit/);
+  await assert.rejects(runBootstrapBrowser({
+    runReadonlyBrowser: true, embeddedWorkspace: true, requireOwnedModelContext: true, ownedShell: 'true',
+  }));
+});
+
+for (const [name, mutate] of [
+  ['hidden header', proof => { proof.initial.header.visible = false; }],
+  ['cropped main', proof => { proof.initial.main.bounds.width = 70; }],
+  ['short main', proof => { proof.initial.main.bounds.height = 100; }],
+  ['main outside frame', proof => { proof.initial.main.insideViewport = false; }],
+  ['header overlap', proof => { proof.initial.main.bounds.y = 0; }],
+  ['footer overlap', proof => { proof.initial.main.bounds.bottom = 830; }],
+  ['covered navigation', proof => { proof.initial.navigation[0].receivesPointer = false; }],
+  ['missing right navigation', proof => { proof.initial.navigation.pop(); }],
+  ['document horizontally shifted', proof => { proof.afterHeaderTools.documentScroll.x = 20; }],
+  ['unfocused search', proof => { proof.headerTools.search.focused = false; }],
+  ['synthetic search', proof => { proof.headerTools.search.operation = 'controller-focus'; }],
+  ['hidden account menu', proof => { proof.headerTools.account.menuVisible = false; }],
+  ['unbound account menu', proof => { proof.headerTools.account.menuTriggerBound = false; }],
+  ['account menu outside iframe', proof => { proof.headerTools.account.menuInsideViewport = false; }],
+  ['account menu not dismissed', proof => { proof.headerTools.account.menuHiddenAfterClose = false; }],
+  ['navigation action', proof => { proof.navigationActionsExecuted = true; }],
+  ['extra request policy', proof => { proof.requestPolicyChanged = true; }],
+  ['console close leaves main covered', proof => { proof.afterConsoleClose.main.receivesPointer = false; }],
+]) test(`owned shell rejects ${name}`, () => {
+  const proof = ownedShellEvidence();
+  mutate(proof);
+  assert.throws(() => verifyOwnedShellEvidence(proof));
+});
+
+test('owned shell geometry uses real iframe DOM, ordinary header tools and console actions in all four cells', async t => {
+  const server = createServer((request, response) => {
+    if (request.url !== '/') { response.writeHead(404); response.end(); return; }
+    response.writeHead(200, { 'Content-Type': 'text/html' });
+    response.end(`<!doctype html><html><head><link rel="icon" href="data:,"><style>
+      *{box-sizing:border-box}html,body,#owned-index{margin:0;width:100%;height:100%;overflow:hidden}
+      [hidden]{display:none!important}.aibiz-design-shell{height:100%;display:flex;flex-direction:column}
+      .ibiz-scroll-container__header{height:88px;flex:none;display:flex;flex-direction:column}
+      .ibiz-panel-container--app_header_left{height:32px;flex:none}
+      .ibiz-panel-container--app_header_right{height:56px;overflow-x:auto;overflow-y:hidden}
+      .header-tools{display:flex;align-items:center;justify-content:space-between;width:800px;height:40px}
+      .ibiz-global-search input{width:240px;height:32px}
+      .ibiz-user-info-info{width:90px;height:32px;border:1px solid}
+      .ibiz-scroll-container-content{display:grid;grid-template-columns:200px minmax(0,1fr) 100px;flex:1;min-height:0}
+      .ibiz-scroll-container-content__left,.ibiz-scroll-container-content__center,.ibiz-scroll-container-content__right{min-width:0;min-height:0;overflow:auto}
+      .ibiz-left-side-menu{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:4px}
+      .ibiz-left-side-menu button{height:42px;min-width:0}
+      .ibiz-right-side-menu button{height:42px;width:100%}
+      .ibiz-scroll-container__footer{height:50px;flex:none}
+      .ibiz-scroll-container__footer button{height:44px}
+      .el-dropdown__popper{position:fixed;right:2px;top:76px;width:100px;height:40px;background:white;border:1px solid;z-index:5}
+      .aibiz-console-drawer{position:fixed;bottom:0;width:100%;height:45%;background:#eee;z-index:6}
+      .el-drawer__close-btn{position:absolute;right:8px;top:8px;width:32px;height:32px}
+      @media(max-width:767px){.ibiz-scroll-container-content{grid-template-columns:minmax(0,1fr);grid-template-rows:104px minmax(0,1fr) 50px}}
+      </style></head><body><div id="owned-index"><div class="aibiz-design-shell">
+      <header class="ibiz-scroll-container__header"><div class="ibiz-panel-container--app_header_left">Actual-shaped header</div>
+      <div class="ibiz-panel-container--app_header_right"><div class="header-tools"><div class="ibiz-global-search"><input></div><div class="ibiz-user-info-info" id="account-trigger" tabindex="0">Account</div></div></div></header>
+      <div class="ibiz-scroll-container-content"><nav class="ibiz-scroll-container-content__left"><div class="ibiz-left-side-menu">
+      <button id="nav-system">System</button><button id="nav-entity">Entity</button></div></nav>
+      <main class="ibiz-scroll-container-content__center"><div style="height:1200px">Inner scrolling content</div></main>
+      <aside class="ibiz-scroll-container-content__right"><div class="ibiz-right-side-menu"><button id="nav-plugin">Plugins</button></div></aside></div>
+      <footer class="ibiz-scroll-container__footer"><button id="terminal">Console</button></footer>
+      </div></div><div class="el-dropdown__popper" hidden><div role="menu" aria-labelledby="account-trigger">Logout</div></div>
+      <section class="aibiz-console-drawer" hidden><button class="el-drawer__close-btn">Close</button></section>
+      <script>const account=document.querySelector('.ibiz-user-info-info'),menu=document.querySelector('.el-dropdown__popper'),drawer=document.querySelector('.aibiz-console-drawer');
+      window.fixture={navClicks:0,searchQueries:0};
+      document.querySelectorAll('nav button,aside button').forEach(button=>button.onclick=()=>window.fixture.navClicks++);
+      document.querySelector('input').oninput=()=>window.fixture.searchQueries++;
+      account.onmouseenter=()=>menu.hidden=false;document.addEventListener('keydown',event=>{if(event.key==='Escape')menu.hidden=true});
+      document.querySelector('#terminal').onclick=()=>{drawer.hidden=false;drawer.classList.add('open')};
+      document.querySelector('.el-drawer__close-btn').onclick=()=>{drawer.hidden=true;drawer.classList.remove('open')};
+      </script></body></html>`);
+  });
+  await new Promise(done => server.listen(0, '127.0.0.1', done));
+  t.after(() => new Promise(done => { server.close(done); server.closeAllConnections(); }));
+  const wrapper = await startEmbeddedWorkspaceWrapper(`http://127.0.0.1:${server.address().port}/`);
+  t.after(() => wrapper.close());
+  const require = createRequire(new URL('../../../ibiz-app-hub/package.json', import.meta.url));
+  const browser = await launchChromium(require('playwright').chromium, { args: ['--no-sandbox'] });
+  t.after(() => browser.close());
+  const item = (id, target = null) => ({ id, visible: true, permitted: true, target,
+    dom: [{ selector: `#${id}`, disabled: false }] });
+  const index = { index: { domId: 'owned-index' }, menus: [
+    { name: 'leftsidemenu', items: [item('nav-system'), item('nav-entity')] },
+    { name: 'rightsidemenu', items: [item('nav-plugin')] },
+    { name: 'bottomsidemenu', items: [item('terminal', { viewId: 'modeldesign.pssysdevbktasktabexpview' })] },
+  ] };
+  for (const locale of ['zh-CN', 'en-US']) for (const viewport of [
+    { width: 1440, height: 900 }, { width: 390, height: 844 },
+  ]) {
+    const context = await browser.newContext({ locale, viewport, serviceWorkers: 'block' });
+    try {
+      const page = await context.newPage();
+      const errors = [];
+      page.on('pageerror', error => errors.push(error.message));
+      page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+      page.on('requestfailed', request => errors.push(request.failure()?.errorText));
+      await page.goto(wrapper.url);
+      const frame = await (await page.locator('#owned-modeldesign-workspace').elementHandle()).contentFrame();
+      const appPage = applicationFramePage(page, frame);
+      const evidence = await verifyEmbeddedWorkspaceUi({
+        page, appPage, wrapper, index, ownedShell: true, screenshot: async () => {},
+      });
+      assert.equal(verifyEmbeddedWorkspaceEvidence(evidence, { ownedShell: true }), true);
+      assert.equal(verifyOwnedShellDom(evidence.shell.initial), true);
+      assert.equal(verifyOwnedShellEvidence(evidence.shell), true);
+  assert.deepEqual(await appPage.evaluate(() => window.fixture), { navClicks: 0, searchQueries: 0 });
+      assert.deepEqual(errors, []);
+      assert.equal(evidence.shell.initial.horizontalDocumentOverflow, false,
+        'Normal tall inner content and a horizontally scrollable header are not body overflow');
+      if (viewport.width < 768) {
+        assert.ok(evidence.shell.headerTools.account.scrollers.some(row => row.x > 0),
+          'The actual account trigger is reached through its own horizontal header scroll');
+      }
+    } finally { await context.close(); }
+  }
+});
+
+test('owned-shell source keeps APPINDEX-only actions and the existing exact API policy', () => {
+  const source = readFileSync(new URL('./owned-modeling-bootstrap.browser.mjs', import.meta.url), 'utf8');
+  assert.match(source, /'owned-shell': \{ type: 'boolean' \}/);
+  assert.match(source, /ownedShell \|\| \(embeddedWorkspace && requireOwnedModelContext\)/);
+  assert.match(source, /readOnlyBrowserRequestAllowed\(\{ method, path: url\.pathname \}, readPolicy\)/);
+  assert.match(source, /counterRead \|\|/);
+  assert.match(source, /await runBootstrapScopeAction\(\{ row, requireOwnedModelContext,/);
+  const helper = source.slice(source.indexOf('export async function observeOwnedShellUi'),
+    source.indexOf('export function collectEmbeddedWorkspaceDom'));
+  assert.match(helper, /search\.click\(\)/);
+  assert.match(helper, /account\.hover\(\)/);
+  assert.match(helper, /scrollIntoViewIfNeeded\(\)/);
+  assert.doesNotMatch(helper, /fetch\(|\.fill\(|\.dispatchEvent\(|force:|window\.ibiz|setContent|addStyleTag|controller/);
 });
