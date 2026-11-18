@@ -47,35 +47,6 @@ export function translateModelLabel(value: string): string {
     : value;
 }
 
-export function localizeModel<T>(model: T): T {
-  if (Array.isArray(model)) return model.map(item => localizeModel(item)) as T;
-  if (!model || typeof model !== 'object') return model;
-  const result: Record<string, unknown> = {};
-  Object.entries(model).forEach(([key, value]) => {
-    let translated = value;
-    if (displayKeys.has(key) && typeof value === 'string') {
-      translated = translateModelLabel(value);
-    } else if (key === 'appDEFields' && Array.isArray(value)) {
-      translated = value.map(field => {
-        const localized = localizeModel(field);
-        if (field && typeof field.logicName === 'string') {
-          localized.logicName = translateModelLabel(field.logicName);
-        }
-        return localized;
-      });
-    } else if (!dataKeys.has(key) && typeof value === 'object') {
-      translated = localizeModel(value);
-    }
-    Object.defineProperty(result, key, {
-      value: translated,
-      enumerable: true,
-      configurable: true,
-      writable: true,
-    });
-  });
-  return result as T;
-}
-
 const installed = new WeakSet<object>();
 const methods = [
   'initApp',
@@ -143,6 +114,48 @@ function localizeCodeListModel(
       : {}),
     ...(model.codeItems ? { codeItems: items(model.codeItems) } : {}),
   };
+}
+
+export function localizeModel<T>(model: T): T {
+  if (Array.isArray(model)) return model.map(item => localizeModel(item)) as T;
+  if (!model || typeof model !== 'object') return model;
+  if (Object.prototype.hasOwnProperty.call(model, 'codeListType')) {
+    const codeList = model as unknown as IAppCodeList;
+    return codeList.codeListType === 'STATIC' &&
+      Object.prototype.hasOwnProperty.call(
+        staticCodeLists,
+        codeList.codeName || '',
+      )
+      ? (localizeCodeListModel(
+          codeList,
+          staticCodeLists[codeList.codeName!],
+        ) as T)
+      : model;
+  }
+  const result: Record<string, unknown> = {};
+  Object.entries(model).forEach(([key, value]) => {
+    let translated = value;
+    if (displayKeys.has(key) && typeof value === 'string') {
+      translated = translateModelLabel(value);
+    } else if (key === 'appDEFields' && Array.isArray(value)) {
+      translated = value.map(field => {
+        const localized = localizeModel(field);
+        if (field && typeof field.logicName === 'string') {
+          localized.logicName = translateModelLabel(field.logicName);
+        }
+        return localized;
+      });
+    } else if (!dataKeys.has(key) && typeof value === 'object') {
+      translated = localizeModel(value);
+    }
+    Object.defineProperty(result, key, {
+      value: translated,
+      enumerable: true,
+      configurable: true,
+      writable: true,
+    });
+  });
+  return result as T;
 }
 
 function installCodeListLocale(

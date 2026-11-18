@@ -28,15 +28,25 @@
   },
   "Config__YesNoColor8": {
     "emptyText": "（否）",
-    "items": { "1": "是", "0": "否" }
+    "items": {
+      "0": "否",
+      "1": "是"
+    }
   },
   "Config__YesNo": {
     "emptyText": "未定义",
-    "items": { "1": "是", "0": "否" }
+    "items": {
+      "0": "否",
+      "1": "是"
+    }
   },
   "Config__DynaInstMode3": {
     "emptyText": "未定义",
-    "items": { "0": "不启用", "1": "启用", "2": "启用副本" }
+    "items": {
+      "0": "不启用",
+      "1": "启用",
+      "2": "启用副本"
+    }
   },
   "Config__ModelUserCat": {
     "emptyText": "未定义",
@@ -72,10 +82,676 @@
     }
   },
   "Config__YesNoColor3": {
-    "items": { "1": "是", "0": "否" }
+    "items": {
+      "0": "否",
+      "1": "是"
+    }
   },
   "Config__PSObjChangeType": {
     "emptyText": "未定义",
-    "items": { "CREATE": "建立", "UPDATE": "更新", "DELETE": "删除", "OTHER": "其它" }
+    "items": {
+      "CREATE": "建立",
+      "UPDATE": "更新",
+      "DELETE": "删除",
+      "OTHER": "其它"
+    }
+  },
+  "Config__PSObjType": {
+    "emptyText": "未定义",
+    "items": {
+      "PSACHANDLER": "部件后台处理",
+      "PSAMITEMTYPE": "云应用菜单项类型",
+      "PSAPPCTRLSTYLE": "云应用部件样式",
+      "PSAPPDEVIEW": "云应用实体视图",
+      "PSAPPEDITORTEMPL": "云应用编辑器模版",
+      "PSAPPFUNC": "云应用功能",
+      "PSAPPFUNCTYPE": "云应用功能类型",
+      "PSAPPINDEXVIEW": "应用首页视图",
+      "PSAPPUTILVIEW": "应用功能视图",
+      "PSAPPMENU": "云应用菜单",
+      "PSAPPMENUITEM": "云应用菜单项",
+      "PSDERGROUP": "实体关系组",
+      "PSAPPMODULE": "云应用模块",
+      "PSAPPPORTALVIEW": "应用门户视图",
+      "PSAPPPVPART": "应用门户视图部件",
+      "PSAPPSERVER": "云平台应用服务器",
+      "PSAPPSUBAPP": "云应用子应用",
+      "PSAPPTYPE": "云应用系统类型",
+      "PSAPPUISTYLE": "云应用界面样式",
+      "PSAPPUITHEME": "云应用界面主题",
+      "PSAPPUSERMODE": "云应用用户模式",
+      "PSAPPUTILPAGE": "应用功能页面",
+      "PSAPPVIEW": "云应用视图",
+      "PSAPPVIEWCODE": "云应用视图代码",
+      "PSAPPVIEWLOGIC": "云应用视图逻辑",
+      "PSAPPVIEWREF": "云应用视图引用",
+      "PSAPPVIEWSTYLE": "云应用视图样式",
+      "PSAPPVIEWTEMPL": "云应用视图模版",
+      "PSASTYPE": "应用服务器类型",
+      "PSBACKSERVICE": "云平台预置后台任务",
+      "PSCHARTTYPE": "云平台图表类型",
+      "PSCODEITEM": "系统代码表项",
+      "PSCODELIST": "系统代码表",
+      "PSCODELISTTEMPL": "云平台代码表模版",
+      "PSCODENAME": "代码名称库",
+      "PSCOUNTER": "云平台预置计数器",
+      "PSCOUNTERTYPE": "云平台计数器类型",
+      "PSCOUNTERTYPESF": "云平台计数器类型服务框架",
+      "PSCSSCATTEMPL": "云平台样式表分类模板",
+      "PSCSSTEMPL": "云平台界面样式表模板",
+      "PSCTRLACTION": "云控件行为",
+      "PSCTRLEVENT": "云控件事件",
+      "PSCTRLTYPE": "云平台部件类型",
+      "PSCTRLTYPEACTION": "云平台部件操作",
+      "PSCTRLTYPEEVENT": "云平台部件事件",
+      "PSDATAENTITY": "实体",
+      "PSDBDEVINST": "云平台数据库开发实例",
+      "PSDBOBJTYPE": "云平台数据库对象类型",
+      "PSDBPROCPARAM": "系统存储过程参数",
+      "PSDBSERVER": "云平台数据库主机",
+      "PSDBSPPARTTEMPL": "数据库系统过程成员模版",
+      "PSDBSYSPROCTEMPL": "数据库系统过程模版",
+      "PSDBSYSPROCTYPE": "数据库系统过程类型",
+      "PSDBTYPE": "数据库类型",
+      "PSDBVALUEFUNC": "数据库值函数",
+      "PSDBVALUEMODE": "数据库值模式",
+      "PSDBVALUEOP": "数据库值操作符",
+      "PSDBVFCODE": "数据库值函数代码",
+      "PSDCBULLETIN": "云应用中心公告",
+      "PSDCINST": "云应用中心实例",
+      "PSDCMODELTEMPL": "云应用中心模型模板",
+      "PSDCMTDECAT": "模型模板实体分类",
+      "PSDCMTDEF": "模型模板预置属性",
+      "PSDCPRODUCT": "云应用中心产品",
+      "PSDCSERVERSTATE": "云应用中心主机状态",
+      "PSDCSYSPRDVER": "云应用中心系统产品版本",
+      "PSDCSYSPRODUCT": "云应用中心系统产品",
+      "PSDCSYSRES": "云应用中心系统资源",
+      "PSDCTASKLOG": "云应用中心后台作业日志",
+      "PSDEACMODE": "实体自填模式",
+      "PSDEACMODEITEM": "实体自填数据项",
+      "PSDEACTION": "实体行为",
+      "PSDEACTIONLOGIC": "实体行为逻辑",
+      "PSDEACTIONTYPE": "云实体行为类型",
+      "PSDECHART": "实体图表",
+      "PSDECHARTAXES": "实体图像维度",
+      "PSDECHARTPARAM": "实体图表数据序列",
+      "PSDECTRL": "实体部件配置",
+      "PSDEDATAEXP": "实体数据导出",
+      "PSDEDATAIMP": "实体数据导入",
+      "PSDEDATAQUERY": "实体数据查询",
+      "PSDEDATARELATION": "实体关系界面组",
+      "PSDEDATASET": "实体数据集合",
+      "PSDEDATAVIEW": "实体数据视图",
+      "PSDEDBCFG": "实体数据库配置",
+      "PSDEDBIDXFIELD": "实体数据库索引属性",
+      "PSDEDBINDEX": "实体数据库索引",
+      "PSDEDBOBJSQL": "实体数据库对象代码",
+      "PSDEDQCODE": "数据数据查询代码",
+      "PSDEDQCODECOND": "实体查询代码条件",
+      "PSDEDQCODEEXP": "实体查询代码表达式",
+      "PSDESARS": "服务接口关系",
+      "PSSYSAICHATAGENT": "系统AI交谈代理",
+      "PSDESERVICEAPI": "实体服务接口",
+      "PSAPPRESOURCE": "应用资源",
+      "PSAPPLAN": "应用多语言",
+      "PSAPPLOGIC": "前端应用逻辑",
+      "PSAPPPANELVIEW": "应用面板视图",
+      "PSAPPLOCALDE": "应用实体",
+      "PSAPPPDTVIEW": "应用预置视图",
+      "PSAPPPKG": "系统应用组件包",
+      "PSAPPPORTLET": "应用门户部件",
+      "PSDEGROUP": "实体组",
+      "PSDEFGROUP": "实体属性组",
+      "PSDEWIZARD": "实体向导",
+      "PSDEFINPUTTIP": "属性输入提示",
+      "PSDEDQCOND": "实体数据查询条件",
+      "PSDEDQJOIN": "实体数据查询连接",
+      "PSDEDQPDCOND": "云实体数据查询预置条件",
+      "PSDEDRDETAIL": "实体界面组成员",
+      "PSDEDRGROUP": "实体关系界面分组",
+      "PSDEDRITEM": "实体关系界面",
+      "PSDEDSCODE": "实体数据集合代码",
+      "PSDEDSDQ": "实体数据集合查询",
+      "PSDEDSGRPPARAM": "实体数据集分组参数",
+      "PSDEDSPARAM": "实体数据集合参数",
+      "PSDEDUPRULE": "实体数据重复规则",
+      "PSDEDUPRULEITEM": "实体数据重复规则项",
+      "PSDEFDATATYPE": "云实体属性数据类型",
+      "PSDEFDLOGIC": "实体表单成员逻辑项",
+      "PSDEFDTCOL": "属性数据列",
+      "PSDEFFORMITEM": "实体属性界面配置",
+      "PSDEFGRIDCOL": "实体属性表格列",
+      "PSDEFIELD": "实体属性",
+      "PSDEFIUDETAIL": "实体表单项更新明细",
+      "PSDEFIUPDATE": "实体表单项更新",
+      "PSDEFIVR": "实体表单项值规则",
+      "PSDEFORM": "实体表单",
+      "PSDEFORMDETAIL": "实体表单成员",
+      "PSDEFORMRF": "实体表单引用",
+      "PSDEFSFITEM": "实体属性搜索项",
+      "PSDEFTYPE": "实体属性类型",
+      "PSDEFVALUERULE": "实体属性值规则",
+      "PSDEFVRCODETYPE": "云平台属性规则代码类型",
+      "PSDEFVRCOND": "实体属性值规则项",
+      "PSDEFVRDSPARAM": "实体属性值规则参数",
+      "PSDEFVRTYPE": "云实体属性值规则类型",
+      "PSDEFVRTYPEDETAIL": "云实体属性值规则类型明细",
+      "PSDEGCTYPE": "云实体表格列类型",
+      "PSDEGRID": "实体表格",
+      "PSDEGRIDCOL": "实体表格列",
+      "PSDEJOINTYPE": "云实体查询连接类型",
+      "PSDELIST": "实体列表",
+      "PSDELISTITEM": "实体列表项",
+      "PSDELLCOND": "实体处理逻辑连接条件",
+      "PSDELLCONDTYPE": "云实体逻辑处理连接条件类型",
+      "PSDELLTYPE": "云实体逻辑处理连接类型",
+      "PSDELNPARAM": "实体处理逻辑节点参数",
+      "PSDELNTYPE": "云实体逻辑处理节点类型",
+      "PSDELOGIC": "实体处理逻辑",
+      "PSDELOGICLINK": "实体处理逻辑链接",
+      "PSDELOGICNODE": "实体处理逻辑节点",
+      "PSDELOGICPARAM": "实体逻辑参数",
+      "PSDEMAINSTATE": "实体主状态",
+      "PSDEMAP": "实体映射",
+      "PSDEMAPDETAIL": "实体映射明细",
+      "PSDEMODELCNT": "实体模型计数",
+      "PSDEMSACTION": "实体主状态操作",
+      "PSDEOPPRIV": "实体操作权限",
+      "PSDEPRINT": "实体打印",
+      "PSDEPSLN": "部署方案",
+      "PSDEPSLNAS": "部署方案应用服务器",
+      "PSDEPSLNASGRP": "部署方案应用服务器组",
+      "PSDEPSLNASITEM": "部署方案应用服务器组成员",
+      "PSDEPSLNDBINST": "部署方案数据库实例",
+      "PSDEPSLNLOG": "部署方案操作日志",
+      "PSDEPSLNMODE": "部署方案模式",
+      "PSDEPSLNMODEPRD": "部署方案产品部署",
+      "PSDEPSLNPRD": "部署方案产品",
+      "PSDEPSLNRUNLOG": "部署方案运行日志",
+      "PSDER": "实体关系",
+      "PSDERDEFMAP": "实体关系属性映射",
+      "PSDEREPITEM": "实体报表项",
+      "PSDEREPORT": "实体报表",
+      "PSDERTYPE": "实体关系类型",
+      "PSDESPCODE": "系统存储过程代码",
+      "PSDESPCODEPART": "系统存储过程代码块",
+      "PSDESPFIELD": "系统存储过程属性",
+      "PSDESYSPROC": "实体系统存储过程",
+      "PSDETBITEM": "实体工具栏项",
+      "PSDETOOLBAR": "实体工具栏",
+      "PSDETREENODE": "实体树节点",
+      "PSDETREENODERS": "实体树节点关系",
+      "PSDETREEVIEW": "实体树视图",
+      "PSDEUAGROUP": "实体界面行为组",
+      "PSDEUAGRPDETAIL": "实体界面行为组成员",
+      "PSDEUIACTION": "实体界面行为",
+      "PSDEUIACTIONTYPE": "云实体界面行为类型",
+      "PSDEVCENTER": "云应用中心",
+      "PSDEVCENTERAS": "云应用中心应用服务器",
+      "PSDEVCENTERDBINST": "云应用中心数据库实例",
+      "PSDEVCENTERLOG": "云应用中心日志",
+      "PSDEVCENTERMQ": "云应用中心MQ服务",
+      "PSDEVCENTERPF": "云应用中心应用框架",
+      "PSDEVCENTERRES": "云应用中心资源",
+      "PSDEVCENTERSERVER": "云应用中心主机",
+      "PSDEVCENTERSRV": "云应用中心服务",
+      "PSDEVCENTERSVN": "云应用中心代码库",
+      "PSDEVCENTERTS": "云应用中心任务服务器",
+      "PSDEVENV": "云开发环境",
+      "PSDEVIEWBASE": "实体视图",
+      "PSDEVIEWCTRL": "实体视图部件",
+      "PSDEVIEWLOGIC": "实体视图逻辑",
+      "PSDEVIEWRV": "实体视图关联视图",
+      "PSDEVRGROUP": "实体属性值规则组",
+      "PSDEVRGRPDETAIL": "实体属性值规则组成员",
+      "PSDEVSERVER": "云平台开发主机",
+      "PSDEVSERVERLEASE": "云开发主机租约",
+      "PSDEVSLN": "开发方案",
+      "PSDEVSLNSYS": "开发系统",
+      "PSDEVSLNSYSVER": "开发系统版本",
+      "PSDEVSLNUSER": "开发方案用户",
+      "PSDEVSYSDIFFITEM": "云应用系统差异项",
+      "PSDEVSYSDIFFREP": "开发系统差异分析",
+      "PSDEVUSER": "云应用中心用户",
+      "PSDEVUSERGROUP": "云应用中心用户组",
+      "PSDEVUSEROBJ": "云应用中心用户对象",
+      "PSDEVUSERRECENT": "云应用用户最近访问",
+      "PSDRITEMTYPE": "云平台数据关系项类型",
+      "PSEDITORSTYLE": "云平台预置编辑器样式",
+      "PSEDITORTYPE": "云平台编辑器类型",
+      "PSFDLOGICTYPE": "云平台表单成员逻辑类型",
+      "PSFORMDETAILTYPE": "云平台表单成员类型",
+      "PSFORMTYPE": "云平台表单类型",
+      "PSIMAGETEMPL": "云平台图片模版",
+      "PSLANGUAGE": "云平台语言",
+      "PSLISTITEMTYPE": "云平台列表项类型",
+      "PSMIDETAIL": "云模型初始化步骤",
+      "PSMOBAPPPACK": "移动应用打包",
+      "PSMODELAPI": "云平台API",
+      "PSMODELAPIINT": "云平台API接口",
+      "PSMODELAPIMETHOD": "云平台API接口方法",
+      "PSMODELAPIRS": "系统模型API关系",
+      "PSMODELINIT": "云模型初始化配置",
+      "PSMODULE": "系统模块",
+      "PSMQINST": "云平台MQ实例",
+      "PSPDTAPPFUNC": "云平台预置应用功能",
+      "PSPDTVIEW": "云平台预置视图",
+      "PSPF": "前端应用体系",
+      "PSPFAPPTEMPL": "云应用应用代码模版",
+      "PSPFCODEFOLDER": "云应用代码目录",
+      "PSPFCTDETAIL": "云应用部件代码模版成员",
+      "PSPFCTRLTEMPL": "云应用部件代码模版",
+      "PSPFEDITORTEMPL": "云平台编辑器模版",
+      "PSPFPLUGIN": "云平台预置应用框架插件",
+      "PSPFPLUGINTEMPL": "云平台预置应用框架插件模板",
+      "PSPFPLUGINTYPE": "云应用框架插件类型",
+      "PSPFPUBCODE": "应用框架发布代码",
+      "PSPFSTYLE": "云应用框架样式",
+      "PSPFSTYLECODE": "云应用样式宏代码",
+      "PSPFUATEMPL": "云应用界面行为代码模版",
+      "PSPFVIEWTEMPL": "云应用视图代码模版",
+      "PSPFVLTEMPL": "云视图逻辑模版",
+      "PSPORTLET": "云平台预置门户部件",
+      "PSPORTLETTYPE": "云平台门户部件类型",
+      "PSPRODUCT": "云平台产品",
+      "PSPRODUCTTYPE": "云平台产品类型",
+      "PSROSSERVER": "云ROS服务器",
+      "PSSAMPLEVALUE": "云平台示例值",
+      "PSSF": "系统服务体系",
+      "PSSFACHANDLER": "系统服务部件处理器",
+      "PSSFCODEFOLDER": "系统服务代码目录",
+      "PSSFCODETEMPL": "系统服务代码模版",
+      "PSSFCODETYPE": "系统服务代码类型",
+      "PSSFSTYLE": "系统服务框架",
+      "PSSFSTYLECODE": "系统服务框架宏",
+      "PSSFSTYLEVER": "云服务框架版本",
+      "PSSFVERCODE": "系统服务框架版本代码模板",
+      "PSSFVERCODEITEM": "系统服务框架版本代码项",
+      "PSSUBAPP": "云平台子系统应用",
+      "PSSUBAPPVIEW": "云平台子系统应用视图",
+      "PSSUBDE": "云平台子系统实体",
+      "PSSUBDEACTION": "云平台子实体操作",
+      "PSSUBDEVIEW": "子系统实体视图",
+      "PSSUBSYS": "云平台子系统",
+      "PSSUBSYSDM": "子系统数据库结构",
+      "PSSUBSYSSF": "云平台子系统服务体系",
+      "PSSUBSYSVER": "平台子系统版本",
+      "PSSUBVIEWTYPE": "系统视图样式",
+      "PSSVNINSTREPO": "云平台SVN仓库",
+      "PSSVNSERVER": "云SVN服务器",
+      "PSSVRDOMAIN": "云平台服务域",
+      "PSSVRPROVIDER": "云服务提供商",
+      "PSSVRSERVER": "云平台系统主机",
+      "PSSYSACHANDLER": "云平台部件处理器",
+      "PSSYSACTOR": "系统角色",
+      "PSSYSAPP": "系统应用",
+      "PSSYSBACKSERVICE": "系统后台任务",
+      "PSSYSCOUNTER": "系统计数器",
+      "PSSYSCSS": "系统界面样式表",
+      "PSSYSCSSCAT": "系统界面样式表分类",
+      "PSSYSCTRLSTYLE": "系统部件样式",
+      "PSSYSDBCHGLOG": "系统模型变更日志",
+      "PSSYSDBDETAIL": "系统数据库发布版本",
+      "PSSYSDBVF": "系统数据库值函数",
+      "PSSYSDBVFCODE": "系统数据库值函数代码",
+      "PSSYSDEPLOY": "系统部署",
+      "PSSYSDEPLOYAPP": "系统部署应用",
+      "PSSYSDEPLOYAS": "系统部署应用服务器",
+      "PSSYSDEPLOYDB": "系统部署数据库",
+      "PSSYSDEVBKTASK": "系统开发后台任务",
+      "PSSYSDEVBTTYPE": "云系统开发后台任务类型",
+      "PSSYSDEVINFO": "系统开发信息",
+      "PSSYSDEVINFOTYPE": "云系统开发信息类型",
+      "PSSYSDEVSTUDIO": "系统开发用户",
+      "PSSYSDICTCAT": "系统输入词条类别",
+      "PSSYSDMITEM": "系统数据库模型项",
+      "PSSYSDSACTION": "系统开发操作",
+      "PSSYSDSACTIONTYPE": "云系统开发环境操作类型",
+      "PSSYSEDITORSTYLE": "系统编辑器样式",
+      "PSSYSIMAGE": "系统图片资源",
+      "PSSYSISSUE": "系统问题",
+      "PSSYSISSUEENGINE": "云系统问题分析引擎",
+      "PSSYSISSUETYPE": "云系统问题类型",
+      "PSSYSLANITEM": "云平台语言项",
+      "PSSYSLANRES": "云平台语言资源",
+      "PSSYSMODELACTION": "云系统模块实例操作",
+      "PSSYSMODELINST": "云系统模型实例",
+      "PSSYSMODELVER": "云系统模型版本",
+      "PSSYSMSGTEMPL": "系统消息模板",
+      "PSSYSOPPRIV": "系统权限标识",
+      "PSSYSORGTYPE": "系统组织类型",
+      "PSSYSOUTYPE": "系统组织单元类型",
+      "PSSYSOUTYPERS": "系统组织单元类型关系",
+      "PSSYSPDTVIEW": "系统预置视图",
+      "PSSYSPFPITEMPL": "系统应用插件模板",
+      "PSSYSPFPLUGIN": "系统应用插件",
+      "PSSYSPORTLET": "系统门户部件",
+      "PSSYSPRDVER": "云系统商品版本",
+      "PSSYSPRODUCT": "云平台系统产品",
+      "PSSYSREF": "系统引用",
+      "PSSYSREFDE": "系统引用实体",
+      "PSSYSREPORT": "系统报表",
+      "PSSYSRUNLOG": "系统运行日志",
+      "PSSYSRUNSESSION": "系统运行会话",
+      "PSSYSSAMPLEVALUE": "系统示例值",
+      "PSSYSSFCODE": "系统服务体系代码",
+      "PSSYSSFPUB": "系统后台服务体系",
+      "PSSYSTBITEM": "云平台预置工具栏项",
+      "PSSYSTCASSERT": "系统测试用例断言",
+      "PSSYSTCINPUT": "系统测试用例输入",
+      "PSSYSTDITEM": "系统测试数据项",
+      "PSSYSTEM": "系统",
+      "PSSYSTEMAS": "系统应用服务器",
+      "PSSYSTEMDBCFG": "系统数据库",
+      "PSSYSTEMMQ": "系统MQ",
+      "PSSYSTEMRUN": "系统运行",
+      "PSSYSTESTCASE": "系统测试用例",
+      "PSSYSTESTDATA": "系统测试数据",
+      "PSSYSTOOLBAR": "云平台预置工具栏",
+      "PSSYSUIACTION": "云平台预置界面行为",
+      "PSSYSUNIRES": "系统统一资源",
+      "PSSYSUSECASE": "系统用例",
+      "PSSYSUSECASERS": "系统用例关系",
+      "PSSYSUSERMODE": "系统用户模式",
+      "PSSYSVALUERULE": "系统值规则",
+      "PSSYSVIEWLOGIC": "系统预置视图逻辑",
+      "PSSYSWFMODE": "系统工作流模式",
+      "PSSYSWFSETTING": "系统流程配置",
+      "PSTASKSERVER": "云平台任务服务器",
+      "PSTBITEMTYPE": "云平台工具栏项类型",
+      "PSTREENODETYPE": "云平台树节点类型",
+      "PSTSCMD": "任务服务器后台命令",
+      "PSUAWIZARD": "实体界面操作向导",
+      "PSUAWIZARD2": "界面操作向导2",
+      "PSV3MGFORM": "平台V3迁移表单",
+      "PSV3MGGRID": "平台V3迁移表格",
+      "PSV3MGVIEW": "平台V3默认视图",
+      "PSV3MIGRATE": "平台V3迁移",
+      "PSV3MIGRATEDE": "平台V3迁移实体",
+      "PSVALUERULE": "云平台值规则",
+      "PSVARTYPE": "云平台变量类型",
+      "PSVIEWLOGICTYPE": "云视图预置逻辑",
+      "PSVIEWTYPE": "云平台视图类型",
+      "PSVIEWTYPECAT": "云平台视图类型分类",
+      "PSVIEWTYPELOGIC": "云视图类型内置逻辑",
+      "PSVTCATDETAIL": "云视图类型分类成员",
+      "PSVTCTRL": "云平台视图类型部件",
+      "PSVTRV": "云平台视图类型关联视图",
+      "PSVTSTYLE": "云平台视图类型样式",
+      "PSWFDE": "工作流实体",
+      "PSWFLINK": "流程处理连接",
+      "PSWFLINKCOND": "流程处理连接条件",
+      "PSWFLINKCONDTYPE": "流程连接条件类型",
+      "PSWFLINKROLE": "流程处理连接角色",
+      "PSWFLINKTYPE": "云系统流程连接类型",
+      "PSWFPROCESS": "流程处理",
+      "PSWFPROCESSTYPE": "云系统流程处理类型",
+      "PSWFPROCPARAM": "流程处理参数",
+      "PSWFPROCROLE": "流程处理角色",
+      "PSWFPROCSUBWF": "流程处理子流程",
+      "PSWFROLE": "工作流角色",
+      "PSWFSUBWF": "流程子流程",
+      "PSWFVERSION": "工作流版本",
+      "PSWFWORKTIME": "流程工作时间",
+      "PSWORKFLOW": "系统工作流"
+    }
+  },
+  "Config__DEType": {
+    "emptyText": "未定义",
+    "items": {
+      "1": "主实体",
+      "2": "附属实体",
+      "3": "关系实体"
+    }
+  },
+  "Config__DERemoveMode": {
+    "emptyText": "限制删除",
+    "items": {
+      "0": "限制删除",
+      "1": "允许删除（删除自身相关数据）"
+    }
+  },
+  "Config__DEStorageType": {
+    "emptyText": "未定义",
+    "items": {
+      "0": "无存储",
+      "1": "SQL",
+      "2": "NoSQL",
+      "4": "ServiceAPI",
+      "9": "SQL（多模式支持）",
+      "10": "NoSQL（多模式支持）",
+      "12": "ServiceAPI（多模式支持）",
+      "128": "用户自定义",
+      "256": "用户自定义2"
+    }
+  },
+  "Config__SysDeployDBMode": {
+    "items": {
+      "DEFAULT": "默认连接",
+      "DB2": "数据连接2",
+      "DB3": "数据连接3",
+      "DB4": "数据连接4",
+      "DB5": "数据连接5",
+      "DB6": "数据连接6",
+      "DB7": "数据连接7",
+      "DB8": "数据连接8",
+      "DB9": "数据连接9",
+      "DB10": "数据连接10",
+      "DB11": "数据连接11",
+      "DB12": "数据连接12"
+    }
+  },
+  "Config__DEDataAuditMode": {
+    "emptyText": "未定义",
+    "items": {
+      "1": "基本审计",
+      "2": "详细审计（含变化记录）"
+    }
+  },
+  "Config__DETempDataHolder": {
+    "emptyText": "（后台）",
+    "items": {
+      "0": "不支持",
+      "1": "后台",
+      "2": "前台",
+      "3": "后台及前台"
+    }
+  },
+  "DESaaSMode": {
+    "emptyText": "未定义",
+    "items": {
+      "0": "不启用",
+      "1": "标准SaaS构型",
+      "2": "标准SaaS构型2",
+      "3": "标准SaaS构型3",
+      "4": "标准SaaS构型4"
+    }
+  },
+  "AppStudio__DEDynaSysMode": {
+    "emptyText": "（不启用）",
+    "items": {
+      "0": "不启用",
+      "1": "启用（默认）",
+      "2": "启用（系统）",
+      "3": "启用（系统模型组）",
+      "4": "启用（系统模块）",
+      "5": "启用（实体）",
+      "99": "启用（行数据）"
+    }
+  },
+  "Config__DEIndexType": {
+    "emptyText": "未定义",
+    "items": {
+      "INDEX": "索引主实体",
+      "INHERIT": "继承主实体"
+    }
+  },
+  "Config__DEVirtualMode": {
+    "emptyText": "未定义",
+    "items": {
+      "0": "不启用",
+      "1": "常规多继承模式",
+      "2": "高级继承扩展模式",
+      "3": "索引主实体模式",
+      "4": "混合多继承模式"
+    }
+  },
+  "Config__AccCtrlArch": {
+    "emptyText": "未定义",
+    "items": {
+      "1": "运行子系统角色体系（默认）",
+      "2": "当前系统角色及实体角色"
+    }
+  },
+  "Config__DEDataAccCtrlMode": {
+    "emptyText": "未定义",
+    "items": {
+      "0": "无控制",
+      "1": "自控制",
+      "2": "附属主实体控制",
+      "3": "附属主实体控制（未映射自控）"
+    }
+  },
+  "AppStudio__DEMSActionLogicMode": {
+    "emptyText": "未定义",
+    "items": {
+      "0": "不启用",
+      "1": "后台",
+      "2": "前台",
+      "3": "后台及前台"
+    }
+  },
+  "Config__SysServiceApiMode2": {
+    "emptyText": "（系统设置）",
+    "items": {
+      "0": "默认不提供",
+      "1": "默认提供"
+    }
+  },
+  "DEActionType2": {
+    "emptyText": "未定义",
+    "items": {
+      "USERCUSTOM": "用户自定义",
+      "DELOGIC": "实体处理逻辑",
+      "BUILTIN": "内置方法",
+      "SELECTBYKEY": "通过键值获取",
+      "SCRIPT": "脚本代码",
+      "REMOTE": "远程接口行为",
+      "USERCREATE": "用户扩展建立",
+      "USERUPDATE": "用户扩展更新",
+      "USERSYSUPDATE": "用户扩展系统更新"
+    }
+  },
+  "Config__DELogicHolder": {
+    "emptyText": "（后台）",
+    "items": {
+      "1": "后台",
+      "2": "前台",
+      "3": "后台及前台"
+    }
+  },
+  "Config__DEUIActionType": {
+    "emptyText": "未定义",
+    "items": {
+      "SYS": "系统预定义",
+      "FRONT": "前台调用",
+      "BACKEND": "后台调用",
+      "WFFRONT": "工作流前台调用",
+      "WFBACKEND": "工作流后台调用"
+    }
+  },
+  "Config__DEUIActionDataRange": {
+    "emptyText": "未定义",
+    "items": {
+      "SINGLEDATA": "单项数据",
+      "SINGLEKEY": "单项数据（主键）",
+      "MULTIDATA": "多项数据",
+      "MULTIKEY": "多项数据（主键）",
+      "NONE": "无数据"
+    }
+  },
+  "Config__SysAppType": {
+    "emptyText": "未定义",
+    "items": {
+      "WEBAPP_HTML5": "网页应用（HTML5）",
+      "MOBILEAPP_HTML5": "移动应用（HTML5）",
+      "IOSAPP": "iOS原生应用",
+      "ANDROIDAPP": "Android原生应用"
+    }
+  },
+  "Config__AppMode": {
+    "emptyText": "未定义",
+    "items": {
+      "DEFAULT": "默认应用",
+      "WFAPP": "工作流应用"
+    }
+  },
+  "Config__AppUIStyle": {
+    "emptyText": "未定义",
+    "items": {
+      "DEFAULT": "默认",
+      "STYLE2": "样式2",
+      "STYLE3": "样式3",
+      "STYLE4": "样式4",
+      "STYLE5": "样式5",
+      "STYLE6": "样式6",
+      "STYLE7": "样式7",
+      "STYLE8": "样式8",
+      "STYLE9": "样式9",
+      "STYLE10": "样式10"
+    }
+  },
+  "Config__AppIndexViewMenuAlign": {
+    "emptyText": "未定义",
+    "items": {
+      "LEFT": "左侧",
+      "TOP": "上方",
+      "CENTER": "中间",
+      "TREEEXP": "树导航",
+      "TABEXP_TOP": "分页导航（上方分页）",
+      "TABEXP_LEFT": "分页导航（左侧分页）",
+      "TABEXP_BOTTOM": "分页导航（下方分页）",
+      "TABEXP_RIGHT": "分页导航（右侧分页）",
+      "NONE": "不显示"
+    }
+  },
+  "Config__GridRowActiveMode": {
+    "emptyText": "未定义",
+    "items": {
+      "0": "无",
+      "1": "单击",
+      "2": "双击"
+    }
+  },
+  "Config__NoPrivDisplayModes": {
+    "emptyText": "未定义",
+    "items": {
+      "1": "显示空或*内容",
+      "2": "隐藏"
+    }
+  },
+  "Config__DEGridColLinkMode": {
+    "emptyText": "未定义",
+    "items": {
+      "0": "不启用",
+      "1": "启用",
+      "2": "启用（自动判断）"
+    }
+  },
+  "Config__BtnNoPrivDisplayMode": {
+    "emptyText": "（应用设置）",
+    "items": {
+      "1": "禁用",
+      "2": "隐藏",
+      "6": "隐藏且默认隐藏"
+    }
+  },
+  "AppStudio__DynaSysMode": {
+    "emptyText": "（不启用）",
+    "items": {
+      "0": "不启用",
+      "1": "启用"
+    }
   }
 }
