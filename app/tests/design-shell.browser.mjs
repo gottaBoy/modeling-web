@@ -33,6 +33,7 @@ import {createApp,h,reactive} from 'vue';
 import {ScrollContainer} from ${JSON.stringify(join(util, 'panel-component/scroll-container/scroll-container/scroll-container.tsx'))};
 import {ScrollContainerItem} from ${JSON.stringify(join(util, 'panel-component/scroll-container/scroll-container-item/scroll-container-item.tsx'))};
 import {PanelContainer} from ${JSON.stringify(join(util, 'panel-component/panel-container/panel-container.tsx'))};
+import {PanelAppHeader} from ${JSON.stringify(join(components, 'panel-component/panel-app-header/panel-app-header.tsx'))};
 import {IBizRow} from ${JSON.stringify(join(components, 'common/row/row.tsx'))};
 import {IBizCol} from ${JSON.stringify(join(components, 'common/col/col.tsx'))};
 import {prepareIndexModel} from ${JSON.stringify(marker)};
@@ -42,6 +43,7 @@ const labels=english?['System','Entities','User Interface','Workflow','Favorites
 const model=${JSON.stringify(nativeModel).replaceAll('<', '\\u003c')};
 const shell=prepareIndexModel(model).viewLayoutPanel.rootPanelItems.find(item=>item.id==='container_scroll1');
 const state=item=>({model:item,containerClass:item.sysCss?[item.sysCss.cssName]:[],
+ panel:{view:{model:{mainMenuAlign:'LEFT'}}},
  state:reactive({visible:true,loading:false,layout:{width:item.width?item.width+'px':'',
  height:item.height?item.height+'px':'',extraStyle:{},extraClass:[]}}),onClick(){}});
 const controls=new Map();
@@ -54,6 +56,9 @@ function menu(labels,side) {
   h('button',{class:'el-button ibiz-extend-menu-button__menuitem',
    'data-nav':side+'-'+index,onClick:()=>{actions++}},[h('span',label)])
  ])]));
+ if(side==='left')items.splice(5,0,h('div',{
+  class:'ibiz-extend-menu-button__content--item ibiz-extend-menu-button__content--seperator'
+ },[h('hr')]));
  return h('div',{class:'ibiz-'+side+'-side-menu'},[
   h('div',{class:'ibiz-extend-menu-button is-vertical'},[
    h('div',{class:'ibiz-extend-menu-button__content is-vertical'},items)
@@ -65,7 +70,8 @@ function renderHeaderSide(side) {
  const child=header.panelItems.find(item=>item.id==='app_header_'+side);
  return h(PanelContainer,{modelData:child,controller:controller(child)},{
   default:()=>side==='left'
-   ?[h('span',{style:'white-space:nowrap'},english?'Modeling Studio - long system name':'模型设计 - 很长的系统名称')]
+   ?[h('span',{'data-logo':true,style:'display:inline-block;height:40px;line-height:40px;white-space:nowrap'},
+    english?'Modeling Studio - long system name':'模型设计 - 很长的系统名称')]
    :[h('div',{style:'display:flex;flex:none;width:740px;gap:16px'},[
     h('input',{'aria-label':english?'Model Retrieval':'模型检索',style:'width:240px'}),
     h('button',{'data-header':'overview'},english?'System Overview':'系统总览'),
@@ -75,7 +81,7 @@ function renderHeaderSide(side) {
 }
 function regionContent(item) {
  if(item.id==='container_scroll_header')return[
-  h(PanelContainer,{modelData:header,controller:controller(header)},{
+  h(PanelAppHeader,{modelData:header,controller:controller(header)},{
    default:()=>['left','right'].map(renderHeaderSide)
   })
  ];
@@ -117,6 +123,8 @@ async function compile() {
           ({ path: 'namespace', namespace: 'controlled-boundary' }));
         build.onLoad({ filter: /.*/, namespace: 'controlled-boundary' }, () => ({
           contents: `export class PanelContainerController{};export class ViewLayoutPanelController{};
+          export class PanelItemController{};
+          export const useSemanticNode=()=>({semanticClass:()=>'',semanticStyle:()=>undefined});
           export const calcContentAlignStyle=()=>undefined;export const useNamespace=name=>({
           b:part=>'ibiz-'+name+(part?'-'+part:''),m:modifier=>'ibiz-'+name+'--'+modifier,
           e:element=>'ibiz-'+name+'__'+element,be:(block,element)=>'ibiz-'+name+'-'+block+'__'+element,

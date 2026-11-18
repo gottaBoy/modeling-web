@@ -166,19 +166,40 @@ test('responsive shell marker applies only to the recognized native layout and p
 
 test('authoritative ModelingIndex DSL receives the mobile marker without changing stored metadata', async () => {
   const require = createRequire(new URL('../../../app/package.json', import.meta.url));
+  const ts = require('typescript');
   const { DSLHelper } = await import(require.resolve('@ibiz/rt-model-api'));
   const source = JSON.parse(readFileSync(new URL(
     '../../../../vendor-upstream/ibizmodeling-standard/modelapi-core/src/main/resources/model/net/ibizsys/modeling/PSSYSAPPS/ModelDesign/PSAPPINDEXVIEWS/ModelingIndex.json',
     import.meta.url,
   ), 'utf8'));
   const original = JSON.stringify(source);
-  const model = new DSLHelper().appView(source);
+  const loaderSource = readFileSync(new URL(
+    '../../../packages-latest/@ibiz-template/model-helper/src/model-util.ts', import.meta.url), 'utf8');
+  const parsed = ts.createSourceFile('model-util.ts', loaderSource, ts.ScriptTarget.Latest, true);
+  const loader = parsed.statements.find(item => ts.isClassDeclaration(item) && item.name?.text === 'ModelUtil');
+  const fill = loader.members.find(item => item.name?.getText(parsed) === 'deepFillModel');
+  assert.ok(fill);
+  const exports = {};
+  runInNewContext(ts.transpileModule(`class Loader {
+    appId = 'ibizmodeling__modeldesign';
+    ${fill.getText(parsed)}
+  } exports.Loader = Loader;`, {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+  }).outputText, { exports, ModelTransformer: { getInstance: () => ({ transform: (_path, model) => model }) } });
+  const model = new DSLHelper().appView(new exports.Loader().deepFillModel(structuredClone(source)));
   const before = JSON.stringify(model);
   const prepared = modelHelpers.prepareIndexModel(model);
   const shell = prepared.viewLayoutPanel.rootPanelItems.find(item => item.id === 'container_scroll1');
   assert.deepEqual(shell.sysCss, { cssName: 'aibiz-design-shell' });
   assert.equal(JSON.stringify(model), before);
   assert.equal(JSON.stringify(source), original);
+  const header = model.viewLayoutPanel.rootPanelItems[0].panelItems
+    .find(item => item.id === 'container_scroll_header').panelItems[0];
+  assert.equal(header.panelItems[0].sysCss.appId, model.appId);
+  const custom = structuredClone(model);
+  custom.viewLayoutPanel.rootPanelItems[0].panelItems
+    .find(item => item.id === 'container_scroll_header').panelItems[0].panelItems[0].sysCss.appId = 'foreign__app';
+  assert.equal(modelHelpers.prepareIndexModel(custom).viewLayoutPanel.rootPanelItems[0].sysCss, undefined);
 });
 
 test('only the console bottom drawer receives bounded and normally closable defaults', () => {

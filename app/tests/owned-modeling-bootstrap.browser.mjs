@@ -100,6 +100,17 @@ export async function retainBootstrapPageRoute({ page, tracker }) {
 export function collectOwnedShellDom({ indexId, navigation = [] }) {
   const root = document.getElementById(indexId);
   const shell = root?.querySelector('.aibiz-design-shell');
+  const view = window.ibiz?.util?.viewStack?.getView?.(indexId);
+  const summary = item => item ? {
+    id: item.id, predefinedType: item.predefinedType, sysCss: item.sysCss,
+    layout: item.layout, layoutPos: item.layoutPos,
+    width: item.width, height: item.height,
+    children: item.panelItems?.map(child => ({
+      id: child.id, predefinedType: child.predefinedType, sysCss: child.sysCss,
+      layout: child.layout, layoutPos: child.layoutPos,
+    })),
+  } : null;
+  const modelShell = view?.model?.viewLayoutPanel?.rootPanelItems?.find(item => item.id === 'container_scroll1');
   const rect = element => {
     if (!element) return null;
     const value = element.getBoundingClientRect();
@@ -146,6 +157,8 @@ export function collectOwnedShellDom({ indexId, navigation = [] }) {
   const headerRight = shell?.querySelector('.ibiz-panel-container--app_header_right');
   return {
     embedded: window.parent !== window, indexId,
+    modelShell: modelShell ? { ...summary(modelShell), regions: modelShell.panelItems?.map(summary) } : null,
+    panelShell: summary(view?.layoutPanel?.panelItems?.container_scroll1?.model),
     viewport: { width: innerWidth, height: innerHeight }, documentScroll: { x: scrollX, y: scrollY },
     horizontalDocumentOverflow: document.documentElement.scrollWidth > innerWidth + 1,
     root: inspect(root),
@@ -241,15 +254,20 @@ export async function observeOwnedShellUi({ appPage, index, screenshot, evidence
     navigationActionsExecuted: false, modelWritesRequested: false, requestPolicyChanged: false });
   const navigation = index.menus.filter(menu => ['leftsidemenu', 'rightsidemenu'].includes(menu.name))
     .flatMap(menu => menu.items.filter(item => item.visible === true && item.permitted === true &&
-      !item.hidden && !item.disabled).map(item => {
+      item.itemType !== 'SEPERATOR' && !item.hidden && !item.disabled).map(item => {
       assert.equal(item.dom.length, 1, 'Every permitted shell navigation item must have one real DOM target');
       assert.equal(item.dom[0].disabled, false);
       return { id: item.id, side: menu.name, selector: item.dom[0].selector };
     }));
   const options = { indexId: index.index.domId, navigation };
-  evidence.initial = await waitForEmbeddedDomStable({
-    appPage, collect: collectOwnedShellDom, options, verify: verifyOwnedShellDom,
-  });
+  try {
+    evidence.initial = await waitForEmbeddedDomStable({
+      appPage, collect: collectOwnedShellDom, options, verify: verifyOwnedShellDom,
+    });
+  } catch (error) {
+    evidence.initial = error.evidence;
+    throw error;
+  }
   const root = appPage.locator(`[id=${JSON.stringify(index.index.domId)}]`);
   const header = root.locator('.aibiz-design-shell > .ibiz-scroll-container__header');
   const search = header.locator('.ibiz-global-search input');

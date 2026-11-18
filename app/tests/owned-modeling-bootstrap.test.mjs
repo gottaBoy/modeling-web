@@ -1215,10 +1215,12 @@ test('owned shell geometry uses real iframe DOM, ordinary header tools and conso
   const require = createRequire(new URL('../../../ibiz-app-hub/package.json', import.meta.url));
   const browser = await launchChromium(require('playwright').chromium, { args: ['--no-sandbox'] });
   t.after(() => browser.close());
-  const item = (id, target = null) => ({ id, visible: true, permitted: true, target,
+  const item = (id, target = null) => ({ id, itemType: 'MENUITEM', visible: true, permitted: true, target,
     dom: [{ selector: `#${id}`, disabled: false }] });
   const index = { index: { domId: 'owned-index' }, menus: [
-    { name: 'leftsidemenu', items: [item('nav-system'), item('nav-entity')] },
+    { name: 'leftsidemenu', items: [item('nav-system'),
+      { id: 'separator1', itemType: 'SEPERATOR', visible: true, permitted: true, dom: [] },
+      item('nav-entity')] },
     { name: 'rightsidemenu', items: [item('nav-plugin')] },
     { name: 'bottomsidemenu', items: [item('terminal', { viewId: 'modeldesign.pssysdevbktasktabexpview' })] },
   ] };

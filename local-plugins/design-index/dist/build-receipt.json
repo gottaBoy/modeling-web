@@ -30,15 +30,15 @@
     },
     {
       "path": "src/model.ts",
-      "sha256": "33606a574eca59811948b616dece85557485a69f54e895f4fee80143309d2339"
+      "sha256": "920131acab4530fc16b42a62348ee0ee68a28d833b897350808725061f313f8d"
     },
     {
       "path": "src/style.css",
-      "sha256": "8cb58033344b97db9ed167b94d41cbd71a35cc5d94ca04231eb9a666814911bf"
+      "sha256": "f7737f2cf9216fed33d950c0973afd51c2c9c6a5f976dc39eb0ad1640ba60ec3"
     },
     {
       "path": "tests/permitted-menu.test.mjs",
-      "sha256": "1dce087f69afd75ccc46698fbff7e478d1fdc0960ec140d23ea4d378ad63dbd1"
+      "sha256": "3eaca14aedd3f63e558b4e0cb76df5c3e29786ece2713755f603616be297d4d7"
     },
     {
       "path": "tests/todo-counter.test.mjs",
@@ -48,15 +48,15 @@
   "outputs": [
     {
       "path": "index.mjs",
-      "sha256": "57b73cdace7990b1c1da8b122371e9b735375a1a2d6fa752dadd7a5f25acbd4c"
+      "sha256": "619d371d0fa6f5e6c02ea997b67eac27878b24862eb6f57d439f4f293683c09d"
     },
     {
       "path": "index.system.js",
-      "sha256": "a7a1c2f4429775856cfb01f874e2034ff0d17750d3bdeda6ff192f061ac3070f"
+      "sha256": "eb4517ee49e96c02b3edb3884f27fa309350c1c2dc278354354b594524458023"
     },
     {
       "path": "style.css",
-      "sha256": "8cb58033344b97db9ed167b94d41cbd71a35cc5d94ca04231eb9a666814911bf"
+      "sha256": "f7737f2cf9216fed33d950c0973afd51c2c9c6a5f976dc39eb0ad1640ba60ec3"
     }
   ],
   "toolchain": {

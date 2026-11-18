@@ -165,7 +165,8 @@ System.register(['@ibiz-template/runtime', '@ibiz-template/vue3-util'], (functio
                 if ([main, left, header[0], ...right].some(item => item.layout?.layout !== 'BORDER' || item.layoutPos?.layout !== 'BORDER') ||
                     panelItems([main, left, header[0], ...right]).some(item => item.sysCss &&
                         !(item === headerSides[0] && item.sysCss.cssName === 'ibiz-panel-item' &&
-                            Object.keys(item.sysCss).length === 1)))
+                            Object.keys(item.sysCss).every(key => ['cssName', 'appId'].includes(key)) &&
+                            (item.sysCss.appId === undefined || item.sysCss.appId === model.appId))))
                     return;
                 container.sysCss = { cssName: 'aibiz-design-shell' };
             }
