@@ -221,6 +221,8 @@ function collectOwnedHeaderTool(element) {
   }
   return { insideViewport: bounds.x >= -1 && bounds.y >= -1 &&
     bounds.right <= innerWidth + 1 && bounds.bottom <= innerHeight + 1,
+  bounds: { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height,
+    right: bounds.right, bottom: bounds.bottom },
   receivesPointer: Boolean(hit && (hit === element || element.contains(hit))),
   focused: document.activeElement === element, documentScroll: { x: scrollX, y: scrollY }, scrollers };
 }

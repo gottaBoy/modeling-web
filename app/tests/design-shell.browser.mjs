@@ -75,7 +75,10 @@ function renderHeaderSide(side) {
    :[h('div',{style:'display:flex;flex:none;width:740px;gap:16px'},[
     h('input',{'aria-label':english?'Model Retrieval':'模型检索',style:'width:240px'}),
     h('button',{'data-header':'overview'},english?'System Overview':'系统总览'),
-    h('button',{'data-header':'account'},english?'Current Account':'当前账号')
+    h('div',{class:'ibiz-user-info'},[
+     h('button',{'data-header':'account',style:'height:var(--ibiz-user-info-height,44px)'},
+      english?'Current Account':'当前账号')
+    ])
    ])]
  });
 }
@@ -207,8 +210,15 @@ test('recognized native shell retains navigation, header tools and a usable mobi
           }
           await nav.click();
         }
+        const headerSearch = page.getByRole('textbox', { name: language === 'en-US' ? 'Model Retrieval' : '模型检索' });
+        await headerSearch.scrollIntoViewIfNeeded();
+        await headerSearch.click();
+        const searchBounds = await headerSearch.boundingBox();
+        assert.ok(searchBounds && searchBounds.x >= 0 && searchBounds.x + searchBounds.width <= width);
         await page.locator('[data-header=overview]').click();
         await page.locator('[data-header=account]').click();
+        const accountBounds = await page.locator('[data-header=account]').boundingBox();
+        assert.ok(accountBounds && accountBounds.y >= 0 && accountBounds.height <= 40);
         await page.locator('[data-nav=right-0]').click();
         await page.locator('[data-search]').fill('entity');
         assert.equal(await page.evaluate(() => window.fixture.actions()), 7);
